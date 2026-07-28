@@ -151,12 +151,37 @@ export interface Server extends IndexServer {
 // Teams
 // ---------------------------------------------------------------------------
 
-export interface Team {
+export interface TeamMember {
+  itag: string;
   team_id: string;
+  user: PlatformUser | null;
+  flags: string[];
+  service: string;
+  created_at: string;
+  mentionable: boolean;
+  data_holder: boolean;
+}
+
+export interface TeamEntities {
+  targets?: string[];
+  members?: TeamMember[];
+  bots?: IndexBot[];
+  servers?: IndexServer[];
+}
+
+export interface Team {
+  id: string;
   name: string;
   avatar: AssetMetadata | null;
   banner: AssetMetadata | null;
   short: string;
+  tags: string[];
+  extra_links: Link[];
+  votes: number;
+  nsfw: boolean;
+  vanity: string;
+  /** Only present when the API resolves entities for this team (e.g. via /users/{id}) */
+  entities: TeamEntities | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -417,13 +442,20 @@ export interface BlogPost extends BlogListPost {
 
 export interface CreateBotPayload {
   bot_id: string;
+  /** Discord application ID — the same as bot_id for virtually all bots */
+  client_id: string;
+  /** 30-150 characters */
   short: string;
-  long?: string;
-  prefix?: string;
-  library?: string;
+  /** At least 500 characters, HTML/markdown supported */
+  long: string;
+  prefix: string;
+  /** Must be a valid HTTPS URL */
+  invite: string;
+  library: string;
+  /** 1-5 tags */
+  tags: string[];
+  extra_links: Link[];
   nsfw?: boolean;
-  tags?: string[];
-  extra_links?: Link[];
 }
 
 export interface CreateServerPayload {

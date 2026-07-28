@@ -321,11 +321,17 @@ function BotItem({
   token,
   onDeleted,
   mutate,
+  team,
+  canManage = true,
 }: {
   bot: IndexBot;
   token: string;
   onDeleted: (id: string) => void;
   mutate: () => void;
+  /** Set when this bot is owned by a team the user is a member of, rather than owned directly. */
+  team?: Team;
+  /** Whether the current user has permission to edit/delete this bot. Always true for directly-owned bots. */
+  canManage?: boolean;
 }) {
   const [deleting, setDeleting] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -367,6 +373,13 @@ function BotItem({
           <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
             {bot.short}
           </p>
+          {team && (
+            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-600">
+              <Users size={11} />
+              via {team.name}
+              {!canManage && " · view only"}
+            </div>
+          )}
         </div>
       </div>
 
@@ -388,25 +401,29 @@ function BotItem({
             View
             <ArrowUpRight size={11} />
           </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setEditing(true)}
-            className="px-2 text-xs h-7"
-          >
-            <Pencil size={12} />
-            Edit
-          </Button>
-          <Button
-            variant={confirming ? "danger" : "ghost"}
-            size="sm"
-            loading={deleting}
-            onClick={handleDeleteClick}
-            className="px-2 text-xs h-7"
-          >
-            <Trash2 size={12} />
-            {confirming ? "Confirm?" : "Delete"}
-          </Button>
+          {canManage && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditing(true)}
+                className="px-2 text-xs h-7"
+              >
+                <Pencil size={12} />
+                Edit
+              </Button>
+              <Button
+                variant={confirming ? "danger" : "ghost"}
+                size="sm"
+                loading={deleting}
+                onClick={handleDeleteClick}
+                className="px-2 text-xs h-7"
+              >
+                <Trash2 size={12} />
+                {confirming ? "Confirm?" : "Delete"}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -422,48 +439,83 @@ function BotItem({
   );
 }
 
+interface TeamBot {
+  bot: IndexBot;
+  team: Team;
+  canManage: boolean;
+}
+
 function BotsTab({
   bots: allBots,
+  teamBots: allTeamBots,
   token,
   mutate,
 }: {
   bots: IndexBot[];
+  teamBots: TeamBot[];
   token: string;
   mutate: () => void;
 }) {
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const botList = allBots.filter((b) => !deletedIds.includes(b.bot_id));
+  const teamBotList = allTeamBots.filter(
+    (tb) => !deletedIds.includes(tb.bot.bot_id),
+  );
 
   function handleDeleted(id: string) {
     setDeletedIds((prev) => [...prev, id]);
   }
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+  if (botList.length === 0 && teamBotList.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <Bot size={32} className="mb-3 text-zinc-300 dark:text-zinc-700" />
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {botList.length} {botList.length === 1 ? "bot" : "bots"}
+          You haven&apos;t listed any bots yet.
         </p>
       </div>
+    );
+  }
 
-      {botList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Bot size={32} className="mb-3 text-zinc-300 dark:text-zinc-700" />
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            You haven&apos;t listed any bots yet.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {botList.map((bot) => (
-            <BotItem
-              key={bot.bot_id}
-              bot={bot}
-              token={token}
-              mutate={mutate}
-              onDeleted={handleDeleted}
-            />
-          ))}
+  return (
+    <div className="space-y-10">
+      <div>
+        <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
+          {botList.length} {botList.length === 1 ? "bot" : "bots"}
+        </p>
+        {botList.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {botList.map((bot) => (
+              <BotItem
+                key={bot.bot_id}
+                bot={bot}
+                token={token}
+                mutate={mutate}
+                onDeleted={handleDeleted}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {teamBotList.length > 0 && (
+        <div>
+          <h3 className="mb-4 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            Team Bots
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {teamBotList.map(({ bot, team, canManage }) => (
+              <BotItem
+                key={bot.bot_id}
+                bot={bot}
+                token={token}
+                mutate={mutate}
+                onDeleted={handleDeleted}
+                team={team}
+                canManage={canManage}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -508,12 +560,21 @@ function TeamsTab({ teams }: { teams: Team[] }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {teams.map((team) => (
-            <TeamItem key={team.team_id} team={team} />
+            <TeamItem key={team.id} team={team} />
           ))}
         </div>
       )}
     </div>
   );
+}
+
+// Best-effort client-side gate for whether to show manage actions (edit/delete)
+// on a team-owned bot — the actual PATCH/DELETE endpoints independently
+// re-check permissions server-side via kittycat regardless, so getting this
+// heuristic slightly wrong only affects which buttons are shown, not security.
+const BOT_MANAGE_FLAGS = ["*", "global.*", "bot.*", "bot.edit"];
+function canManageTeamBot(flags: string[]): boolean {
+  return flags.some((f) => BOT_MANAGE_FLAGS.includes(f));
 }
 
 const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
@@ -574,6 +635,21 @@ export default function DashboardPage() {
   const username = normalizedMe.user?.username ?? "unknown";
   const avatar = normalizedMe.user?.avatar ?? "";
 
+  // Bots owned by teams the user belongs to, alongside directly-owned bots.
+  // Each team's `entities.bots` is already resolved by the API; we just need
+  // to figure out whether the current user can manage them.
+  const teamBots: TeamBot[] = normalizedMe.user_teams.flatMap((team) => {
+    const myFlags =
+      team.entities?.members?.find((m) => m.user?.id === session.user_id)
+        ?.flags ?? [];
+    const canManage = canManageTeamBot(myFlags);
+    return (team.entities?.bots ?? []).map((bot) => ({
+      bot,
+      team,
+      canManage,
+    }));
+  });
+
   return (
     <Container className="py-10">
       {/* Profile header */}
@@ -602,7 +678,7 @@ export default function DashboardPage() {
           {TABS.map(({ key, label, icon: Icon }) => {
             const count =
               key === "bots"
-                ? normalizedMe.user_bots.length
+                ? normalizedMe.user_bots.length + teamBots.length
                 : key === "packs"
                   ? normalizedMe.user_packs.length
                   : key === "teams"
@@ -645,6 +721,7 @@ export default function DashboardPage() {
       {tab === "bots" && (
         <BotsTab
           bots={normalizedMe.user_bots}
+          teamBots={teamBots}
           token={session.token}
           mutate={mutate}
         />

@@ -1,3 +1,4 @@
+import { clearSession } from "@/lib/utils/auth";
 import { API_URL } from "./config";
 import type { ApiErrorBody } from "./types";
 
@@ -17,6 +18,18 @@ type RequestOptions = {
   cache?: RequestCache;
   next?: NextFetchRequestConfig;
 };
+
+function handleInvalidSession() {
+  if (typeof window === "undefined") return;
+
+  clearSession();
+
+  const current = window.location.pathname + window.location.search;
+  if (current.startsWith("/auth/")) return;
+
+  localStorage.setItem("auth_redirect", current);
+  window.location.href = "/auth/login";
+}
 
 async function request<T>(
   path: string,
@@ -44,7 +57,20 @@ async function request<T>(
     } catch {
       // keep default
     }
-    throw new ApiError(body.message ?? res.statusText, res.status, body.context);
+
+    // Popplio sets this header specifically when the session token itself is
+    // dead (expired/revoked), as opposed to a generic 401/403 for some other
+    // reason. Bounce the user back through login instead of leaving them in
+    // a state where the app thinks they're signed in but every request 401s.
+    if (token && res.headers.get("X-Session-Invalid") === "true") {
+      handleInvalidSession();
+    }
+
+    throw new ApiError(
+      body.message ?? res.statusText,
+      res.status,
+      body.context,
+    );
   }
 
   // 204 No Content

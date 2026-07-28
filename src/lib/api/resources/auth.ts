@@ -13,12 +13,14 @@ interface CreateSessionResponse {
 }
 
 export const authResource = {
-  /** Returns the raw OAuth metadata (client_id + Discord OAuth URL template) */
   getOAuthMeta: (): Promise<OauthMeta> =>
     client.get<OauthMeta>("/auth/login/discord-oauth2", { cache: "no-store" }),
 
-  /** Exchange an OAuth2 code for a session, then fetch avatar/username */
-  callback: async (code: string, clientId: string, redirectUri: string): Promise<AuthSession> => {
+  callback: async (
+    code: string,
+    clientId: string,
+    redirectUri: string,
+  ): Promise<AuthSession> => {
     const res = await client.post<CreateSessionResponse>(
       "/auth/login/discord-oauth2",
       {
@@ -40,7 +42,7 @@ export const authResource = {
       token: res.token,
       user_id: res.target_id,
       session_id: res.session_id,
-      expires_at: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      expires_at: Date.now() + 30 * 24 * 60 * 60 * 1000,
       avatar: user.user?.avatar ?? "",
       username: user.user?.username ?? "",
       display_name: user.user?.display_name ?? "",

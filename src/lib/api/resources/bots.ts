@@ -46,8 +46,9 @@ export const botsResource = {
   deleteBot: (botId: string, token: string) =>
     client.delete<void>(`/bots/${botId}`, { token }),
 
+  // Note: the backend returns 204 No Content on success, not the created bot.
   createBot: (payload: import("../types").CreateBotPayload, token: string) =>
-    client.post<import("../types").Bot>("/bots", payload, { token }),
+    client.put<void>("/bots", payload, { token }),
 
   updateBot: (botId: string, payload: BotSettingsUpdate, token: string) =>
     client.patch<void>(`/bots/${botId}/settings`, payload, { token }),
