@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DiscordIcon, GithubIcon } from "@/components/ui/BrandIcons";
+import { DiscordIcon, GithubIcon, XIcon } from "@/components/ui/BrandIcons";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
@@ -11,7 +11,6 @@ const FOOTER_LINKS = [
       { href: "/bots", label: "Bots" },
       { href: "/servers", label: "Servers" },
       { href: "/packs", label: "Packs" },
-      //{ href: "/search", label: "Search" },
     ],
   },
   {
@@ -25,9 +24,9 @@ const FOOTER_LINKS = [
   {
     heading: "Company",
     links: [
-      { href: "/about", label: "About" },
-      { href: "/about/status", label: "Status" },
-      { href: "/blog", label: "Blog" },
+      { href: "/about", label: "About Us" },
+      { href: "/about/status", label: "System Status" },
+      { href: "/blog", label: "Blog Posts" },
     ],
   },
   {
@@ -107,10 +106,19 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-3">
             <a
+              href={SOCIAL_LINKS.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
+              aria-label="Omniplex on X"
+            >
+              <XIcon size={17} />
+            </a>
+            <a
               href={SOCIAL_LINKS.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 transition-colors hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
+              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
               aria-label="Omniplex on GitHub"
             >
               <GithubIcon size={17} />
@@ -119,7 +127,7 @@ export function Footer() {
               href={SOCIAL_LINKS.discord}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 transition-colors hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
+              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
               aria-label="Omniplex on Discord"
             >
               <DiscordIcon size={17} />

@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 import { bots, servers } from "@/lib/api";
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://omniplex.gg";
+import { BASE_URL } from "@/lib/api/config";
 
 export const revalidate = 3600; // re-generate every hour
 

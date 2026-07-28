@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
 import { CheckCircle, XCircle } from "lucide-react";
-import { list } from "@/lib/api";
+import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
+import { auth, bots, list, servers } from "@/lib/api";
+import { CDN_URL } from "@/lib/api/config";
+import { SOCIAL_LINKS } from "@/lib/social";
 
 export const metadata: Metadata = {
   title: "Status",
@@ -13,36 +15,70 @@ export const revalidate = 60;
 interface ServiceStatus {
   name: string;
   ok: boolean;
+  ms: number;
   detail: string;
 }
 
+async function timedCheck(fn: () => Promise<unknown>) {
+  const start = Date.now();
+  try {
+    await fn();
+    return { ok: true, ms: Date.now() - start };
+  } catch {
+    return { ok: false, ms: Date.now() - start };
+  }
+}
+
 export default async function StatusPage() {
-  const apiOk = await list.getStats().then(() => true).catch(() => false);
+  const [api, botListings, serverListings, discordAuth, cdn] =
+    await Promise.all([
+      timedCheck(() => list.getStats()),
+      timedCheck(() => bots.getAll(1)),
+      timedCheck(() => servers.getAll(1)),
+      timedCheck(() => auth.getOAuthMeta()),
+      timedCheck(async () => {
+        const res = await fetch(CDN_URL, {
+          method: "HEAD",
+          cache: "no-store",
+        });
+        if (res.status >= 500) throw new Error("CDN unreachable");
+      }),
+    ]);
 
   const services: ServiceStatus[] = [
     {
       name: "API",
-      ok: apiOk,
-      detail: apiOk ? "All systems operational" : "Unable to reach backend",
+      ...api,
+      detail: api.ok ? "All systems operational" : "Unable to reach backend",
     },
     {
       name: "Bot Listings",
-      ok: apiOk,
-      detail: apiOk ? "Serving normally" : "Degraded",
+      ...botListings,
+      detail: botListings.ok ? "Serving normally" : "Degraded",
     },
     {
       name: "Server Listings",
-      ok: apiOk,
-      detail: apiOk ? "Serving normally" : "Degraded",
+      ...serverListings,
+      detail: serverListings.ok ? "Serving normally" : "Degraded",
     },
     {
-      name: "Auth",
-      ok: apiOk,
-      detail: apiOk ? "Discord OAuth operational" : "May be affected",
+      name: "Discord Auth",
+      ...discordAuth,
+      detail: discordAuth.ok ? "Discord OAuth operational" : "May be affected",
+    },
+    {
+      name: "CDN",
+      ...cdn,
+      detail: cdn.ok ? "Assets serving normally" : "May be affected",
     },
   ];
 
   const allOk = services.every((s) => s.ok);
+  const checkedAt = new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(new Date());
 
   return (
     <Container className="py-16">
@@ -52,7 +88,7 @@ export default async function StatusPage() {
             Platform Status
           </h1>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            Live operational status refreshes every 60 seconds.
+            Live operational status, refreshed every 60 seconds.
           </p>
         </div>
 
@@ -65,7 +101,9 @@ export default async function StatusPage() {
               : "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400",
           ].join(" ")}
         >
-          {allOk ? "All systems operational" : "Some services are experiencing issues"}
+          {allOk
+            ? "All systems operational"
+            : "Some services are experiencing issues"}
         </div>
 
         {/* Service list */}
@@ -73,9 +111,9 @@ export default async function StatusPage() {
           {services.map((service) => (
             <div
               key={service.name}
-              className="flex items-center justify-between px-5 py-4"
+              className="flex items-center justify-between gap-3 px-5 py-4"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
                   {service.name}
                 </p>
@@ -83,17 +121,36 @@ export default async function StatusPage() {
                   {service.detail}
                 </p>
               </div>
-              {service.ok ? (
-                <CheckCircle size={18} className="text-emerald-500" />
-              ) : (
-                <XCircle size={18} className="text-red-500" />
-              )}
+              <div className="flex shrink-0 items-center gap-3">
+                <span className="font-mono text-xs text-zinc-400 dark:text-zinc-600">
+                  {service.ms}ms
+                </span>
+                {service.ok ? (
+                  <CheckCircle size={18} className="text-emerald-500" />
+                ) : (
+                  <XCircle size={18} className="text-red-500" />
+                )}
+              </div>
             </div>
           ))}
         </div>
 
-        <p className="mt-6 text-xs text-center text-zinc-400 dark:text-zinc-600">
-          Status is determined by live API availability checks.
+        <p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-600">
+          Status is determined by live availability checks against each service.
+          Last checked {checkedAt} UTC.
+        </p>
+
+        <p className="mt-2 text-center text-xs text-zinc-400 dark:text-zinc-600">
+          Does something look wrong?{" "}
+          <a
+            href={SOCIAL_LINKS.discord}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent underline underline-offset-2"
+          >
+            Let us know on Discord
+          </a>
+          .
         </p>
       </div>
     </Container>

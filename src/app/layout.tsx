@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { CustomizationProvider } from "@/components/providers/CustomizationProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { BASE_URL } from "@/lib/api/config";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -14,10 +15,8 @@ const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin
 // Runs before React hydrates to prevent accent/font flash
 const INIT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('omniplex-prefs')||'{}');if(p.accent)document.documentElement.dataset.accent=p.accent;if(p.font)document.documentElement.dataset.font=p.font;}catch(e){}})()`;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://omniplex.gg";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL(BASE_URL),
   title: {
     default: "Omniplex — Discord Bot List",
     template: "%s — Omniplex",
@@ -27,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "Omniplex",
     type: "website",
-    url: SITE_URL,
+    url: BASE_URL,
   },
   twitter: {
     card: "summary_large_image",

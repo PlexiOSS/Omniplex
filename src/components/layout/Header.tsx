@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
-import { DiscordIcon, GithubIcon } from "@/components/ui/BrandIcons";
+import { DiscordIcon, GithubIcon, XIcon } from "@/components/ui/BrandIcons";
 import { Button } from "@/components/ui/Button";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
@@ -90,6 +90,15 @@ export function Header() {
                 aria-label="Omniplex on GitHub"
               >
                 <GithubIcon size={16} />
+              </a>
+              <a
+                href={SOCIAL_LINKS.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`hidden md:flex ${ICON_BUTTON}`}
+                aria-label="Omniplex on X"
+              >
+                <XIcon size={16} />
               </a>
               <a
                 href={SOCIAL_LINKS.discord}
@@ -178,7 +187,7 @@ export function Header() {
                   {label}
                 </Link>
               ))}
-              <div className="mt-2 flex items-center gap-1 border-t border-zinc-200 pt-2 dark:border-zinc-800">
+              <div className="flex items-center gap-1 pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
                 <a
                   href={SOCIAL_LINKS.github}
                   target="_blank"
@@ -187,6 +196,15 @@ export function Header() {
                   aria-label="Omniplex on GitHub"
                 >
                   <GithubIcon size={16} />
+                </a>
+                <a
+                  href={SOCIAL_LINKS.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={ICON_BUTTON}
+                  aria-label="Omniplex on X"
+                >
+                  <XIcon size={16} />
                 </a>
                 <a
                   href={SOCIAL_LINKS.discord}
