@@ -1,7 +1,7 @@
 ---
 title: Community Policies
 description: Our official community policies and guidelines for all users, server members, and staff.
-order: 2
+order: 3
 ---
 
 We are, first and foremost, a community, and we offer a variety of features including partnership, certification, verification, and of course most importantly text and voice chat. You should treat this server like you would any other bot list or general Discord community.

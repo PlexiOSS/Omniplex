@@ -15,7 +15,7 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     slug: "basics",
     title: "Basics",
     description:
-      "Rules and policies for our Official Discord Server(s) and community.",
+      "Getting started, and rules and policies for our Official Discord Server(s) and community.",
     order: 1,
   },
   {
@@ -26,10 +26,30 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     order: 2,
   },
   {
+    slug: "servers",
+    title: "Servers",
+    description: "Rules and resources for Discord servers listed on Omniplex.",
+    order: 3,
+  },
+  {
+    slug: "packs",
+    title: "Packs",
+    description:
+      "Rules and resources for bot packs — curated collections of bots grouped together.",
+    order: 4,
+  },
+  {
+    slug: "voting",
+    title: "Voting",
+    description:
+      "How voting works on Omniplex, including cooldowns, vote weight, and abuse policy.",
+    order: 5,
+  },
+  {
     slug: "programs",
     title: "Programs",
     description:
       "Information about Omniplex's certification and partnership programs.",
-    order: 3,
+    order: 6,
   },
 ];

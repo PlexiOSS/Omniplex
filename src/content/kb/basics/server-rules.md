@@ -1,10 +1,10 @@
 ---
-title: Server Rules
+title: Official Discord Server Rules
 description: General rules that all members of our Official Discord Server(s) are expected to follow at all times, with no exceptions.
-order: 1
+order: 2
 ---
 
-**Note:** The rules outlined below apply to all of the Official Omniplex Discord Server(s).
+**Note:** The rules below apply to our own Official Omniplex Discord Server(s) — the community you join to chat with staff and other developers. If you're looking for the rules that servers *listed* on Omniplex must follow, see [Servers → Listing Rules](/kb/servers/listing-rules) instead.
 
 1. **Be friendly and respectful.** This is meant to be a welcoming and supportive community for all Discord users and bot developers. Please treat others how you want to be treated regardless of whatever issues you may or may not have with them — do not bring your drama here.
 2. **Follow the guidelines.** All members should respect and follow the Omniplex legal documentation including our privacy policy, terms of service, community guidelines, server rules, and server policies at all times. We offer no exceptions to this rule.
