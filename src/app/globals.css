@@ -1,26 +1,339 @@
 @import "tailwindcss";
 
+/* Class-based dark mode for next-themes */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* --------------------------------------------------------------------------
+   Accent color — swapped via data-accent on <html>
+   -------------------------------------------------------------------------- */
+:root,
+[data-accent="indigo"] {
+  --accent: #6366f1;
+  --accent-muted: #4f46e5;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="purple"] {
+  --accent: #a855f7;
+  --accent-muted: #9333ea;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="blue"] {
+  --accent: #3b82f6;
+  --accent-muted: #2563eb;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="emerald"] {
+  --accent: #10b981;
+  --accent-muted: #059669;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="rose"] {
+  --accent: #f43f5e;
+  --accent-muted: #e11d48;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="orange"] {
+  --accent: #f97316;
+  --accent-muted: #ea580c;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="amber"] {
+  --accent: #eab308;
+  --accent-muted: #ca8a04;
+  --accent-fg: #000000;
+}
+
+/* --------------------------------------------------------------------------
+   Font — swapped via data-font on <html>
+   -------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-body: var(--font-geist-sans);
+}
+
+[data-font="serif"] {
+  --font-body: var(--font-lora);
+}
+
+[data-font="rounded"] {
+  --font-body: var(--font-jakarta);
+}
+
+[data-font="mono"] {
+  --font-body: var(--font-geist-mono);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
+
+  /* Expose accent as Tailwind utilities: bg-accent, text-accent, etc. */
+  --color-accent: var(--accent);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-fg: var(--accent-fg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* --------------------------------------------------------------------------
+   Prose — long descriptions & blog content (Markdown + inline HTML)
+   -------------------------------------------------------------------------- */
+.prose {
+  color: inherit;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  font-family: var(--font-body);
+  line-height: 1.75;
+}
+.prose * {
+  max-width: 100%;
+}
+.prose > *:first-child {
+  margin-top: 0;
+}
+.prose > *:last-child {
+  margin-bottom: 0;
+}
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-top: 1.75em;
+  margin-bottom: 0.6em;
+  color: var(--foreground);
+  scroll-margin-top: 5rem;
+}
+.prose h1 {
+  font-size: 1.5em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid rgba(0 0 0 / 0.08);
+}
+.prose h2 {
+  font-size: 1.3em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid rgba(0 0 0 / 0.08);
+}
+.prose h3 {
+  font-size: 1.125em;
+}
+.prose h4 {
+  font-size: 1em;
+}
+.dark .prose h1,
+.dark .prose h2 {
+  border-bottom-color: rgba(255 255 255 / 0.1);
+}
+.prose p {
+  margin-bottom: 1em;
+}
+.prose strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.prose em {
+  font-style: italic;
+}
+.prose del {
+  color: #71717a;
+}
+.prose mark {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--foreground);
+  border-radius: 0.2em;
+  padding: 0.05em 0.3em;
+}
+.prose kbd {
+  background: rgba(0 0 0 / 0.06);
+  border: 1px solid rgba(0 0 0 / 0.12);
+  border-bottom-width: 2px;
+  border-radius: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  padding: 0.1em 0.45em;
+}
+.dark .prose kbd {
+  background: rgba(255 255 255 / 0.08);
+  border-color: rgba(255 255 255 / 0.16);
+}
+.prose sup,
+.prose sub {
+  font-size: 0.75em;
+}
+.prose a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.15s ease;
+}
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+.prose code {
+  background: rgba(0 0 0 / 0.06);
+  border-radius: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 0.125em 0.375em;
+}
+.dark .prose code {
+  background: rgba(255 255 255 / 0.08);
+}
+.prose pre {
+  background: #18181b;
+  border-radius: 0.75rem;
+  color: #e4e4e7;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin-bottom: 1em;
+  padding: 1rem 1.25rem;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 1em;
+}
+.prose ul,
+.prose ol {
+  margin-bottom: 1em;
+  padding-left: 1.4em;
+}
+.prose ul {
+  list-style-type: disc;
+}
+.prose ol {
+  list-style-type: decimal;
+}
+.prose ul ul,
+.prose ol ul {
+  list-style-type: circle;
+}
+.prose li {
+  margin-bottom: 0.3em;
+  padding-left: 0.2em;
+}
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.3em;
+  margin-bottom: 0;
+}
+/* GFM task lists */
+.prose ul:has(li > input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0.2em;
+}
+.prose li:has(> input[type="checkbox"]) {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  list-style: none;
+}
+.prose input[type="checkbox"] {
+  accent-color: var(--accent);
+  translate: 0 0.1em;
+}
+.prose img {
+  border-radius: 0.75rem;
+  max-width: 100%;
+}
+.prose hr {
+  border: none;
+  border-top: 1px solid rgba(0 0 0 / 0.1);
+  margin: 2em 0;
+}
+.dark .prose hr {
+  border-top-color: rgba(255 255 255 / 0.12);
+}
+.prose blockquote {
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #52525b;
+  margin: 1em 0;
+  padding: 0.6em 1em;
+}
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+.dark .prose blockquote {
+  color: #d4d4d8;
+}
+/* GFM tables */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+  font-size: 0.9em;
+  display: block;
+  overflow-x: auto;
+}
+.prose th,
+.prose td {
+  border: 1px solid rgba(0 0 0 / 0.1);
+  padding: 0.5em 0.85em;
+  text-align: left;
+}
+.dark .prose th,
+.dark .prose td {
+  border-color: rgba(255 255 255 / 0.12);
+}
+.prose thead th {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--foreground);
+  font-weight: 600;
+}
+.prose tbody tr:nth-child(even) {
+  background: rgba(0 0 0 / 0.02);
+}
+.dark .prose tbody tr:nth-child(even) {
+  background: rgba(255 255 255 / 0.03);
+}
+.prose details {
+  border: 1px solid rgba(0 0 0 / 0.1);
+  border-radius: 0.5rem;
+  margin-bottom: 1em;
+  padding: 0.6em 1em;
+}
+.dark .prose details {
+  border-color: rgba(255 255 255 / 0.12);
+}
+.prose summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--foreground);
 }

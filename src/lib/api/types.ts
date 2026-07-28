@@ -1,0 +1,487 @@
+// ---------------------------------------------------------------------------
+// Platform user (from eureka/dovewing) — avatar is already a full URL
+// ---------------------------------------------------------------------------
+
+export interface PlatformUser {
+  id: string;
+  username: string;
+  display_name: string;
+  /** Fully resolved avatar URL — use directly in <img> */
+  avatar: string;
+  bot: boolean;
+  status: "online" | "idle" | "dnd" | "offline";
+  extra_data: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// Asset metadata — CDN-relative, resolve with resolveAsset() from utils/assets
+// ---------------------------------------------------------------------------
+
+export interface AssetMetadata {
+  exists: boolean;
+  path: string;
+  default_path: string;
+  type: string;
+  size: number;
+  last_modified: string | null;
+  errors: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Links  (extra_links on bots/servers use `value` not `url`)
+// ---------------------------------------------------------------------------
+
+export interface Link {
+  name: string;
+  value: string;
+}
+
+// ---------------------------------------------------------------------------
+// Bots
+// ---------------------------------------------------------------------------
+
+export type BotType =
+  | "approved"
+  | "certified"
+  | "denied"
+  | "banned"
+  | "under_review"
+  | "pending";
+
+export interface IndexBot {
+  bot_id: string;
+  /** Full platform user resolved by dovewing — avatar is a full URL */
+  user: PlatformUser;
+  short: string;
+  type: BotType;
+  vanity_ref: string;
+  vanity: string;
+  /** Exact vote count (from entity_votes) */
+  votes: number;
+  /** Cached approximate votes — used for ranking/display */
+  approximate_votes: number;
+  shards: number;
+  library: string;
+  invite_clicks: number;
+  clicks: number;
+  servers: number;
+  nsfw: boolean;
+  tags: string[];
+  premium: boolean;
+  banner: AssetMetadata | null;
+  created_at: string;
+}
+
+export interface Bot {
+  itag: string;
+  bot_id: string;
+  client_id: string;
+  user: PlatformUser;
+  owner: PlatformUser | null;
+  team_owner: Team | null;
+  short: string;
+  /** Long description (HTML/markdown). Only present when include=long is passed */
+  long: string;
+  library: string;
+  nsfw: boolean;
+  premium: boolean;
+  last_stats_post: string | null;
+  servers: number;
+  shards: number;
+  shard_list: number[];
+  users: number;
+  votes: number;
+  approximate_votes: number;
+  clicks: number;
+  unique_clicks: number;
+  invite_clicks: number;
+  banner: AssetMetadata | null;
+  invite: string;
+  type: BotType;
+  vanity_ref: string;
+  vanity: string;
+  vote_banned: boolean;
+  prefix: string;
+  extra_links: Link[];
+  tags: string[];
+  cert_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Servers — note: servers have `name` directly (not via user), avatar is AssetMetadata
+// ---------------------------------------------------------------------------
+
+export type ServerState = "public" | "private" | "unlisted" | "defunct";
+
+export interface IndexServer {
+  server_id: string;
+  name: string;
+  /** CDN-based avatar — resolve with resolveAsset() */
+  avatar: AssetMetadata | null;
+  total_members: number;
+  online_members: number;
+  short: string;
+  type: "approved" | "certified" | "pending";
+  state: ServerState;
+  vanity_ref: string;
+  vanity: string;
+  votes: number;
+  approximate_votes: number;
+  invite_clicks: number;
+  clicks: number;
+  nsfw: boolean;
+  tags: string[];
+  premium: boolean;
+  banner: AssetMetadata | null;
+}
+
+export interface Server extends IndexServer {
+  long: string;
+  extra_links: Link[];
+  team_owner: Team | null;
+  vote_banned: boolean;
+  unique_clicks: number;
+  /** The user ID who claimed management of this server listing, if any */
+  claimed_by: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Teams
+// ---------------------------------------------------------------------------
+
+export interface Team {
+  team_id: string;
+  name: string;
+  avatar: AssetMetadata | null;
+  banner: AssetMetadata | null;
+  short: string;
+}
+
+// ---------------------------------------------------------------------------
+// Packs
+// ---------------------------------------------------------------------------
+
+export interface BotPack {
+  owner: PlatformUser;
+  name: string;
+  short: string;
+  votes: number;
+  tags: string[];
+  url: string;
+  created_at: string;
+  /** Raw bot IDs */
+  bot_ids: string[];
+  /** Resolved IndexBot objects */
+  bots: IndexBot[];
+  vote_banned: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+export interface User {
+  itag: string;
+  /** Resolved Discord/platform user — may be null for deleted accounts */
+  user: PlatformUser | null;
+  about: string | null;
+  extra_links: Link[];
+  user_bots: IndexBot[];
+  user_packs: BotPack[];
+  user_teams: Team[];
+  staff: boolean;
+  bot_developer: boolean;
+  certified: boolean;
+  vote_banned: boolean;
+  banned: boolean;
+  bug_hunters: boolean;
+  captcha_sponsor_enabled: boolean;
+  experiments: string[];
+  created_at: string;
+  updated_at: string;
+  last_booster_claim: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Voting
+// ---------------------------------------------------------------------------
+
+export interface Vote {
+  user_id: string;
+  created_at: string;
+}
+
+export interface UserVote {
+  has_voted: boolean;
+  valid_votes: Vote[];
+  vote_info: {
+    multiple_votes: boolean;
+    per_user: number;
+    supports_downvotes: boolean;
+    supports_partial_vote_credits_redeem: boolean;
+    supports_upvotes: boolean;
+    vote_credits: boolean;
+    vote_time: number;
+  } | null;
+  wait: {
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null;
+}
+
+// ---------------------------------------------------------------------------
+// Search
+// ---------------------------------------------------------------------------
+
+export interface SearchFilter {
+  from: number;
+  to: number;
+}
+
+export type TagMode = "@>" | "&&";
+
+export interface TagFilter {
+  tags: string[];
+  /** "@>" = all tags must match, "&&" = any tag matches */
+  tag_mode: TagMode;
+}
+
+export interface SearchQuery {
+  query?: string;
+  target_types: string[];
+  servers?: SearchFilter;
+  votes?: SearchFilter;
+  shards?: SearchFilter;
+  total_members?: SearchFilter;
+  tags?: TagFilter;
+}
+
+export interface SearchResponse {
+  target_types: string[];
+  bots?: IndexBot[];
+  servers?: IndexServer[];
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+export interface AuthSession {
+  token: string;
+  user_id: string;
+  session_id: string;
+  expires_at: number;
+  avatar: string;
+  username: string;
+  display_name: string;
+}
+
+// ---------------------------------------------------------------------------
+// User mutations
+// ---------------------------------------------------------------------------
+
+export interface UpdateUserPayload {
+  about?: string | null;
+  captcha_sponsor_enabled?: boolean | null;
+  extra_links?: Link[];
+}
+
+// ---------------------------------------------------------------------------
+// Permissions
+// ---------------------------------------------------------------------------
+
+export interface UserPerm {
+  banned: boolean;
+  captcha_sponsor_enabled: boolean;
+  experiments: string[];
+  staff: boolean;
+  user: PlatformUser | null;
+  vote_banned: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Paginated responses — ALL list endpoints use this shape
+// ---------------------------------------------------------------------------
+
+export interface PagedResult<T> {
+  count: number;
+  per_page: number;
+  results: T;
+}
+
+// ---------------------------------------------------------------------------
+// Index responses
+// ---------------------------------------------------------------------------
+
+export interface ListIndexBot {
+  certified: IndexBot[];
+  premium: IndexBot[];
+  most_viewed: IndexBot[];
+  packs: BotPack[];
+  recently_added: IndexBot[];
+  top_voted: IndexBot[];
+}
+
+export interface ListIndexServer {
+  certified: IndexServer[];
+  premium: IndexServer[];
+  most_viewed: IndexServer[];
+  recently_added: IndexServer[];
+  top_voted: IndexServer[];
+}
+
+// ---------------------------------------------------------------------------
+// List-wide stats
+// ---------------------------------------------------------------------------
+
+export interface ListStats {
+  total_bots: number;
+  total_approved_bots: number;
+  total_certified_bots: number;
+  total_staff: number;
+  total_users: number;
+  total_votes: number;
+  total_packs: number;
+  total_tickets: number;
+}
+
+// ---------------------------------------------------------------------------
+// Random bots / servers
+// ---------------------------------------------------------------------------
+
+export interface RandomBots {
+  bots: IndexBot[];
+}
+
+export interface RandomServers {
+  servers: IndexServer[];
+}
+
+// ---------------------------------------------------------------------------
+// Partners
+// ---------------------------------------------------------------------------
+
+export interface PartnerType {
+  id: string;
+  name: string;
+  short: string;
+  icon: string;
+  created_at: string;
+}
+
+export interface Partner {
+  id: string;
+  name: string;
+  avatar: AssetMetadata | null;
+  short: string;
+  links: Link[];
+  type: string;
+  created_at: string;
+  user: PlatformUser | null;
+  bot_id: string | null;
+}
+
+export interface PartnerList {
+  partners: Partner[];
+  partner_types: PartnerType[];
+}
+
+// ---------------------------------------------------------------------------
+// Blog
+// ---------------------------------------------------------------------------
+
+export interface BlogListPost {
+  slug: string;
+  title: string;
+  description: string;
+  author: PlatformUser | null;
+  created_at: string;
+  draft: boolean;
+  tags: string[];
+}
+
+export interface Blog {
+  posts: BlogListPost[];
+}
+
+export interface BlogPost extends BlogListPost {
+  content: string;
+}
+
+// ---------------------------------------------------------------------------
+// Bot / Server creation payloads
+// ---------------------------------------------------------------------------
+
+export interface CreateBotPayload {
+  bot_id: string;
+  short: string;
+  long?: string;
+  prefix?: string;
+  library?: string;
+  nsfw?: boolean;
+  tags?: string[];
+  extra_links?: Link[];
+}
+
+export interface CreateServerPayload {
+  server_id: string;
+  short: string;
+  long?: string;
+  nsfw?: boolean;
+  tags?: string[];
+  extra_links?: Link[];
+}
+
+// ---------------------------------------------------------------------------
+// Bot / Server / Pack settings updates
+// ---------------------------------------------------------------------------
+
+export interface BotSettingsUpdate {
+  short: string;
+  long: string;
+  prefix: string;
+  invite: string;
+  library: string;
+  extra_links: Link[];
+  tags: string[];
+  nsfw: boolean;
+  captcha_opt_out: boolean;
+}
+
+export interface ServerSettingsUpdate {
+  short: string;
+  long: string;
+  extra_links: Link[];
+  state: "public" | "private" | "unlisted" | "defunct";
+  tags: string[];
+  nsfw: boolean;
+  captcha_opt_out: boolean;
+  login_required_for_invite: boolean;
+}
+
+export interface CreatePackPayload {
+  name: string;
+  url: string;
+  short: string;
+  tags: string[];
+  bots: string[];
+}
+
+export interface PackSettingsUpdate {
+  name: string;
+  short: string;
+  tags: string[];
+  bots: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Errors
+// ---------------------------------------------------------------------------
+
+export interface ApiErrorBody {
+  message: string;
+  context?: Record<string, string>;
+}

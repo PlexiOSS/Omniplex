@@ -1,0 +1,233 @@
+import { ArrowLeft, ExternalLink, Globe, Star, Users } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Container } from "@/components/layout/Container";
+import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { Markdown } from "@/components/markdown/Markdown";
+import { Avatar } from "@/components/ui/Avatar";
+import { Badge } from "@/components/ui/Badge";
+import { WidgetShare } from "@/components/widget/WidgetShare";
+import { servers, vanity } from "@/lib/api";
+import { ApiError } from "@/lib/api/client";
+import { resolveAsset } from "@/lib/utils/assets";
+import { isApiUnavailable } from "@/lib/utils/errors";
+import { formatCount } from "@/lib/utils/format";
+import { ServerVoteButton } from "./ServerVoteButton";
+
+interface Props {
+  params: Promise<{ id: string }>;
+}
+
+async function fetchServer(id: string) {
+  try {
+    return await servers.getServer(id);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      const resolved = await vanity.resolve(id).catch(() => null);
+      if (resolved?.target_type === "server") {
+        return servers.getServer(resolved.target_id);
+      }
+    }
+    throw err;
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const server = await fetchServer(id).catch(() => null);
+  if (!server) return {};
+  return {
+    title: server.name,
+    description: server.short,
+  };
+}
+
+export default async function ServerPage({ params }: Props) {
+  const { id } = await params;
+  let server = null;
+  try {
+    server = await fetchServer(id);
+  } catch (err) {
+    if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
+    notFound();
+  }
+  if (!server) notFound();
+
+  const avatarSrc =
+    resolveAsset(server.avatar) ??
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`;
+
+  return (
+    <Container className="py-10">
+      <Link
+        href="/servers"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+      >
+        <ArrowLeft size={14} />
+        Back to servers
+      </Link>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+        {/* Main */}
+        <div className="min-w-0">
+          <div className="flex items-start gap-4">
+            <Avatar src={avatarSrc} alt={server.name} size={64} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+                  {server.name}
+                </h1>
+                {server.premium && <Badge variant="premium">Premium</Badge>}
+                {server.type === "certified" && (
+                  <Badge variant="success">Certified</Badge>
+                )}
+                {server.nsfw && <Badge variant="danger">NSFW</Badge>}
+              </div>
+              <p className="mt-1 text-zinc-500 dark:text-zinc-400">
+                {server.short}
+              </p>
+            </div>
+          </div>
+
+          {server.tags.length > 0 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {server.tags.map((tag) => (
+                <Badge key={tag}>{tag}</Badge>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+            <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+              About
+            </h2>
+            <Markdown
+              content={server.long ?? ""}
+              className="text-sm text-zinc-700 dark:text-zinc-300"
+            />
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <aside className="space-y-4">
+          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+            <div className="flex flex-col gap-2">
+              {(() => {
+                const inviteLink = server.extra_links.find(
+                  (l) => l.name === "invite",
+                )?.value;
+                return inviteLink ? (
+                  <a
+                    href={inviteLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  >
+                    <ExternalLink size={14} />
+                    Join Server
+                  </a>
+                ) : null;
+              })()}
+              <ServerVoteButton
+                serverId={server.server_id}
+                currentVotes={server.approximate_votes}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+              Stats
+            </h3>
+            <dl className="space-y-2.5">
+              <StatRow
+                icon={<Star size={14} />}
+                label="Votes"
+                value={formatCount(server.approximate_votes)}
+              />
+              <StatRow
+                icon={<Users size={14} />}
+                label="Members"
+                value={formatCount(server.total_members)}
+              />
+              {server.online_members != null && (
+                <StatRow
+                  icon={<Users size={14} />}
+                  label="Online"
+                  value={formatCount(server.online_members)}
+                />
+              )}
+            </dl>
+          </div>
+
+          {server.extra_links.length > 0 && (
+            <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+              <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                Links
+              </h3>
+              <div className="space-y-2">
+                {server.extra_links.map((link) => (
+                  <LinkItem
+                    key={link.name}
+                    href={link.value}
+                    icon={<Globe size={14} />}
+                    label={link.name}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <WidgetShare
+            widgetPath={`/servers/${server.vanity || server.server_id}/widget`}
+          />
+        </aside>
+      </div>
+    </Container>
+  );
+}
+
+function StatRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 text-sm">
+      <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+        {icon}
+        {label}
+      </span>
+      <span className="font-medium text-zinc-950 dark:text-zinc-50">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function LinkItem({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+    >
+      {icon}
+      {label}
+    </a>
+  );
+}
