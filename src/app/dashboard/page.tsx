@@ -558,9 +558,21 @@ export default function DashboardPage() {
     );
   }
 
-  const displayName = me.user?.display_name || me.user?.username || "Unknown";
-  const username = me.user?.username ?? "unknown";
-  const avatar = me.user?.avatar ?? "";
+  // Popplio can return `null` instead of `[]` for these resolved-in-application-code
+  // fields when the underlying Go slice is nil — normalize once here so every
+  // tab below can rely on them always being arrays.
+  const normalizedMe: UserType = {
+    ...me,
+    extra_links: me.extra_links ?? [],
+    user_bots: me.user_bots ?? [],
+    user_packs: me.user_packs ?? [],
+    user_teams: me.user_teams ?? [],
+  };
+
+  const displayName =
+    normalizedMe.user?.display_name || normalizedMe.user?.username || "Unknown";
+  const username = normalizedMe.user?.username ?? "unknown";
+  const avatar = normalizedMe.user?.avatar ?? "";
 
   return (
     <Container className="py-10">
@@ -575,9 +587,11 @@ export default function DashboardPage() {
             @{username}
           </p>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {me.staff && <Badge variant="info">Staff</Badge>}
-            {me.certified && <Badge variant="success">Certified Dev</Badge>}
-            {me.bot_developer && <Badge>Bot Developer</Badge>}
+            {normalizedMe.staff && <Badge variant="info">Staff</Badge>}
+            {normalizedMe.certified && (
+              <Badge variant="success">Certified Dev</Badge>
+            )}
+            {normalizedMe.bot_developer && <Badge>Bot Developer</Badge>}
           </div>
         </div>
       </div>
@@ -588,11 +602,11 @@ export default function DashboardPage() {
           {TABS.map(({ key, label, icon: Icon }) => {
             const count =
               key === "bots"
-                ? me.user_bots.length
+                ? normalizedMe.user_bots.length
                 : key === "packs"
-                  ? me.user_packs.length
+                  ? normalizedMe.user_packs.length
                   : key === "teams"
-                    ? me.user_teams.length
+                    ? normalizedMe.user_teams.length
                     : null;
             return (
               <button
@@ -620,23 +634,31 @@ export default function DashboardPage() {
       </div>
 
       {/* Tab content */}
-      {tab === "overview" && <OverviewTab me={me} />}
+      {tab === "overview" && <OverviewTab me={normalizedMe} />}
       {tab === "profile" && (
-        <EditProfileTab me={me} token={session.token} mutate={mutate} />
-      )}
-      {tab === "bots" && (
-        <BotsTab bots={me.user_bots} token={session.token} mutate={mutate} />
-      )}
-      {tab === "packs" && (
-        <PacksTab
-          packs={me.user_packs}
-          userId={session.user_id}
-          userBots={me.user_bots}
+        <EditProfileTab
+          me={normalizedMe}
           token={session.token}
           mutate={mutate}
         />
       )}
-      {tab === "teams" && <TeamsTab teams={me.user_teams} />}
+      {tab === "bots" && (
+        <BotsTab
+          bots={normalizedMe.user_bots}
+          token={session.token}
+          mutate={mutate}
+        />
+      )}
+      {tab === "packs" && (
+        <PacksTab
+          packs={normalizedMe.user_packs}
+          userId={session.user_id}
+          userBots={normalizedMe.user_bots}
+          token={session.token}
+          mutate={mutate}
+        />
+      )}
+      {tab === "teams" && <TeamsTab teams={normalizedMe.user_teams} />}
     </Container>
   );
 }
