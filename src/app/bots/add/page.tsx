@@ -36,14 +36,25 @@ export default function AddBotPage() {
 
   if (loading || !isAuthenticated || !session) return null;
 
+  function validate(): string | null {
+    if (!form.bot_id.trim()) return "Bot ID is required.";
+    if (form.short.trim().length < 30)
+      return "Short description must be at least 30 characters.";
+    if (form.long.trim().length < 500)
+      return "Long description must be at least 500 characters.";
+    if (!form.prefix.trim()) return "Prefix is required.";
+    if (!form.library.trim()) return "Library is required.";
+    if (!form.invite.trim() || !form.invite.trim().startsWith("https://"))
+      return "Invite URL is required and must be a valid HTTPS URL.";
+    if (form.tags.length === 0) return "Select at least one tag.";
+    return null;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.bot_id.trim()) {
-      setError("Bot ID is required.");
-      return;
-    }
-    if (!form.short.trim()) {
-      setError("Short description is required.");
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -52,24 +63,30 @@ export default function AddBotPage() {
     setError(null);
 
     try {
-      const extra_links = form.invite
-        ? [{ name: "invite", value: form.invite }]
-        : [];
+      const botId = form.bot_id.trim();
+      const invite = form.invite.trim();
 
-      const bot = await bots.createBot(
+      await bots.createBot(
         {
-          bot_id: form.bot_id.trim(),
+          bot_id: botId,
+          // The Discord application ID is the same as the bot's user ID for
+          // virtually all bots — there's no separate field for this in the
+          // add-bot form since it would rarely differ in practice.
+          client_id: botId,
           short: form.short.trim(),
-          long: form.long.trim() || undefined,
-          prefix: form.prefix.trim() || undefined,
-          library: form.library.trim() || undefined,
+          long: form.long.trim(),
+          prefix: form.prefix.trim(),
+          invite,
+          library: form.library.trim(),
           nsfw: form.nsfw,
           tags: form.tags,
-          extra_links,
+          extra_links: [{ name: "invite", value: invite }],
         },
         session.token,
       );
-      router.push(`/bots/${bot.vanity || bot.bot_id}`);
+      // The API returns 204 No Content on success, so redirect using the
+      // bot ID we already know rather than a vanity from the response.
+      router.push(`/bots/${botId}`);
     } catch (err) {
       const msg =
         err instanceof ApiError
@@ -135,7 +152,7 @@ export default function AddBotPage() {
               required
             />
             <p className="text-xs text-right text-zinc-400">
-              {form.short.length}/191
+              {form.short.length}/191 (30 minimum)
             </p>
           </div>
 
@@ -147,15 +164,18 @@ export default function AddBotPage() {
             placeholder="https://discord.com/oauth2/authorize?client_id=..."
             value={form.invite}
             onChange={(e) => setForm((f) => ({ ...f, invite: e.target.value }))}
+            required
           />
 
           {/* Prefix */}
           <Input
             id="prefix"
             label="Prefix"
-            placeholder="! / $ / . (leave blank if slash-command only)"
+            placeholder="! / $ / . / (use / for slash-command only bots)"
+            maxLength={10}
             value={form.prefix}
             onChange={(e) => setForm((f) => ({ ...f, prefix: e.target.value }))}
+            required
           />
 
           {/* Library */}
@@ -167,17 +187,23 @@ export default function AddBotPage() {
             onChange={(e) =>
               setForm((f) => ({ ...f, library: e.target.value }))
             }
+            required
           />
 
           {/* Tags */}
           <div>
             <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Tags
+              Tags <span className="text-red-500">*</span>
+              <span className="ml-1 text-xs font-normal text-zinc-400">
+                (1-5)
+              </span>
             </p>
             <TagPicker
               available={AVAILABLE_TAGS}
               selected={form.tags}
-              onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+              onChange={(tags) =>
+                setForm((f) => ({ ...f, tags: tags.slice(0, 5) }))
+              }
             />
           </div>
 
@@ -187,7 +213,7 @@ export default function AddBotPage() {
               htmlFor="long"
               className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
-              Long Description{" "}
+              Long Description <span className="text-red-500">*</span>{" "}
               <span className="text-xs text-zinc-400">(HTML supported)</span>
             </label>
             <textarea
@@ -197,7 +223,11 @@ export default function AddBotPage() {
               onChange={(e) => setForm((f) => ({ ...f, long: e.target.value }))}
               placeholder="Describe your bot in detail — features, commands, setup instructions…"
               className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+              required
             />
+            <p className="text-xs text-right text-zinc-400">
+              {form.long.length} characters (500 minimum)
+            </p>
           </div>
 
           {/* NSFW */}
