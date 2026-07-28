@@ -7,10 +7,13 @@ import {
   ACCENT_VALUES,
   type AccentColor,
 } from "@/lib/constants/accent";
+import type { WidgetStatDef } from "@/lib/widget/shared";
 
 interface WidgetShareProps {
   /** Path to the widget route, e.g. "/bots/lurifix/widget" */
   widgetPath: string;
+  /** Stat keys this widget type supports, e.g. BOT_WIDGET_STATS */
+  stats: WidgetStatDef[];
 }
 
 type Theme = "dark" | "light";
@@ -56,10 +59,25 @@ function CopyRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function WidgetShare({ widgetPath }: WidgetShareProps) {
+export function WidgetShare({ widgetPath, stats }: WidgetShareProps) {
   const [theme, setTheme] = useState<Theme>("dark");
   const [accent, setAccent] = useState<AccentColor>("indigo");
   const [format, setFormat] = useState<Format>("markdown");
+  const [visibleStats, setVisibleStats] = useState(
+    () => new Set(stats.map((s) => s.key)),
+  );
+
+  function toggleStat(key: string) {
+    setVisibleStats((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }
 
   // Server and the first client render must produce identical markup, so
   // `origin` starts empty (matching SSR, where `window` doesn't exist) and
@@ -70,7 +88,11 @@ export function WidgetShare({ widgetPath }: WidgetShareProps) {
     setOrigin(window.location.origin);
   }, []);
 
-  const query = `theme=${theme}&accent=${accent}`;
+  const statsParam = stats
+    .map((s) => s.key)
+    .filter((key) => visibleStats.has(key))
+    .join(",");
+  const query = `theme=${theme}&accent=${accent}&stats=${statsParam}`;
   // Relative — safe to use before `origin` is known, and works identically
   // once it's filled in (browsers resolve it against the current page).
   const previewSrc = `${widgetPath}?${query}`;
@@ -155,6 +177,24 @@ export function WidgetShare({ widgetPath }: WidgetShareProps) {
             />
           ))}
         </div>
+      </div>
+
+      {/* Stat visibility */}
+      <div className="mt-3 flex flex-wrap gap-3">
+        {stats.map(({ key, label }) => (
+          <label
+            key={key}
+            className="flex cursor-pointer items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400"
+          >
+            <input
+              type="checkbox"
+              checked={visibleStats.has(key)}
+              onChange={() => toggleStat(key)}
+              className="h-3.5 w-3.5 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+            />
+            {label}
+          </label>
+        ))}
       </div>
 
       {/* Format tabs */}

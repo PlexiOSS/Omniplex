@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/PlexiOSS/Omniplex/security/advisories/new
+    about: Please report security vulnerabilities privately. See SECURITY.md for details.
+  - name: Community support and discussion
+    url: https://discord.gg/KBCRuBKrHe
+    about: Ask questions or chat with the community on Discord.

@@ -4,6 +4,8 @@ import { ApiError } from "@/lib/api/client";
 import { toOgImageSrc } from "@/lib/og/image";
 import { formatCount } from "@/lib/utils/format";
 import {
+  BOT_WIDGET_STATS,
+  resolveVisibleStats,
   resolveWidgetTheme,
   WIDGET_CONTENT_TYPE,
   WIDGET_SIZE,
@@ -36,6 +38,10 @@ export async function GET(
   const { id } = await params;
   const { searchParams } = new URL(request.url);
   const theme = resolveWidgetTheme(searchParams);
+  const visibleStats = resolveVisibleStats(
+    searchParams,
+    BOT_WIDGET_STATS.map((s) => s.key),
+  );
 
   const bot = await fetchBot(id).catch(() => null);
 
@@ -130,18 +136,24 @@ export async function GET(
         {description}
       </p>
 
-      <div style={{ display: "flex", gap: 28, marginTop: "auto" }}>
-        <WidgetStat
-          theme={theme}
-          label="Votes"
-          value={formatCount(bot.approximate_votes)}
-        />
-        <WidgetStat
-          theme={theme}
-          label="Servers"
-          value={formatCount(bot.servers)}
-        />
-      </div>
+      {visibleStats.size > 0 && (
+        <div style={{ display: "flex", gap: 28, marginTop: "auto" }}>
+          {visibleStats.has("votes") && (
+            <WidgetStat
+              theme={theme}
+              label="Votes"
+              value={formatCount(bot.approximate_votes)}
+            />
+          )}
+          {visibleStats.has("servers") && (
+            <WidgetStat
+              theme={theme}
+              label="Servers"
+              value={formatCount(bot.servers)}
+            />
+          )}
+        </div>
+      )}
     </WidgetFrame>,
     { ...WIDGET_SIZE },
   );

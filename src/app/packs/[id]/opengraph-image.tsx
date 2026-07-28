@@ -102,7 +102,7 @@ export default async function Image({
       {pack && (
         <div style={{ display: "flex", gap: 40 }}>
           <OgStat label="Votes" value={formatCount(pack.votes)} />
-          <OgStat label="Bots" value={formatCount(pack.bots.length)} />
+          <OgStat label="Bots" value={formatCount((pack.bots ?? []).length)} />
         </div>
       )}
     </OgFrame>,

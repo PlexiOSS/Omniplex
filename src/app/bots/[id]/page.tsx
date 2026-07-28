@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/Badge";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import { resolveAsset } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
+import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
 import { VoteButton } from "./VoteButton";
 
 interface Props {
@@ -171,6 +173,46 @@ export default async function BotPage({ params }: Props) {
             </dl>
           </div>
 
+          {/* Owner */}
+          {(bot.team_owner || bot.owner) && (
+            <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+              <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                {bot.team_owner ? "Team" : "Owner"}
+              </h3>
+              {bot.team_owner ? (
+                <div className="flex items-center gap-2.5">
+                  <Avatar
+                    src={
+                      resolveAsset(bot.team_owner.avatar) ??
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(bot.team_owner.name)}&size=64&background=random`
+                    }
+                    alt={bot.team_owner.name}
+                    size={32}
+                  />
+                  <span className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                    {bot.team_owner.name}
+                  </span>
+                </div>
+              ) : (
+                bot.owner && (
+                  <Link
+                    href={`/user/${bot.owner.id}`}
+                    className="flex items-center gap-2.5"
+                  >
+                    <Avatar
+                      src={bot.owner.avatar}
+                      alt={bot.owner.username}
+                      size={32}
+                    />
+                    <span className="truncate text-sm font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
+                      {bot.owner.display_name || bot.owner.username}
+                    </span>
+                  </Link>
+                )
+              )}
+            </div>
+          )}
+
           {/* Links */}
           {bot.extra_links.length > 0 && (
             <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
@@ -192,6 +234,7 @@ export default async function BotPage({ params }: Props) {
 
           <WidgetShare
             widgetPath={`/bots/${bot.vanity || bot.bot_id}/widget`}
+            stats={BOT_WIDGET_STATS}
           />
         </aside>
       </div>

@@ -47,7 +47,7 @@ function PackItem({
   return (
     <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex -space-x-2">
-        {pack.bots.slice(0, 4).map((bot) => (
+        {(pack.bots ?? []).slice(0, 4).map((bot) => (
           <Avatar
             key={bot.bot_id}
             src={bot.user.avatar}

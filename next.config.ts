@@ -21,6 +21,21 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  async redirects() {
+    return [
+      {
+        source: "/help",
+        destination: "/kb",
+        permanent: true,
+      },
+      {
+        source: "/help/:category/:slug",
+        destination: "/kb/:category/:slug",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

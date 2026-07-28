@@ -1,0 +1,21 @@
+# Local dev artifacts — Railpack builds fresh inside the image, these
+# shouldn't be copied into the build context at all.
+node_modules
+.next
+*.tsbuildinfo
+
+# Secrets — set these through the hosting platform's environment config
+# instead. NEXT_PUBLIC_* vars must be provided at *build* time since
+# Next.js inlines them into the client bundle.
+.env
+.env.local
+.env.*.local
+
+# Version control and editor metadata
+.git
+.github
+.vscode
+
+# Misc
+*.log
+.DS_Store

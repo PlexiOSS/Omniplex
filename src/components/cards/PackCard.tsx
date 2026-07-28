@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { ArrowUpRight, Bot, Star } from "lucide-react";
-import type { BotPack } from "@/lib/api/types";
-import { formatCount } from "@/lib/utils/format";
+import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import type { BotPack } from "@/lib/api/types";
+import { formatCount } from "@/lib/utils/format";
 
 interface PackCardProps {
   pack: BotPack;
@@ -20,7 +20,7 @@ export function PackCard({ pack }: PackCardProps) {
       <div className="flex items-start gap-3">
         {/* Show up to 3 bot avatars stacked */}
         <div className="flex shrink-0 -space-x-2">
-          {pack.bots.slice(0, 3).map((bot) => (
+          {(pack.bots ?? []).slice(0, 3).map((bot) => (
             <Avatar
               key={bot.bot_id}
               src={bot.user.avatar}
@@ -46,9 +46,9 @@ export function PackCard({ pack }: PackCardProps) {
         />
       </div>
 
-      {pack.tags.length > 0 && (
+      {(pack.tags ?? []).length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {pack.tags.slice(0, 4).map((tag) => (
+          {(pack.tags ?? []).slice(0, 4).map((tag) => (
             <Badge key={tag}>{tag}</Badge>
           ))}
         </div>
@@ -61,7 +61,7 @@ export function PackCard({ pack }: PackCardProps) {
         </span>
         <span className="flex items-center gap-1">
           <Bot size={12} />
-          {pack.bot_ids.length} bots
+          {(pack.bot_ids ?? []).length} bots
         </span>
       </div>
     </Link>
