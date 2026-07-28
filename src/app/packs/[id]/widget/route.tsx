@@ -3,6 +3,8 @@ import { packs } from "@/lib/api";
 import { toOgImageSrc } from "@/lib/og/image";
 import { formatCount } from "@/lib/utils/format";
 import {
+  PACK_WIDGET_STATS,
+  resolveVisibleStats,
   resolveWidgetTheme,
   WIDGET_CONTENT_TYPE,
   WIDGET_SIZE,
@@ -20,6 +22,10 @@ export async function GET(
   const { id } = await params;
   const { searchParams } = new URL(request.url);
   const theme = resolveWidgetTheme(searchParams);
+  const visibleStats = resolveVisibleStats(
+    searchParams,
+    PACK_WIDGET_STATS.map((s) => s.key),
+  );
 
   const pack = await packs.getPack(id).catch(() => null);
 
@@ -46,7 +52,7 @@ export async function GET(
 
   const description = widgetClamp(pack.short, 90);
   const avatars = await Promise.all(
-    pack.bots.slice(0, 5).map(async (bot) => ({
+    (pack.bots ?? []).slice(0, 5).map(async (bot) => ({
       id: bot.bot_id,
       src: await toOgImageSrc(bot.user.avatar),
     })),
@@ -94,16 +100,20 @@ export async function GET(
         }}
       >
         <div style={{ display: "flex", gap: 28 }}>
-          <WidgetStat
-            theme={theme}
-            label="Votes"
-            value={formatCount(pack.votes)}
-          />
-          <WidgetStat
-            theme={theme}
-            label="Bots"
-            value={formatCount(pack.bots.length)}
-          />
+          {visibleStats.has("votes") && (
+            <WidgetStat
+              theme={theme}
+              label="Votes"
+              value={formatCount(pack.votes)}
+            />
+          )}
+          {visibleStats.has("bots") && (
+            <WidgetStat
+              theme={theme}
+              label="Bots"
+              value={formatCount((pack.bots ?? []).length)}
+            />
+          )}
         </div>
         {avatars.length > 0 && (
           <div style={{ display: "flex" }}>

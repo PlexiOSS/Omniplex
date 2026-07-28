@@ -8,9 +8,11 @@ import {
   LayoutDashboard,
   Package,
   Pencil,
+  Plus,
   Trash2,
   User,
   Users,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +21,6 @@ import { Container } from "@/components/layout/Container";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
@@ -143,6 +144,8 @@ function OverviewTab({ me }: { me: UserType }) {
   );
 }
 
+const MAX_PROFILE_LINKS = 20;
+
 function EditProfileTab({
   me,
   token,
@@ -152,31 +155,55 @@ function EditProfileTab({
   token: string;
   mutate: () => void;
 }) {
-  const [form, setForm] = useState({
-    about: me.about ?? "",
-    website: me.extra_links.find((l) => l.name === "website")?.value ?? "",
-    github: me.extra_links.find((l) => l.name === "github")?.value ?? "",
-  });
+  // Links starting with "_" are private (system-managed) — this editor only
+  // manages the public ones a user advertises on their profile. Private
+  // links are carried through unchanged on save.
+  const privateLinks = me.extra_links.filter((l) => l.name.startsWith("_"));
+  const [about, setAbout] = useState(me.about ?? "");
+  const [links, setLinks] = useState<ApiLink[]>(
+    me.extra_links.filter((l) => !l.name.startsWith("_")),
+  );
+  const [captchaSponsorEnabled, setCaptchaSponsorEnabled] = useState(
+    me.captcha_sponsor_enabled,
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function updateLink(index: number, patch: Partial<ApiLink>) {
+    setLinks((prev) =>
+      prev.map((link, i) => (i === index ? { ...link, ...patch } : link)),
+    );
+  }
+
+  function removeLink(index: number) {
+    setLinks((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function addLink() {
+    setLinks((prev) =>
+      prev.length >= MAX_PROFILE_LINKS
+        ? prev
+        : [...prev, { name: "", value: "" }],
+    );
+  }
 
   async function handleSave() {
     setSaving(true);
     setError(null);
     setSaved(false);
     try {
-      const otherLinks = me.extra_links.filter(
-        (l) => l.name !== "website" && l.name !== "github",
+      const cleanLinks = links.filter(
+        (l) => l.name.trim() !== "" && l.value.trim() !== "",
       );
-      const extra_links: ApiLink[] = [
-        ...otherLinks,
-        ...(form.website ? [{ name: "website", value: form.website }] : []),
-        ...(form.github ? [{ name: "github", value: form.github }] : []),
-      ];
+      const extra_links: ApiLink[] = [...privateLinks, ...cleanLinks];
       await users.updateUser(
         me.user?.id ?? "",
-        { about: form.about || null, extra_links },
+        {
+          about: about || null,
+          extra_links,
+          captcha_sponsor_enabled: captchaSponsorEnabled,
+        },
         token,
       );
       mutate();
@@ -201,32 +228,82 @@ function EditProfileTab({
         <textarea
           id="about"
           rows={3}
-          value={form.about}
-          onChange={(e) => setForm((f) => ({ ...f, about: e.target.value }))}
+          value={about}
+          onChange={(e) => setAbout(e.target.value)}
           placeholder="Tell the community a bit about yourself…"
           className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
         />
       </div>
 
-      <Input
-        id="website"
-        label="Website"
-        type="url"
-        placeholder="https://yoursite.com"
-        value={form.website}
-        onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
-        icon={<Globe size={14} />}
-      />
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Links
+          </p>
+          <span className="text-xs text-zinc-400">
+            {links.length}/{MAX_PROFILE_LINKS}
+          </span>
+        </div>
 
-      <Input
-        id="github"
-        label="GitHub URL"
-        type="url"
-        placeholder="https://github.com/yourhandle"
-        value={form.github}
-        onChange={(e) => setForm((f) => ({ ...f, github: e.target.value }))}
-        icon={<GitBranch size={14} />}
-      />
+        <div className="space-y-2">
+          {links.map((link, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id until saved
+            <div key={index} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={link.name}
+                onChange={(e) => updateLink(index, { name: e.target.value })}
+                placeholder="Name (e.g. website, github)"
+                className="w-36 shrink-0 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+              />
+              <input
+                type="url"
+                value={link.value}
+                onChange={(e) => updateLink(index, { value: e.target.value })}
+                placeholder="https://…"
+                className="min-w-0 flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+              />
+              <button
+                type="button"
+                onClick={() => removeLink(index)}
+                aria-label="Remove link"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {links.length < MAX_PROFILE_LINKS && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addLink}
+            className="mt-2"
+          >
+            <Plus size={14} />
+            Add link
+          </Button>
+        )}
+      </div>
+
+      <label className="flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={captchaSponsorEnabled}
+          onChange={(e) => setCaptchaSponsorEnabled(e.target.checked)}
+          className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+        />
+        <span className="text-sm text-zinc-700 dark:text-zinc-300">
+          Sponsor captchas
+          <span className="block text-xs text-zinc-400">
+            Show a captcha before voting even on bots and servers that have
+            opted out of them.
+          </span>
+        </span>
+      </label>
 
       {error && (
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>

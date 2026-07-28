@@ -11,6 +11,7 @@ import { WidgetShare } from "@/components/widget/WidgetShare";
 import { packs } from "@/lib/api";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount, formatRelativeTime } from "@/lib/utils/format";
+import { PACK_WIDGET_STATS } from "@/lib/widget/shared";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -51,7 +52,7 @@ export default async function PackPage({ params }: Props) {
       <div className="flex items-start gap-5">
         {/* Stacked bot avatars */}
         <div className="flex shrink-0 -space-x-3">
-          {pack.bots.slice(0, 4).map((bot) => (
+          {(pack.bots ?? []).slice(0, 4).map((bot) => (
             <Avatar
               key={bot.bot_id}
               src={bot.user.avatar}
@@ -77,15 +78,15 @@ export default async function PackPage({ params }: Props) {
             </span>
             <span className="flex items-center gap-1">
               <Bot size={13} />
-              {pack.bot_ids.length} bots
+              {(pack.bot_ids ?? []).length} bots
             </span>
             <span>by {pack.owner.display_name || pack.owner.username}</span>
             <span>{formatRelativeTime(pack.created_at)}</span>
           </div>
 
-          {pack.tags.length > 0 && (
+          {(pack.tags ?? []).length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {pack.tags.map((tag) => (
+              {(pack.tags ?? []).map((tag) => (
                 <Badge key={tag}>{tag}</Badge>
               ))}
             </div>
@@ -94,17 +95,20 @@ export default async function PackPage({ params }: Props) {
       </div>
 
       <section className="mt-10 max-w-md">
-        <WidgetShare widgetPath={`/packs/${pack.url}/widget`} />
+        <WidgetShare
+          widgetPath={`/packs/${pack.url}/widget`}
+          stats={PACK_WIDGET_STATS}
+        />
       </section>
 
       {/* Bots in this pack */}
-      {pack.bots.length > 0 && (
+      {(pack.bots ?? []).length > 0 && (
         <section className="mt-12">
           <h2 className="mb-5 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
             Bots in this pack
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {pack.bots.map((bot) => (
+            {(pack.bots ?? []).map((bot) => (
               <BotCard key={bot.bot_id} bot={bot} />
             ))}
           </div>

@@ -8,11 +8,12 @@ import { Markdown } from "@/components/markdown/Markdown";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { WidgetShare } from "@/components/widget/WidgetShare";
-import { servers, vanity } from "@/lib/api";
+import { servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { resolveAsset } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
+import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
 import { ServerVoteButton } from "./ServerVoteButton";
 
 interface Props {
@@ -53,6 +54,12 @@ export default async function ServerPage({ params }: Props) {
     notFound();
   }
   if (!server) notFound();
+
+  const owner = server.team_owner
+    ? null
+    : server.claimed_by
+      ? await users.getUser(server.claimed_by).catch(() => null)
+      : null;
 
   const avatarSrc =
     resolveAsset(server.avatar) ??
@@ -161,6 +168,45 @@ export default async function ServerPage({ params }: Props) {
             </dl>
           </div>
 
+          {(server.team_owner || owner?.user) && (
+            <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+              <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                {server.team_owner ? "Team" : "Owner"}
+              </h3>
+              {server.team_owner ? (
+                <div className="flex items-center gap-2.5">
+                  <Avatar
+                    src={
+                      resolveAsset(server.team_owner.avatar) ??
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.team_owner.name)}&size=64&background=random`
+                    }
+                    alt={server.team_owner.name}
+                    size={32}
+                  />
+                  <span className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                    {server.team_owner.name}
+                  </span>
+                </div>
+              ) : (
+                owner?.user && (
+                  <Link
+                    href={`/user/${owner.user.id}`}
+                    className="flex items-center gap-2.5"
+                  >
+                    <Avatar
+                      src={owner.user.avatar}
+                      alt={owner.user.username}
+                      size={32}
+                    />
+                    <span className="truncate text-sm font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
+                      {owner.user.display_name || owner.user.username}
+                    </span>
+                  </Link>
+                )
+              )}
+            </div>
+          )}
+
           {server.extra_links.length > 0 && (
             <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
               <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
@@ -181,6 +227,7 @@ export default async function ServerPage({ params }: Props) {
 
           <WidgetShare
             widgetPath={`/servers/${server.vanity || server.server_id}/widget`}
+            stats={SERVER_WIDGET_STATS}
           />
         </aside>
       </div>

@@ -22,6 +22,7 @@ const NAV_LINKS = [
   { href: "/servers", label: "Servers" },
   { href: "/packs", label: "Packs" },
   { href: "/blog", label: "Blog" },
+  { href: "/kb", label: "Help" },
   { href: "/search", label: "Search" },
 ];
 

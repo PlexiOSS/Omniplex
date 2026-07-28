@@ -31,8 +31,8 @@ export function PackEditModal({
   const [form, setForm] = useState({
     name: pack.name,
     short: pack.short,
-    tags: pack.tags,
-    bots: pack.bot_ids,
+    tags: pack.tags ?? [],
+    bots: pack.bot_ids ?? [],
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

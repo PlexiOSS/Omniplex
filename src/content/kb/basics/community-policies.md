@@ -1,0 +1,19 @@
+---
+title: Community Policies
+description: Our official community policies and guidelines for all users, server members, and staff.
+order: 2
+---
+
+We are, first and foremost, a community, and we offer a variety of features including partnership, certification, verification, and of course most importantly text and voice chat. You should treat this server like you would any other bot list or general Discord community.
+
+1. **Community Managers.** Our management team has wide-sweeping authority on all of our team-related decisions and the management of our service(s), which includes but is not limited to: handling staff and developer applications, transfer requests, acceptable content, membership, and carrying out necessary moderator actions. Their word is final without further review.
+2. **Website Moderators.** Our website moderators are the heart of our community and have wide-sweeping authority on anything related to our website or Discord server(s), including: approval, denial, role assignment, vote bans, bot removals, moderation actions, bans, mutes, and timeouts. In most cases their word is final without further review, however you can appeal their decisions or gain more information by contacting them directly or asking for a review from management.
+3. **Moderator Actions.** All Omniplex staff members have delegated authority to carry out moderator actions including bans, mutes, and timeouts on any Discord user at any time. They exercise these permissions as needed to keep the community safe, friendly, and welcoming for everyone at all times.
+4. **Permanent Bans.** Any and all permanent bans are decided and issued on a case-by-case basis, but to keep it simple: when a user is found to be particularly toxic, rude, or disruptive they may face an immediate permanent ban. Permanent bans cannot currently be appealed and will also remove any and all access to our website.
+5. **Member Complaints.** Any member of our Discord server(s) who has specific complaints about another member should contact a member of our staff team or open a support ticket as soon as possible, and we will answer and handle the complaint in a timely fashion.
+6. **Community Staff.** Our management team and website moderators balance the needs of our community(s) with the specific needs of an individual or bot. When in doubt, safety and security will supersede the short-term harm that may come to the server.
+7. **Harassment/Bullying.** If you're being harassed by a member of our Discord server (even in a DM), please let a staff member know. Even if they aren't breaking any rules we are dedicated to keeping you safe, comfortable, and happy in our server(s) at all times.
+8. **Staff/Admin Abuse.** While all of our staff members are entrusted with additional responsibility, they are not above the rules. If you see a staff member breaking the rules please let another member of our management/staff team know as soon as possible.
+9. **Available Channels.** All channels in our Discord server(s) will have pinned messages or channel descriptions explaining what they are there for and how everything works. If you don't understand something, feel free to ask.
+10. **Staff Communication.** We require all of our users and Discord community members to be open and welcoming to having conversations with our staff members regarding approvals, denials, staff applications, and staff positions. Blocking, banning, or defaming any of our staff members on any platform simply because you didn't like their decision is strictly prohibited and can result in a permanent ban with no chance of appeal.
+11. **Policy Acceptance.** Your presence in our Discord server(s) and usage of our website/services implies that you accept and understand these policies, including all further changes. Changes might be made at any time without prior written notice — it is your responsibility to stay up to date with change logs.

@@ -5,7 +5,9 @@ import { toOgImageSrc } from "@/lib/og/image";
 import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import {
+  resolveVisibleStats,
   resolveWidgetTheme,
+  SERVER_WIDGET_STATS,
   WIDGET_CONTENT_TYPE,
   WIDGET_SIZE,
   WidgetBadge,
@@ -37,6 +39,10 @@ export async function GET(
   const { id } = await params;
   const { searchParams } = new URL(request.url);
   const theme = resolveWidgetTheme(searchParams);
+  const visibleStats = resolveVisibleStats(
+    searchParams,
+    SERVER_WIDGET_STATS.map((s) => s.key),
+  );
 
   const server = await fetchServer(id).catch(() => null);
 
@@ -134,18 +140,24 @@ export async function GET(
         {description}
       </p>
 
-      <div style={{ display: "flex", gap: 28, marginTop: "auto" }}>
-        <WidgetStat
-          theme={theme}
-          label="Votes"
-          value={formatCount(server.approximate_votes)}
-        />
-        <WidgetStat
-          theme={theme}
-          label="Members"
-          value={formatCount(server.total_members)}
-        />
-      </div>
+      {visibleStats.size > 0 && (
+        <div style={{ display: "flex", gap: 28, marginTop: "auto" }}>
+          {visibleStats.has("votes") && (
+            <WidgetStat
+              theme={theme}
+              label="Votes"
+              value={formatCount(server.approximate_votes)}
+            />
+          )}
+          {visibleStats.has("members") && (
+            <WidgetStat
+              theme={theme}
+              label="Members"
+              value={formatCount(server.total_members)}
+            />
+          )}
+        </div>
+      )}
     </WidgetFrame>,
     { ...WIDGET_SIZE },
   );

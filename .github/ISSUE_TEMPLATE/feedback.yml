@@ -1,0 +1,25 @@
+name: General feedback
+description: Something that isn't a bug or a specific feature request. Thoughts, friction points, general impressions.
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for anything that doesn't fit a bug report or feature request, for example a rough edge you noticed, a suggestion about how something is presented, or general thoughts on using Omniplex.
+
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Your feedback
+      description: Share as much or as little detail as you'd like.
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Related page
+      description: If your feedback is about a specific page, link it here.
+      placeholder: https://omniplex.gg/bots/example
+    validations:
+      required: false

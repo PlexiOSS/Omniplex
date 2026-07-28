@@ -55,6 +55,23 @@ export function resolveWidgetTheme(searchParams: URLSearchParams): WidgetTheme {
   return { ...THEMES[theme], accent };
 }
 
+/**
+ * Reads the `stats` query param (comma-separated keys, e.g. `votes,servers`)
+ * into a lookup of which stats should render. Absent param means "show
+ * everything" so existing embeds don't silently lose their stats.
+ */
+export function resolveVisibleStats(
+  searchParams: URLSearchParams,
+  allKeys: string[],
+): Set<string> {
+  const raw = searchParams.get("stats");
+  if (raw === null) return new Set(allKeys);
+  if (raw.trim() === "") return new Set();
+
+  const requested = new Set(raw.split(",").map((s) => s.trim()));
+  return new Set(allKeys.filter((key) => requested.has(key)));
+}
+
 export function WidgetFrame({
   theme,
   children,
@@ -162,3 +179,25 @@ export function WidgetBadge({
 export function widgetClamp(text: string, max: number) {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
+
+export interface WidgetStatDef {
+  key: string;
+  label: string;
+}
+
+// Single source of truth for which stat keys each widget type supports, so
+// the render route and the WidgetShare toggle UI can't drift apart.
+export const BOT_WIDGET_STATS: WidgetStatDef[] = [
+  { key: "votes", label: "Votes" },
+  { key: "servers", label: "Servers" },
+];
+
+export const SERVER_WIDGET_STATS: WidgetStatDef[] = [
+  { key: "votes", label: "Votes" },
+  { key: "members", label: "Members" },
+];
+
+export const PACK_WIDGET_STATS: WidgetStatDef[] = [
+  { key: "votes", label: "Votes" },
+  { key: "bots", label: "Bots" },
+];

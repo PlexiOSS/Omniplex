@@ -28,6 +28,7 @@ const FOOTER_LINKS = [
       { href: "/about", label: "About" },
       { href: "/about/status", label: "Status" },
       { href: "/blog", label: "Blog" },
+      { href: "/kb", label: "Knowledge Base" },
     ],
   },
   {
