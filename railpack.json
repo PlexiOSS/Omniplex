@@ -4,11 +4,6 @@
   "packages": {
     "node": "22"
   },
-  "steps": {
-    "install": {
-      "commands": ["bun install"]
-    },
-  },
   "deploy": {
     "startCommand": "bun run start",
     "variables": {
