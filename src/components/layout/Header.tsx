@@ -11,6 +11,7 @@ import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { useArcadiaAuth } from "@/hooks/useArcadiaAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
 import { ThemeToggle } from "./ThemeToggle";
@@ -48,6 +49,11 @@ export function Header() {
   const { session, isAuthenticated, logout } = useAuth();
   const { isAuthenticated: isStaffAuthenticated, logout: staffLogout } =
     useArcadiaAuth();
+  // `me.staff` reflects real staff status regardless of whether this browser
+  // has an active Arcadia panel session yet — isStaffAuthenticated alone only
+  // tells us they've logged into /admin before, not whether they're staff.
+  const { me } = useMe(session);
+  const isStaff = me?.staff ?? false;
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -161,7 +167,7 @@ export function Header() {
                   </Button>
                 </div>
               )}
-              {!isAdminSection && isStaffAuthenticated && (
+              {!isAdminSection && isStaff && (
                 <Link href="/admin" className="hidden md:block">
                   <Button variant="ghost" size="sm">
                     <Shield size={14} />
@@ -257,7 +263,7 @@ export function Header() {
                   Exit staff panel
                 </button>
               )}
-              {!isAdminSection && isStaffAuthenticated && (
+              {!isAdminSection && isStaff && (
                 <Link
                   href="/admin"
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
