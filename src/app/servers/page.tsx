@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useServerList } from "@/hooks/useServers";
 import { ServerCard } from "@/components/cards/ServerCard";
-import { BotCardSkeleton } from "@/components/ui/Skeleton";
-import { Pagination } from "@/components/search/Pagination";
 import { Container } from "@/components/layout/Container";
+import { Pagination } from "@/components/search/Pagination";
+import { BotCardSkeleton } from "@/components/ui/Skeleton";
+import { useServerList } from "@/hooks/useServers";
 
 export default function ServersPage() {
   const [page, setPage] = useState(1);

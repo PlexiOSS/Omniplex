@@ -5,10 +5,11 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Markdown } from "@/components/markdown/Markdown";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { WidgetShare } from "@/components/widget/WidgetShare";
-import { bots, vanity } from "@/lib/api";
+import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { resolveAsset } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
@@ -54,6 +55,10 @@ export default async function BotPage({ params }: Props) {
     notFound();
   }
   if (!bot) notFound();
+
+  const reviewList = await reviews
+    .getAll("bot", bot.bot_id)
+    .catch(() => ({ reviews: [] }));
 
   // bot.user.avatar is already a fully-resolved URL from dovewing
   const avatarSrc =
@@ -112,6 +117,12 @@ export default async function BotPage({ params }: Props) {
               className="text-sm text-zinc-700 dark:text-zinc-300"
             />
           </div>
+
+          <ReviewsSection
+            targetType="bot"
+            targetId={bot.bot_id}
+            initialReviews={reviewList.reviews}
+          />
         </div>
 
         {/* Sidebar */}

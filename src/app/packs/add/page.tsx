@@ -1,5 +1,6 @@
 "use client";
 
+import { Search as SearchIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
@@ -9,9 +10,19 @@ import { Input } from "@/components/ui/Input";
 import { TagPicker } from "@/components/ui/TagPicker";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { packs } from "@/lib/api";
+import { packs, search } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { BOT_TAGS } from "@/lib/constants/tags";
+import { resolveAsset } from "@/lib/utils/assets";
+
+type PickedEntity = {
+  type: "bot" | "server";
+  id: string;
+  label: string;
+  avatar: string;
+};
+
+const MAX_PER_TYPE = 10;
 
 export default function AddPackPage() {
   const router = useRouter();
@@ -29,22 +40,63 @@ export default function AddPackPage() {
     url: "",
     short: "",
     tags: [] as string[],
-    bots: [] as string[],
   });
+  const [entities, setEntities] = useState<PickedEntity[]>([]);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<PickedEntity[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (loading || meLoading || !isAuthenticated || !session || !me) return null;
 
-  function toggleBot(botId: string) {
-    setForm((f) => ({
-      ...f,
-      bots: f.bots.includes(botId)
-        ? f.bots.filter((id) => id !== botId)
-        : f.bots.length < 10
-          ? [...f.bots, botId]
-          : f.bots,
-    }));
+  const botCount = entities.filter((e) => e.type === "bot").length;
+  const serverCount = entities.filter((e) => e.type === "server").length;
+
+  function isPicked(type: "bot" | "server", id: string) {
+    return entities.some((e) => e.type === type && e.id === id);
+  }
+
+  function addEntity(entity: PickedEntity) {
+    if (isPicked(entity.type, entity.id)) return;
+    const countForType = entity.type === "bot" ? botCount : serverCount;
+    if (countForType >= MAX_PER_TYPE) return;
+    setEntities((e) => [...e, entity]);
+  }
+
+  function removeEntity(type: "bot" | "server", id: string) {
+    setEntities((e) => e.filter((x) => !(x.type === type && x.id === id)));
+  }
+
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (!query.trim()) return;
+    setSearching(true);
+    try {
+      const res = await search.search({
+        query: query.trim(),
+        target_types: ["bot", "server"],
+      });
+      const bots: PickedEntity[] = (res.bots ?? []).map((b) => ({
+        type: "bot",
+        id: b.bot_id,
+        label: b.user.username,
+        avatar: b.user.avatar,
+      }));
+      const servers: PickedEntity[] = (res.servers ?? []).map((s) => ({
+        type: "server",
+        id: s.server_id,
+        label: s.name,
+        avatar:
+          resolveAsset(s.avatar) ??
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&size=64&background=random`,
+      }));
+      setSearchResults([...bots, ...servers]);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -52,7 +104,8 @@ export default function AddPackPage() {
     if (!form.name.trim()) return setError("Pack name is required.");
     if (!form.url.trim()) return setError("Pack URL is required.");
     if (!form.short.trim()) return setError("Short description is required.");
-    if (form.bots.length === 0) return setError("Select at least one bot.");
+    if (entities.length === 0)
+      return setError("Add at least one bot or server.");
 
     if (!session) return;
     setSubmitting(true);
@@ -66,7 +119,8 @@ export default function AddPackPage() {
           url: form.url.trim(),
           short: form.short.trim(),
           tags: form.tags,
-          bots: form.bots,
+          bots: entities.filter((e) => e.type === "bot").map((e) => e.id),
+          servers: entities.filter((e) => e.type === "server").map((e) => e.id),
         },
         session.token,
       );
@@ -90,7 +144,8 @@ export default function AddPackPage() {
             Add a Pack
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Group up to 10 of your bots into a themed collection.
+            Group up to 10 bots and 10 servers into a themed collection — they
+            don't have to be yours.
           </p>
         </div>
 
@@ -152,46 +207,129 @@ export default function AddPackPage() {
 
           <div>
             <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Bots <span className="text-red-500">*</span>{" "}
+              Bots &amp; Servers <span className="text-red-500">*</span>{" "}
               <span className="text-xs font-normal text-zinc-400">
-                ({form.bots.length}/10 selected)
+                ({botCount}/{MAX_PER_TYPE} bots, {serverCount}/{MAX_PER_TYPE}{" "}
+                servers)
               </span>
             </p>
-            {me.user_bots.length === 0 ? (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                You don't have any bots listed yet.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {me.user_bots.map((bot) => {
-                  const checked = form.bots.includes(bot.bot_id);
-                  return (
-                    <label
-                      key={bot.bot_id}
-                      className={[
-                        "flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors",
-                        checked
-                          ? "border-accent bg-accent/5"
-                          : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700",
-                      ].join(" ")}
+
+            {entities.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {entities.map((entity) => (
+                  <span
+                    key={`${entity.type}-${entity.id}`}
+                    className="flex items-center gap-1.5 rounded-full border border-zinc-200 py-1 pr-1.5 pl-2 text-xs dark:border-zinc-800"
+                  >
+                    <Avatar src={entity.avatar} alt={entity.label} size={16} />
+                    {entity.label}
+                    <button
+                      type="button"
+                      onClick={() => removeEntity(entity.type, entity.id)}
+                      aria-label={`Remove ${entity.label}`}
+                      className="flex h-4 w-4 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                     >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleBot(bot.bot_id)}
-                        className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-                      />
+                      <X size={10} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch(e);
+                  }
+                }}
+                placeholder="Search any bot or server by name…"
+                className="min-w-0 flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                loading={searching}
+                onClick={handleSearch}
+              >
+                <SearchIcon size={14} />
+              </Button>
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="mt-2 space-y-1.5">
+                {searchResults.map((result) => {
+                  const picked = isPicked(result.type, result.id);
+                  const atLimit =
+                    (result.type === "bot" ? botCount : serverCount) >=
+                    MAX_PER_TYPE;
+                  return (
+                    <button
+                      key={`${result.type}-${result.id}`}
+                      type="button"
+                      disabled={picked || atLimit}
+                      onClick={() => addEntity(result)}
+                      className="flex w-full items-center gap-2.5 rounded-xl border border-zinc-200 p-2.5 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"
+                    >
                       <Avatar
-                        src={bot.user.avatar}
-                        alt={bot.user.username}
-                        size={28}
+                        src={result.avatar}
+                        alt={result.label}
+                        size={24}
                       />
-                      <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                        {bot.user.username}
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                        {result.label}
                       </span>
-                    </label>
+                      <span className="shrink-0 text-xs text-zinc-400 dark:text-zinc-600">
+                        {result.type === "bot" ? "Bot" : "Server"}
+                      </span>
+                      {picked && (
+                        <span className="shrink-0 text-xs text-accent">
+                          Added
+                        </span>
+                      )}
+                    </button>
                   );
                 })}
+              </div>
+            )}
+
+            {me.user_bots.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  Quick-add your bots
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {me.user_bots.map((bot) => {
+                    const picked = isPicked("bot", bot.bot_id);
+                    return (
+                      <button
+                        key={bot.bot_id}
+                        type="button"
+                        disabled={picked || botCount >= MAX_PER_TYPE}
+                        onClick={() =>
+                          addEntity({
+                            type: "bot",
+                            id: bot.bot_id,
+                            label: bot.user.username,
+                            avatar: bot.user.avatar,
+                          })
+                        }
+                        className={[
+                          "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                          picked
+                            ? "border-accent bg-accent/10 text-accent"
+                            : "border-zinc-200 text-zinc-600 hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:text-zinc-400",
+                        ].join(" ")}
+                      >
+                        {bot.user.username}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

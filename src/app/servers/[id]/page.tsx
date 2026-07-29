@@ -5,10 +5,11 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Markdown } from "@/components/markdown/Markdown";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { WidgetShare } from "@/components/widget/WidgetShare";
-import { servers, users, vanity } from "@/lib/api";
+import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { resolveAsset } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
@@ -65,6 +66,10 @@ export default async function ServerPage({ params }: Props) {
     resolveAsset(server.avatar) ??
     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`;
 
+  const reviewList = await reviews
+    .getAll("server", server.server_id)
+    .catch(() => ({ reviews: [] }));
+
   return (
     <Container className="py-10">
       <Link
@@ -114,6 +119,12 @@ export default async function ServerPage({ params }: Props) {
               className="text-sm text-zinc-700 dark:text-zinc-300"
             />
           </div>
+
+          <ReviewsSection
+            targetType="server"
+            targetId={server.server_id}
+            initialReviews={reviewList.reviews}
+          />
         </div>
 
         {/* Sidebar */}

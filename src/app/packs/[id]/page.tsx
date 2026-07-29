@@ -1,8 +1,9 @@
-import { ArrowLeft, Bot, Star } from "lucide-react";
+import { ArrowLeft, Bot, Server, Star } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BotCard } from "@/components/cards/BotCard";
+import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Avatar } from "@/components/ui/Avatar";
@@ -80,6 +81,12 @@ export default async function PackPage({ params }: Props) {
               <Bot size={13} />
               {(pack.bot_ids ?? []).length} bots
             </span>
+            {(pack.server_ids ?? []).length > 0 && (
+              <span className="flex items-center gap-1">
+                <Server size={13} />
+                {(pack.server_ids ?? []).length} servers
+              </span>
+            )}
             <span>by {pack.owner.display_name || pack.owner.username}</span>
             <span>{formatRelativeTime(pack.created_at)}</span>
           </div>
@@ -110,6 +117,20 @@ export default async function PackPage({ params }: Props) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(pack.bots ?? []).map((bot) => (
               <BotCard key={bot.bot_id} bot={bot} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Servers in this pack */}
+      {(pack.servers ?? []).length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-5 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+            Servers in this pack
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {(pack.servers ?? []).map((server) => (
+              <ServerCard key={server.server_id} server={server} />
             ))}
           </div>
         </section>

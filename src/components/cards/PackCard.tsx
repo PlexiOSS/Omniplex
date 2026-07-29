@@ -1,8 +1,9 @@
-import { ArrowUpRight, Bot, Star } from "lucide-react";
+import { ArrowUpRight, Bot, Server, Star } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { BotPack } from "@/lib/api/types";
+import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 interface PackCardProps {
@@ -18,17 +19,34 @@ export function PackCard({ pack }: PackCardProps) {
       className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
     >
       <div className="flex items-start gap-3">
-        {/* Show up to 3 bot avatars stacked */}
+        {/* Show up to 3 avatars stacked — bots first, falling back to servers for server-only packs */}
         <div className="flex shrink-0 -space-x-2">
-          {(pack.bots ?? []).slice(0, 3).map((bot) => (
-            <Avatar
-              key={bot.bot_id}
-              src={bot.user.avatar}
-              alt={bot.user.username}
-              size={32}
-              className="ring-2 ring-white dark:ring-zinc-900"
-            />
-          ))}
+          {(pack.bots ?? []).length > 0
+            ? (pack.bots ?? [])
+                .slice(0, 3)
+                .map((bot) => (
+                  <Avatar
+                    key={bot.bot_id}
+                    src={bot.user.avatar}
+                    alt={bot.user.username}
+                    size={32}
+                    className="ring-2 ring-white dark:ring-zinc-900"
+                  />
+                ))
+            : (pack.servers ?? [])
+                .slice(0, 3)
+                .map((server) => (
+                  <Avatar
+                    key={server.server_id}
+                    src={
+                      resolveAsset(server.avatar) ??
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`
+                    }
+                    alt={server.name}
+                    size={32}
+                    className="ring-2 ring-white dark:ring-zinc-900"
+                  />
+                ))}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -59,10 +77,18 @@ export function PackCard({ pack }: PackCardProps) {
           <Star size={12} />
           {formatCount(pack.votes)} votes
         </span>
-        <span className="flex items-center gap-1">
-          <Bot size={12} />
-          {(pack.bot_ids ?? []).length} bots
-        </span>
+        {(pack.bot_ids ?? []).length > 0 && (
+          <span className="flex items-center gap-1">
+            <Bot size={12} />
+            {(pack.bot_ids ?? []).length} bots
+          </span>
+        )}
+        {(pack.server_ids ?? []).length > 0 && (
+          <span className="flex items-center gap-1">
+            <Server size={12} />
+            {(pack.server_ids ?? []).length} servers
+          </span>
+        )}
       </div>
     </Link>
   );

@@ -32,6 +32,7 @@ import type {
   Team,
   User as UserType,
 } from "@/lib/api/types";
+import { hasAnyPermString } from "@/lib/permissions";
 import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { BotEditModal } from "./BotEditModal";
@@ -525,7 +526,10 @@ function BotsTab({
 function TeamItem({ team }: { team: Team }) {
   const avatarSrc = resolveAsset(team.avatar) ?? "";
   return (
-    <div className="flex items-center gap-3 p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
+    <Link
+      href={`/teams/${team.id}`}
+      className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+    >
       <Avatar src={avatarSrc} alt={team.name} size={44} />
       <div className="flex-1 min-w-0">
         <span className="block font-semibold truncate text-zinc-950 dark:text-zinc-50">
@@ -537,7 +541,7 @@ function TeamItem({ team }: { team: Team }) {
           </p>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -566,15 +570,6 @@ function TeamsTab({ teams }: { teams: Team[] }) {
       )}
     </div>
   );
-}
-
-// Best-effort client-side gate for whether to show manage actions (edit/delete)
-// on a team-owned bot — the actual PATCH/DELETE endpoints independently
-// re-check permissions server-side via kittycat regardless, so getting this
-// heuristic slightly wrong only affects which buttons are shown, not security.
-const BOT_MANAGE_FLAGS = ["*", "global.*", "bot.*", "bot.edit"];
-function canManageTeamBot(flags: string[]): boolean {
-  return flags.some((f) => BOT_MANAGE_FLAGS.includes(f));
 }
 
 const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
@@ -642,7 +637,11 @@ export default function DashboardPage() {
     const myFlags =
       team.entities?.members?.find((m) => m.user?.id === session.user_id)
         ?.flags ?? [];
-    const canManage = canManageTeamBot(myFlags);
+    const canManage = hasAnyPermString(myFlags, [
+      "global.*",
+      "bot.*",
+      "bot.edit",
+    ]);
     return (team.entities?.bots ?? []).map((bot) => ({
       bot,
       team,

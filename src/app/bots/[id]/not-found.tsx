@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 
 export default function BotNotFound() {

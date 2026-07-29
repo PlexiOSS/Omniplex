@@ -1,14 +1,15 @@
 "use client";
 
-import { Menu, Settings2, X } from "lucide-react";
+import { LogOut, Menu, Settings2, Shield, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { Avatar } from "@/components/ui/Avatar";
-import { DiscordIcon, GithubIcon, XIcon } from "@/components/ui/BrandIcons";
 import { Button } from "@/components/ui/Button";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
+import { useArcadiaAuth } from "@/hooks/useArcadiaAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
@@ -18,12 +19,23 @@ const ICON_BUTTON =
   "flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";
 
 const NAV_LINKS = [
+  { href: "/", label: "Home" },
   { href: "/bots", label: "Bots" },
   { href: "/servers", label: "Servers" },
   { href: "/packs", label: "Packs" },
-  { href: "/blog", label: "Blog" },
-  { href: "/kb", label: "Help" },
   { href: "/search", label: "Search" },
+];
+
+// The staff panel (/admin/**) swaps in its own nav here rather than running
+// a second header — /admin/login and /admin/auth/callback are excluded since
+// those sit outside the gate and have no staff nav to show yet.
+const ADMIN_NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/admin", label: "Queue" },
+  { href: "/admin/search", label: "Search" },
+  { href: "/admin/staff/positions", label: "Positions" },
+  { href: "/admin/staff/members", label: "Members" },
+  { href: "/admin/logs", label: "Logs" },
 ];
 
 /**
@@ -32,9 +44,25 @@ const NAV_LINKS = [
  */
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { session, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated: isStaffAuthenticated, logout: staffLogout } =
+    useArcadiaAuth();
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const isAdminSection =
+    pathname.startsWith("/admin") &&
+    pathname !== "/admin/login" &&
+    !pathname.startsWith("/admin/auth");
+  const links = isAdminSection ? ADMIN_NAV_LINKS : NAV_LINKS;
+  const isActiveLink = (href: string) =>
+    isAdminSection ? pathname === href : pathname.startsWith(href);
+
+  function exitStaffPanel() {
+    staffLogout();
+    router.push("/");
+  }
 
   // Close the mobile nav whenever the route changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is a trigger, not read in the body
@@ -49,30 +77,36 @@ export function Header() {
           <div className="flex items-center justify-between gap-4 h-14">
             {/* Logo */}
             <Link
-              href="/"
+              href={isAdminSection ? "/admin" : "/"}
               className="flex items-center gap-2 text-zinc-950 dark:text-zinc-50"
             >
               <OmniplexLogo size={26} />
               <span className="text-base font-semibold tracking-tight">
                 Omniplex
               </span>
+              {isAdminSection && (
+                <span className="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
+                  <Shield size={11} />
+                  Staff
+                </span>
+              )}
             </Link>
 
             {/* Nav */}
             <nav className="items-center hidden gap-1 md:flex">
-              {NAV_LINKS.map(({ href, label }) => (
+              {links.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
                   className={[
                     "relative rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                    pathname.startsWith(href)
+                    isActiveLink(href)
                       ? "bg-accent/10 text-accent"
                       : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
                   ].join(" ")}
                 >
                   {label}
-                  {pathname.startsWith(href) && (
+                  {isActiveLink(href) && (
                     <span className="absolute inset-x-3 -bottom-2.25 h-0.5 rounded-full bg-accent" />
                   )}
                 </Link>
@@ -83,13 +117,22 @@ export function Header() {
             <div className="flex items-center gap-1">
               {/* Social links */}
               <a
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`hidden md:flex ${ICON_BUTTON}`}
+                aria-label="Omniplex on Instagram"
+              >
+                <BsInstagram size={16} />
+              </a>
+              <a
                 href={SOCIAL_LINKS.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`hidden md:flex ${ICON_BUTTON}`}
                 aria-label="Omniplex on GitHub"
               >
-                <GithubIcon size={16} />
+                <BsGithub size={16} />
               </a>
               <a
                 href={SOCIAL_LINKS.twitter}
@@ -98,7 +141,7 @@ export function Header() {
                 className={`hidden md:flex ${ICON_BUTTON}`}
                 aria-label="Omniplex on X"
               >
-                <XIcon size={16} />
+                <BsTwitter size={16} />
               </a>
               <a
                 href={SOCIAL_LINKS.discord}
@@ -107,8 +150,25 @@ export function Header() {
                 className={`hidden md:flex ${ICON_BUTTON}`}
                 aria-label="Omniplex on Discord"
               >
-                <DiscordIcon size={16} />
+                <BsDiscord size={16} />
               </a>
+
+              {isAdminSection && isStaffAuthenticated && (
+                <div className="hidden md:block">
+                  <Button variant="ghost" size="sm" onClick={exitStaffPanel}>
+                    <LogOut size={14} />
+                    Exit staff panel
+                  </Button>
+                </div>
+              )}
+              {!isAdminSection && isStaffAuthenticated && (
+                <Link href="/admin" className="hidden md:block">
+                  <Button variant="ghost" size="sm">
+                    <Shield size={14} />
+                    Staff panel
+                  </Button>
+                </Link>
+              )}
 
               {/* Mobile nav toggle */}
               <button
@@ -144,7 +204,7 @@ export function Header() {
               <ThemeToggle />
 
               {isAuthenticated && session ? (
-                <div className="flex items-center gap-2 ml-1">
+                <div className="items-center hidden gap-2 ml-1 md:flex">
                   <Link href="/dashboard">
                     <Avatar
                       src={session.avatar}
@@ -160,7 +220,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="inline-flex items-center justify-center h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg bg-accent text-accent-fg hover:opacity-90"
+                  className="items-center justify-center hidden h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg md:inline-flex bg-accent text-accent-fg hover:opacity-90"
                 >
                   Sign in
                 </Link>
@@ -173,13 +233,13 @@ export function Header() {
         {mobileNavOpen && (
           <nav className="border-t border-zinc-200 md:hidden dark:border-zinc-800">
             <Container className="flex flex-col gap-1 py-3">
-              {NAV_LINKS.map(({ href, label }) => (
+              {links.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
                   className={[
                     "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname.startsWith(href)
+                    isActiveLink(href)
                       ? "bg-accent/10 text-accent"
                       : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
                   ].join(" ")}
@@ -187,6 +247,56 @@ export function Header() {
                   {label}
                 </Link>
               ))}
+              {isAdminSection && isStaffAuthenticated && (
+                <button
+                  type="button"
+                  onClick={exitStaffPanel}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-left transition-colors rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                >
+                  <LogOut size={14} />
+                  Exit staff panel
+                </button>
+              )}
+              {!isAdminSection && isStaffAuthenticated && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                >
+                  <Shield size={14} />
+                  Staff panel
+                </Link>
+              )}
+
+              {isAuthenticated && session ? (
+                <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
+                  <Link href="/dashboard" className="flex items-center gap-2">
+                    <Avatar
+                      src={session.avatar}
+                      alt={session.username ?? "Your profile"}
+                      size={32}
+                    />
+                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      {session.username ?? "Your profile"}
+                    </span>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={logout}
+                    className="ml-auto"
+                  >
+                    Sign out
+                  </Button>
+                </div>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center justify-center px-3 mx-3 text-sm font-medium transition-opacity rounded-lg h-9 bg-accent text-accent-fg hover:opacity-90"
+                >
+                  Sign in
+                </Link>
+              )}
+
               <div className="flex items-center gap-1 pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
                 <a
                   href={SOCIAL_LINKS.github}
@@ -195,7 +305,7 @@ export function Header() {
                   className={ICON_BUTTON}
                   aria-label="Omniplex on GitHub"
                 >
-                  <GithubIcon size={16} />
+                  <BsGithub size={16} />
                 </a>
                 <a
                   href={SOCIAL_LINKS.twitter}
@@ -204,7 +314,7 @@ export function Header() {
                   className={ICON_BUTTON}
                   aria-label="Omniplex on X"
                 >
-                  <XIcon size={16} />
+                  <BsTwitter size={16} />
                 </a>
                 <a
                   href={SOCIAL_LINKS.discord}
@@ -213,7 +323,7 @@ export function Header() {
                   className={ICON_BUTTON}
                   aria-label="Omniplex on Discord"
                 >
-                  <DiscordIcon size={16} />
+                  <BsDiscord size={16} />
                 </a>
               </div>
             </Container>
