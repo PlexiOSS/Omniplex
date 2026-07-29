@@ -1,6 +1,8 @@
 # Omniplex
 
-Omniplex is a Discord bot and server listing platform. This repository contains the frontend, built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository.
+Omniplex is a Discord bot and server listing platform. This repository contains the frontend, built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the Rust-based staff panel API that powers `/admin`.
+
+See [CHANGELOG.md](CHANGELOG.md) for what's actually shipped.
 
 Production runs at [omniplex.gg](https://omniplex.gg), with [beta.omniplex.gg](https://beta.omniplex.gg) and [reedwhisker.omniplex.gg](https://reedwhisker.omniplex.gg) used for staged rollouts.
 
@@ -37,16 +39,17 @@ bun run format  # Biome format, writes changes
 
 ## Configuration
 
-The frontend is decoupled from the backend through `src/lib/api/`. These environment variables control it:
+The frontend is decoupled from both backends it talks to — Popplio (`src/lib/api/`) and Arcadia, the staff panel API (`src/lib/arcadia/`). These environment variables control them:
 
 | Variable | Default | Purpose |
 |---|---|---|
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:3000` | Canonical URL of this instance used in metadata, sitemaps, and as the OAuth redirect URI. Must exactly match what's registered in the Discord Developer Portal and in Popplio/Arcadia's own redirect allowlists. |
 | `NEXT_PUBLIC_API_URL` | `https://spider-staging.omniplex.gg` | Popplio API base URL |
 | `NEXT_PUBLIC_CDN_URL` | `https://cdn.omniplex.gg` | Asset CDN base URL |
-| `NEXT_PUBLIC_SITE_URL` | `https://omniplex.gg` | Canonical site URL, used in metadata and sitemaps |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:3000` | Base URL for the running instance |
+| `NEXT_PUBLIC_ARCADIA_URL` | `https://staging--panel-api.omniplex.gg` | Arcadia panel API base URL powers `/admin` |
+| `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` | `infinity-list` | Arcadia's configured `panel_scope` for this instance — must match Arcadia's own config exactly or staff login fails |
 
-Set these in a `.env.local` file for local development. None are required to run the app against staging.
+Copy `.env.template` to `.env.local` to override any of these for local development. None are required to run the app against staging the defaults point there already.
 
 ## Deployment
 
@@ -56,7 +59,7 @@ Because the `NEXT_PUBLIC_*` variables above are inlined into the client bundle a
 
 ## Project structure
 
-See [AGENTS.md](AGENTS.md) for a full breakdown of the codebase layout, API layer conventions, and styling rules. In short:
+See `AGENTS.md` at the root of the wider plexicore workspace (outside this repo) for a full breakdown of the codebase layout, API layer conventions, and styling rules. In short:
 
 ```
 src/

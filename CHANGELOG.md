@@ -102,6 +102,10 @@ initial `0.1.0` version.
 - `TagPicker`'s custom-tag input rendered a nested `<form>` inside the
   page's own `<form>` (invalid HTML, React 19 hard-errors on it during
   hydration) — replaced with a plain input handling Enter directly.
+- The team page and team settings form crashed outright for any team with
+  no tags set (`team.tags` was `null`, not `[]`) — fixed on both sides: the
+  Popplio response no longer sends `null` for this (see Popplio's
+  changelog), and the frontend now defensively falls back to `[]` too.
 
 ## Backend integration notes
 

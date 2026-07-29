@@ -46,6 +46,7 @@ export default async function TeamPage({ params }: Props) {
   const members = team.entities?.members ?? [];
   const bots = team.entities?.bots ?? [];
   const servers = team.entities?.servers ?? [];
+  const tags = team.tags ?? [];
 
   return (
     <Container className="py-10">
@@ -85,9 +86,9 @@ export default async function TeamPage({ params }: Props) {
             <TeamManageLink teamId={team.id} />
           </div>
 
-          {team.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {team.tags.map((tag) => (
+              {tags.map((tag) => (
                 <Badge key={tag}>{tag}</Badge>
               ))}
             </div>

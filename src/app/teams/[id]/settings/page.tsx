@@ -174,7 +174,7 @@ function EditInfoTab({
 }) {
   const [name, setName] = useState(team.name);
   const [short, setShort] = useState(team.short ?? "");
-  const [tags, setTags] = useState(team.tags.join(", "));
+  const [tags, setTags] = useState((team.tags ?? []).join(", "));
   const [nsfw, setNsfw] = useState(team.nsfw);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
