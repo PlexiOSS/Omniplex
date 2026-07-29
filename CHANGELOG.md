@@ -28,6 +28,11 @@ initial `0.1.0` version.
     staff permissions.
   - Pagination on the queue, search results, staff members list, and RPC
     audit log.
+  - Overview page (`/admin`) summarizing bot/server/ticket counts, total
+    users, and changelog count via Arcadia's `BaseAnalytics`. The Bot Queue
+    moved to `/admin/queue`.
+  - Bot Queue now resolves `claimed_by` Discord IDs to usernames via
+    Arcadia's `GetUser`, instead of showing the raw ID.
 - Reviews: star ratings and threaded replies on bots and servers, full
   create/edit/delete for the review's author, and a read-only view for staff
   in the admin panel.
@@ -91,6 +96,17 @@ initial `0.1.0` version.
     fought custom-designed descriptions that already had their own layout.
   - `<iframe>` embeds are now allowed (with a sane default height when the
     embed doesn't specify one), instead of being stripped outright.
+  - `background` only ever validated a single flat color or a single
+    gradient function — any bio layering a gradient over a solid fallback
+    color, or stacking multiple gradients (a very common pattern for card
+    backgrounds), had its entire `background` declaration silently dropped.
+    Now validates each comma-separated layer independently.
+  - `box-shadow`, `text-shadow`, `backdrop-filter`, `display:grid` /
+    `grid-template-columns`, and the `flex` shorthand were entirely absent
+    from the allowlist, silently dropping every declaration that used them.
+    Elaborately-styled bios relying on any of these (card depth, blurred
+    glass panels, responsive grid layouts) rendered as flat, stacked,
+    unstyled blocks instead of the intended design.
 - Dashboard tab bar could scroll vertically as well as horizontally on
   narrow viewports, due to a CSS `overflow-x`/`overflow-y` interaction.
 - Bot/server/pack listing cards could force the whole page to overflow

@@ -1,9 +1,11 @@
 import { ARCADIA_URL } from "./config";
 import type {
   AuthorizeAction,
+  BaseAnalytics,
   Hello,
   MfaLogin,
   PartialEntity,
+  PlatformUser,
   RPCLogEntry,
   RPCMethod,
   RPCWebAction,
@@ -151,6 +153,21 @@ export const arcadia = {
 
   botQueue: async (loginToken: string): Promise<PartialEntity[]> => {
     const res = await postQuery({ BotQueue: { login_token: loginToken } });
+    return (await assertOk(res)).json();
+  },
+
+  baseAnalytics: async (loginToken: string): Promise<BaseAnalytics> => {
+    const res = await postQuery({ BaseAnalytics: { login_token: loginToken } });
+    return (await assertOk(res)).json();
+  },
+
+  getUser: async (
+    loginToken: string,
+    userId: string,
+  ): Promise<PlatformUser> => {
+    const res = await postQuery({
+      GetUser: { login_token: loginToken, user_id: userId },
+    });
     return (await assertOk(res)).json();
   },
 

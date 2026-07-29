@@ -32,7 +32,8 @@ const NAV_LINKS = [
 // those sit outside the gate and have no staff nav to show yet.
 const ADMIN_NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/admin", label: "Queue" },
+  { href: "/admin", label: "Overview" },
+  { href: "/admin/queue", label: "Queue" },
   { href: "/admin/search", label: "Search" },
   { href: "/admin/staff/positions", label: "Positions" },
   { href: "/admin/staff/members", label: "Members" },

@@ -12,31 +12,54 @@
  * declaration down to a closed set of safe properties with strictly
  * validated values (no `url(`, no keywords/functions outside the allowed
  * set). Unknown properties, or values that don't match their validator, are
- * dropped silently — never passed through as-is.
+ * dropped silently never passed through as-is.
  *
  * `font-family` is deliberately never allowed: the site lets users pick a
  * site-wide font (see globals.css `--font-body` / CustomizationPanel), and
  * letting embedded content override that per-block would undermine it.
  */
-
-const COLOR =
-  /^(#[0-9a-f]{3,8}|rgba?\([\d.,%\s]+\)|hsla?\([\d.,%\s]+\)|transparent|currentcolor|white|black)$/i;
-const LENGTH = /^-?\d+(\.\d+)?(px|rem|em|%)?$/;
-// margin/padding/gap commonly mix numeric lengths with the `auto` keyword
-// (e.g. `margin: 0 auto` to center) — each space-separated token can be
-// either.
-const LENGTH_LIST =
-  /^(-?\d+(\.\d+)?(px|rem|em|%)?|auto)(\s+(-?\d+(\.\d+)?(px|rem|em|%)?|auto)){0,3}$/;
-const GRADIENT = /^(linear-gradient|radial-gradient)\([a-z0-9#.,%\s-]+\)$/i;
+const COLOR_INNER =
+  "#[0-9a-f]{3,8}|rgba?\\([\\d.,%\\s]+\\)|hsla?\\([\\d.,%\\s]+\\)|transparent|currentcolor|white|black";
+const COLOR = new RegExp(`^(?:${COLOR_INNER})$`, "i");
+const LENGTH_INNER = "-?\\d+(?:\\.\\d+)?(?:px|rem|em|%)?";
+const LENGTH = new RegExp(`^${LENGTH_INNER}$`);
+const LENGTH_LIST = new RegExp(
+  `^(?:${LENGTH_INNER}|auto)(?:\\s+(?:${LENGTH_INNER}|auto)){0,3}$`,
+);
+const GRADIENT_TERM =
+  "(?:linear-gradient|radial-gradient)\\([a-z0-9#.,%\\s()-]+\\)";
+const BACKGROUND_LAYER = `(?:${GRADIENT_TERM}|${COLOR_INNER})`;
+const BACKGROUND = new RegExp(
+  `^${BACKGROUND_LAYER}(?:\\s*,\\s*${BACKGROUND_LAYER})*$`,
+  "i",
+);
 const BORDER =
   /^\d+(\.\d+)?px\s+(solid|dashed|dotted)\s+(#[0-9a-f]{3,8}|rgba?\([\d.,%\s]+\)|hsla?\([\d.,%\s]+\))$/i;
+const BOX_SHADOW_TERM = `(?:inset\\s+)?${LENGTH_INNER}\\s+${LENGTH_INNER}(?:\\s+${LENGTH_INNER})?(?:\\s+${LENGTH_INNER})?\\s+(?:${COLOR_INNER})`;
+const BOX_SHADOW = new RegExp(
+  `^${BOX_SHADOW_TERM}(?:\\s*,\\s*${BOX_SHADOW_TERM})*$`,
+  "i",
+);
+
+const TEXT_SHADOW_TERM = `${LENGTH_INNER}\\s+${LENGTH_INNER}(?:\\s+${LENGTH_INNER})?\\s+(?:${COLOR_INNER})`;
+const TEXT_SHADOW = new RegExp(
+  `^${TEXT_SHADOW_TERM}(?:\\s*,\\s*${TEXT_SHADOW_TERM})*$`,
+  "i",
+);
+
+const BLUR_FILTER = /^blur\(\d+(?:\.\d+)?(?:px)?\)$/i;
+const GRID_TEMPLATE = /^[a-z0-9%.,()\s-]+$/i;
 
 type Validator = (value: string) => boolean;
 
 const PROPERTY_VALIDATORS: Record<string, Validator> = {
   color: (v) => COLOR.test(v),
-  background: (v) => COLOR.test(v) || GRADIENT.test(v),
+  background: (v) => BACKGROUND.test(v),
   "background-color": (v) => COLOR.test(v),
+  "box-shadow": (v) => BOX_SHADOW.test(v),
+  "text-shadow": (v) => TEXT_SHADOW.test(v),
+  "backdrop-filter": (v) => BLUR_FILTER.test(v),
+  "-webkit-backdrop-filter": (v) => BLUR_FILTER.test(v),
   "border-color": (v) => COLOR.test(v),
   border: (v) => BORDER.test(v),
   "border-radius": (v) => LENGTH_LIST.test(v),
@@ -66,7 +89,13 @@ const PROPERTY_VALIDATORS: Record<string, Validator> = {
   "text-align": (v) => /^(left|center|right|justify)$/i.test(v),
   "text-transform": (v) => /^(uppercase|lowercase|capitalize|none)$/i.test(v),
   "text-decoration": (v) => /^(none|underline|line-through)$/i.test(v),
-  display: (v) => /^(block|inline-block|inline|flex|inline-flex)$/i.test(v),
+  display: (v) =>
+    /^(block|inline-block|inline|flex|inline-flex|grid|inline-grid)$/i.test(v),
+  "grid-template-columns": (v) => GRID_TEMPLATE.test(v),
+  "grid-template-rows": (v) => GRID_TEMPLATE.test(v),
+  flex: (v) => /^(none|auto|initial|\d+(?:\.\d+)?)$/i.test(v),
+  "flex-grow": (v) => /^\d+(?:\.\d+)?$/.test(v),
+  "flex-shrink": (v) => /^\d+(?:\.\d+)?$/.test(v),
   "flex-wrap": (v) => /^(wrap|nowrap)$/i.test(v),
   "flex-direction": (v) => /^(row|column)$/i.test(v),
   "justify-content": (v) =>
@@ -95,6 +124,22 @@ const NEVER_ALLOWED = new Set([
   "bottom",
 ]);
 
+/**
+ * Filters a raw inline `style` attribute value down to just the
+ * declarations that pass the allowlist above, silently dropping the rest.
+ *
+ * @param style - Raw `style` attribute content, e.g. `"color:red;top:0"`.
+ * @returns A semicolon-joined string of only the safe declarations (e.g.
+ *   `"color:red"`), or `""` if none passed. Never throws — malformed
+ *   declarations (no `:`, empty property/value) are skipped rather than
+ *   erroring, since this runs on untrusted third-party HTML.
+ *
+ * Called from `rehypeSanitizeStyle.ts` (a rehype plugin run on every element
+ * with a `style` attribute) for bot/server/pack `long` descriptions and blog
+ * posts. `sanitizeSchema.ts` allows the `style` attribute back onto the
+ * default rehype-sanitize schema specifically so this function has something
+ * to filter — neither step is safe to use without the other.
+ */
 export function sanitizeStyleValue(style: string): string {
   const safeDeclarations: string[] = [];
 
@@ -107,8 +152,6 @@ export function sanitizeStyleValue(style: string): string {
 
     if (!prop || !value) continue;
     if (NEVER_ALLOWED.has(prop)) continue;
-    // Blanket block on dangerous substrings regardless of property, as
-    // defense-in-depth in case a validator regex has a gap.
     if (/url\(|expression\(|javascript:|import|<|>/i.test(value)) continue;
 
     const validator = PROPERTY_VALIDATORS[prop];

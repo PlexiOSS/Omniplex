@@ -136,6 +136,16 @@ export interface Hello {
   target_types: TargetType[];
 }
 
+// --- Analytics ------------------------------------------------------------
+
+export interface BaseAnalytics {
+  bot_counts: Record<string, number>;
+  server_counts: Record<string, number>;
+  ticket_counts: Record<string, number>;
+  total_users: number;
+  changelogs_count: number;
+}
+
 // --- Bot queue ----------------------------------------------------------------
 
 export interface PartialBot {
