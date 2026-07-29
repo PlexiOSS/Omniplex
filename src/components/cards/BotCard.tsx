@@ -22,7 +22,12 @@ export function BotCard({ bot }: BotCardProps) {
     >
       {/* Header */}
       <div className="flex items-start gap-3">
-        <Avatar src={avatarSrc} alt={bot.user.username} size={44} />
+        <Avatar
+          src={avatarSrc}
+          alt={bot.user.username}
+          size={44}
+          status={bot.user.status}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="truncate font-semibold text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">

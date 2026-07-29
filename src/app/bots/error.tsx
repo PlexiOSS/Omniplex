@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Container } from "@/components/layout/Container";
+import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Button } from "@/components/ui/Button";
 import { isBoundaryApiError } from "@/lib/utils/errors";
 

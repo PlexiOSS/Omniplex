@@ -4,6 +4,7 @@ import { Bot, Server, Star, Users } from "lucide-react";
 import { list } from "@/lib/api";
 import { Container } from "@/components/layout/Container";
 import { formatCount } from "@/lib/utils/format";
+import { totalListedBots } from "@/lib/utils/stats";
 
 export const metadata: Metadata = {
   title: "About",
@@ -71,8 +72,8 @@ export default async function AboutPage() {
       {stats && (
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: "Total Bots", value: stats.total_bots },
-            { label: "Approved Bots", value: stats.total_approved_bots },
+            { label: "Listed Bots", value: totalListedBots(stats) },
+            { label: "Total Submitted", value: stats.total_bots },
             { label: "Total Votes", value: stats.total_votes },
             { label: "Users", value: stats.total_users },
           ].map(({ label, value }) => (

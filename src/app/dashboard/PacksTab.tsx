@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { packs } from "@/lib/api";
 import type { BotPack, IndexBot } from "@/lib/api/types";
+import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { PackEditModal } from "./PackEditModal";
 
@@ -47,15 +48,32 @@ function PackItem({
   return (
     <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex -space-x-2">
-        {(pack.bots ?? []).slice(0, 4).map((bot) => (
-          <Avatar
-            key={bot.bot_id}
-            src={bot.user.avatar}
-            alt={bot.user.username}
-            size={32}
-            className="ring-2 ring-white dark:ring-zinc-900"
-          />
-        ))}
+        {(pack.bots ?? []).length > 0
+          ? (pack.bots ?? [])
+              .slice(0, 4)
+              .map((bot) => (
+                <Avatar
+                  key={bot.bot_id}
+                  src={bot.user.avatar}
+                  alt={bot.user.username}
+                  size={32}
+                  className="ring-2 ring-white dark:ring-zinc-900"
+                />
+              ))
+          : (pack.servers ?? [])
+              .slice(0, 4)
+              .map((server) => (
+                <Avatar
+                  key={server.server_id}
+                  src={
+                    resolveAsset(server.avatar) ??
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`
+                  }
+                  alt={server.name}
+                  size={32}
+                  className="ring-2 ring-white dark:ring-zinc-900"
+                />
+              ))}
       </div>
 
       <p className="mt-3 truncate font-semibold text-zinc-950 dark:text-zinc-50">

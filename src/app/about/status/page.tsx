@@ -1,8 +1,10 @@
 import { CheckCircle, XCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
-import { auth, bots, list, servers } from "@/lib/api";
+import { auth, blogs, bots, list, packs, search, servers } from "@/lib/api";
 import { CDN_URL } from "@/lib/api/config";
+import { arcadia } from "@/lib/arcadia/client";
+import { ARCADIA_PANEL_SCOPE } from "@/lib/arcadia/config";
 import { SOCIAL_LINKS } from "@/lib/social";
 
 export const metadata: Metadata = {
@@ -30,20 +32,37 @@ async function timedCheck(fn: () => Promise<unknown>) {
 }
 
 export default async function StatusPage() {
-  const [api, botListings, serverListings, discordAuth, cdn] =
-    await Promise.all([
-      timedCheck(() => list.getStats()),
-      timedCheck(() => bots.getAll(1)),
-      timedCheck(() => servers.getAll(1)),
-      timedCheck(() => auth.getOAuthMeta()),
-      timedCheck(async () => {
-        const res = await fetch(CDN_URL, {
-          method: "HEAD",
-          cache: "no-store",
-        });
-        if (res.status >= 500) throw new Error("CDN unreachable");
-      }),
-    ]);
+  const [
+    api,
+    botListings,
+    serverListings,
+    packListings,
+    blogService,
+    searchService,
+    discordAuth,
+    cdn,
+    staffPanel,
+  ] = await Promise.all([
+    timedCheck(() => list.getStats()),
+    timedCheck(() => bots.getAll(1)),
+    timedCheck(() => servers.getAll(1)),
+    timedCheck(() => packs.getAll(1)),
+    timedCheck(() => blogs.getAll()),
+    timedCheck(() =>
+      search.search({ query: "", target_types: ["bot", "server"] }),
+    ),
+    timedCheck(() => auth.getOAuthMeta()),
+    timedCheck(async () => {
+      const res = await fetch(CDN_URL, {
+        method: "HEAD",
+        cache: "no-store",
+      });
+      if (res.status >= 500) throw new Error("CDN unreachable");
+    }),
+    timedCheck(() =>
+      arcadia.auth.begin(ARCADIA_PANEL_SCOPE, "https://omniplex.gg"),
+    ),
+  ]);
 
   const services: ServiceStatus[] = [
     {
@@ -62,6 +81,21 @@ export default async function StatusPage() {
       detail: serverListings.ok ? "Serving normally" : "Degraded",
     },
     {
+      name: "Pack Listings",
+      ...packListings,
+      detail: packListings.ok ? "Serving normally" : "Degraded",
+    },
+    {
+      name: "Blog",
+      ...blogService,
+      detail: blogService.ok ? "Serving normally" : "Degraded",
+    },
+    {
+      name: "Search",
+      ...searchService,
+      detail: searchService.ok ? "Serving normally" : "Degraded",
+    },
+    {
       name: "Discord Auth",
       ...discordAuth,
       detail: discordAuth.ok ? "Discord OAuth operational" : "May be affected",
@@ -70,6 +104,11 @@ export default async function StatusPage() {
       name: "CDN",
       ...cdn,
       detail: cdn.ok ? "Assets serving normally" : "May be affected",
+    },
+    {
+      name: "Staff Panel",
+      ...staffPanel,
+      detail: staffPanel.ok ? "Panel API reachable" : "May be affected",
     },
   ];
 

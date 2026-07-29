@@ -184,6 +184,43 @@ export interface Team {
   entities: TeamEntities | null;
 }
 
+/** Metadata for a single kittycat permission verb (e.g. "edit", "*") — from GET /teams/meta/permissions */
+export interface PermissionData {
+  id: string;
+  name: string;
+  desc: string;
+  supported_entities: string[];
+  data_override?: Record<string, { name: string; desc: string } | undefined>;
+}
+
+export interface CreateEditTeamPayload {
+  name: string;
+  short?: string;
+  tags?: string[];
+  extra_links?: Link[];
+  nsfw?: boolean;
+}
+
+export interface CreateTeamResponse {
+  team_id: string;
+}
+
+export interface AddTeamMemberPayload {
+  user_id: string;
+  perms: string[];
+}
+
+export interface EditTeamMemberPayload {
+  perms?: string[];
+  mentionable?: boolean;
+  data_holder?: boolean;
+}
+
+/** A user's flattened, resolved permissions on a specific entity — GET /users/{id}/{target_type}/{target_id}/perms */
+export interface UserEntityPerms {
+  perms: string[];
+}
+
 // ---------------------------------------------------------------------------
 // Packs
 // ---------------------------------------------------------------------------
@@ -200,6 +237,10 @@ export interface BotPack {
   bot_ids: string[];
   /** Resolved IndexBot objects */
   bots: IndexBot[];
+  /** Raw server IDs */
+  server_ids: string[];
+  /** Resolved IndexServer objects */
+  servers: IndexServer[];
   vote_banned: boolean;
 }
 
@@ -386,6 +427,42 @@ export interface RandomServers {
 }
 
 // ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+export type ReviewTargetType = "bot" | "server" | "team";
+
+export interface Review {
+  id: string;
+  target_type: string;
+  target_id: string;
+  author: PlatformUser;
+  owner_review: boolean;
+  content: string;
+  stars: number;
+  created_at: string;
+  /** Null for a root review, the parent review's id otherwise. */
+  parent_id: string | null;
+}
+
+export interface ReviewList {
+  reviews: Review[];
+}
+
+export interface CreateReviewPayload {
+  content: string;
+  stars: number;
+  /** Omit (or "") for a root review. */
+  parent_id?: string;
+  owner_review: boolean;
+}
+
+export interface EditReviewPayload {
+  content: string;
+  stars: number;
+}
+
+// ---------------------------------------------------------------------------
 // Partners
 // ---------------------------------------------------------------------------
 
@@ -499,14 +576,18 @@ export interface CreatePackPayload {
   url: string;
   short: string;
   tags: string[];
+  /** At least one of bots/servers must be non-empty. */
   bots: string[];
+  servers: string[];
 }
 
 export interface PackSettingsUpdate {
   name: string;
   short: string;
   tags: string[];
+  /** At least one of bots/servers must be non-empty. */
   bots: string[];
+  servers: string[];
 }
 
 // ---------------------------------------------------------------------------

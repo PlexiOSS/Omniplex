@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DiscordIcon, GithubIcon, XIcon } from "@/components/ui/BrandIcons";
+import { BsTwitter, BsInstagram, BsDiscord, BsGithub } from "react-icons/bs";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
@@ -11,14 +11,16 @@ const FOOTER_LINKS = [
       { href: "/bots", label: "Bots" },
       { href: "/servers", label: "Servers" },
       { href: "/packs", label: "Packs" },
+      { href: '/search', label: 'Search' },
     ],
   },
   {
-    heading: "Submit",
+    heading: "Developers",
     links: [
       { href: "/bots/add", label: "Add a Bot" },
       { href: "/servers/add", label: "Add a Server" },
       { href: "/packs/add", label: "Add a Pack" },
+      { href: "https://docs.botlist.site", label: "Developer Docs" },
     ],
   },
   {
@@ -26,6 +28,7 @@ const FOOTER_LINKS = [
     links: [
       { href: "/about", label: "About Us" },
       { href: "/about/status", label: "System Status" },
+      { href: "/kb", label: "Knowledge Base" },
       { href: "/blog", label: "Blog Posts" },
     ],
   },
@@ -33,12 +36,12 @@ const FOOTER_LINKS = [
     heading: "Legal",
     links: [
       { href: "https://nodebyte.co.uk/legal", label: "All Policies" },
-      { href: "https://nodebyte.co.uk/legal/terms", label: "Terms of Service" },
-      { href: "https://nodebyte.co.uk/legal/privacy", label: "Privacy Policy" },
-      /**{
+      {
         href: "https://nodebyte.co.uk/legal/service-agreement",
         label: "Service Agreement",
-      },*/
+      },
+      { href: "https://nodebyte.co.uk/legal/terms", label: "Terms of Service" },
+      { href: "https://nodebyte.co.uk/legal/privacy", label: "Privacy Policy" },
     ],
   },
 ];
@@ -93,7 +96,7 @@ export function Footer() {
         </div>
         <div className="flex flex-col-reverse items-center gap-4 pt-6 mt-10 border-t border-zinc-200 dark:border-zinc-800 sm:flex-row sm:justify-between">
           <p className="text-xs text-zinc-400 dark:text-zinc-600">
-            © 2019–{new Date().getFullYear()}{" "}
+            © 2021–{new Date().getFullYear()}{" "}
             <a
               href="https://nodebyte.co.uk"
               target="_blank"
@@ -106,13 +109,22 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-3">
             <a
+              href={SOCIAL_LINKS.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
+              aria-label="Omniplex on Instagram"
+            >
+              <BsInstagram size={17} />
+            </a>
+            <a
               href={SOCIAL_LINKS.twitter}
               target="_blank"
               rel="noopener noreferrer"
               className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
               aria-label="Omniplex on X"
             >
-              <XIcon size={17} />
+              <BsTwitter size={17} />
             </a>
             <a
               href={SOCIAL_LINKS.github}
@@ -121,7 +133,7 @@ export function Footer() {
               className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
               aria-label="Omniplex on GitHub"
             >
-              <GithubIcon size={17} />
+              <BsGithub size={17} />
             </a>
             <a
               href={SOCIAL_LINKS.discord}
@@ -130,7 +142,7 @@ export function Footer() {
               className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
               aria-label="Omniplex on Discord"
             >
-              <DiscordIcon size={17} />
+              <BsDiscord size={17} />
             </a>
           </div>
         </div>

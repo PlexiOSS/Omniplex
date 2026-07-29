@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { packs } from "@/lib/api";
 import { PackCard } from "@/components/cards/PackCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { packs } from "@/lib/api";
 import { isApiUnavailable } from "@/lib/utils/errors";
 
 export const metadata: Metadata = { title: "Bot Packs" };
