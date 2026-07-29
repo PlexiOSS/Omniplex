@@ -572,6 +572,15 @@ function TeamsTab({ teams }: { teams: Team[] }) {
   );
 }
 
+// Best-effort client-side gate for whether to show manage actions (edit/delete)
+// on a team-owned bot — the actual PATCH/DELETE endpoints independently
+// re-check permissions server-side via kittycat regardless, so getting this
+// heuristic slightly wrong only affects which buttons are shown, not security.
+const BOT_MANAGE_FLAGS = ["*", "global.*", "bot.*", "bot.edit"];
+function canManageTeamBot(flags: string[]): boolean {
+  return flags.some((f) => BOT_MANAGE_FLAGS.includes(f));
+}
+
 const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "profile", label: "Edit Profile", icon: User },
