@@ -114,10 +114,16 @@ export default async function ServerPage({ params }: Props) {
             <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
               About
             </h2>
-            <Markdown
-              content={server.long ?? ""}
-              className="text-sm text-zinc-700 dark:text-zinc-300"
-            />
+            {server.long?.trim() ? (
+              <Markdown
+                content={server.long}
+                className="text-sm text-zinc-700 dark:text-zinc-300"
+              />
+            ) : (
+              <p className="text-sm text-zinc-400 dark:text-zinc-600">
+                No description provided.
+              </p>
+            )}
           </div>
 
           <ReviewsSection

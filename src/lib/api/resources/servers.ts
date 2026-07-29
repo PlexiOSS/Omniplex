@@ -40,10 +40,11 @@ export const serversResource = {
   deleteServer: (serverId: string, token: string) =>
     client.delete<void>(`/servers/${serverId}`, { token }),
 
+  // Note: the backend returns 204 No Content on success, not the created server.
   createServer: (
     payload: import("../types").CreateServerPayload,
     token: string,
-  ) => client.post<import("../types").Server>("/servers", payload, { token }),
+  ) => client.put<void>("/servers", payload, { token }),
 
   updateServer: (
     serverId: string,

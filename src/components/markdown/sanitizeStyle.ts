@@ -22,8 +22,11 @@
 const COLOR =
   /^(#[0-9a-f]{3,8}|rgba?\([\d.,%\s]+\)|hsla?\([\d.,%\s]+\)|transparent|currentcolor|white|black)$/i;
 const LENGTH = /^-?\d+(\.\d+)?(px|rem|em|%)?$/;
+// margin/padding/gap commonly mix numeric lengths with the `auto` keyword
+// (e.g. `margin: 0 auto` to center) — each space-separated token can be
+// either.
 const LENGTH_LIST =
-  /^(-?\d+(\.\d+)?(px|rem|em|%)?)(\s+-?\d+(\.\d+)?(px|rem|em|%)?){0,3}$/;
+  /^(-?\d+(\.\d+)?(px|rem|em|%)?|auto)(\s+(-?\d+(\.\d+)?(px|rem|em|%)?|auto)){0,3}$/;
 const GRADIENT = /^(linear-gradient|radial-gradient)\([a-z0-9#.,%\s-]+\)$/i;
 const BORDER =
   /^\d+(\.\d+)?px\s+(solid|dashed|dotted)\s+(#[0-9a-f]{3,8}|rgba?\([\d.,%\s]+\)|hsla?\([\d.,%\s]+\))$/i;
@@ -40,8 +43,18 @@ const PROPERTY_VALIDATORS: Record<string, Validator> = {
   "border-width": (v) => LENGTH_LIST.test(v),
   "border-style": (v) => /^(solid|dashed|dotted|none)$/i.test(v),
   padding: (v) => LENGTH_LIST.test(v),
+  "padding-top": (v) => LENGTH.test(v),
+  "padding-right": (v) => LENGTH.test(v),
+  "padding-bottom": (v) => LENGTH.test(v),
+  "padding-left": (v) => LENGTH.test(v),
   margin: (v) => LENGTH_LIST.test(v),
+  "margin-top": (v) => LENGTH.test(v) || v === "auto",
+  "margin-right": (v) => LENGTH.test(v) || v === "auto",
+  "margin-bottom": (v) => LENGTH.test(v) || v === "auto",
+  "margin-left": (v) => LENGTH.test(v) || v === "auto",
   gap: (v) => LENGTH_LIST.test(v),
+  "row-gap": (v) => LENGTH.test(v),
+  "column-gap": (v) => LENGTH.test(v),
   "max-width": (v) => LENGTH.test(v) || v === "auto",
   "min-width": (v) => LENGTH.test(v) || v === "auto",
   width: (v) => LENGTH.test(v) || v === "auto",

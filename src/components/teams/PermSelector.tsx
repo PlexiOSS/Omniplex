@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { PermissionData } from "@/lib/api/types";
 import { hasPermString } from "@/lib/permissions";
@@ -50,6 +51,22 @@ export function PermSelector({
   const perms = grouped.get(activeEntity) ?? [];
   const hasWildcard = value.includes(`${activeEntity}.*`);
 
+  const unrecognized = useMemo(() => {
+    const known = new Set<string>();
+    for (const entity of entities) {
+      for (const perm of grouped.get(entity) ?? []) {
+        known.add(`${entity}.${perm.id}`);
+      }
+    }
+    return value.filter(
+      (v) => entities.some((e) => v.startsWith(`${e}.`)) && !known.has(v),
+    );
+  }, [value, entities, grouped]);
+
+  function removeUnrecognized(perm: string) {
+    onChange(value.filter((p) => p !== perm));
+  }
+
   function toggle(entity: string, permId: string) {
     const key = `${entity}.${permId}`;
     if (permId === "*") {
@@ -73,7 +90,7 @@ export function PermSelector({
 
   return (
     <div>
-      <div className="flex flex-wrap gap-1 border-b border-zinc-200 pb-2 dark:border-zinc-800">
+      <div className="flex flex-wrap gap-1 pb-2 border-b border-zinc-200 dark:border-zinc-800">
         {entities.map((entity) => (
           <button
             key={entity}
@@ -127,6 +144,32 @@ export function PermSelector({
           );
         })}
       </div>
+
+      {unrecognized.length > 0 && (
+        <div className="pt-3 mt-4 border-t border-zinc-200 dark:border-zinc-800">
+          <p className="mb-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            Other granted permissions
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {unrecognized.map((perm) => (
+              <span
+                key={perm}
+                className="flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 font-mono text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+              >
+                {perm}
+                <button
+                  type="button"
+                  onClick={() => removeUnrecognized(perm)}
+                  aria-label={`Remove ${perm}`}
+                  className="rounded-full hover:opacity-70"
+                >
+                  <X size={10} />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

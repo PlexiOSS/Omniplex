@@ -1,7 +1,10 @@
 "use client";
 
+import { BookOpen } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -9,6 +12,7 @@ import { TagPicker } from "@/components/ui/TagPicker";
 import { useAuth } from "@/hooks/useAuth";
 import { bots } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import type { Link as ApiLink } from "@/lib/api/types";
 import { BOT_TAGS as AVAILABLE_TAGS } from "@/lib/constants/tags";
 
 export default function AddBotPage() {
@@ -31,6 +35,7 @@ export default function AddBotPage() {
     nsfw: false,
     tags: [] as string[],
   });
+  const [links, setLinks] = useState<ApiLink[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,7 +85,10 @@ export default function AddBotPage() {
           library: form.library.trim(),
           nsfw: form.nsfw,
           tags: form.tags,
-          extra_links: [{ name: "invite", value: invite }],
+          extra_links: [
+            { name: "Invite", value: invite },
+            ...links.filter((l) => l.name.trim() && l.value.trim()),
+          ],
         },
         session.token,
       );
@@ -117,6 +125,27 @@ export default function AddBotPage() {
               Developer Portal
             </a>
             .
+          </p>
+        </div>
+
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-accent/20 bg-accent/5 p-4 text-sm text-zinc-700 dark:text-zinc-300">
+          <BookOpen size={16} className="mt-0.5 shrink-0 text-accent" />
+          <p>
+            Before submitting, please read the{" "}
+            <Link
+              href="/kb/bots/rules"
+              className="font-medium text-accent underline underline-offset-2"
+            >
+              Bot Rules
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/kb/bots/page-rules"
+              className="font-medium text-accent underline underline-offset-2"
+            >
+              Page Rules
+            </Link>
+            . Bots that don't follow them will be denied.
           </p>
         </div>
 
@@ -228,6 +257,14 @@ export default function AddBotPage() {
             <p className="text-xs text-right text-zinc-400">
               {form.long.length} characters (500 minimum)
             </p>
+          </div>
+
+          {/* Extra links */}
+          <div>
+            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Extra Links
+            </p>
+            <LinksEditor links={links} onChange={setLinks} />
           </div>
 
           {/* NSFW */}

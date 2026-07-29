@@ -105,6 +105,7 @@ export interface Bot {
   extra_links: Link[];
   tags: string[];
   cert_reason: string | null;
+  captcha_opt_out: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -145,11 +146,9 @@ export interface Server extends IndexServer {
   unique_clicks: number;
   /** The user ID who claimed management of this server listing, if any */
   claimed_by: string | null;
+  captcha_opt_out: boolean;
+  login_required_for_invite: boolean;
 }
-
-// ---------------------------------------------------------------------------
-// Teams
-// ---------------------------------------------------------------------------
 
 export interface TeamMember {
   itag: string;
@@ -536,12 +535,13 @@ export interface CreateBotPayload {
 }
 
 export interface CreateServerPayload {
-  server_id: string;
+  /** A Discord invite URL or bare code — the server itself is resolved from this. */
+  invite: string;
   short: string;
-  long?: string;
-  nsfw?: boolean;
-  tags?: string[];
-  extra_links?: Link[];
+  long: string;
+  nsfw: boolean;
+  tags: string[];
+  extra_links: Link[];
 }
 
 // ---------------------------------------------------------------------------

@@ -18,19 +18,25 @@ import { defaultSchema } from "rehype-sanitize";
  * `rehypeSanitizeStyle` runs after this schema and strips every declaration
  * down to a closed, validated property/value allowlist. Never rely on this
  * schema alone to make `style` safe.
+ *
+ * `iframe` is allowed with an unrestricted `src` (any http/https URL,
+ * protocol-checked the same way `img`/`video`/`audio` already are) — a
+ * deliberate product decision to trust bot-owner-submitted embeds, even
+ * though this is a real clickjacking/tracking/arbitrary-content surface.
+ * `<style>`/`<svg>`/`<object>`/`<embed>` remain stripped; those weren't part
+ * of that decision.
  */
 export const markdownSanitizeSchema: Schema = {
   ...defaultSchema,
   // Tags that must be removed along with their raw text content, not just
   // unwrapped. The default schema only strips `script` this way — anything
-  // else disallowed by tagNames (style, svg, iframe, ...) has its *tag*
-  // dropped but its text content left behind, which for a <style> block
-  // means the raw CSS/data-URI source gets rendered as visible page text.
+  // else disallowed by tagNames (style, svg, ...) has its *tag* dropped but
+  // its text content left behind, which for a <style> block means the raw
+  // CSS/data-URI source gets rendered as visible page text.
   strip: [
     ...(defaultSchema.strip ?? []),
     "style",
     "svg",
-    "iframe",
     "object",
     "embed",
     "noscript",
@@ -41,6 +47,7 @@ export const markdownSanitizeSchema: Schema = {
     "video",
     "audio",
     "source",
+    "iframe",
     "mark",
     "kbd",
     "sup",
@@ -66,6 +73,17 @@ export const markdownSanitizeSchema: Schema = {
     video: ["src", "controls", "poster", "width", "height"],
     audio: ["src", "controls"],
     source: ["src", "type"],
+    iframe: [
+      "src",
+      "width",
+      "height",
+      "allow",
+      "allowfullscreen",
+      "frameborder",
+      "title",
+      "loading",
+      "referrerPolicy",
+    ],
   },
   protocols: {
     ...defaultSchema.protocols,
