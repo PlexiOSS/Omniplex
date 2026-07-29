@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
@@ -54,6 +55,49 @@ export function MemberEditModal({
   return (
     <Modal open onClose={onClose} title={`Edit — ${member.user.username}`}>
       <div className="space-y-4">
+        {member.positions.length > 0 && (
+          <div>
+            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Positions
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {member.positions.map((p) => (
+                <Badge key={p.id}>{p.name}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div>
+          <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Resolved permissions{" "}
+            <span className="font-normal text-zinc-400">
+              ({member.resolved_perms.length})
+            </span>
+          </p>
+          <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
+            Everything this member can actually do — the combination of their
+            positions above and the overrides below. Read-only here; edit
+            positions on the Positions page.
+          </p>
+          {member.resolved_perms.length > 0 ? (
+            <div className="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto rounded-xl border border-zinc-200 p-2.5 dark:border-zinc-800">
+              {member.resolved_perms.map((perm) => (
+                <span
+                  key={perm}
+                  className="rounded-full bg-zinc-100 px-2.5 py-1 font-mono text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                >
+                  {perm}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-400 dark:text-zinc-600">
+              No permissions resolved for this member.
+            </p>
+          )}
+        </div>
+
         <div>
           <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Permission overrides
@@ -67,6 +111,7 @@ export function MemberEditModal({
             granterPerms={granterPerms}
             value={permOverrides}
             onChange={setPermOverrides}
+            resolvedPerms={member.resolved_perms}
           />
         </div>
 

@@ -9,6 +9,7 @@ import {
   Package,
   Pencil,
   Plus,
+  Server as ServerIcon,
   Trash2,
   User,
   Users,
@@ -29,6 +30,7 @@ import type {
   Link as ApiLink,
   BotType,
   IndexBot,
+  IndexServer,
   Team,
   User as UserType,
 } from "@/lib/api/types";
@@ -37,8 +39,9 @@ import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { BotEditModal } from "./BotEditModal";
 import { PacksTab } from "./PacksTab";
+import { ServerEditModal } from "./ServerEditModal";
 
-type Tab = "overview" | "profile" | "bots" | "packs" | "teams";
+type Tab = "overview" | "profile" | "bots" | "servers" | "packs" | "teams";
 
 const BOT_STATUS: Record<
   BotType,
@@ -523,6 +526,161 @@ function BotsTab({
   );
 }
 
+interface TeamServer {
+  server: IndexServer;
+  team: Team;
+  canManage: boolean;
+}
+
+function ServerItem({
+  server,
+  team,
+  canManage,
+  token,
+  mutate,
+}: {
+  server: IndexServer;
+  team: Team;
+  canManage: boolean;
+  token: string;
+  mutate: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const avatarSrc =
+    resolveAsset(server.avatar) ??
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
+
+  return (
+    <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex items-start gap-3">
+        <Avatar src={avatarSrc} alt={server.name} size={44} />
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-semibold truncate text-zinc-950 dark:text-zinc-50">
+              {server.name}
+            </span>
+            {server.premium && <Badge variant="premium">Premium</Badge>}
+            {server.type === "certified" && (
+              <Badge variant="success">Certified</Badge>
+            )}
+            {server.type === "pending" && (
+              <Badge variant="warning">Pending</Badge>
+            )}
+          </div>
+          <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+            {server.short}
+          </p>
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-600">
+            <Users size={11} />
+            via {team.name}
+            {!canManage && " · view only"}
+          </div>
+        </div>
+      </div>
+
+      {server.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {server.tags.slice(0, 4).map((tag) => (
+            <Badge key={tag}>{tag}</Badge>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between pt-3 mt-auto text-xs text-zinc-500 dark:text-zinc-400">
+        <span>{formatCount(server.approximate_votes)} votes</span>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/servers/${server.vanity || server.server_id}`}
+            className="inline-flex items-center gap-1 text-xs transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            View
+            <ArrowUpRight size={11} />
+          </Link>
+          {canManage && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditing(true)}
+              className="px-2 text-xs h-7"
+            >
+              <Pencil size={12} />
+              Edit
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {editing && (
+        <ServerEditModal
+          serverId={server.server_id}
+          token={token}
+          onClose={() => setEditing(false)}
+          onSaved={mutate}
+        />
+      )}
+    </div>
+  );
+}
+
+function ServersTab({
+  teamServers,
+  token,
+  mutate,
+}: {
+  teamServers: TeamServer[];
+  token: string;
+  mutate: () => void;
+}) {
+  if (teamServers.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <ServerIcon
+          size={32}
+          className="mb-3 text-zinc-300 dark:text-zinc-700"
+        />
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          You don&apos;t have access to any listed servers yet.
+        </p>
+        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+          Servers are owned by teams — add one to create a team automatically.
+        </p>
+        <Link href="/servers/add" className="mt-4">
+          <Button variant="secondary" size="sm">
+            Add a Server
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          {teamServers.length} {teamServers.length === 1 ? "server" : "servers"}
+        </p>
+        <Link href="/servers/add">
+          <Button variant="secondary" size="sm">
+            Add a Server
+          </Button>
+        </Link>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {teamServers.map(({ server, team, canManage }) => (
+          <ServerItem
+            key={server.server_id}
+            server={server}
+            team={team}
+            canManage={canManage}
+            token={token}
+            mutate={mutate}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TeamItem({ team }: { team: Team }) {
   const avatarSrc = resolveAsset(team.avatar) ?? "";
   return (
@@ -585,6 +743,7 @@ const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "profile", label: "Edit Profile", icon: User },
   { key: "bots", label: "Bots", icon: Bot },
+  { key: "servers", label: "Servers", icon: ServerIcon },
   { key: "packs", label: "Packs", icon: Package },
   { key: "teams", label: "Teams", icon: Users },
 ];
@@ -658,6 +817,24 @@ export default function DashboardPage() {
     }));
   });
 
+  // Servers are always team-owned (no direct-ownership equivalent to a
+  // bot's `owner` field), so this is the only source of listed servers.
+  const teamServers: TeamServer[] = normalizedMe.user_teams.flatMap((team) => {
+    const myFlags =
+      team.entities?.members?.find((m) => m.user?.id === session.user_id)
+        ?.flags ?? [];
+    const canManage = hasAnyPermString(myFlags, [
+      "global.*",
+      "server.*",
+      "server.edit",
+    ]);
+    return (team.entities?.servers ?? []).map((server) => ({
+      server,
+      team,
+      canManage,
+    }));
+  });
+
   return (
     <Container className="py-10">
       {/* Profile header */}
@@ -681,17 +858,19 @@ export default function DashboardPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="mb-8 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center gap-1">
+      <div className="mb-8 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex flex-nowrap items-center gap-1">
           {TABS.map(({ key, label, icon: Icon }) => {
             const count =
               key === "bots"
                 ? normalizedMe.user_bots.length + teamBots.length
-                : key === "packs"
-                  ? normalizedMe.user_packs.length
-                  : key === "teams"
-                    ? normalizedMe.user_teams.length
-                    : null;
+                : key === "servers"
+                  ? teamServers.length
+                  : key === "packs"
+                    ? normalizedMe.user_packs.length
+                    : key === "teams"
+                      ? normalizedMe.user_teams.length
+                      : null;
             return (
               <button
                 key={key}
@@ -730,6 +909,13 @@ export default function DashboardPage() {
         <BotsTab
           bots={normalizedMe.user_bots}
           teamBots={teamBots}
+          token={session.token}
+          mutate={mutate}
+        />
+      )}
+      {tab === "servers" && (
+        <ServersTab
+          teamServers={teamServers}
           token={session.token}
           mutate={mutate}
         />

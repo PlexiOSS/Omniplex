@@ -18,7 +18,7 @@ export function BotCard({ bot }: BotCardProps) {
   return (
     <Link
       href={href}
-      className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40"
+      className="group flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40"
     >
       {/* Header */}
       <div className="flex items-start gap-3">
@@ -50,7 +50,7 @@ export function BotCard({ bot }: BotCardProps) {
 
       {/* Tags */}
       {bot.tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex min-w-0 flex-wrap gap-1.5">
           {bot.tags.slice(0, 4).map((tag) => (
             <Badge key={tag}>{tag}</Badge>
           ))}

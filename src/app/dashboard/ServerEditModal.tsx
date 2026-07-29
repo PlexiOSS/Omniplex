@@ -3,40 +3,39 @@
 import { useEffect, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { TagPicker } from "@/components/ui/TagPicker";
-import { bots } from "@/lib/api";
+import { servers } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import type { Bot, Link } from "@/lib/api/types";
-import { BOT_TAGS } from "@/lib/constants/tags";
+import type { Link, Server, ServerState } from "@/lib/api/types";
+import { SERVER_TAGS } from "@/lib/constants/tags";
 
-interface BotEditModalProps {
-  botId: string;
+interface ServerEditModalProps {
+  serverId: string;
   token: string;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function BotEditModal({
-  botId,
+export function ServerEditModal({
+  serverId,
   token,
   onClose,
   onSaved,
-}: BotEditModalProps) {
-  const [bot, setBot] = useState<Bot | null>(null);
+}: ServerEditModalProps) {
+  const [server, setServer] = useState<Server | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    bots
-      .getBot(botId)
-      .then((b) => {
-        if (!cancelled) setBot(b);
+    servers
+      .getServer(serverId)
+      .then((s) => {
+        if (!cancelled) setServer(s);
       })
       .catch(() => {
-        if (!cancelled) setLoadError("Failed to load bot settings.");
+        if (!cancelled) setLoadError("Failed to load server settings.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -44,21 +43,21 @@ export function BotEditModal({
     return () => {
       cancelled = true;
     };
-  }, [botId]);
+  }, [serverId]);
 
   return (
-    <Modal open onClose={onClose} title="Edit Bot">
+    <Modal open onClose={onClose} title="Edit Server">
       {loading ? (
-        <p className="py-8 text-sm text-center text-zinc-500 dark:text-zinc-400">
+        <p className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
           Loading…
         </p>
-      ) : loadError || !bot ? (
-        <p className="py-8 text-sm text-center text-red-600 dark:text-red-400">
-          {loadError ?? "Bot not found."}
+      ) : loadError || !server ? (
+        <p className="py-8 text-center text-sm text-red-600 dark:text-red-400">
+          {loadError ?? "Server not found."}
         </p>
       ) : (
-        <BotEditForm
-          bot={bot}
+        <ServerEditForm
+          server={server}
           token={token}
           onClose={onClose}
           onSaved={onSaved}
@@ -68,28 +67,34 @@ export function BotEditModal({
   );
 }
 
-function BotEditForm({
-  bot,
+const STATE_OPTIONS: { value: ServerState; label: string }[] = [
+  { value: "public", label: "Public" },
+  { value: "private", label: "Private" },
+  { value: "unlisted", label: "Unlisted" },
+  { value: "defunct", label: "Defunct" },
+];
+
+function ServerEditForm({
+  server,
   token,
   onClose,
   onSaved,
 }: {
-  bot: Bot;
+  server: Server;
   token: string;
   onClose: () => void;
   onSaved: () => void;
 }) {
   const [form, setForm] = useState({
-    short: bot.short,
-    long: bot.long,
-    prefix: bot.prefix,
-    invite: bot.invite,
-    library: bot.library,
-    tags: bot.tags,
-    nsfw: bot.nsfw,
-    captchaOptOut: bot.captcha_opt_out,
+    short: server.short,
+    long: server.long,
+    state: server.state,
+    tags: server.tags,
+    nsfw: server.nsfw,
+    captchaOptOut: server.captcha_opt_out,
+    loginRequiredForInvite: server.login_required_for_invite,
   });
-  const [links, setLinks] = useState<Link[]>(bot.extra_links ?? []);
+  const [links, setLinks] = useState<Link[]>(server.extra_links ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,18 +103,17 @@ function BotEditForm({
     setSaving(true);
     setError(null);
     try {
-      await bots.updateBot(
-        bot.bot_id,
+      await servers.updateServer(
+        server.server_id,
         {
           short: form.short.trim(),
           long: form.long.trim(),
-          prefix: form.prefix.trim(),
-          invite: form.invite.trim(),
-          library: form.library.trim(),
           extra_links: links.filter((l) => l.name.trim() && l.value.trim()),
+          state: form.state,
           tags: form.tags,
           nsfw: form.nsfw,
           captcha_opt_out: form.captchaOptOut,
+          login_required_for_invite: form.loginRequiredForInvite,
         },
         token,
       );
@@ -128,15 +132,15 @@ function BotEditForm({
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="flex flex-col gap-1.5">
         <label
-          htmlFor="edit-short"
+          htmlFor="edit-server-short"
           className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Short Description
         </label>
         <textarea
-          id="edit-short"
+          id="edit-server-short"
           rows={2}
-          maxLength={191}
+          maxLength={150}
           value={form.short}
           onChange={(e) => setForm((f) => ({ ...f, short: e.target.value }))}
           className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
@@ -144,37 +148,35 @@ function BotEditForm({
         />
       </div>
 
-      <Input
-        id="edit-invite"
-        label="Invite URL"
-        type="url"
-        value={form.invite}
-        onChange={(e) => setForm((f) => ({ ...f, invite: e.target.value }))}
-        required
-      />
-
-      <Input
-        id="edit-prefix"
-        label="Prefix"
-        value={form.prefix}
-        onChange={(e) => setForm((f) => ({ ...f, prefix: e.target.value }))}
-        required
-      />
-
-      <Input
-        id="edit-library"
-        label="Library"
-        value={form.library}
-        onChange={(e) => setForm((f) => ({ ...f, library: e.target.value }))}
-        required
-      />
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="edit-server-state"
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+        >
+          Visibility
+        </label>
+        <select
+          id="edit-server-state"
+          value={form.state}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, state: e.target.value as ServerState }))
+          }
+          className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+        >
+          {STATE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div>
         <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Tags
         </p>
         <TagPicker
-          available={BOT_TAGS}
+          available={SERVER_TAGS}
           selected={form.tags}
           onChange={(tags) => setForm((f) => ({ ...f, tags }))}
         />
@@ -182,13 +184,13 @@ function BotEditForm({
 
       <div className="flex flex-col gap-1.5">
         <label
-          htmlFor="edit-long"
+          htmlFor="edit-server-long"
           className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Long Description
         </label>
         <textarea
-          id="edit-long"
+          id="edit-server-long"
           rows={8}
           value={form.long}
           onChange={(e) => setForm((f) => ({ ...f, long: e.target.value }))}
@@ -204,34 +206,51 @@ function BotEditForm({
         <LinksEditor links={links} onChange={setLinks} />
       </div>
 
-      <label className="flex items-center gap-3 cursor-pointer">
+      <label className="flex cursor-pointer items-center gap-3">
         <input
           type="checkbox"
           checked={form.nsfw}
           onChange={(e) => setForm((f) => ({ ...f, nsfw: e.target.checked }))}
-          className="w-4 h-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+          className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
         />
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
-          This bot contains NSFW content
+          This server contains NSFW content
         </span>
       </label>
 
-      <label className="flex items-center gap-3 cursor-pointer">
+      <label className="flex cursor-pointer items-center gap-3">
+        <input
+          type="checkbox"
+          checked={form.loginRequiredForInvite}
+          onChange={(e) =>
+            setForm((f) => ({
+              ...f,
+              loginRequiredForInvite: e.target.checked,
+            }))
+          }
+          className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+        />
+        <span className="text-sm text-zinc-700 dark:text-zinc-300">
+          Require sign-in before showing the invite
+        </span>
+      </label>
+
+      <label className="flex cursor-pointer items-center gap-3">
         <input
           type="checkbox"
           checked={form.captchaOptOut}
           onChange={(e) =>
             setForm((f) => ({ ...f, captchaOptOut: e.target.checked }))
           }
-          className="w-4 h-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+          className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
         />
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
-          Opt out of captchas for this bot
+          Opt out of captchas for this server
         </span>
       </label>
 
       {error && (
-        <div className="px-4 py-3 text-sm text-red-700 border border-red-200 rounded-xl bg-red-50 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       )}
