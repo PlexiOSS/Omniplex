@@ -39,7 +39,7 @@ bun run format  # Biome format, writes changes
 
 ## Configuration
 
-The frontend is decoupled from both backends it talks to — Popplio (`src/lib/api/`) and Arcadia, the staff panel API (`src/lib/arcadia/`). These environment variables control them:
+The frontend is decoupled from both backends it talks to Popplio (`src/lib/api/`) and Arcadia, the staff panel API (`src/lib/arcadia/`). These environment variables control them:
 
 | Variable | Default | Purpose |
 |---|---|---|
