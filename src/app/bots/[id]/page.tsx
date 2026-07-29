@@ -80,7 +80,12 @@ export default async function BotPage({ params }: Props) {
         <div className="min-w-0">
           {/* Bot header */}
           <div className="flex items-start gap-4">
-            <Avatar src={avatarSrc} alt={bot.user.username} size={64} />
+            <Avatar
+              src={avatarSrc}
+              alt={bot.user.username}
+              size={64}
+              status={bot.user.status}
+            />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
