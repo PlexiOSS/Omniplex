@@ -63,8 +63,11 @@ export function Header() {
     pathname !== "/admin/login" &&
     !pathname.startsWith("/admin/auth");
   const links = isAdminSection ? ADMIN_NAV_LINKS : NAV_LINKS;
-  const isActiveLink = (href: string) =>
-    isAdminSection ? pathname === href : pathname.startsWith(href);
+  const isActiveLink = (href: string) => {
+    if (isAdminSection) return pathname === href;
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  }
 
   function exitStaffPanel() {
     staffLogout();
