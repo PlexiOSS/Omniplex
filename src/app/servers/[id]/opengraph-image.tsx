@@ -12,7 +12,6 @@ import {
   og,
   ogClamp,
 } from "@/lib/og/shared";
-import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 export const size = OG_SIZE;
@@ -45,7 +44,7 @@ export default async function Image({
     server?.short ?? "A Discord server on Omniplex",
     140,
   );
-  const avatarUrl = await toOgImageSrc(resolveAsset(server?.avatar));
+  const avatarUrl = await toOgImageSrc(server?.avatar);
 
   return new ImageResponse(
     <OgFrame>

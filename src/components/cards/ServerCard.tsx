@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { IndexServer } from "@/lib/api/types";
-import { resolveAsset, serverPath } from "@/lib/utils/assets";
+import { serverPath } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 interface ServerCardProps {
@@ -12,9 +12,8 @@ interface ServerCardProps {
 
 export function ServerCard({ server }: ServerCardProps) {
   const href = serverPath(server.server_id, server.vanity);
-  // Server avatar is AssetMetadata (CDN-stored), not a Discord user avatar
   const avatarSrc =
-    resolveAsset(server.avatar) ??
+    server.avatar ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
 
   return (

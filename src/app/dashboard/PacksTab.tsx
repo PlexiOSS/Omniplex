@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { packs } from "@/lib/api";
 import type { BotPack, IndexBot } from "@/lib/api/types";
-import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { PackEditModal } from "./PackEditModal";
 
@@ -66,7 +65,7 @@ function PackItem({
                 <Avatar
                   key={server.server_id}
                   src={
-                    resolveAsset(server.avatar) ??
+                    server.avatar ||
                     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`
                   }
                   alt={server.name}

@@ -11,7 +11,6 @@ import { packs, search } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { BotPack, IndexBot } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
-import { resolveAsset } from "@/lib/utils/assets";
 
 type PickedEntity = {
   type: "bot" | "server";
@@ -56,7 +55,7 @@ export function PackEditModal({
       id: s.server_id,
       label: s.name,
       avatar:
-        resolveAsset(s.avatar) ??
+        s.avatar ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&size=64&background=random`,
     })),
   ]);
@@ -104,7 +103,7 @@ export function PackEditModal({
         id: s.server_id,
         label: s.name,
         avatar:
-          resolveAsset(s.avatar) ??
+          s.avatar ||
           `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&size=64&background=random`,
       }));
       setSearchResults([...bots, ...servers]);

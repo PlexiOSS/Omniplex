@@ -106,6 +106,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Server avatars showed the initials fallback everywhere (server cards,
+  detail pages, widgets, OG images, pack pickers) — `IndexServer.avatar` was
+  still typed and handled as `AssetMetadata` (the old CDN-asset shape from
+  before that system was removed), while the backend now returns a plain
+  URL string. Every consumer called `resolveAsset()` on it, which always
+  returned `null` for a string, silently falling through to the fallback.
+  `IndexServer.avatar` is now typed as `string` and used directly, matching
+  `bots.avatar`. Team/partner avatars are unaffected — those are still
+  genuinely removed, unlike servers'.
+- The status page's "Staff Panel" check called `arcadia.auth.begin(...)`
+  with a hardcoded production redirect URL (`https://omniplex.gg`)
+  regardless of which environment was actually running. On staging, this
+  sent the wrong origin to staging Arcadia's redirect validation, which
+  legitimately rejected it — making a perfectly healthy panel API report as
+  "May be affected". Now uses `BASE_URL` (already environment-aware) instead
+  of a hardcoded value.
 - Markdown/HTML sanitizer:
   - `<style>`, `<svg>`, `<object>`, and `<embed>` are stripped along with
     their content, instead of leaving a `<style>` block's raw CSS visible as

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { BotPack } from "@/lib/api/types";
-import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 interface PackCardProps {
@@ -39,7 +38,7 @@ export function PackCard({ pack }: PackCardProps) {
                   <Avatar
                     key={server.server_id}
                     src={
-                      resolveAsset(server.avatar) ??
+                      server.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`
                     }
                     alt={server.name}
