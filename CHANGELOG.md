@@ -5,9 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Nothing has been tagged or released yet — everything below falls under the
-initial `0.1.0` version.
-
 ## [0.1.0] - Unreleased
 
 ### Added
@@ -58,6 +55,31 @@ initial `0.1.0` version.
 - The staff Member edit modal now shows a member's positions and their full
   resolved permission set (positions + overrides combined), not just the
   override layer being edited.
+- Add Bot and Add Server are now step-based flows, ported from the legacy
+  site's pattern and extended with a confirmation step: enter an ID/invite
+  and look it up, and a preview card shows the bot's real Discord
+  name/avatar/server count/flags (or the server's name/icon/member counts)
+  with a "Looks right — continue" / "Change" choice before the rest of the
+  form unlocks — instead of blindly trusting whatever the submitter typed.
+  Add Bot also carries over the legacy site's already-listed/not-public
+  checks and the `fallback_bot_id` recovery path for when the anti-abuse
+  provider is down.
+- Add Bot and Add Server drafts are now persisted to `localStorage`, scoped
+  to the signed-in user (`usePersistedFormDraft`), so an in-progress
+  submission survives not just a refresh but closing the browser entirely.
+  Unlike the legacy site's single global draft key, drafts are namespaced
+  per user so they can't leak between accounts on a shared browser, and
+  they're cleared automatically on a successful submit.
+- Server owners can opt in ("Show this server's emojis & stickers") to
+  displaying their server's custom emojis and stickers on its listing page,
+  via a new toggle in `ServerEditModal`. The gallery only renders when the
+  owner has opted in and there's actually synced data to show — nothing
+  appears while the tracking bot isn't a member of the server.
+- Add Server now warns (without blocking submission) when the tracking bot
+  isn't currently a member of the server being added, with a direct invite
+  link — several features (emoji/sticker sync, real invite generation, live
+  member counts) silently never work otherwise, and previously nothing told
+  the owner why.
 
 ### Changed
 

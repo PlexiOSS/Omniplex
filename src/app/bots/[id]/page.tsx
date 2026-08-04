@@ -202,7 +202,10 @@ export default async function BotPage({ params }: Props) {
                 {bot.team_owner ? "Team" : "Owner"}
               </h3>
               {bot.team_owner ? (
-                <div className="flex items-center gap-2.5">
+                <Link
+                  href={`/teams/${bot.team_owner.id}`}
+                  className="flex items-center gap-2.5"
+                >
                   <Avatar
                     src={
                       resolveAsset(bot.team_owner.avatar) ??
@@ -211,10 +214,10 @@ export default async function BotPage({ params }: Props) {
                     alt={bot.team_owner.name}
                     size={32}
                   />
-                  <span className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                  <span className="truncate text-sm font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
                     {bot.team_owner.name}
                   </span>
-                </div>
+                </Link>
               ) : (
                 bot.owner && (
                   <Link

@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
+import { EmojiStickerGallery } from "@/components/servers/EmojiStickerGallery";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { WidgetShare } from "@/components/widget/WidgetShare";
@@ -125,6 +126,13 @@ export default async function ServerPage({ params }: Props) {
               </p>
             )}
           </div>
+
+          {server.show_emojis && (
+            <EmojiStickerGallery
+              emojis={server.emojis}
+              stickers={server.stickers}
+            />
+          )}
 
           <ReviewsSection
             targetType="server"
