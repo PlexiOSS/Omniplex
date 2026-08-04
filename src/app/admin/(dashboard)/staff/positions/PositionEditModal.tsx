@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import type { ArcadiaPermissionEntry } from "@/lib/arcadia/permissionCatalog";
+import type { PermissionData } from "@/lib/api/types";
 import type { StaffPosition } from "@/lib/arcadia/types";
 import { ArcadiaPermSelector } from "../../ArcadiaPermSelector";
 
 interface PositionEditModalProps {
   loginToken: string;
   granterPerms: string[];
-  catalog: ArcadiaPermissionEntry[];
+  catalog: PermissionData[];
   /** Omit for create; pass an existing position for edit. */
   position?: StaffPosition;
   /** Only used when creating — where to insert the new position in the hierarchy. */

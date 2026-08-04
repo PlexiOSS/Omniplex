@@ -87,9 +87,9 @@ export default function TeamSettingsPage() {
 
   const TABS: { key: Tab; label: string; perm?: string }[] = [
     { key: "overview", label: "Overview" },
-    { key: "info", label: "Edit Info", perm: "team.edit" },
+    { key: "info", label: "Edit Info", perm: "edit_team" },
     { key: "members", label: "Members" },
-    { key: "danger", label: "Danger Zone", perm: "global.*" },
+    { key: "danger", label: "Danger Zone", perm: "owner" },
   ];
   const visibleTabs = TABS.filter(
     (t) => !t.perm || hasPermString(ownPerms, t.perm),
@@ -282,9 +282,9 @@ function MembersTab({
   onChanged: () => void;
 }) {
   const members = team.entities?.members ?? [];
-  const canAdd = hasPermString(ownPerms, "team_member.add");
-  const canEdit = hasPermString(ownPerms, "team_member.edit");
-  const canDelete = hasPermString(ownPerms, "team_member.delete");
+  const canAdd = hasPermString(ownPerms, "add_team_members");
+  const canEdit = hasPermString(ownPerms, "edit_team_members");
+  const canDelete = hasPermString(ownPerms, "remove_team_members");
 
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [addingOpen, setAddingOpen] = useState(false);
@@ -361,7 +361,7 @@ function MembersTab({
 
       <div className="space-y-2">
         {members.map((member) => {
-          const isOwner = hasPermString(member.flags, "global.*");
+          const isOwner = hasPermString(member.flags, "owner");
           const isSelf = member.user?.id === currentUserId;
           return (
             <div

@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { PermissionData } from "@/lib/api/types";
-import { hasPermString } from "@/lib/permissions";
+import { hasPermString, isSuperPerm } from "@/lib/permissions";
 
 interface PermSelectorProps {
   catalog: PermissionData[];
@@ -11,20 +11,6 @@ interface PermSelectorProps {
   granterPerms: string[];
   value: string[];
   onChange: (perms: string[]) => void;
-  /** Restrict to specific namespaces (e.g. just "team_member" when editing a member's perms). Omit for all. */
-  namespaces?: string[];
-}
-
-function permName(entity: string, perm: PermissionData): string {
-  const override = perm.data_override?.[entity];
-  const name = override?.name ?? perm.name;
-  return name.replace("{entity}", entity);
-}
-
-function permDesc(entity: string, perm: PermissionData): string {
-  const override = perm.data_override?.[entity];
-  const desc = override?.desc ?? perm.desc;
-  return desc.replace("{entity}", entity);
 }
 
 export function PermSelector({
@@ -32,55 +18,46 @@ export function PermSelector({
   granterPerms,
   value,
   onChange,
-  namespaces,
 }: PermSelectorProps) {
   const grouped = useMemo(() => {
     const map = new Map<string, PermissionData[]>();
     for (const perm of catalog) {
-      for (const entity of perm.supported_entities) {
-        if (namespaces && !namespaces.includes(entity)) continue;
-        if (!map.has(entity)) map.set(entity, []);
-        map.get(entity)?.push(perm);
-      }
+      if (!map.has(perm.category)) map.set(perm.category, []);
+      map.get(perm.category)?.push(perm);
     }
     return map;
-  }, [catalog, namespaces]);
+  }, [catalog]);
 
-  const entities = useMemo(() => Array.from(grouped.keys()), [grouped]);
-  const [activeEntity, setActiveEntity] = useState(entities[0] ?? "");
-  const perms = grouped.get(activeEntity) ?? [];
-  const hasWildcard = value.includes(`${activeEntity}.*`);
+  const categories = useMemo(() => Array.from(grouped.keys()), [grouped]);
+  const [activeCategory, setActiveCategory] = useState(categories[0] ?? "");
+  const perms = grouped.get(activeCategory) ?? [];
+  const hasSuper = value.some(isSuperPerm);
 
-  const unrecognized = useMemo(() => {
-    const known = new Set<string>();
-    for (const entity of entities) {
-      for (const perm of grouped.get(entity) ?? []) {
-        known.add(`${entity}.${perm.id}`);
-      }
-    }
-    return value.filter(
-      (v) => entities.some((e) => v.startsWith(`${e}.`)) && !known.has(v),
-    );
-  }, [value, entities, grouped]);
+  const known = useMemo(() => new Set(catalog.map((p) => p.id)), [catalog]);
+  const unrecognized = useMemo(
+    () => value.filter((v) => !known.has(v)),
+    [value, known],
+  );
 
   function removeUnrecognized(perm: string) {
     onChange(value.filter((p) => p !== perm));
   }
 
-  function toggle(entity: string, permId: string) {
-    const key = `${entity}.${permId}`;
-    if (permId === "*") {
-      // Selecting the wildcard supersedes every other perm in this namespace.
-      const withoutEntity = value.filter((p) => !p.startsWith(`${entity}.`));
-      onChange(value.includes(key) ? withoutEntity : [...withoutEntity, key]);
+  function toggle(permId: string) {
+    if (isSuperPerm(permId)) {
+      // The super permission (owner/administrator) implies every other one,
+      // so selecting it supersedes whatever else was picked.
+      onChange(value.includes(permId) ? [] : [permId]);
       return;
     }
     onChange(
-      value.includes(key) ? value.filter((p) => p !== key) : [...value, key],
+      value.includes(permId)
+        ? value.filter((p) => p !== permId)
+        : [...value, permId],
     );
   }
 
-  if (entities.length === 0) {
+  if (categories.length === 0) {
     return (
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         No permissions available.
@@ -91,29 +68,28 @@ export function PermSelector({
   return (
     <div>
       <div className="flex flex-wrap gap-1 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-        {entities.map((entity) => (
+        {categories.map((category) => (
           <button
-            key={entity}
+            key={category}
             type="button"
-            onClick={() => setActiveEntity(entity)}
+            onClick={() => setActiveCategory(category)}
             className={[
-              "rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition-colors",
-              entity === activeEntity
+              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              category === activeCategory
                 ? "bg-accent/10 text-accent"
                 : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
             ].join(" ")}
           >
-            {entity.replace("_", " ")}
+            {category}
           </button>
         ))}
       </div>
 
       <div className="mt-3 space-y-2">
         {perms.map((perm) => {
-          const key = `${activeEntity}.${perm.id}`;
-          const checked = value.includes(key);
-          const canGrant = hasPermString(granterPerms, key);
-          const disabled = !canGrant || (perm.id !== "*" && hasWildcard);
+          const checked = value.includes(perm.id);
+          const canGrant = hasPermString(granterPerms, perm.id);
+          const disabled = !canGrant || (!isSuperPerm(perm.id) && hasSuper);
 
           return (
             <label
@@ -129,15 +105,20 @@ export function PermSelector({
                 type="checkbox"
                 checked={checked}
                 disabled={disabled}
-                onChange={() => toggle(activeEntity, perm.id)}
+                onChange={() => toggle(perm.id)}
                 className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
               />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                  {permName(activeEntity, perm)}
+                  {perm.name}
+                  {perm.dangerous && (
+                    <span className="ml-1.5 text-xs font-normal text-red-500">
+                      Dangerous
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {permDesc(activeEntity, perm)}
+                  {perm.desc}
                 </p>
               </div>
             </label>

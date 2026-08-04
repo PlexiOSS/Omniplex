@@ -103,7 +103,7 @@ export default async function TeamPage({ params }: Props) {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {members.map((member) => {
-              const isOwner = hasPermString(member.flags, "global.*");
+              const isOwner = hasPermString(member.flags, "owner");
               return (
                 <div
                   key={member.itag}
