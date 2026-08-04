@@ -41,6 +41,10 @@ const DRAFT_DEFAULT: AddServerDraft = {
   links: [],
 };
 
+const LONG_MIN = 500;
+const SHORT_MIN = 30;
+const SHORT_MAX = 150;
+
 export default function AddServerPage() {
   const router = useRouter();
   const { session, isAuthenticated, loading } = useAuth();
