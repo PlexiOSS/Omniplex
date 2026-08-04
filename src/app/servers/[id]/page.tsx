@@ -64,7 +64,7 @@ export default async function ServerPage({ params }: Props) {
       : null;
 
   const avatarSrc =
-    resolveAsset(server.avatar) ??
+    server.avatar ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`;
 
   const reviewList = await reviews

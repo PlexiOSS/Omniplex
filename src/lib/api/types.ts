@@ -111,7 +111,7 @@ export interface Bot {
 }
 
 // ---------------------------------------------------------------------------
-// Servers — note: servers have `name` directly (not via user), avatar is AssetMetadata
+// Servers — note: servers have `name` directly (not via user)
 // ---------------------------------------------------------------------------
 
 export type ServerState = "public" | "private" | "unlisted" | "defunct";
@@ -119,8 +119,10 @@ export type ServerState = "public" | "private" | "unlisted" | "defunct";
 export interface IndexServer {
   server_id: string;
   name: string;
-  /** CDN-based avatar — resolve with resolveAsset() */
-  avatar: AssetMetadata | null;
+  /** Fully resolved icon URL, synced from Infernoplex's gateway cache. Empty
+   * string if the server has no icon set or hasn't been synced yet — use
+   * directly in <img>, no resolveAsset() needed. */
+  avatar: string;
   total_members: number;
   online_members: number;
   short: string;

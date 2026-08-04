@@ -2,7 +2,6 @@ import { ImageResponse } from "next/og";
 import { servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { toOgImageSrc } from "@/lib/og/image";
-import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import {
   resolveVisibleStats,
@@ -67,7 +66,7 @@ export async function GET(
     );
   }
 
-  const avatarSrc = await toOgImageSrc(resolveAsset(server.avatar));
+  const avatarSrc = await toOgImageSrc(server.avatar);
   const description = widgetClamp(server.short, 90);
 
   let ownerLine: string | null = server.team_owner

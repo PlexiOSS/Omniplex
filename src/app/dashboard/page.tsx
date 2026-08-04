@@ -547,7 +547,7 @@ function ServerItem({
 }) {
   const [editing, setEditing] = useState(false);
   const avatarSrc =
-    resolveAsset(server.avatar) ??
+    server.avatar ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
 
   return (
