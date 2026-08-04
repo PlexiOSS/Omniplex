@@ -106,6 +106,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The entire frontend permission system was still built for Popplio's old
+  `namespace.action` model (dotted strings, `*` wildcards, `~` negators,
+  `global.*` for "grants everything") after the backend moved to flat,
+  self-describing permission names (`edit_servers`, `manage_webhooks`,
+  `owner`) with no namespaces, wildcards or negation. Every permission
+  check across the team and staff/admin panel UI was comparing against
+  names that no longer exist, so team owners (and staff) with correct
+  permissions server-side could still be denied client-side, or see broken
+  panels:
+  - `lib/permissions.ts` rewritten for flat exact-match, with `owner`/
+    `administrator` as the two domain "super" permissions that imply
+    everything (was reimplementing full namespace/wildcard/negator parsing).
+  - Every literal permission string across `dashboard`, `teams/[id]`,
+    `teams/[id]/settings`, and the `/admin` staff pages (positions, queue,
+    members) updated to its flat equivalent (e.g. `team_member.add` →
+    `add_team_members`, `rpc.Claim` → `review_bots`, `global.*` → `owner`).
+  - `PermissionData` (the shape of `GET /teams/meta/permissions` and
+    `GET /staff/meta/permissions`) still had the old kittycat fields
+    (`supported_entities`, `data_override`); the real response is
+    `{id, name, desc, category, dangerous}`. This was the direct cause of
+    `TypeError: s.supported_entities is not iterable` crashing the team
+    settings page — something iterated a field that no longer exists.
+  - `PermSelector` and `ArcadiaPermSelector` rewritten to group by the new
+    `category` field instead of a namespace derived from
+    `supported_entities`, and to toggle flat permission ids directly
+    instead of building `namespace.perm` keys.
+  - `ArcadiaPermSelector` additionally dropped negation support
+    (`~permission`) entirely — the new model's overrides are purely
+    additive (nothing subtracts from the union), so revoking a
+    position-granted permission from a specific member is no longer
+    possible from this editor; it now shows those as read-only ("via
+    position") instead of offering a toggle that would silently do nothing.
+  - Removed `lib/arcadia/permissionCatalog.ts`, a hand-maintained list of
+    every permission string that existed because standalone Arcadia had no
+    live catalog endpoint. Now that Arcadia is merged into Popplio, both
+    `GET /teams/meta/permissions` and `GET /staff/meta/permissions` are
+    real live endpoints (new `staff` API resource added), so the staff
+    panel's permission pickers can't drift out of sync with the server the
+    way the static list could.
 - Server avatars showed the initials fallback everywhere (server cards,
   detail pages, widgets, OG images, pack pickers) — `IndexServer.avatar` was
   still typed and handled as `AssetMetadata` (the old CDN-asset shape from

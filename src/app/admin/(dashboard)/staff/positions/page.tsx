@@ -4,11 +4,9 @@ import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { staff } from "@/lib/api";
+import type { PermissionData } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import {
-  type ArcadiaPermissionEntry,
-  getFullPermissionCatalog,
-} from "@/lib/arcadia/permissionCatalog";
 import type { StaffPosition } from "@/lib/arcadia/types";
 import { useAdmin } from "../../../AdminContext";
 import { PositionEditModal } from "./PositionEditModal";
@@ -17,7 +15,7 @@ export default function StaffPositionsPage() {
   const { loginToken, staffMember, hasPerm } = useAdmin();
 
   const [positions, setPositions] = useState<StaffPosition[] | null>(null);
-  const [catalog, setCatalog] = useState<ArcadiaPermissionEntry[]>([]);
+  const [catalog, setCatalog] = useState<PermissionData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<StaffPosition | "new" | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -33,10 +31,10 @@ export default function StaffPositionsPage() {
     try {
       const [pos, cat] = await Promise.all([
         arcadia.staffPositions.list(loginToken),
-        getFullPermissionCatalog(loginToken),
+        staff.getPermissionCatalog(),
       ]);
       setPositions(pos);
-      setCatalog(cat);
+      setCatalog(cat.perms);
     } catch (err) {
       setError(
         err instanceof ArcadiaError ? err.message : "Failed to load positions.",
@@ -107,7 +105,7 @@ export default function StaffPositionsPage() {
             positions at or below your own lowest index.
           </p>
         </div>
-        {hasPerm("staff_positions.create") && (
+        {hasPerm("manage_staff_roles") && (
           <Button variant="primary" size="sm" onClick={() => setEditing("new")}>
             <Plus size={14} />
             New Position
@@ -134,7 +132,7 @@ export default function StaffPositionsPage() {
                 <button
                   type="button"
                   disabled={
-                    !prev || locked || !hasPerm("staff_positions.swap_index")
+                    !prev || locked || !hasPerm("manage_staff_roles")
                   }
                   onClick={() => prev && handleSwap(position.id, prev.id)}
                   className="text-zinc-400 hover:text-zinc-900 disabled:opacity-30 dark:hover:text-zinc-50"
@@ -144,7 +142,7 @@ export default function StaffPositionsPage() {
                 <button
                   type="button"
                   disabled={
-                    !next || locked || !hasPerm("staff_positions.swap_index")
+                    !next || locked || !hasPerm("manage_staff_roles")
                   }
                   onClick={() => next && handleSwap(position.id, next.id)}
                   className="text-zinc-400 hover:text-zinc-900 disabled:opacity-30 dark:hover:text-zinc-50"
@@ -169,7 +167,7 @@ export default function StaffPositionsPage() {
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                {hasPerm("staff_positions.edit") && (
+                {hasPerm("manage_staff_roles") && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -179,7 +177,7 @@ export default function StaffPositionsPage() {
                     <Pencil size={12} />
                   </Button>
                 )}
-                {hasPerm("staff_positions.delete") && (
+                {hasPerm("manage_staff_roles") && (
                   <Button
                     variant={
                       confirmDeleteId === position.id ? "danger" : "ghost"

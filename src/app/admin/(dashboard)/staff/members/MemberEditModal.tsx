@@ -5,14 +5,14 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import type { ArcadiaPermissionEntry } from "@/lib/arcadia/permissionCatalog";
+import type { PermissionData } from "@/lib/api/types";
 import type { StaffMember } from "@/lib/arcadia/types";
 import { ArcadiaPermSelector } from "../../ArcadiaPermSelector";
 
 interface MemberEditModalProps {
   loginToken: string;
   granterPerms: string[];
-  catalog: ArcadiaPermissionEntry[];
+  catalog: PermissionData[];
   member: StaffMember;
   onClose: () => void;
   onSaved: () => void;

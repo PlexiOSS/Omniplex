@@ -40,7 +40,7 @@ export const teamsResource = {
   removeMember: (teamId: string, userId: string, token: string) =>
     client.delete<void>(`/teams/${teamId}/members/${userId}`, { token }),
 
-  /** Catalog of every kittycat permission verb and which namespaces support it */
+  /** Every flat permission a team member can hold, grouped by category */
   getPermissionCatalog: () =>
     client.get<{ perms: PermissionData[] }>("/teams/meta/permissions", {
       next: { revalidate: 3600 },

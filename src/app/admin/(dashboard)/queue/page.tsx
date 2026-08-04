@@ -271,7 +271,7 @@ export default function AdminQueuePage() {
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-900">
-                {!bot.claimed_by && hasPerm("rpc.Claim") && (
+                {!bot.claimed_by && hasPerm("review_bots") && (
                   <Button
                     variant="secondary"
                     size="sm"
@@ -281,7 +281,7 @@ export default function AdminQueuePage() {
                     Claim
                   </Button>
                 )}
-                {bot.claimed_by && hasPerm("rpc.Unclaim") && (
+                {bot.claimed_by && hasPerm("review_bots") && (
                   <Button
                     variant="secondary"
                     size="sm"
@@ -290,7 +290,7 @@ export default function AdminQueuePage() {
                     Unclaim
                   </Button>
                 )}
-                {bot.claimed_by && hasPerm("rpc.Approve") && (
+                {bot.claimed_by && hasPerm("review_bots") && (
                   <Button
                     variant="primary"
                     size="sm"
@@ -300,7 +300,7 @@ export default function AdminQueuePage() {
                     Approve
                   </Button>
                 )}
-                {bot.claimed_by && hasPerm("rpc.Deny") && (
+                {bot.claimed_by && hasPerm("review_bots") && (
                   <Button
                     variant="danger"
                     size="sm"

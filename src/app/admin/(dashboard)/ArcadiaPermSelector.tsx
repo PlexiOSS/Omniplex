@@ -2,22 +2,28 @@
 
 import { X } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { ArcadiaPermissionEntry } from "@/lib/arcadia/permissionCatalog";
-import { hasPermString } from "@/lib/permissions";
+import type { PermissionData } from "@/lib/api/types";
+import { hasPermString, isSuperPerm } from "@/lib/permissions";
 
 interface ArcadiaPermSelectorProps {
-  catalog: ArcadiaPermissionEntry[];
+  catalog: PermissionData[];
   /** The permissions of the person doing the editing — you can't grant what you don't have. */
   granterPerms: string[];
   /** The override array being edited (what actually gets saved). */
   value: string[];
   onChange: (perms: string[]) => void;
   /**
-   * The member's fully resolved permissions (positions + overrides already
-   * combined), if known — e.g. `member.resolved_perms`. Without this, a
-   * checkbox only reflects whether *this* editor has explicitly added the
-   * permission as an override, not whether the member effectively has it
-   * via a position — which reads as "granted but shown unchecked."
+   * The member's fully resolved permissions (position perms + overrides
+   * already combined), if known — e.g. `member.resolved_perms`. Without
+   * this, a checkbox only reflects whether this override list explicitly
+   * grants the permission, not whether the member effectively has it via a
+   * position — which reads as "granted but shown unchecked."
+   *
+   * There's no way to revoke a position-granted permission from here: the
+   * flat model's overrides are purely additive (`perms.Resolve` is a union
+   * of every source, nothing subtracts), unlike the old model's `~key`
+   * negators. A permission granted by a position can only be removed by
+   * editing the position itself.
    */
   resolvedPerms?: string[];
 }
@@ -30,87 +36,42 @@ export function ArcadiaPermSelector({
   resolvedPerms = [],
 }: ArcadiaPermSelectorProps) {
   const grouped = useMemo(() => {
-    const map = new Map<string, ArcadiaPermissionEntry[]>();
-    for (const entry of catalog) {
-      if (!map.has(entry.namespace)) map.set(entry.namespace, []);
-      map.get(entry.namespace)?.push(entry);
+    const map = new Map<string, PermissionData[]>();
+    for (const perm of catalog) {
+      if (!map.has(perm.category)) map.set(perm.category, []);
+      map.get(perm.category)?.push(perm);
     }
     return map;
   }, [catalog]);
 
-  const namespaces = useMemo(() => Array.from(grouped.keys()), [grouped]);
-  const [activeNamespace, setActiveNamespace] = useState(namespaces[0] ?? "");
-  const entries = grouped.get(activeNamespace) ?? [];
+  const categories = useMemo(() => Array.from(grouped.keys()), [grouped]);
+  const [activeCategory, setActiveCategory] = useState(categories[0] ?? "");
+  const perms = grouped.get(activeCategory) ?? [];
+  const hasSuper = value.some(isSuperPerm) || resolvedPerms.some(isSuperPerm);
 
-  // A namespace wildcard override (`ns.*`) supersedes every other perm in
-  // that namespace, whether the wildcard came from an explicit override or
-  // is already true via resolvedPerms (a position granting it).
-  const hasWildcard =
-    value.includes(`${activeNamespace}.*`) ||
-    resolvedPerms.includes(`${activeNamespace}.*`);
-
-  // STATIC_PERMISSION_CATALOG is hand-maintained and can drift out of sync
-  // with what Arcadia actually checks server-side — without this, a granted
-  // permission the catalog doesn't know about would just be silently
-  // invisible here despite still being in effect.
-  const unrecognized = useMemo(() => {
-    const known = new Set<string>();
-    for (const ns of namespaces) {
-      for (const entry of grouped.get(ns) ?? []) {
-        known.add(`${ns}.${entry.perm}`);
-      }
-    }
-    return value.filter(
-      (v) => namespaces.some((ns) => v.startsWith(`${ns}.`)) && !known.has(v),
-    );
-  }, [value, namespaces, grouped]);
+  const known = useMemo(() => new Set(catalog.map((p) => p.id)), [catalog]);
+  const unrecognized = useMemo(
+    () => value.filter((v) => !known.has(v)),
+    [value, known],
+  );
 
   function removeUnrecognized(perm: string) {
     onChange(value.filter((p) => p !== perm));
   }
 
-  /**
-   * Three real states per permission, matching kittycat's actual model:
-   *  - directly overridden on for this member (`key` in `value`)
-   *  - granted some other way (a position) and not touched here — shown
-   *    checked, but "off" means adding an explicit `~key` revoke, not
-   *    just leaving it alone
-   *  - explicitly revoked despite a position granting it (`~key` in `value`)
-   */
-  function toggle(namespace: string, perm: string) {
-    const key = `${namespace}.${perm}`;
-    const negated = `~${key}`;
-    const isOverridden = value.includes(key);
-    const isNegated = value.includes(negated);
-    const isImplicit = resolvedPerms.includes(key) && !isOverridden;
-
-    if (perm === "*") {
-      const withoutNamespace = value.filter(
-        (p) => !p.startsWith(`${namespace}.`) && p !== `~${namespace}.*`,
-      );
-      const effectivelyOn = isOverridden || (isImplicit && !isNegated);
-      onChange(
-        effectivelyOn
-          ? isImplicit
-            ? [...withoutNamespace, `~${namespace}.*`]
-            : withoutNamespace
-          : [...withoutNamespace, key],
-      );
+  function toggle(permId: string) {
+    if (isSuperPerm(permId)) {
+      onChange(value.includes(permId) ? [] : [permId]);
       return;
     }
-
-    if (isOverridden) {
-      onChange(value.filter((p) => p !== key));
-    } else if (isNegated) {
-      onChange(value.filter((p) => p !== negated));
-    } else if (isImplicit) {
-      onChange([...value, negated]);
-    } else {
-      onChange([...value, key]);
-    }
+    onChange(
+      value.includes(permId)
+        ? value.filter((p) => p !== permId)
+        : [...value, permId],
+    );
   }
 
-  if (namespaces.length === 0) {
+  if (categories.length === 0) {
     return (
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         No permissions available.
@@ -121,37 +82,40 @@ export function ArcadiaPermSelector({
   return (
     <div>
       <div className="flex max-h-32 flex-wrap gap-1 overflow-y-auto border-b border-zinc-200 pb-2 dark:border-zinc-800">
-        {namespaces.map((ns) => (
+        {categories.map((category) => (
           <button
-            key={ns}
+            key={category}
             type="button"
-            onClick={() => setActiveNamespace(ns)}
+            onClick={() => setActiveCategory(category)}
             className={[
               "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-              ns === activeNamespace
+              category === activeCategory
                 ? "bg-accent/10 text-accent"
                 : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
             ].join(" ")}
           >
-            {ns}
+            {category}
           </button>
         ))}
       </div>
 
       <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">
-        {entries.map((entry) => {
-          const key = `${activeNamespace}.${entry.perm}`;
-          const negated = `~${key}`;
-          const isOverridden = value.includes(key);
-          const isNegated = value.includes(negated);
-          const isImplicit = resolvedPerms.includes(key) && !isOverridden;
-          const checked = isOverridden || (isImplicit && !isNegated);
-          const canGrant = hasPermString(granterPerms, key);
-          const disabled = !canGrant || (entry.perm !== "*" && hasWildcard);
+        {perms.map((perm) => {
+          const isOverridden = value.includes(perm.id);
+          const isImplicit =
+            !isOverridden && resolvedPerms.includes(perm.id);
+          const checked = isOverridden || isImplicit;
+          const canGrant = hasPermString(granterPerms, perm.id);
+          // A permission already granted via a position can't be usefully
+          // toggled from here (there's nothing to remove — see the
+          // resolvedPerms doc above), and the super permission supersedes
+          // everything else once held.
+          const disabled =
+            !canGrant || isImplicit || (!isSuperPerm(perm.id) && hasSuper);
 
           return (
             <label
-              key={entry.perm}
+              key={perm.id}
               className={[
                 "flex items-start gap-3 rounded-xl border p-3",
                 disabled
@@ -163,25 +127,25 @@ export function ArcadiaPermSelector({
                 type="checkbox"
                 checked={checked}
                 disabled={disabled}
-                onChange={() => toggle(activeNamespace, entry.perm)}
+                onChange={() => toggle(perm.id)}
                 className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
               />
               <div className="min-w-0">
                 <p className="flex items-center gap-1.5 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                  {entry.label}
-                  {isImplicit && !isNegated && (
+                  {perm.name}
+                  {perm.dangerous && (
+                    <span className="ml-1.5 text-xs font-normal text-red-500">
+                      Dangerous
+                    </span>
+                  )}
+                  {isImplicit && (
                     <span className="rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-normal text-accent">
                       via position
                     </span>
                   )}
-                  {isNegated && (
-                    <span className="rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-normal text-red-600 dark:text-red-400">
-                      revoked
-                    </span>
-                  )}
                 </p>
-                <p className="font-mono text-xs text-zinc-400 dark:text-zinc-600">
-                  {key}
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {perm.desc}
                 </p>
               </div>
             </label>

@@ -7,11 +7,9 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { usePagination } from "@/hooks/usePagination";
+import { staff } from "@/lib/api";
+import type { PermissionData } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import {
-  type ArcadiaPermissionEntry,
-  getFullPermissionCatalog,
-} from "@/lib/arcadia/permissionCatalog";
 import type { StaffMember } from "@/lib/arcadia/types";
 import { useAdmin } from "../../../AdminContext";
 import { MemberEditModal } from "./MemberEditModal";
@@ -22,7 +20,7 @@ export default function StaffMembersPage() {
   const { loginToken, staffMember, hasPerm } = useAdmin();
 
   const [members, setMembers] = useState<StaffMember[] | null>(null);
-  const [catalog, setCatalog] = useState<ArcadiaPermissionEntry[]>([]);
+  const [catalog, setCatalog] = useState<PermissionData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<StaffMember | null>(null);
 
@@ -40,10 +38,10 @@ export default function StaffMembersPage() {
     try {
       const [list, cat] = await Promise.all([
         arcadia.staffMembers.list(loginToken),
-        getFullPermissionCatalog(loginToken),
+        staff.getPermissionCatalog(),
       ]);
       setMembers(list);
-      setCatalog(cat);
+      setCatalog(cat.perms);
     } catch (err) {
       setError(
         err instanceof ArcadiaError ? err.message : "Failed to load members.",
@@ -132,7 +130,7 @@ export default function StaffMembersPage() {
                     ` · ${member.perm_overrides.length} override${member.perm_overrides.length === 1 ? "" : "s"}`}
                 </p>
               </div>
-              {hasPerm("staff_members.edit") && (
+              {hasPerm("manage_staff_members") && (
                 <Button
                   variant="ghost"
                   size="sm"

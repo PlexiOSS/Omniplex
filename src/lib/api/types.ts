@@ -207,13 +207,13 @@ export interface Team {
   entities: TeamEntities | null;
 }
 
-/** Metadata for a single kittycat permission verb (e.g. "edit", "*") — from GET /teams/meta/permissions */
+/** A single flat permission (e.g. "edit_servers") — from GET /teams/meta/permissions or GET /staff/meta/permissions */
 export interface PermissionData {
   id: string;
   name: string;
   desc: string;
-  supported_entities: string[];
-  data_override?: Record<string, { name: string; desc: string } | undefined>;
+  category: string;
+  dangerous?: boolean;
 }
 
 export interface CreateEditTeamPayload {
