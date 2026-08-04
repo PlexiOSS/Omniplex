@@ -93,6 +93,7 @@ function ServerEditForm({
     nsfw: server.nsfw,
     captchaOptOut: server.captcha_opt_out,
     loginRequiredForInvite: server.login_required_for_invite,
+    showEmojis: server.show_emojis,
   });
   const [links, setLinks] = useState<Link[]>(server.extra_links ?? []);
   const [saving, setSaving] = useState(false);
@@ -114,6 +115,7 @@ function ServerEditForm({
           nsfw: form.nsfw,
           captcha_opt_out: form.captchaOptOut,
           login_required_for_invite: form.loginRequiredForInvite,
+          show_emojis: form.showEmojis,
         },
         token,
       );
@@ -246,6 +248,24 @@ function ServerEditForm({
         />
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
           Opt out of captchas for this server
+        </span>
+      </label>
+
+      <label className="flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={form.showEmojis}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, showEmojis: e.target.checked }))
+          }
+          className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+        />
+        <span className="text-sm text-zinc-700 dark:text-zinc-300">
+          Show this server's emojis &amp; stickers on its listing page
+          <span className="block text-xs text-zinc-400 dark:text-zinc-600">
+            Synced periodically while the tracking bot is a member of your
+            server. Nothing shows if it isn't.
+          </span>
         </span>
       </label>
 

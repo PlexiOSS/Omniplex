@@ -1,5 +1,6 @@
 import { client } from "../client";
 import type {
+  DiscordServerMeta,
   IndexServer,
   ListIndexServer,
   PagedResult,
@@ -45,6 +46,13 @@ export const serversResource = {
     payload: import("../types").CreateServerPayload,
     token: string,
   ) => client.put<void>("/servers", payload, { token }),
+
+  /** Resolves an invite link to the real server's name/icon/member counts, ahead of submitting Add Server. */
+  getServerMeta: (invite: string, token: string) =>
+    client.get<DiscordServerMeta>(
+      `/servers/meta?invite=${encodeURIComponent(invite)}`,
+      { token, cache: "no-store" },
+    ),
 
   updateServer: (
     serverId: string,

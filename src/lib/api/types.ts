@@ -148,6 +148,28 @@ export interface Server extends IndexServer {
   claimed_by: string | null;
   captcha_opt_out: boolean;
   login_required_for_invite: boolean;
+  /** Whether the owner has opted in to showing this server's emojis/stickers below. */
+  show_emojis: boolean;
+  /** Synced periodically by the tracking bot, always empty unless show_emojis is true. */
+  emojis: ServerEmoji[];
+  stickers: ServerSticker[];
+  /** Null if never synced (e.g. the tracking bot has never been in this server). */
+  emojis_synced_at: string | null;
+}
+
+export interface ServerEmoji {
+  id: string;
+  name: string;
+  animated: boolean;
+  url: string;
+}
+
+export interface ServerSticker {
+  id: string;
+  name: string;
+  /** "png" | "apng" | "lottie" | "gif" */
+  format: string;
+  url: string;
 }
 
 export interface TeamMember {
@@ -544,6 +566,36 @@ export interface CreateServerPayload {
   extra_links: Link[];
 }
 
+/** Preview of a bot resolved from `GET /bots/{client_id}/meta`, ahead of submitting Add Bot. */
+export interface DiscordBotMeta {
+  bot_id: string;
+  client_id: string;
+  name: string;
+  avatar: string;
+  /** Empty if not on the list yet. */
+  list_type: string;
+  guild_count: number;
+  bot_public: boolean;
+  flags: string[];
+  description: string;
+  tags: string[];
+  fallback: boolean;
+  fetch_errors: Record<string, string>;
+}
+
+/** Preview of a server resolved from `GET /servers/meta?invite=...`, ahead of submitting Add Server. */
+export interface DiscordServerMeta {
+  server_id: string;
+  name: string;
+  avatar: string;
+  total_members: number;
+  online_members: number;
+  already_listed: boolean;
+  list_type: string;
+  bot_present: boolean;
+  bot_invite_url: string;
+}
+
 // ---------------------------------------------------------------------------
 // Bot / Server / Pack settings updates
 // ---------------------------------------------------------------------------
@@ -569,6 +621,7 @@ export interface ServerSettingsUpdate {
   nsfw: boolean;
   captcha_opt_out: boolean;
   login_required_for_invite: boolean;
+  show_emojis: boolean;
 }
 
 export interface CreatePackPayload {

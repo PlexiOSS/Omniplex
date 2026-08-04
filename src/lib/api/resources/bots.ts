@@ -2,6 +2,7 @@ import { client } from "../client";
 import type {
   Bot,
   BotSettingsUpdate,
+  DiscordBotMeta,
   IndexBot,
   ListIndexBot,
   PagedResult,
@@ -49,6 +50,13 @@ export const botsResource = {
   // Note: the backend returns 204 No Content on success, not the created bot.
   createBot: (payload: import("../types").CreateBotPayload, token: string) =>
     client.put<void>("/bots", payload, { token }),
+
+  /** Resolves a client ID to the bot's real Discord name/avatar/status, ahead of submitting Add Bot. */
+  getBotMeta: (clientId: string, token: string, fallbackBotId?: string) =>
+    client.get<DiscordBotMeta>(
+      `/bots/${clientId}/meta${fallbackBotId ? `?fallback_bot_id=${fallbackBotId}` : ""}`,
+      { token, cache: "no-store" },
+    ),
 
   updateBot: (botId: string, payload: BotSettingsUpdate, token: string) =>
     client.patch<void>(`/bots/${botId}/settings`, payload, { token }),
