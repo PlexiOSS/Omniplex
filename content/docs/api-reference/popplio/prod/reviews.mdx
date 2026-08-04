@@ -1,0 +1,49 @@
+---
+title: Reviews
+description: These API endpoints are related to reviews on IBL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Reviews
+      url: '#get-reviews'
+    - depth: 2
+      title: Create Bot Review
+      url: '#create-bot-review'
+    - depth: 2
+      title: Edit Review
+      url: '#edit-review'
+    - depth: 2
+      title: Delete Review
+      url: '#delete-review'
+  structuredData:
+    headings:
+      - content: Get Reviews
+        id: get-reviews
+      - content: Create Bot Review
+        id: create-bot-review
+      - content: Edit Review
+        id: edit-review
+      - content: Delete Review
+        id: delete-review
+    contents:
+      - content: Gets the reviews of a bot by its ID or vanity.
+        heading: get-reviews
+      - content: >-
+          Creates a new review for an entity. A user may have only one `root
+          review` per entity. Triggers a garbage collection step to remove any
+          orphaned reviews afterwards. Returns 204 on success
+        heading: create-bot-review
+      - content: >-
+          Edits a review by review ID. The user must be the author of this
+          review. This will automatically trigger a garbage collection task and
+          returns 204 on success
+        heading: edit-review
+      - content: >-
+          Deletes a review by review ID. The user must be the author of this
+          review. This will automatically trigger a garbage collection task and
+          returns 204 on success
+        heading: delete-review
+---
+
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/reviews/{target_id}"},{"method":"post","path":"/users/{uid}/reviews/{target_id}"},{"method":"patch","path":"/users/{uid}/reviews/{rid}"},{"method":"delete","path":"/users/{uid}/reviews/{rid}"}]} hasHead={true} />

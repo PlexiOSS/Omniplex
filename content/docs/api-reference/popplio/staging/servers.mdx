@@ -1,0 +1,72 @@
+---
+title: Servers
+description: These API endpoints are related to servers on IBL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get All Servers
+      url: '#get-all-servers'
+    - depth: 2
+      title: Get Random Servers
+      url: '#get-random-servers'
+    - depth: 2
+      title: Get Servers Index
+      url: '#get-servers-index'
+    - depth: 2
+      title: Add Server
+      url: '#add-server'
+    - depth: 2
+      title: Get Server
+      url: '#get-server'
+    - depth: 2
+      title: Get Server SEO Info
+      url: '#get-server-seo-info'
+    - depth: 2
+      title: Update Server Settings
+      url: '#update-server-settings'
+  structuredData:
+    headings:
+      - content: Get All Servers
+        id: get-all-servers
+      - content: Get Random Servers
+        id: get-random-servers
+      - content: Get Servers Index
+        id: get-servers-index
+      - content: Add Server
+        id: add-server
+      - content: Get Server
+        id: get-server
+      - content: Get Server SEO Info
+        id: get-server-seo-info
+      - content: Update Server Settings
+        id: update-server-settings
+    contents:
+      - content: >-
+          Gets all servers on the list. Returns a set of paginated
+          ``IndexServer`` objects
+        heading: get-all-servers
+      - content: Returns a list of servers from the database in random order
+        heading: get-random-servers
+      - content: >-
+          Gets the index of the server-side of the list. Returns a
+          ``ListIndexServer`` object
+        heading: get-servers-index
+      - content: >-
+          Adds a server to the database from an invite link. Resolves the guild
+          via the invite (the tracking bot does not need to already be in the
+          server). Returns 204 on success
+        heading: add-server
+      - content: Gets a server by id
+        heading: get-server
+      - content: >-
+          Gets the minimal SEO information about a server for embed/search
+          purposes. Used by v4 website for meta tags
+        heading: get-server-seo-info
+      - content: >-
+          Updates a servers settings. You must have 'Edit Server Settings' in
+          the team if the bot is in a team. Returns 204 on success
+        heading: update-server-settings
+---
+
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/servers/@all"},{"method":"get","path":"/servers/@random"},{"method":"get","path":"/servers/@index"},{"method":"put","path":"/servers"},{"method":"get","path":"/servers/{id}"},{"method":"get","path":"/servers/{id}/seo"},{"method":"patch","path":"/servers/{id}/settings"}]} hasHead={true} />

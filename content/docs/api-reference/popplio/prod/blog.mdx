@@ -1,0 +1,35 @@
+---
+title: Blog
+description: These API endpoints are related to blog posts on our list.
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Blog List
+      url: '#get-blog-list'
+    - depth: 2
+      title: Get Blog Post
+      url: '#get-blog-post'
+    - depth: 2
+      title: Get Blog Post
+      url: '#get-blog-post-1'
+  structuredData:
+    headings:
+      - content: Get Blog List
+        id: get-blog-list
+      - content: Get Blog Post
+        id: get-blog-post
+      - content: Get Blog Post
+        id: get-blog-post-1
+    contents:
+      - content: Gets all blog posts on the list in condensed form
+        heading: get-blog-list
+      - content: Gets a blog posts on the list
+        heading: get-blog-post
+      - content: >-
+          Gets the minimal SEO information about a blogpost for embed/search
+          purposes. Used by v4 website for meta tags
+        heading: get-blog-post-1
+---
+
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/blogs/@all"},{"method":"get","path":"/blogs/{slug}"},{"method":"get","path":"/blogs/{slug}/seo"}]} hasHead={true} />

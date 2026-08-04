@@ -1,0 +1,29 @@
+{
+  "title": "Production",
+  "description": "spider.omniplex.gg",
+  "pages": [
+    "bots",
+    "servers",
+    "teams",
+    "bot--packs",
+    "users",
+    "votes",
+    "webhooks",
+    "reviews",
+    "vanity",
+    "payments",
+    "reminders",
+    "notifications",
+    "alerts",
+    "assets",
+    "a-p-i--tokens",
+    "apps",
+    "blog",
+    "list",
+    "platform--specific",
+    "staff",
+    "tasks",
+    "tickets",
+    "diagnostics"
+  ]
+}

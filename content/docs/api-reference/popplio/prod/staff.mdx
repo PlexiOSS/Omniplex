@@ -1,0 +1,28 @@
+---
+title: Staff
+description: >-
+  Staff-only IBL endpoints. Only usable from staff panel using panelapi
+  credentials
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: 'Staff: Get Application List'
+      url: '#staff-get-application-list'
+    - depth: 2
+      title: 'Staff: Manage Application'
+      url: '#staff-manage-application'
+  structuredData:
+    headings:
+      - content: 'Staff: Get Application List'
+        id: staff-get-application-list
+      - content: 'Staff: Manage Application'
+        id: staff-manage-application
+    contents:
+      - content: Gets all applications returning a list of apps.
+        heading: staff-get-application-list
+      - content: Approves or denies an application. Returns a 204 on success.
+        heading: staff-manage-application
+---
+
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/staff/apps"},{"method":"patch","path":"/staff/apps/{app_id}"}]} hasHead={true} />

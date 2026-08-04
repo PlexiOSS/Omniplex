@@ -1,4 +1,5 @@
-import { source } from '@/lib/source';
+import { source, getPageImageUrl } from '@/lib/source';
+import { openapi } from '@/lib/openapi';
 import {
   DocsPage,
   DocsBody,
@@ -22,14 +23,29 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX components={{ ...defaultMdxComponents }} />
+        <MDX
+          components={{
+            ...defaultMdxComponents,
+            APIPage: openapi.APIPage,
+          }}
+        />
       </DocsBody>
     </DocsPage>
   );
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  const params = await source.generateParams();
+
+  // Generated OpenAPI reference pages (content/docs/api-reference/popplio)
+  // pull from a live external schema and render fine on demand, but crash
+  // during static export's serialization step in this fumadocs-openapi
+  // version. Excluding them from static generation here just means they're
+  // rendered per-request instead of prebuilt, which suits pages backed by a
+  // live schema anyway.
+  return params.filter(
+    (p) => !(p.slug?.[0] === 'api-reference' && p.slug?.[1] === 'popplio'),
+  );
 }
 
 export async function generateMetadata(props: {
@@ -42,5 +58,12 @@ export async function generateMetadata(props: {
   return {
     title: page.data.title,
     description: page.data.description,
+    openGraph: {
+      images: getPageImageUrl(page).url,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: getPageImageUrl(page).url,
+    },
   };
 }

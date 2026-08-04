@@ -1,0 +1,15 @@
+{
+  "title": "User Guides",
+  "description": "Basic guides for using Omniplex.",
+  "root": true,
+  "pages": [
+    "index",
+    "getting-started",
+    "voting",
+    "teams",
+    "bot-commands",
+    "rules",
+    "programs",
+    "community"
+  ]
+}

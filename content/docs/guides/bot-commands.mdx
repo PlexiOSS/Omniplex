@@ -1,0 +1,39 @@
+---
+title: Bot Commands
+description: Slash commands for the Omniplex server-tracking bot.
+---
+
+Omniplex's tracking bot manages your server's listing directly from
+Discord. All commands are slash commands.
+
+## `/setup`
+
+Creates your server's listing from within the guild being listed. Requires
+the **Administrator** permission. This creates a team for the server (owned
+by you, and by whoever ran the command if different from the server owner),
+resolves an invite, and takes an initial member/online-count snapshot.
+Other admins can be added to the team afterward through Team Settings on
+the site, `/setup` does not add them automatically.
+
+## `/update`
+
+Updates a specific part of your server's listing (which "pane" to update is
+chosen when you run the command) without leaving Discord.
+
+## `/delete`
+
+Removes your server's listing.
+
+## `/leaderboard`
+
+Shows the server's vote leaderboard. Takes an optional `limit` (how many
+results to show) and an optional filter to only include current server
+members.
+
+## `/stats`
+
+Shows the bot's own stats (uptime, version, environment).
+
+## `/help`
+
+Lists all available commands.

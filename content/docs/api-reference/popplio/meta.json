@@ -1,0 +1,5 @@
+{
+  "title": "Popplio",
+  "description": "Generated from the live OpenAPI schema",
+  "pages": ["prod", "staging"]
+}

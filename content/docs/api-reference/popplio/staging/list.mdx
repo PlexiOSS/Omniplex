@@ -1,0 +1,79 @@
+---
+title: List
+description: These API endpoints are core endpoints of our list.
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get RSS Feed
+      url: '#get-rss-feed'
+    - depth: 2
+      title: Get Sitemap
+      url: '#get-sitemap'
+    - depth: 2
+      title: Search List
+      url: '#search-list'
+    - depth: 2
+      title: Get List Statistics
+      url: '#get-list-statistics'
+    - depth: 2
+      title: Get List Partners
+      url: '#get-list-partners'
+    - depth: 2
+      title: Get Staff Templates
+      url: '#get-staff-templates'
+    - depth: 2
+      title: Get List Team
+      url: '#get-list-team'
+    - depth: 2
+      title: Get Current Status
+      url: '#get-current-status'
+    - depth: 2
+      title: Get Cache Servers
+      url: '#get-cache-servers'
+  structuredData:
+    headings:
+      - content: Get RSS Feed
+        id: get-rss-feed
+      - content: Get Sitemap
+        id: get-sitemap
+      - content: Search List
+        id: search-list
+      - content: Get List Statistics
+        id: get-list-statistics
+      - content: Get List Partners
+        id: get-list-partners
+      - content: Get Staff Templates
+        id: get-staff-templates
+      - content: Get List Team
+        id: get-list-team
+      - content: Get Current Status
+        id: get-current-status
+      - content: Get Cache Servers
+        id: get-cache-servers
+    contents:
+      - content: Gets the RSS feed for the site, in XML format
+        heading: get-rss-feed
+      - content: Gets the sitemap for the site, in XML format
+        heading: get-sitemap
+      - content: >-
+          Searches the list returning a list of bots/servers that match the
+          query
+        heading: search-list
+      - content: Gets basic statistics of the list
+        heading: get-list-statistics
+      - content: Gets the official partners of the list
+        heading: get-list-partners
+      - content: Returns all of the staff templates used for reviewing bots
+        heading: get-staff-templates
+      - content: >-
+          Gets an up to date listing of the staff team of the list. This is
+          currently broken and does not handle permissions yet (TODO)
+        heading: get-list-team
+      - content: Gets the current status of the list
+        heading: get-current-status
+      - content: Returns a list of all available cache servers.
+        heading: get-cache-servers
+---
+
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/list/rss.xml"},{"method":"get","path":"/list/sitemap.xml"},{"method":"post","path":"/list/search"},{"method":"get","path":"/list/stats"},{"method":"get","path":"/list/partners"},{"method":"get","path":"/list/staff-templates"},{"method":"get","path":"/list/team"},{"method":"get","path":"/list/current-status"},{"method":"get","path":"/list/cache-servers"}]} hasHead={true} />

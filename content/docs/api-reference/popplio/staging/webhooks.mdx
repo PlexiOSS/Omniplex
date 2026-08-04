@@ -1,0 +1,75 @@
+---
+title: Webhooks
+description: >-
+  Webhooks are a way to receive events from Infinity Bot List in real time. You
+  can use webhooks to receive events such as new votes, new reviews, and more.
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Webhooks
+      url: '#get-webhooks'
+    - depth: 2
+      title: Create Webhook
+      url: '#create-webhook'
+    - depth: 2
+      title: Update Webhook
+      url: '#update-webhook'
+    - depth: 2
+      title: Delete Webhook
+      url: '#delete-webhook'
+    - depth: 2
+      title: Get Webhook Logs
+      url: '#get-webhook-logs'
+    - depth: 2
+      title: Get Test Webhook Metadata
+      url: '#get-test-webhook-metadata'
+    - depth: 2
+      title: Test Webhook
+      url: '#test-webhook'
+  structuredData:
+    headings:
+      - content: Get Webhooks
+        id: get-webhooks
+      - content: Create Webhook
+        id: create-webhook
+      - content: Update Webhook
+        id: update-webhook
+      - content: Delete Webhook
+        id: delete-webhook
+      - content: Get Webhook Logs
+        id: get-webhook-logs
+      - content: Get Test Webhook Metadata
+        id: get-test-webhook-metadata
+      - content: Test Webhook
+        id: test-webhook
+    contents:
+      - content: >-
+          Gets a list of webhooks of a specific entity (excluding the secret due
+          to security concerns). **Requires the Get Webhooks permission**
+        heading: get-webhooks
+      - content: >-
+          Creates a new webhook for an entity. Returns 204 on success.
+          **Requires Create Webhooks permission**
+        heading: create-webhook
+      - content: >-
+          Updates an existing webhook on an entity. Returns 204 on success.
+          **Requires Edit Webhooks permission**
+        heading: update-webhook
+      - content: >-
+          Updates an existing webhook on an entity. Returns 204 on success.
+          **Requires Edit Webhooks permission**
+        heading: delete-webhook
+      - content: >-
+          Gets webhook logs of a specific entity. Paginated to 10 at a time.
+          **Requires authentication**
+        heading: get-webhook-logs
+      - content: >-
+          Responds with the metadata of all webhooks that can currently be
+          tested. Note that this does not require any specific permission
+        heading: get-test-webhook-metadata
+      - content: Sends a test webhook.
+        heading: test-webhook
+---
+
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/{target_type}/{target_id}/webhooks"},{"method":"post","path":"/{target_type}/{target_id}/webhooks"},{"method":"post","path":"/{target_type}/{target_id}/webhooks/{webhook_id}"},{"method":"delete","path":"/{target_type}/{target_id}/webhooks/{webhook_id}"},{"method":"get","path":"/{target_type}/{target_id}/webhooks/logs"},{"method":"get","path":"/{target_type}/{target_id}/webhooks/test"},{"method":"post","path":"/{target_type}/{target_id}/webhooks/test"}]} hasHead={true} />

@@ -1,0 +1,56 @@
+---
+title: Alerts
+description: These API endpoints are related to user alerts on IBL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get User Alerts
+      url: '#get-user-alerts'
+    - depth: 2
+      title: Patch User Alerts
+      url: '#patch-user-alerts'
+    - depth: 2
+      title: Delete All User Alerts
+      url: '#delete-all-user-alerts'
+    - depth: 2
+      title: Get Featured User Alerts
+      url: '#get-featured-user-alerts'
+    - depth: 2
+      title: Get User Alert By Itag
+      url: '#get-user-alert-by-itag'
+  structuredData:
+    headings:
+      - content: Get User Alerts
+        id: get-user-alerts
+      - content: Patch User Alerts
+        id: patch-user-alerts
+      - content: Delete All User Alerts
+        id: delete-all-user-alerts
+      - content: Get Featured User Alerts
+        id: get-featured-user-alerts
+      - content: Get User Alert By Itag
+        id: get-user-alert-by-itag
+    contents:
+      - content: >-
+          Gets a users alerts.
+
+
+          All alerts are also sent via push notifications if the user has
+          subscribed to them.
+        heading: get-user-alerts
+      - content: >-
+          Updates a set of user alerts with a given 'patch' to apply to the
+          alert. Returns 204 on success
+        heading: patch-user-alerts
+      - content: Deletes all user alerts. Returns 204 on success
+        heading: delete-all-user-alerts
+      - content: Gets the featured user alerts of the user.
+        heading: get-featured-user-alerts
+      - content: >-
+          Gets a single user alert based on its `itag`. This returns an
+          alertlist to aid with consistency.
+        heading: get-user-alert-by-itag
+---
+
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/users/{id}/alerts"},{"method":"patch","path":"/users/{id}/alerts"},{"method":"delete","path":"/users/{id}/alerts"},{"method":"get","path":"/users/{id}/alerts/@featured"},{"method":"get","path":"/users/{id}/alerts/{itag}"}]} hasHead={true} />

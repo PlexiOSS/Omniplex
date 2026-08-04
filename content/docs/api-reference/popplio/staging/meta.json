@@ -1,0 +1,30 @@
+{
+  "title": "Staging",
+  "description": "spider-staging.omniplex.gg",
+  "pages": [
+    "bots",
+    "servers",
+    "teams",
+    "bot--packs",
+    "users",
+    "votes",
+    "webhooks",
+    "reviews",
+    "vanity",
+    "payments",
+    "shop",
+    "reminders",
+    "notifications",
+    "alerts",
+    "assets",
+    "a-p-i--tokens",
+    "apps",
+    "blog",
+    "list",
+    "platform--specific",
+    "staff",
+    "tasks",
+    "tickets",
+    "diagnostics"
+  ]
+}

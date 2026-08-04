@@ -1,0 +1,42 @@
+---
+title: Notifications
+description: These API endpoints are related to user notifications on IBL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Notifications Info
+      url: '#get-notifications-info'
+    - depth: 2
+      title: Get User Notifications
+      url: '#get-user-notifications'
+    - depth: 2
+      title: Create User Notification
+      url: '#create-user-notification'
+    - depth: 2
+      title: Delete User Notifications
+      url: '#delete-user-notifications'
+  structuredData:
+    headings:
+      - content: Get Notifications Info
+        id: get-notifications-info
+      - content: Get User Notifications
+        id: get-user-notifications
+      - content: Create User Notification
+        id: create-user-notification
+      - content: Delete User Notifications
+        id: delete-user-notifications
+    contents:
+      - content: Gets info needed to subscribe to push notifications (VAPID public key)
+        heading: get-notifications-info
+      - content: Gets a users notifications
+        heading: get-user-notifications
+      - content: >-
+          Creates a new subscription for a push notification. Returns 204 on
+          success
+        heading: create-user-notification
+      - content: Deletes a users notification. Returns 204 on success
+        heading: delete-user-notifications
+---
+
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/users/notifications/info"},{"method":"get","path":"/users/{id}/notifications"},{"method":"post","path":"/users/{id}/notifications"},{"method":"delete","path":"/users/{id}/notification"}]} hasHead={true} />

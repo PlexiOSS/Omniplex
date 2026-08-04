@@ -1,0 +1,57 @@
+---
+title: Webhooks
+description: >-
+  Webhooks are a way to receive events from Infinity Bot List in real time. You
+  can use webhooks to receive events such as new votes, new reviews, and more.
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Webhooks
+      url: '#get-webhooks'
+    - depth: 2
+      title: Update Entity Webhook
+      url: '#update-entity-webhook'
+    - depth: 2
+      title: Get Webhook Logs
+      url: '#get-webhook-logs'
+    - depth: 2
+      title: Get Test Webhook Metadata
+      url: '#get-test-webhook-metadata'
+    - depth: 2
+      title: Test Webhook
+      url: '#test-webhook'
+  structuredData:
+    headings:
+      - content: Get Webhooks
+        id: get-webhooks
+      - content: Update Entity Webhook
+        id: update-entity-webhook
+      - content: Get Webhook Logs
+        id: get-webhook-logs
+      - content: Get Test Webhook Metadata
+        id: get-test-webhook-metadata
+      - content: Test Webhook
+        id: test-webhook
+    contents:
+      - content: >-
+          Gets a list of webhooks of a specific entity (excluding the secret due
+          to security concerns). **Requires authentication**
+        heading: get-webhooks
+      - content: >-
+          Updates the webhooks of an entity. Note that only provided webhooks
+          are edited. Returns 204 on success
+        heading: update-entity-webhook
+      - content: >-
+          Gets webhook logs of a specific entity. Paginated to 10 at a time.
+          **Requires authentication**
+        heading: get-webhook-logs
+      - content: >-
+          Responds with the metadata of all webhooks that can currently be
+          tested. Note that this does not require any specific permission
+        heading: get-test-webhook-metadata
+      - content: Sends a test webhook.
+        heading: test-webhook
+---
+
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/users/{uid}/webhooks/{target_id}"},{"method":"patch","path":"/users/{uid}/webhooks/{target_id}"},{"method":"get","path":"/users/{uid}/webhooks/{target_id}/logs"},{"method":"get","path":"/webhooks/tests/meta"},{"method":"post","path":"/users/{uid}/webhooks/{target_id}/test"}]} hasHead={true} />

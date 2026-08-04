@@ -1,0 +1,34 @@
+---
+title: Diagnostics
+description: >-
+  These API endpoints allow diagnosing potential issues within our API or within
+  any frontend application.
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Ping Server
+      url: '#ping-server'
+    - depth: 2
+      title: Ping Server (HEAD)
+      url: '#ping-server-head'
+  structuredData:
+    headings:
+      - content: Ping Server
+        id: ping-server
+      - content: Ping Server (HEAD)
+        id: ping-server-head
+    contents:
+      - content: >-
+          This is a simple ping endpoint to check if the API is online. It will
+          return a simple JSON object with a message, docs link, our site link
+          and status page link.
+        heading: ping-server
+      - content: >-
+          This is a simple ping endpoint to check if the API is online. It will
+          return a simple JSON object with a message, docs link, our site link
+          and status page link.
+        heading: ping-server-head
+---
+
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/"},{"method":"head","path":"/"}]} hasHead={true} />

@@ -1,0 +1,53 @@
+---
+title: Posting Bot Stats
+description: Keeping your bot's server count and presence up to date.
+---
+
+Your bot should periodically post its stats so its server count, shard
+count, and presence stay accurate on its listing.
+
+## Endpoint
+
+```
+POST /bots/stats
+```
+
+Requires **Bot-Auth** (your bot's own token, `Bot-Auth: <token>`, or
+`Authorization: Bot <token>`). There's no rate limit on this endpoint, post
+as often as makes sense for your bot (for example, on every `READY`/shard
+reconnect, and periodically after that).
+
+## Body
+
+Every field is optional. Only send what you actually have, omitted fields
+keep whatever value was last posted rather than being reset to zero.
+
+```json
+{
+  "servers": 1234,
+  "shards": 4,
+  "users": 56789,
+  "shard_list": [0, 1, 2, 3],
+  "status": "online"
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `servers` | number | Server count. |
+| `shards` | number | Shard count. |
+| `users` | number | User count. Not currently shown on the site. |
+| `shard_list` | number[] | The shard IDs this process handles. |
+| `status` | string | One of `online`, `idle`, `dnd`, `offline`. See below. |
+
+## Self-reported presence
+
+Most bots don't share a guild with Omniplex's own Discord client, so there's
+usually no real gateway presence to read for your bot. `status` lets you
+report it yourself instead, post it periodically to keep it fresh, it
+otherwise keeps showing the last value you sent.
+
+If you never send `status` at all, but you do post stats regularly with a
+nonzero `servers` count, your bot is still shown as online rather than
+falling back to an (almost always stale) gateway-derived status, a recent
+stats post is treated as evidence the bot is actually running.

@@ -1,0 +1,30 @@
+---
+title: API Tokens
+description: These API endpoints are related to API Tokens on IBL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Entity Token
+      url: '#get-entity-token'
+    - depth: 2
+      title: Reset Entity Token
+      url: '#reset-entity-token'
+  structuredData:
+    headings:
+      - content: Get Entity Token
+        id: get-entity-token
+      - content: Reset Entity Token
+        id: reset-entity-token
+    contents:
+      - content: >-
+          Gets the API token of an entity. You must have 'View Existing Tokens'
+          for the entity in the team.
+        heading: get-entity-token
+      - content: >-
+          Reset the API token of an entity. You must have 'Reset Tokens' for the
+          entity in the team. Returns the new token on success
+        heading: reset-entity-token
+---
+
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/users/{uid}/tokens/{target_id}"},{"method":"patch","path":"/users/{uid}/tokens/{target_id}"}]} hasHead={true} />
