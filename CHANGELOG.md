@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - Unreleased
+
+### Fixed
+
+- Staff Panel sign-in on prod failed with a misleading "Method Not Allowed"
+  whenever `NEXT_PUBLIC_ARCADIA_URL` was configured with a trailing slash:
+  `postQuery()` always appends its own `/`, so the request landed on a
+  double-slash URL, which the panel API 301-redirects to the real path —
+  and per the Fetch spec, a `POST` following a `301` is replayed as a `GET`,
+  which the panel API correctly (but confusingly) rejects with
+  `405 Method Not Allowed`. `ARCADIA_URL` now strips any trailing slash.
+
 ## [0.1.0] - 2026-08-04
 
 ### Added
@@ -162,13 +174,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   match any OAuth2 scope Arcadia actually registers (`infinity-list`) —
   staff panel login failed OAuth validation for anyone relying on the
   default rather than an explicit `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` env var.
-- Staff Panel sign-in on prod failed with a misleading "Method Not Allowed"
-  whenever `NEXT_PUBLIC_ARCADIA_URL` was configured with a trailing slash:
-  `postQuery()` always appends its own `/`, so the request landed on a
-  double-slash URL, which the panel API 301-redirects to the real path —
-  and per the Fetch spec, a `POST` following a `301` is replayed as a `GET`,
-  which the panel API correctly (but confusingly) rejects with
-  `405 Method Not Allowed`. `ARCADIA_URL` now strips any trailing slash.
 - The status page's "Staff Panel" check called `arcadia.auth.begin(...)`
   with a hardcoded production redirect URL (`https://omniplex.gg`)
   regardless of which environment was actually running. On staging, this
