@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.1] - Unreleased
 
+### Changed
+
+- Bot/server dashboard cards were getting crowded as more per-item actions
+  were added (Stats, Tokens, Delete). View and Edit stay as direct buttons;
+  everything else now lives behind a "more actions" dropdown (new
+  `components/ui/Dropdown.tsx`).
+
+### Added
+
+- A "Test" button on a freshly created token, using Popplio's existing
+  `POST /auth/test` to confirm it actually authorizes before dismissing it —
+  disabled for now pending a Popplio deploy (see Popplio's changelog for the
+  bug that endpoint needed fixed first).
+- API token management, backed by Popplio's existing (previously unexposed
+  on the frontend) generic `/{target_type}/{target_id}/sessions` endpoints:
+  a new "API Tokens" dashboard tab for a user's own personal tokens, and a
+  "Tokens" button on bot/server cards (visible to team members with
+  `view_sessions`/`manage_sessions`) for tokens scoped to that bot or
+  server. Supports creating a token with a name, expiry, and an optional
+  restricted permission set (via the same `PermSelector` used for team
+  member permissions), and revoking existing ones. A newly created token's
+  raw value is shown exactly once, since Popplio never stores or re-serves
+  it after creation.
+
 ### Fixed
 
 - Staff Panel sign-in on prod failed with a misleading "Method Not Allowed"

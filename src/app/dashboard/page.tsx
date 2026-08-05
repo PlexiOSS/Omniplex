@@ -6,7 +6,9 @@ import {
   Bot,
   GitBranch,
   Globe,
+  KeyRound,
   LayoutDashboard,
+  MoreHorizontal,
   Package,
   Pencil,
   Plus,
@@ -20,9 +22,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Container } from "@/components/layout/Container";
+import { TokenManager } from "@/components/sessions/TokenManager";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
@@ -35,15 +39,23 @@ import type {
   Team,
   User as UserType,
 } from "@/lib/api/types";
-import { hasPermString } from "@/lib/permissions";
+import { hasAnyPermString, hasPermString } from "@/lib/permissions";
 import { resolveAsset } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { BotEditModal } from "./BotEditModal";
 import { PacksTab } from "./PacksTab";
 import { ServerEditModal } from "./ServerEditModal";
 import { BotStatsModal, ServerStatsModal } from "./StatsModal";
+import { TokenModal } from "./TokenModal";
 
-type Tab = "overview" | "profile" | "bots" | "servers" | "packs" | "teams";
+type Tab =
+  | "overview"
+  | "profile"
+  | "bots"
+  | "servers"
+  | "packs"
+  | "teams"
+  | "tokens";
 
 const BOT_STATUS: Record<
   BotType,
@@ -329,6 +341,7 @@ function BotItem({
   mutate,
   team,
   canManage = true,
+  myFlags = ["owner"],
 }: {
   bot: IndexBot;
   token: string;
@@ -338,12 +351,20 @@ function BotItem({
   team?: Team;
   /** Whether the current user has permission to edit/delete this bot. Always true for directly-owned bots. */
   canManage?: boolean;
+  /** The current user's resolved flags on this bot's team — defaults to owner for directly-owned bots. */
+  myFlags?: string[];
 }) {
   const [deleting, setDeleting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [editing, setEditing] = useState(false);
   const [viewingStats, setViewingStats] = useState(false);
+  const [viewingTokens, setViewingTokens] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canSeeTokens = hasAnyPermString(myFlags, [
+    "view_sessions",
+    "manage_sessions",
+  ]);
 
   const status = BOT_STATUS[bot.type];
 
@@ -358,7 +379,10 @@ function BotItem({
     setDeleting(true);
     bots
       .deleteBot(bot.bot_id, token)
-      .then(() => onDeleted(bot.bot_id))
+      .then(() => {
+        setMenuOpen(false);
+        onDeleted(bot.bot_id);
+      })
       .catch(() => setDeleting(false));
   }
 
@@ -408,38 +432,63 @@ function BotItem({
             View
             <ArrowUpRight size={11} />
           </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setViewingStats(true)}
-            className="px-2 text-xs h-7"
-          >
-            <BarChart2 size={12} />
-            Stats
-          </Button>
           {canManage && (
-            <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditing(true)}
+              className="px-2 text-xs h-7"
+            >
+              <Pencil size={12} />
+              Edit
+            </Button>
+          )}
+          <Dropdown
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            trigger={
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setEditing(true)}
-                className="px-2 text-xs h-7"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="px-1.5 text-xs h-7"
+                aria-label="More actions"
               >
-                <Pencil size={12} />
-                Edit
+                <MoreHorizontal size={14} />
               </Button>
-              <Button
-                variant={confirming ? "danger" : "ghost"}
-                size="sm"
+            }
+          >
+            <DropdownItem
+              icon={<BarChart2 size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                setViewingStats(true);
+              }}
+            >
+              Stats
+            </DropdownItem>
+            {canSeeTokens && (
+              <DropdownItem
+                icon={<KeyRound size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingTokens(true);
+                }}
+              >
+                Tokens
+              </DropdownItem>
+            )}
+            {canManage && (
+              <DropdownItem
+                icon={<Trash2 size={14} />}
+                danger
                 loading={deleting}
                 onClick={handleDeleteClick}
-                className="px-2 text-xs h-7"
               >
-                <Trash2 size={12} />
                 {confirming ? "Confirm?" : "Delete"}
-              </Button>
-            </>
-          )}
+              </DropdownItem>
+            )}
+          </Dropdown>
         </div>
       </div>
 
@@ -449,6 +498,17 @@ function BotItem({
           token={token}
           onClose={() => setEditing(false)}
           onSaved={mutate}
+        />
+      )}
+
+      {viewingTokens && (
+        <TokenModal
+          title="Bot API Tokens"
+          targetType="bot"
+          targetId={bot.bot_id}
+          authToken={token}
+          myPerms={myFlags}
+          onClose={() => setViewingTokens(false)}
         />
       )}
 
@@ -466,6 +526,7 @@ interface TeamBot {
   bot: IndexBot;
   team: Team;
   canManage: boolean;
+  myFlags: string[];
 }
 
 function BotsTab({
@@ -539,7 +600,7 @@ function BotsTab({
             Team Bots
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {teamBotList.map(({ bot, team, canManage }) => (
+            {teamBotList.map(({ bot, team, canManage, myFlags }) => (
               <BotItem
                 key={bot.bot_id}
                 bot={bot}
@@ -548,6 +609,7 @@ function BotsTab({
                 onDeleted={handleDeleted}
                 team={team}
                 canManage={canManage}
+                myFlags={myFlags}
               />
             ))}
           </div>
@@ -561,23 +623,32 @@ interface TeamServer {
   server: IndexServer;
   team: Team;
   canManage: boolean;
+  myFlags: string[];
 }
 
 function ServerItem({
   server,
   team,
   canManage,
+  myFlags,
   token,
   mutate,
 }: {
   server: IndexServer;
   team: Team;
   canManage: boolean;
+  myFlags: string[];
   token: string;
   mutate: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [viewingStats, setViewingStats] = useState(false);
+  const [viewingTokens, setViewingTokens] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const canSeeTokens = hasAnyPermString(myFlags, [
+    "view_sessions",
+    "manage_sessions",
+  ]);
   const avatarSrc =
     server.avatar ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
@@ -628,15 +699,6 @@ function ServerItem({
             View
             <ArrowUpRight size={11} />
           </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setViewingStats(true)}
-            className="px-2 text-xs h-7"
-          >
-            <BarChart2 size={12} />
-            Stats
-          </Button>
           {canManage && (
             <Button
               variant="ghost"
@@ -648,6 +710,42 @@ function ServerItem({
               Edit
             </Button>
           )}
+          <Dropdown
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            trigger={
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="px-1.5 text-xs h-7"
+                aria-label="More actions"
+              >
+                <MoreHorizontal size={14} />
+              </Button>
+            }
+          >
+            <DropdownItem
+              icon={<BarChart2 size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                setViewingStats(true);
+              }}
+            >
+              Stats
+            </DropdownItem>
+            {canSeeTokens && (
+              <DropdownItem
+                icon={<KeyRound size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingTokens(true);
+                }}
+              >
+                Tokens
+              </DropdownItem>
+            )}
+          </Dropdown>
         </div>
       </div>
 
@@ -664,6 +762,17 @@ function ServerItem({
         <ServerStatsModal
           serverId={server.server_id}
           onClose={() => setViewingStats(false)}
+        />
+      )}
+
+      {viewingTokens && (
+        <TokenModal
+          title="Server API Tokens"
+          targetType="server"
+          targetId={server.server_id}
+          authToken={token}
+          myPerms={myFlags}
+          onClose={() => setViewingTokens(false)}
         />
       )}
     </div>
@@ -714,12 +823,13 @@ function ServersTab({
         </Link>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {teamServers.map(({ server, team, canManage }) => (
+        {teamServers.map(({ server, team, canManage, myFlags }) => (
           <ServerItem
             key={server.server_id}
             server={server}
             team={team}
             canManage={canManage}
+            myFlags={myFlags}
             token={token}
             mutate={mutate}
           />
@@ -790,6 +900,7 @@ const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "servers", label: "Servers", icon: ServerIcon },
   { key: "packs", label: "Packs", icon: Package },
   { key: "teams", label: "Teams", icon: Users },
+  { key: "tokens", label: "API Tokens", icon: KeyRound },
 ];
 
 export default function DashboardPage() {
@@ -854,6 +965,7 @@ export default function DashboardPage() {
       bot,
       team,
       canManage,
+      myFlags,
     }));
   });
 
@@ -868,6 +980,7 @@ export default function DashboardPage() {
       server,
       team,
       canManage,
+      myFlags,
     }));
   });
 
@@ -966,6 +1079,22 @@ export default function DashboardPage() {
         />
       )}
       {tab === "teams" && <TeamsTab teams={normalizedMe.user_teams} />}
+      {tab === "tokens" && (
+        <div className="max-w-xl">
+          <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
+            Personal API tokens act as you across every endpoint. Bot- and
+            server-scoped tokens can be managed from each listing&apos;s
+            &quot;Tokens&quot; button on the Bots/Servers tabs.
+          </p>
+          <TokenManager
+            targetType="user"
+            targetId={session.user_id}
+            authToken={session.token}
+            myPerms={["owner"]}
+            isSelf
+          />
+        </div>
+      )}
     </Container>
   );
 }

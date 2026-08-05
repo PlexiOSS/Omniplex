@@ -7,6 +7,7 @@ export { packsResource as packs } from "./resources/packs";
 export { reviewsResource as reviews } from "./resources/reviews";
 export { searchResource as search } from "./resources/search";
 export { serversResource as servers } from "./resources/servers";
+export { sessionsResource as sessions } from "./resources/sessions";
 export { staffResource as staff } from "./resources/staff";
 export { teamsResource as teams } from "./resources/teams";
 export { usersResource as users } from "./resources/users";

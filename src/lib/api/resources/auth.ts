@@ -1,5 +1,5 @@
 import { client } from "../client";
-import type { AuthSession, User } from "../types";
+import type { AuthSession, TestAuthResult, User } from "../types";
 
 export interface OauthMeta {
   client_id: string;
@@ -48,4 +48,12 @@ export const authResource = {
       display_name: user.user?.display_name ?? "",
     };
   },
+
+  /** Checks whether a token is currently valid for a given target, without spending it on a real request. */
+  testAuth: (authType: string, targetId: string, token: string) =>
+    client.post<TestAuthResult>(
+      "/auth/test",
+      { auth_type: authType, target_id: targetId, token },
+      { cache: "no-store" },
+    ),
 };
