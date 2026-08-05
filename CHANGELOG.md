@@ -7,15 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.1] - Unreleased
 
-### Changed
-
-- Bot/server dashboard cards were getting crowded as more per-item actions
-  were added (Stats, Tokens, Delete). View and Edit stay as direct buttons;
-  everything else now lives behind a "more actions" dropdown (new
-  `components/ui/Dropdown.tsx`).
-
 ### Added
 
+- A public `/partners` page — the `GET /list/partners` client and types
+  already existed (used on the homepage) but nothing ever linked to a
+  dedicated page. Groups partners by partner type, shows their links and
+  (if set) a direct link to their bot listing.
+- The main header nav gets the same dropdown-grouping treatment as the admin
+  one: Bots/Servers/Packs collapse into "Browse", and Blog/Partners/
+  Documentation/About — previously footer-only — collapse into "Community",
+  reachable from anywhere now instead of just the footer.
+- Public and admin Search both pre-fill with real content on load instead of
+  a blank page: admin search runs an empty query (which matches everything)
+  on mount and on target-type switch; public search browses the full
+  bot/server listing (real backend pagination via `/bots|servers/@all`)
+  until a query or tag is submitted, at which point it switches to paginated
+  search results (client-side, since `/list/search` has no server-side
+  pagination).
+- Three new staff admin sections, backed by Arcadia panel RPC methods that
+  already existed in Popplio but had no Omniplex UI at all:
+  - **Blog** (`/admin/blog`) — full list/create/edit/delete for posts on the
+    public `/blog` section, using the `UpdateBlog` RPC (`manage_blog`).
+    New posts publish immediately; existing ones can be toggled to draft.
+  - **Partners** (`/admin/partners`) — full CRUD for featured partners
+    (`UpdatePartners`, `manage_partners`), including link validation
+    (must be `https://`). Partner *types* aren't manageable from here yet —
+    there's no RPC for creating one, only for assigning an existing type
+    to a partner.
+  - **Disciplinary Types** (`/admin/staff/disciplinary-types`) — full CRUD
+    for staff warning/suspension templates (`UpdateStaffDisciplinaryType`,
+    `manage_disciplinaries`): self-assignable, additory, needs-approval,
+    max expiry, and a permission-limit picker reusing `ArcadiaPermSelector`.
+
+  Two other backend-ready gaps were identified but deferred (larger scope):
+  staff application review (`GET/PATCH /staff/apps*`) and the shop/economy
+  admin surface (vote-credit tiers, shop items, item benefits, coupons,
+  bot whitelist — five separate CRUD areas under `ops_shop.go`).
 - A "Test" button on a freshly created token, using Popplio's existing
   `POST /auth/test` to confirm it actually authorizes before dismissing it —
   disabled for now pending a Popplio deploy (see Popplio's changelog for the
@@ -31,8 +58,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   raw value is shown exactly once, since Popplio never stores or re-serves
   it after creation.
 
+### Changed
+
+- Admin panel polish pass: the nav bar had grown to 10 flat links as sections
+  were added — related pages now group into "Staff" and "Content" dropdowns
+  (new `NavGroupMenu`, also used to rebuild the existing "Create" menu for
+  consistency). Every admin list page now shares one header component
+  (`AdminPageHeader`) and container width (`max-w-5xl` — several pages were
+  still on `max-w-4xl`, causing the page width to visibly jump between
+  sections). RPC Logs and Partners showed raw Discord user IDs where every
+  other admin page already resolves them to a username/avatar (matching the
+  Bot Queue's existing `claimed_by` resolution) — both now do the same.
+- Bot/server dashboard cards were getting crowded as more per-item actions
+  were added (Stats, Tokens, Delete). View and Edit stay as direct buttons;
+  everything else now lives behind a "more actions" dropdown (new
+  `components/ui/Dropdown.tsx`).
+
 ### Fixed
 
+- The homepage's Partners section resolved each partner's avatar via
+  `resolveAsset(partner.avatar)`, but Popplio's public partner response has
+  no `avatar` field at all (only ever had it on the type, not the wire) — a
+  partner's image is `partner.user.avatar`, already a full resolved URL.
+  Every partner avatar on the homepage was silently blank as a result. Fixed
+  there and used correctly in the new `/partners` page.
 - Staff Panel sign-in on prod failed with a misleading "Method Not Allowed"
   whenever `NEXT_PUBLIC_ARCADIA_URL` was configured with a trailing slash:
   `postQuery()` always appends its own `/`, so the request landed on a

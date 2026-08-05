@@ -228,20 +228,20 @@ export default function AddBotPage() {
           </p>
         </div>
 
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-accent/20 bg-accent/5 p-4 text-sm text-zinc-700 dark:text-zinc-300">
+        <div className="flex items-start gap-3 p-4 mb-6 text-sm border rounded-xl border-accent/20 bg-accent/5 text-zinc-700 dark:text-zinc-300">
           <BookOpen size={16} className="mt-0.5 shrink-0 text-accent" />
           <p>
             Before submitting, please read the{" "}
             <Link
-              href="/kb/bots/rules"
-              className="font-medium text-accent underline underline-offset-2"
+              href="https://docs.omniplex.gg/docs/guides/rules/bots"
+              className="font-medium underline text-accent underline-offset-2"
             >
               Bot Rules
             </Link>{" "}
             and{" "}
             <Link
               href="/kb/bots/page-rules"
-              className="font-medium text-accent underline underline-offset-2"
+              className="font-medium underline text-accent underline-offset-2"
             >
               Page Rules
             </Link>
@@ -290,11 +290,11 @@ export default function AddBotPage() {
           </div>
         ) : !confirmed ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800">
+            <div className="p-5 border rounded-2xl border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center gap-4">
                 <Avatar src={botMeta.avatar} alt={botMeta.name} size={64} />
                 <div className="min-w-0">
-                  <p className="truncate text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                  <p className="text-lg font-semibold truncate text-zinc-950 dark:text-zinc-50">
                     {botMeta.name}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -303,7 +303,7 @@ export default function AddBotPage() {
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mt-4">
                 <Badge variant="success">
                   <ShieldCheck size={11} />
                   Public
@@ -324,7 +324,7 @@ export default function AddBotPage() {
               </div>
 
               {botMeta.description && (
-                <p className="mt-3 line-clamp-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="mt-3 text-sm line-clamp-3 text-zinc-500 dark:text-zinc-400">
                   {botMeta.description}
                 </p>
               )}
@@ -355,9 +355,9 @@ export default function AddBotPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Fetched bot identity — name comes straight from Discord and
                 can't be edited here, it's re-fetched from the Bot ID above. */}
-            <div className="flex items-center gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
+            <div className="flex items-center gap-3 p-3 border rounded-xl border-zinc-200 dark:border-zinc-800">
               <Avatar src={botMeta.avatar} alt={botMeta.name} size={40} />
-              <div className="min-w-0 flex-1">
+              <div className="flex-1 min-w-0">
                 <Input
                   id="bot_name"
                   label="Bot Name"
