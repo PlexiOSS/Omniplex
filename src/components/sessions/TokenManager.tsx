@@ -17,7 +17,7 @@ type TargetType = "user" | "bot" | "server" | "team";
 // synthetic route it builds internally, so it 500ed on every valid token)
 // that hasn't been deployed yet. Flip this once that's live — the button
 // stays in the UI, just disabled, so there's nothing else to wire up later.
-const TEST_AUTH_ENABLED = false;
+const TEST_AUTH_ENABLED = true;
 
 interface TokenManagerProps {
   targetType: TargetType;
