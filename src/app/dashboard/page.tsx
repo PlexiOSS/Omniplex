@@ -2,6 +2,7 @@
 
 import {
   ArrowUpRight,
+  BarChart2,
   Bot,
   GitBranch,
   Globe,
@@ -40,6 +41,7 @@ import { formatCount } from "@/lib/utils/format";
 import { BotEditModal } from "./BotEditModal";
 import { PacksTab } from "./PacksTab";
 import { ServerEditModal } from "./ServerEditModal";
+import { BotStatsModal, ServerStatsModal } from "./StatsModal";
 
 type Tab = "overview" | "profile" | "bots" | "servers" | "packs" | "teams";
 
@@ -340,6 +342,7 @@ function BotItem({
   const [deleting, setDeleting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [viewingStats, setViewingStats] = useState(false);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const status = BOT_STATUS[bot.type];
@@ -405,6 +408,15 @@ function BotItem({
             View
             <ArrowUpRight size={11} />
           </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setViewingStats(true)}
+            className="px-2 text-xs h-7"
+          >
+            <BarChart2 size={12} />
+            Stats
+          </Button>
           {canManage && (
             <>
               <Button
@@ -437,6 +449,13 @@ function BotItem({
           token={token}
           onClose={() => setEditing(false)}
           onSaved={mutate}
+        />
+      )}
+
+      {viewingStats && (
+        <BotStatsModal
+          botId={bot.bot_id}
+          onClose={() => setViewingStats(false)}
         />
       )}
     </div>
@@ -477,6 +496,11 @@ function BotsTab({
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           You haven&apos;t listed any bots yet.
         </p>
+        <Link href="/bots/add" className="mt-4">
+          <Button variant="secondary" size="sm">
+            Add a Bot
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -484,9 +508,16 @@ function BotsTab({
   return (
     <div className="space-y-10">
       <div>
-        <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-          {botList.length} {botList.length === 1 ? "bot" : "bots"}
-        </p>
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {botList.length} {botList.length === 1 ? "bot" : "bots"}
+          </p>
+          <Link href="/bots/add">
+            <Button variant="secondary" size="sm">
+              Add a Bot
+            </Button>
+          </Link>
+        </div>
         {botList.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {botList.map((bot) => (
@@ -546,6 +577,7 @@ function ServerItem({
   mutate: () => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const [viewingStats, setViewingStats] = useState(false);
   const avatarSrc =
     server.avatar ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
@@ -596,6 +628,15 @@ function ServerItem({
             View
             <ArrowUpRight size={11} />
           </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setViewingStats(true)}
+            className="px-2 text-xs h-7"
+          >
+            <BarChart2 size={12} />
+            Stats
+          </Button>
           {canManage && (
             <Button
               variant="ghost"
@@ -616,6 +657,13 @@ function ServerItem({
           token={token}
           onClose={() => setEditing(false)}
           onSaved={mutate}
+        />
+      )}
+
+      {viewingStats && (
+        <ServerStatsModal
+          serverId={server.server_id}
+          onClose={() => setViewingStats(false)}
         />
       )}
     </div>
@@ -706,10 +754,15 @@ function TeamItem({ team }: { team: Team }) {
 function TeamsTab({ teams }: { teams: Team[] }) {
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {teams.length} {teams.length === 1 ? "team" : "teams"}
         </p>
+        <Link href="/teams/add">
+          <Button variant="secondary" size="sm">
+            Create Team
+          </Button>
+        </Link>
       </div>
 
       {teams.length === 0 ? (

@@ -69,6 +69,11 @@ export default async function StatusPage() {
       detail: api.ok ? "All systems operational" : "Unable to reach backend",
     },
     {
+      name: "Assets",
+      ...cdn,
+      detail: cdn.ok ? "Assets serving normally" : "May be affected",
+    },
+    {
       name: "Bot Listings",
       ...botListings,
       detail: botListings.ok ? "Serving normally" : "Degraded",
@@ -84,12 +89,12 @@ export default async function StatusPage() {
       detail: packListings.ok ? "Serving normally" : "Degraded",
     },
     {
-      name: "Blog",
+      name: "Blog Service",
       ...blogService,
       detail: blogService.ok ? "Serving normally" : "Degraded",
     },
     {
-      name: "Search",
+      name: "Search Service",
       ...searchService,
       detail: searchService.ok ? "Serving normally" : "Degraded",
     },
@@ -97,11 +102,6 @@ export default async function StatusPage() {
       name: "Discord Auth",
       ...discordAuth,
       detail: discordAuth.ok ? "Discord OAuth operational" : "May be affected",
-    },
-    {
-      name: "CDN",
-      ...cdn,
-      detail: cdn.ok ? "Assets serving normally" : "May be affected",
     },
     {
       name: "Staff Panel",
@@ -158,7 +158,7 @@ export default async function StatusPage() {
                   {service.detail}
                 </p>
               </div>
-              <div className="flex shrink-0 items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 <span className="font-mono text-xs text-zinc-400 dark:text-zinc-600">
                   {service.ms}ms
                 </span>
@@ -172,18 +172,18 @@ export default async function StatusPage() {
           ))}
         </div>
 
-        <p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-600">
+        <p className="mt-6 text-xs text-center text-zinc-400 dark:text-zinc-600">
           Status is determined by live availability checks against each service.
           Last checked {checkedAt} UTC.
         </p>
 
-        <p className="mt-2 text-center text-xs text-zinc-400 dark:text-zinc-600">
+        <p className="mt-2 text-xs text-center text-zinc-400 dark:text-zinc-600">
           Does something look wrong?{" "}
           <a
             href={SOCIAL_LINKS.discord}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent underline underline-offset-2"
+            className="underline text-accent underline-offset-2"
           >
             Let us know on Discord
           </a>
