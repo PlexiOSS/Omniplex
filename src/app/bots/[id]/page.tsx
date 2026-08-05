@@ -1,4 +1,11 @@
-import { ArrowLeft, ExternalLink, Server, Star } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Eye,
+  MousePointerClick,
+  Server,
+  Star,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,10 +15,11 @@ import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { resolveAsset } from "@/lib/utils/assets";
+import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
@@ -74,6 +82,12 @@ export default async function BotPage({ params }: Props) {
         <ArrowLeft size={14} />
         Back to bots
       </Link>
+
+      <Banner
+        src={bannerUrl("bots", bot.bot_id)}
+        alt={bot.user.username}
+        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main */}
@@ -182,11 +196,16 @@ export default async function BotPage({ params }: Props) {
                   value={formatCount(bot.shards)}
                 />
               )}
-              {bot.prefix && (
+              <StatRow
+                icon={<Eye size={14} />}
+                label="Page Views"
+                value={formatCount(bot.clicks)}
+              />
+              {bot.invite_clicks > 0 && (
                 <StatRow
-                  icon={<span className="font-mono text-xs">{bot.prefix}</span>}
-                  label="Prefix"
-                  value={bot.prefix}
+                  icon={<MousePointerClick size={14} />}
+                  label="Invite Clicks"
+                  value={formatCount(bot.invite_clicks)}
                 />
               )}
               {bot.library && (
@@ -207,10 +226,7 @@ export default async function BotPage({ params }: Props) {
                   className="flex items-center gap-2.5"
                 >
                   <Avatar
-                    src={
-                      resolveAsset(bot.team_owner.avatar) ??
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(bot.team_owner.name)}&size=64&background=random`
-                    }
+                    src={teamAvatarUrl(bot.team_owner.id)}
                     alt={bot.team_owner.name}
                     size={32}
                   />

@@ -6,6 +6,7 @@ import type {
   IndexBot,
   ListIndexBot,
   PagedResult,
+  PatchBotTeamPayload,
   UserVote,
 } from "../types";
 
@@ -60,4 +61,17 @@ export const botsResource = {
 
   updateBot: (botId: string, payload: BotSettingsUpdate, token: string) =>
     client.patch<void>(`/bots/${botId}/settings`, payload, { token }),
+
+  /** Transfers a bot to a different team. Requires "Delete Bots" on the bot's
+   * current team and "Add Bots" on the destination team — servers have no
+   * equivalent endpoint. */
+  transferTeam: (
+    userId: string,
+    botId: string,
+    payload: PatchBotTeamPayload,
+    token: string,
+  ) =>
+    client.patch<void>(`/users/${userId}/bots/${botId}/teams`, payload, {
+      token,
+    }),
 };

@@ -16,6 +16,7 @@ import {
   Trash2,
   User,
   Users,
+  Webhook as WebhookIcon,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,13 +41,15 @@ import type {
   User as UserType,
 } from "@/lib/api/types";
 import { hasAnyPermString, hasPermString } from "@/lib/permissions";
-import { resolveAsset } from "@/lib/utils/assets";
+import { teamAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { BotEditModal } from "./BotEditModal";
 import { PacksTab } from "./PacksTab";
 import { ServerEditModal } from "./ServerEditModal";
 import { BotStatsModal, ServerStatsModal } from "./StatsModal";
 import { TokenModal } from "./TokenModal";
+import { TransferTeamModal } from "./TransferTeamModal";
+import { WebhookModal } from "./WebhookModal";
 
 type Tab =
   | "overview"
@@ -235,7 +238,7 @@ function EditProfileTab({
   }
 
   return (
-    <div className="max-w-lg space-y-5">
+    <div className="max-w-2xl space-y-5">
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="about"
@@ -337,18 +340,24 @@ function EditProfileTab({
 function BotItem({
   bot,
   token,
+  userId,
   onDeleted,
   mutate,
   team,
+  userTeams = [],
   canManage = true,
   myFlags = ["owner"],
 }: {
   bot: IndexBot;
   token: string;
+  /** Needed for the team-transfer endpoint, which is path-scoped to the acting user. */
+  userId: string;
   onDeleted: (id: string) => void;
   mutate: () => void;
   /** Set when this bot is owned by a team the user is a member of, rather than owned directly. */
   team?: Team;
+  /** Every team the user belongs to — used to build the "Change Team" destination picker. */
+  userTeams?: Team[];
   /** Whether the current user has permission to edit/delete this bot. Always true for directly-owned bots. */
   canManage?: boolean;
   /** The current user's resolved flags on this bot's team — defaults to owner for directly-owned bots. */
@@ -359,12 +368,27 @@ function BotItem({
   const [editing, setEditing] = useState(false);
   const [viewingStats, setViewingStats] = useState(false);
   const [viewingTokens, setViewingTokens] = useState(false);
+  const [viewingWebhooks, setViewingWebhooks] = useState(false);
+  const [transferring, setTransferring] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canSeeTokens = hasAnyPermString(myFlags, [
     "view_sessions",
     "manage_sessions",
   ]);
+  const canSeeWebhooks = hasAnyPermString(myFlags, [
+    "view_webhooks",
+    "manage_webhooks",
+  ]);
+  const canManageWebhooks = hasPermString(myFlags, "manage_webhooks");
+  const canViewWebhookLogs = hasPermString(myFlags, "view_webhook_logs");
+  const canTransferTeam = hasPermString(myFlags, "delete_bots");
+  const transferCandidates = userTeams.filter((t) => {
+    if (team && t.id === team.id) return false;
+    const theirFlags =
+      t.entities?.members?.find((m) => m.user?.id === userId)?.flags ?? [];
+    return hasPermString(theirFlags, "add_bots");
+  });
 
   const status = BOT_STATUS[bot.type];
 
@@ -478,6 +502,28 @@ function BotItem({
                 Tokens
               </DropdownItem>
             )}
+            {canSeeWebhooks && (
+              <DropdownItem
+                icon={<WebhookIcon size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingWebhooks(true);
+                }}
+              >
+                Webhooks
+              </DropdownItem>
+            )}
+            {canTransferTeam && (
+              <DropdownItem
+                icon={<Users size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setTransferring(true);
+                }}
+              >
+                Change Team
+              </DropdownItem>
+            )}
             {canManage && (
               <DropdownItem
                 icon={<Trash2 size={14} />}
@@ -512,6 +558,29 @@ function BotItem({
         />
       )}
 
+      {viewingWebhooks && (
+        <WebhookModal
+          title="Bot Webhooks"
+          targetType="bot"
+          targetId={bot.bot_id}
+          authToken={token}
+          canManage={canManageWebhooks}
+          canViewLogs={canViewWebhookLogs}
+          onClose={() => setViewingWebhooks(false)}
+        />
+      )}
+
+      {transferring && (
+        <TransferTeamModal
+          botId={bot.bot_id}
+          userId={userId}
+          token={token}
+          candidates={transferCandidates}
+          onClose={() => setTransferring(false)}
+          onTransferred={mutate}
+        />
+      )}
+
       {viewingStats && (
         <BotStatsModal
           botId={bot.bot_id}
@@ -533,11 +602,15 @@ function BotsTab({
   bots: allBots,
   teamBots: allTeamBots,
   token,
+  userId,
+  userTeams,
   mutate,
 }: {
   bots: IndexBot[];
   teamBots: TeamBot[];
   token: string;
+  userId: string;
+  userTeams: Team[];
   mutate: () => void;
 }) {
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -586,6 +659,8 @@ function BotsTab({
                 key={bot.bot_id}
                 bot={bot}
                 token={token}
+                userId={userId}
+                userTeams={userTeams}
                 mutate={mutate}
                 onDeleted={handleDeleted}
               />
@@ -605,6 +680,8 @@ function BotsTab({
                 key={bot.bot_id}
                 bot={bot}
                 token={token}
+                userId={userId}
+                userTeams={userTeams}
                 mutate={mutate}
                 onDeleted={handleDeleted}
                 team={team}
@@ -644,11 +721,18 @@ function ServerItem({
   const [editing, setEditing] = useState(false);
   const [viewingStats, setViewingStats] = useState(false);
   const [viewingTokens, setViewingTokens] = useState(false);
+  const [viewingWebhooks, setViewingWebhooks] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const canSeeTokens = hasAnyPermString(myFlags, [
     "view_sessions",
     "manage_sessions",
   ]);
+  const canSeeWebhooks = hasAnyPermString(myFlags, [
+    "view_webhooks",
+    "manage_webhooks",
+  ]);
+  const canManageWebhooks = hasPermString(myFlags, "manage_webhooks");
+  const canViewWebhookLogs = hasPermString(myFlags, "view_webhook_logs");
   const avatarSrc =
     server.avatar ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
@@ -745,6 +829,17 @@ function ServerItem({
                 Tokens
               </DropdownItem>
             )}
+            {canSeeWebhooks && (
+              <DropdownItem
+                icon={<WebhookIcon size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingWebhooks(true);
+                }}
+              >
+                Webhooks
+              </DropdownItem>
+            )}
           </Dropdown>
         </div>
       </div>
@@ -773,6 +868,18 @@ function ServerItem({
           authToken={token}
           myPerms={myFlags}
           onClose={() => setViewingTokens(false)}
+        />
+      )}
+
+      {viewingWebhooks && (
+        <WebhookModal
+          title="Server Webhooks"
+          targetType="server"
+          targetId={server.server_id}
+          authToken={token}
+          canManage={canManageWebhooks}
+          canViewLogs={canViewWebhookLogs}
+          onClose={() => setViewingWebhooks(false)}
         />
       )}
     </div>
@@ -840,15 +947,15 @@ function ServersTab({
 }
 
 function TeamItem({ team }: { team: Team }) {
-  const avatarSrc = resolveAsset(team.avatar) ?? "";
+  const avatarSrc = teamAvatarUrl(team.id);
   return (
     <Link
       href={`/teams/${team.id}`}
-      className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+      className="group flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
     >
       <Avatar src={avatarSrc} alt={team.name} size={44} />
       <div className="flex-1 min-w-0">
-        <span className="block font-semibold truncate text-zinc-950 dark:text-zinc-50">
+        <span className="block font-semibold truncate text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
           {team.name}
         </span>
         {team.short && (
@@ -1007,8 +1114,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="mb-8 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex flex-nowrap items-center gap-1">
+      <div className="mb-10 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex flex-nowrap items-center gap-4">
           {TABS.map(({ key, label, icon: Icon }) => {
             const count =
               key === "bots"
@@ -1026,7 +1133,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => setTab(key)}
                 className={[
-                  "relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 pb-3 pt-1 text-sm font-medium transition-colors",
+                  "relative -mb-px flex shrink-0 items-center gap-2 border-b-2 px-1 pb-4 pt-3 text-sm font-medium transition-colors",
                   tab === key
                     ? "border-accent text-accent"
                     : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
@@ -1059,6 +1166,8 @@ export default function DashboardPage() {
           bots={normalizedMe.user_bots}
           teamBots={teamBots}
           token={session.token}
+          userId={session.user_id}
+          userTeams={normalizedMe.user_teams}
           mutate={mutate}
         />
       )}
@@ -1080,7 +1189,7 @@ export default function DashboardPage() {
       )}
       {tab === "teams" && <TeamsTab teams={normalizedMe.user_teams} />}
       {tab === "tokens" && (
-        <div className="max-w-xl">
+        <div className="max-w-2xl">
           <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
             Personal API tokens act as you across every endpoint. Bot- and
             server-scoped tokens can be managed from each listing&apos;s

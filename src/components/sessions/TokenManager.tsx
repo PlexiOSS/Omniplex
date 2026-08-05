@@ -260,7 +260,7 @@ export function TokenManager({
       {list === null && !error ? (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading…</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {list?.length === 0 && (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               No tokens yet.
@@ -271,7 +271,7 @@ export function TokenManager({
             return (
               <div
                 key={s.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800"
+                className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -280,11 +280,11 @@ export function TokenManager({
                     </p>
                     {expired && <Badge variant="danger">Expired</Badge>}
                   </div>
-                  <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
                     Created {formatDate(s.created_at)} ·{" "}
                     {expired ? "expired" : "expires"} {formatDate(s.expiry)}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                  <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">
                     {s.perm_limits.length === 0
                       ? "Full access"
                       : s.perm_limits.join(", ")}
@@ -297,7 +297,7 @@ export function TokenManager({
                     size="sm"
                     loading={revokingId === s.id}
                     onClick={() => handleRevoke(s.id)}
-                    className="shrink-0 px-2 text-xs h-7"
+                    className="shrink-0 px-3 text-xs"
                   >
                     <Trash2 size={12} />
                     Revoke
@@ -310,7 +310,7 @@ export function TokenManager({
       )}
 
       {canManage && (
-        <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <div className="border-t border-zinc-200 pt-5 dark:border-zinc-800">
           {!creating ? (
             <Button
               type="button"

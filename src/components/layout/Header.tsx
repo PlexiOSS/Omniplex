@@ -237,19 +237,25 @@ export function Header() {
               </button>
 
               {/* Customize */}
-              <button
-                type="button"
-                onClick={() => setCustomizeOpen((o) => !o)}
-                className={[
-                  "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
-                  customizeOpen
-                    ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                ].join(" ")}
-                aria-label="Customize appearance"
-              >
-                <Settings2 size={16} />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCustomizeOpen((o) => !o)}
+                  className={[
+                    "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+                    customizeOpen
+                      ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                  ].join(" ")}
+                  aria-label="Customize appearance"
+                >
+                  <Settings2 size={16} />
+                </button>
+                <CustomizationPanel
+                  open={customizeOpen}
+                  onClose={() => setCustomizeOpen(false)}
+                />
+              </div>
 
               <ThemeToggle />
 
@@ -400,11 +406,6 @@ export function Header() {
           </nav>
         )}
       </header>
-
-      <CustomizationPanel
-        open={customizeOpen}
-        onClose={() => setCustomizeOpen(false)}
-      />
     </>
   );
 }

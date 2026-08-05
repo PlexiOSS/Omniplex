@@ -25,9 +25,45 @@
   --accent-fg: #ffffff;
 }
 
+[data-accent="cyan"] {
+  --accent: #06b6d4;
+  --accent-muted: #0891b2;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="teal"] {
+  --accent: #14b8a6;
+  --accent-muted: #0d9488;
+  --accent-fg: #ffffff;
+}
+
 [data-accent="emerald"] {
   --accent: #10b981;
   --accent-muted: #059669;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="lime"] {
+  --accent: #84cc16;
+  --accent-muted: #65a30d;
+  --accent-fg: #000000;
+}
+
+[data-accent="amber"] {
+  --accent: #eab308;
+  --accent-muted: #ca8a04;
+  --accent-fg: #000000;
+}
+
+[data-accent="orange"] {
+  --accent: #f97316;
+  --accent-muted: #ea580c;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="red"] {
+  --accent: #ef4444;
+  --accent-muted: #dc2626;
   --accent-fg: #ffffff;
 }
 
@@ -37,16 +73,10 @@
   --accent-fg: #ffffff;
 }
 
-[data-accent="orange"] {
-  --accent: #f97316;
-  --accent-muted: #ea580c;
+[data-accent="pink"] {
+  --accent: #ec4899;
+  --accent-muted: #db2777;
   --accent-fg: #ffffff;
-}
-
-[data-accent="amber"] {
-  --accent: #eab308;
-  --accent-muted: #ca8a04;
-  --accent-fg: #000000;
 }
 
 /* --------------------------------------------------------------------------
@@ -66,6 +96,46 @@
 
 [data-font="mono"] {
   --font-body: var(--font-geist-mono);
+}
+
+[data-font="inter"] {
+  --font-body: var(--font-inter);
+}
+
+[data-font="grotesk"] {
+  --font-body: var(--font-grotesk);
+}
+
+/* --------------------------------------------------------------------------
+   Layout width — swapped via data-layout on <html>, consumed by Container
+   -------------------------------------------------------------------------- */
+:root,
+[data-layout="comfortable"] {
+  --container-max: 80rem; /* matches the old fixed max-w-7xl */
+}
+
+[data-layout="compact"] {
+  --container-max: 64rem;
+}
+
+[data-layout="wide"] {
+  --container-max: 96rem;
+}
+
+/* --------------------------------------------------------------------------
+   Content preferences — "Hide NSFW" swapped via data-hide-nsfw on <html>,
+   pure CSS so it applies even to server-rendered listing pages. Cards opt in
+   by setting data-nsfw="true" on themselves.
+   -------------------------------------------------------------------------- */
+[data-hide-nsfw="true"] [data-nsfw="true"] {
+  display: none;
+}
+
+/* "Blur NSFW" — applied attribute is already collapsed with hideNsfw by
+   CustomizationProvider, so this rule never needs to check hideNsfw itself.
+   Blurs only the thumbnail images (banner/avatar), not the surrounding text. */
+[data-blur-nsfw="true"] [data-nsfw="true"] img {
+  filter: blur(20px);
 }
 
 @theme inline {

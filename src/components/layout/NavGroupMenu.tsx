@@ -44,7 +44,7 @@ export function NavGroupMenu({
   }, [open]);
 
   return (
-    <div ref={ref} className="relative hidden md:block">
+    <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -64,7 +64,7 @@ export function NavGroupMenu({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-44 overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+          className="absolute right-0 z-50 mt-2 w-44 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
         >
           {items.map((item) => (
             <Link

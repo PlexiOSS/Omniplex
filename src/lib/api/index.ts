@@ -12,4 +12,5 @@ export { staffResource as staff } from "./resources/staff";
 export { teamsResource as teams } from "./resources/teams";
 export { usersResource as users } from "./resources/users";
 export { vanityResource as vanity } from "./resources/vanity";
+export { webhooksResource as webhooks } from "./resources/webhooks";
 export * from "./types";

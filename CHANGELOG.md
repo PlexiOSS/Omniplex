@@ -9,6 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The Customize panel is now tabbed (Colors / Fonts / Layout / Content)
+  instead of one long stacked list, and grew three new levers:
+  - **Colors** — 5 more accent options (cyan, teal, lime, red, pink), 12 total.
+  - **Fonts** — added Inter and Space Grotesk alongside the existing four.
+  - **Layout** — Compact/Comfortable/Wide page width, applied through a
+    `--container-max` CSS var so it works on server-rendered pages too
+    (`Container` reads the var instead of a fixed `max-w-7xl`).
+  - **Content** — a "Hide NSFW content" toggle that removes `nsfw`-flagged
+    bots/servers from every browse/search/profile listing site-wide, via a
+    `data-nsfw` attribute on `BotCard`/`ServerCard`/`PackCard` and a plain
+    CSS rule (`[data-hide-nsfw="true"] [data-nsfw="true"] { display: none }`)
+    — no per-page filtering logic needed. Detail pages are unaffected by
+    design (this hides cards from browsing, not a page someone linked
+    directly). A "disable cookies" option was requested alongside it but
+    skipped: Omniplex doesn't set any analytics/tracking cookies to begin
+    with, only the session cookie sign-in itself requires, so there'd be
+    nothing for the toggle to actually do. Alongside it, a "Blur NSFW
+    thumbnails" toggle (on by default) blurs just the avatar/banner images
+    on nsfw-flagged cards via `[data-blur-nsfw="true"] [data-nsfw="true"]
+    img { filter: blur(...) }`, leaving the title/description legible. It's
+    disabled in the UI (and its applied state forced off) whenever "Hide
+    NSFW content" is on, since there's nothing left to blur once nsfw cards
+    never render at all.
+- Banner images for bots, servers, and teams (`BotCard`/`ServerCard`, plus
+  the bot/server/team detail pages). Popplio's live API has no `banner`
+  field at all any more — Popplio's own conformance notes confirm the whole
+  CDN-upload pipeline it depended on was removed — but a historical
+  one-time migration left every existing banner sitting at a fixed CDN path
+  keyed by the entity's own ID (`banners/{bots,servers,teams}/{id}.webp`),
+  discovered from that migration script since Popplio's API no longer
+  advertises it anywhere. New `bannerUrl()` builds that URL; new `Banner`
+  component renders it and falls back to a themed gradient (using the
+  viewer's own accent color, so it tracks Customize) for anything that 404s
+  or never had one uploaded — same idea as the existing partner-avatar CDN
+  fallback.
+- Webhook management for bots and servers, from a new "Webhooks" dashboard
+  dropdown item on each listing: create/edit/delete webhooks (HMAC, simple
+  secret, or legacy auth), pick an event whitelist, send test deliveries
+  with dynamically-rendered variable inputs per event type, and browse
+  paginated delivery logs. Built entirely on existing Popplio webhook
+  routes that had no Omniplex UI before now.
+- A "Change Team" dashboard action for bots, using Popplio's
+  `PATCH /users/{uid}/bots/{bid}/teams`, letting an owner move a bot to any
+  other team they have "Add Bots" on. Servers have no equivalent transfer
+  endpoint in Popplio, so this is bots-only for now.
 - A public `/partners` page — the `GET /list/partners` client and types
   already existed (used on the homepage) but nothing ever linked to a
   dedicated page. Groups partners by partner type, shows their links and
@@ -60,6 +105,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The header's "Create" menu (`NavGroupMenu`) was hardcoded `hidden md:block`,
+  so it silently never rendered below the `md` breakpoint — mobile users
+  could only reach Add Bot/Server/Pack and Create Team by opening the full
+  hamburger drawer. Unhid it; it now works as an actual dropdown from the
+  collapsed mobile header too. Browse/Community's `NavGroupMenu` instances
+  stay desktop-only since their parent nav row already is, so nothing
+  changes for those. Also gave both `NavGroupMenu` and the generic
+  `Dropdown` component a `max-w-[calc(100vw-1.5rem)]` safety clamp so their
+  panels can't overflow off-screen on narrow viewports.
+- Bot detail page dropped the "Prefix" stat — most bots are slash-command
+  only now, so it was frequently blank or stale. Both bot and server detail
+  pages gained "Page Views" and "Invite Clicks" stats instead, using data
+  the API already returned but never displayed. The bot's OpenGraph
+  share-image (a separate, independent stat list from the detail page) had
+  the same stale "Prefix" stat — swapped for "Page Views" there too, and the
+  server OG image gained a third stat ("Page Views") to match.
+- Tightened-up spacing pass: the dashboard and team settings tab bars had
+  almost no top padding (`pt-1`) and nearly-touching tabs (`gap-1`), and the
+  API Tokens list rows used noticeably less padding than every other list
+  card in the app. Bumped both to match the spacing used elsewhere.
 - Admin panel polish pass: the nav bar had grown to 10 flat links as sections
   were added — related pages now group into "Staff" and "Content" dropdowns
   (new `NavGroupMenu`, also used to rebuild the existing "Create" menu for
@@ -73,15 +138,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   were added (Stats, Tokens, Delete). View and Edit stay as direct buttons;
   everything else now lives behind a "more actions" dropdown (new
   `components/ui/Dropdown.tsx`).
+- Accent-color customization is more visible throughout the site instead of
+  being mostly confined to buttons and links: the homepage hero highlights
+  "best" in the accent color, the header nav's info badges (Certified,
+  Staff, Pending, etc. — previously a hardcoded blue regardless of chosen
+  accent) now tint with the selected accent, and the Bot/Server/Pack/Team
+  dashboard cards all share one accent-tinted hover treatment (border, title
+  color, and arrow icon) instead of Pack and Team cards using a plain zinc
+  hover that Bot/Server cards had already moved past. The homepage's
+  Partners chips and News & Updates cards were missed in that first pass —
+  now match. Dark-mode card borders were also bumped from `zinc-800` to
+  `zinc-700`: against the `zinc-950` page background and `zinc-900` card
+  fill, the old border was too close in lightness to read as a border at
+  rest, so cards looked edgeless until hovered.
 
 ### Fixed
 
+- `Team.avatar` was silently blank everywhere it was used (dashboard Teams
+  tab, `/teams/[id]`, `TeamPicker`, and the team-owner blocks on bot/server
+  detail pages) — the exact same class of bug as the partner-avatar one
+  below. Popplio's API dropped `Team.avatar` entirely along with the rest of
+  its CDN pipeline, so `resolveAsset(team.avatar)` always resolved to null;
+  the frontend type still claimed `AssetMetadata | null` as if the field
+  were live. Found while wiring up banner support, which uses the same
+  legacy-CDN-path pattern. Replaced every call site with `teamAvatarUrl()`
+  and removed the stale `avatar`/`banner` fields (and now-unused
+  `AssetMetadata`/`resolveAsset`) from the API types entirely rather than
+  leaving them typed as something Popplio no longer sends.
+- The Customize panel (accent/font picker) was positioned with a hardcoded
+  `fixed inset-0` guess (`pt-16 pr-4`) instead of anchoring to the gear icon
+  that opens it, so it visibly floated in the wrong spot whenever the header
+  layout shifted. Switched to the same anchored-dropdown pattern already
+  used elsewhere (`components/ui/Dropdown.tsx`) — it now opens directly
+  under its trigger button.
 - The homepage's Partners section resolved each partner's avatar via
   `resolveAsset(partner.avatar)`, but Popplio's public partner response has
   no `avatar` field at all (only ever had it on the type, not the wire) — a
   partner's image is `partner.user.avatar`, already a full resolved URL.
   Every partner avatar on the homepage was silently blank as a result. Fixed
   there and used correctly in the new `/partners` page.
+- That fix was itself using the wrong source: `partner.user.avatar` is the
+  linked Discord account's avatar, not the partner's actual logo. Popplio's
+  CDN-upload pipeline for partners was removed outright (see its
+  `CONFORMANCE.md` §D11b), but the old manually-uploaded logos are still
+  sitting on the CDN at a fixed, undocumented path keyed by partner ID
+  (`avatars/partners/<id>.webp`). All three partner-avatar call sites
+  (homepage, `/partners`, and the admin edit modal's new preview) now
+  resolve there via `partnerAvatarUrl()`, falling back to a generated
+  avatar for any partner without a file at that path.
 - Staff Panel sign-in on prod failed with a misleading "Method Not Allowed"
   whenever `NEXT_PUBLIC_ARCADIA_URL` was configured with a trailing slash:
   `postQuery()` always appends its own `/`, so the request landed on a

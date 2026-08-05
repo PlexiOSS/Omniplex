@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { list } from "@/lib/api";
 import type { Partner } from "@/lib/api/types";
+import { partnerAvatarUrl } from "@/lib/utils/assets";
 
 export const metadata: Metadata = {
   title: "Partners",
@@ -18,11 +19,13 @@ function PartnerCard({ partner }: { partner: Partner }) {
   const primaryLink = partner.links[0];
 
   return (
-    <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
-        {partner.user?.avatar && (
-          <Avatar src={partner.user.avatar} alt={partner.name} size={44} />
-        )}
+        <Avatar
+          src={partnerAvatarUrl(partner.id)}
+          alt={partner.name}
+          size={44}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="font-semibold text-zinc-950 dark:text-zinc-50">

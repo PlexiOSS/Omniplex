@@ -17,8 +17,7 @@ const variantClasses: Record<Variant, string> = {
     "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400",
   danger:
     "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400",
-  info:
-    "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400",
+  info: "bg-accent/10 text-accent",
   premium:
     "bg-gradient-to-r from-amber-500 to-yellow-400 text-white",
 };

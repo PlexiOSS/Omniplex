@@ -45,7 +45,7 @@ export function Dropdown({
         <div
           role="menu"
           className={[
-            "absolute z-50 mt-1 w-44 overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-800 dark:bg-zinc-900",
+            "absolute z-50 mt-1 w-44 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900",
             align === "right" ? "right-0" : "left-0",
           ].join(" ")}
         >

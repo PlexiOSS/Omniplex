@@ -24,9 +24,13 @@ export function Container({
     <div
       className={[
         "mx-auto w-full px-4 sm:px-6 lg:px-8",
-        narrow ? "max-w-3xl" : "max-w-7xl",
+        narrow ? "max-w-3xl" : "",
         className,
       ].join(" ")}
+      // Non-narrow width follows the user's Layout preference (--container-max,
+      // set via data-layout on <html>) instead of a fixed Tailwind class, so it
+      // works from a plain CSS var in server components too.
+      style={narrow ? undefined : { maxWidth: "var(--container-max, 80rem)" }}
     >
       {children}
     </div>

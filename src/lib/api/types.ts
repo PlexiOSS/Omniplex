@@ -17,16 +17,6 @@ export interface PlatformUser {
 // Asset metadata — CDN-relative, resolve with resolveAsset() from utils/assets
 // ---------------------------------------------------------------------------
 
-export interface AssetMetadata {
-  exists: boolean;
-  path: string;
-  default_path: string;
-  type: string;
-  size: number;
-  last_modified: string | null;
-  errors: string[];
-}
-
 // ---------------------------------------------------------------------------
 // Links  (extra_links on bots/servers use `value` not `url`)
 // ---------------------------------------------------------------------------
@@ -68,7 +58,6 @@ export interface IndexBot {
   nsfw: boolean;
   tags: string[];
   premium: boolean;
-  banner: AssetMetadata | null;
   created_at: string;
 }
 
@@ -95,7 +84,6 @@ export interface Bot {
   clicks: number;
   unique_clicks: number;
   invite_clicks: number;
-  banner: AssetMetadata | null;
   invite: string;
   type: BotType;
   vanity_ref: string;
@@ -142,7 +130,6 @@ export interface IndexServer {
   nsfw: boolean;
   tags: string[];
   premium: boolean;
-  banner: AssetMetadata | null;
 }
 
 export interface Server extends IndexServer {
@@ -200,8 +187,6 @@ export interface TeamEntities {
 export interface Team {
   id: string;
   name: string;
-  avatar: AssetMetadata | null;
-  banner: AssetMetadata | null;
   short: string;
   tags: string[];
   extra_links: Link[];
@@ -260,6 +245,75 @@ export interface TestAuthResult {
   authorized: boolean;
   banned: boolean;
   data: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// Webhooks — GET/POST/DELETE /{target_type}/{target_id}/webhooks[/...]
+// ---------------------------------------------------------------------------
+
+export interface Webhook {
+  id: string;
+  name: string;
+  target_id: string;
+  target_type: string;
+  url: string;
+  broken: boolean;
+  failed_requests: number;
+  /** Legacy: plain JSON + raw secret in the Authorization header. Mutually exclusive with hmac_auth. */
+  simple_auth: boolean;
+  /** Recommended: plain JSON + HMAC-SHA256 signature in X-Webhook-Signature. */
+  hmac_auth: boolean;
+  /** Empty means every event is sent. */
+  event_whitelist: string[];
+  created_at: string;
+}
+
+export interface CreateEditWebhookPayload {
+  name: string;
+  url: string;
+  /** Required unless url resolves as a Discord webhook URL, in which case Popplio fills it in itself.
+   * Never returned by GET — re-entering it is required on every edit too. */
+  secret?: string;
+  simple_auth: boolean;
+  hmac_auth: boolean;
+  event_whitelist: string[];
+}
+
+export interface WebhookTestVariable {
+  id: string;
+  name: string;
+  description: string;
+  value: string;
+  /** "text" | "text[]" | "link[]" | "number" | "changeset" | "boolean" */
+  type: string;
+}
+
+export interface WebhookTestType {
+  type: string;
+  data: WebhookTestVariable[] | null;
+}
+
+export interface WebhookTestMeta {
+  data: WebhookTestType[];
+}
+
+export interface WebhookLogEntry {
+  id: string;
+  webhook_id: string;
+  target_id: string;
+  target_type: string;
+  user: PlatformUser | null;
+  url: string;
+  data: Record<string, unknown>;
+  response: string | null;
+  created_at: string;
+  state: string;
+  tries: number;
+  last_try: string;
+  bad_intent: boolean;
+  status_code: number;
+  request_headers: Record<string, unknown>;
+  response_headers: Record<string, unknown>;
 }
 
 export interface CreateEditTeamPayload {
@@ -585,6 +639,12 @@ export interface BlogPost extends BlogListPost {
 // ---------------------------------------------------------------------------
 // Bot / Server creation payloads
 // ---------------------------------------------------------------------------
+
+/** PATCH /users/{uid}/bots/{bid}/teams — transfer a bot to a different team.
+ * Servers have no equivalent endpoint. */
+export interface PatchBotTeamPayload {
+  team_id: string;
+}
 
 export interface CreateBotPayload {
   bot_id: string;

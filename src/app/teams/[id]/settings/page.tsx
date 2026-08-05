@@ -109,15 +109,15 @@ export default function TeamSettingsPage() {
         Team Settings
       </h1>
 
-      <div className="mb-8 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center gap-1">
+      <div className="mb-10 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center gap-4">
           {visibleTabs.map(({ key, label }) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
               className={[
-                "relative -mb-px shrink-0 border-b-2 px-3 pb-3 pt-1 text-sm font-medium transition-colors",
+                "relative -mb-px shrink-0 border-b-2 px-1 pb-4 pt-3 text-sm font-medium transition-colors",
                 tab === key
                   ? "border-accent text-accent"
                   : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
@@ -152,7 +152,7 @@ export default function TeamSettingsPage() {
 
 function OverviewTab({ team }: { team: Team }) {
   return (
-    <div className="max-w-lg space-y-4">
+    <div className="max-w-2xl space-y-4">
       <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Manage {team.name}&apos;s info, members, and permissions from here.
@@ -209,7 +209,7 @@ function EditInfoTab({
   }
 
   return (
-    <div className="max-w-lg space-y-5">
+    <div className="max-w-2xl space-y-5">
       <Input
         id="team-name"
         label="Team Name"
@@ -569,7 +569,7 @@ function DangerTab({ team, token }: { team: Team; token: string }) {
   }
 
   return (
-    <div className="max-w-lg space-y-4">
+    <div className="max-w-2xl space-y-4">
       <div className="rounded-xl border border-red-200 p-4 dark:border-red-900">
         <h3 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
           Delete this team

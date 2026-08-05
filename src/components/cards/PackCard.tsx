@@ -11,11 +11,16 @@ interface PackCardProps {
 
 export function PackCard({ pack }: PackCardProps) {
   const href = pack.url ? `/packs/${pack.url}` : "#";
+  // BotPack has no nsfw flag of its own — inherit it from any bot/server it contains.
+  const isNsfw =
+    (pack.bots ?? []).some((b) => b.nsfw) ||
+    (pack.servers ?? []).some((s) => s.nsfw);
 
   return (
     <Link
       href={href}
-      className="group flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+      data-nsfw={isNsfw || undefined}
+      className="group flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
     >
       <div className="flex items-start gap-3">
         {/* Show up to 3 avatars stacked — bots first, falling back to servers for server-only packs */}
@@ -49,7 +54,7 @@ export function PackCard({ pack }: PackCardProps) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="truncate font-semibold text-zinc-950 dark:text-zinc-50">
+            <span className="truncate font-semibold text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
               {pack.name}
             </span>
           </div>
@@ -59,7 +64,7 @@ export function PackCard({ pack }: PackCardProps) {
         </div>
         <ArrowUpRight
           size={16}
-          className="shrink-0 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-700 dark:group-hover:text-zinc-400"
+          className="shrink-0 text-zinc-300 transition-colors group-hover:text-accent dark:text-zinc-700"
         />
       </div>
 

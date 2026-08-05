@@ -1,4 +1,12 @@
-import { ArrowLeft, ExternalLink, Globe, Star, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Eye,
+  Globe,
+  MousePointerClick,
+  Star,
+  Users,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,10 +17,11 @@ import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { EmojiStickerGallery } from "@/components/servers/EmojiStickerGallery";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { resolveAsset } from "@/lib/utils/assets";
+import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
@@ -80,6 +89,12 @@ export default async function ServerPage({ params }: Props) {
         <ArrowLeft size={14} />
         Back to servers
       </Link>
+
+      <Banner
+        src={bannerUrl("servers", server.server_id)}
+        alt={server.name}
+        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main */}
@@ -190,6 +205,18 @@ export default async function ServerPage({ params }: Props) {
                   value={formatCount(server.online_members)}
                 />
               )}
+              <StatRow
+                icon={<Eye size={14} />}
+                label="Page Views"
+                value={formatCount(server.clicks)}
+              />
+              {server.invite_clicks > 0 && (
+                <StatRow
+                  icon={<MousePointerClick size={14} />}
+                  label="Invite Clicks"
+                  value={formatCount(server.invite_clicks)}
+                />
+              )}
             </dl>
           </div>
 
@@ -201,10 +228,7 @@ export default async function ServerPage({ params }: Props) {
               {server.team_owner ? (
                 <div className="flex items-center gap-2.5">
                   <Avatar
-                    src={
-                      resolveAsset(server.team_owner.avatar) ??
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.team_owner.name)}&size=64&background=random`
-                    }
+                    src={teamAvatarUrl(server.team_owner.id)}
                     alt={server.team_owner.name}
                     size={32}
                   />
