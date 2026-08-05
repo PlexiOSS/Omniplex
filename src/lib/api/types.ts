@@ -221,6 +221,47 @@ export interface PermissionData {
   dangerous?: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// API sessions (tokens) — GET/POST/DELETE /{target_type}/{target_id}/sessions
+// ---------------------------------------------------------------------------
+
+export interface ApiSession {
+  id: string;
+  /** Null for login sessions, which this UI never shows — always set for API tokens. */
+  name: string | null;
+  created_at: string;
+  type: string;
+  target_type: string;
+  target_id: string;
+  /** Empty means unrestricted — the token inherits whatever perms its owner has at request time. */
+  perm_limits: string[];
+  expiry: string;
+}
+
+export interface CreateSessionPayload {
+  name: string;
+  type: "api";
+  perm_limits: string[];
+  /** Seconds until the token expires. */
+  expiry: number;
+}
+
+export interface CreateSessionResponse {
+  target_id: string;
+  /** Only ever returned once, at creation — Popplio never stores or re-serves the raw token. */
+  token: string;
+  session_id: string;
+}
+
+/** POST /auth/test — checks whether a token is valid for a given target, without spending it on a real request. */
+export interface TestAuthResult {
+  target_type: string;
+  id: string;
+  authorized: boolean;
+  banned: boolean;
+  data: Record<string, unknown>;
+}
+
 export interface CreateEditTeamPayload {
   name: string;
   short?: string;
