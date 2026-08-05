@@ -184,7 +184,7 @@ export default function AddServerPage() {
           <p>
             Before submitting, please read the{" "}
             <Link
-              href="/kb/servers/listing-rules"
+              href="https://docs.omniplex.gg/docs/guides/rules/servers"
               className="font-medium underline text-accent underline-offset-2"
             >
               Listing Rules
@@ -225,11 +225,11 @@ export default function AddServerPage() {
           </div>
         ) : !confirmed ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800">
+            <div className="p-5 border rounded-2xl border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center gap-4">
                 <Avatar src={avatarSrc} alt={serverMeta.name} size={64} />
                 <div className="min-w-0">
-                  <p className="truncate text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                  <p className="text-lg font-semibold truncate text-zinc-950 dark:text-zinc-50">
                     {serverMeta.name}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -238,7 +238,7 @@ export default function AddServerPage() {
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="flex flex-wrap gap-4 mt-4 text-sm text-zinc-600 dark:text-zinc-400">
                 <span className="flex items-center gap-1.5">
                   <Users size={14} />
                   {formatCount(serverMeta.total_members)} members
@@ -251,7 +251,7 @@ export default function AddServerPage() {
               </div>
 
               {!serverMeta.bot_present && (
-                <div className="mt-4 flex items-start gap-3 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-400">
+                <div className="flex items-start gap-3 p-3 mt-4 text-sm text-yellow-800 border border-yellow-200 rounded-xl bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-400">
                   <AlertTriangle size={16} className="mt-0.5 shrink-0" />
                   <p>
                     Our tracking bot isn't in this server yet. You can still
@@ -303,9 +303,9 @@ export default function AddServerPage() {
             {/* Fetched server identity — name comes straight from the
                 invite and can't be edited here, it's re-fetched from the
                 invite link above. */}
-            <div className="flex items-center gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
+            <div className="flex items-center gap-3 p-3 border rounded-xl border-zinc-200 dark:border-zinc-800">
               <Avatar src={avatarSrc} alt={serverMeta.name} size={40} />
-              <div className="min-w-0 flex-1">
+              <div className="flex-1 min-w-0">
                 <Input
                   id="server_name"
                   label="Server Name"

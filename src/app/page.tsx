@@ -12,7 +12,6 @@ import { HomeTabs } from "@/components/home/HomeTabs";
 import { StatsBar } from "@/components/home/StatsBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { resolveAsset } from "@/lib/utils/assets";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 export default async function HomePage() {
@@ -183,25 +182,27 @@ export default async function HomePage() {
               Trusted communities and services we work with
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
-              {partners.map((partner) => {
-                const avatarSrc = resolveAsset(partner.avatar);
-                return (
-                  <div
-                    key={partner.id}
-                    className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
-                  >
-                    {avatarSrc && (
-                      <Avatar src={avatarSrc} alt={partner.name} size={28} />
-                    )}
-                    <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                      {partner.name}
-                    </span>
-                    {partner.type && (
-                      <Badge variant="info">{partner.type}</Badge>
-                    )}
-                  </div>
-                );
-              })}
+              {partners.map((partner) => (
+                <Link
+                  key={partner.id}
+                  href="/partners"
+                  className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+                >
+                  {partner.user?.avatar && (
+                    <Avatar
+                      src={partner.user.avatar}
+                      alt={partner.name}
+                      size={28}
+                    />
+                  )}
+                  <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                    {partner.name}
+                  </span>
+                  {partner.type && (
+                    <Badge variant="info">{partner.type}</Badge>
+                  )}
+                </Link>
+              ))}
             </div>
           </Container>
         </section>

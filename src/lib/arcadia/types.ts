@@ -294,3 +294,99 @@ export type StaffMemberAction =
         unaccounted: boolean;
       };
     };
+
+export type StaffDisciplinaryTypeAction =
+  | "ListDisciplinaryTypes"
+  | { CreateDisciplinaryType: StaffDisciplinaryTypeUpsert }
+  | { EditDisciplinaryType: StaffDisciplinaryTypeUpsert }
+  | { DeleteDisciplinaryType: { id: string } };
+
+export interface StaffDisciplinaryTypeUpsert {
+  id: string;
+  name: string;
+  description: string;
+  self_assignable: boolean;
+  perm_limits: string[];
+  additory: boolean;
+  needs_approval: boolean;
+  max_expiry: number | null;
+}
+
+// ---------------------------------------------------------------------------
+// Blog (UpdateBlog RPC — separate from the public Popplio blog reader)
+// ---------------------------------------------------------------------------
+
+export interface BlogPost {
+  itag: string;
+  slug: string;
+  title: string;
+  description: string;
+  user_id: string;
+  created_at: string;
+  content: string;
+  draft: boolean;
+  tags: string[];
+}
+
+export type BlogAction =
+  | "ListEntries"
+  | { CreateEntry: BlogCreateEntry }
+  | { UpdateEntry: BlogUpdateEntry }
+  | { DeleteEntry: { itag: string } };
+
+export interface BlogCreateEntry {
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  tags: string[];
+}
+
+export interface BlogUpdateEntry extends BlogCreateEntry {
+  itag: string;
+  draft: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Partners
+// ---------------------------------------------------------------------------
+
+export interface Partner {
+  id: string;
+  name: string;
+  short: string;
+  links: Link[];
+  bot_id: string | null;
+  type: string;
+  created_at: string;
+  user_id: string;
+}
+
+export interface PartnerType {
+  id: string;
+  name: string;
+  short: string;
+  icon: string;
+  created_at: string;
+}
+
+export interface Partners {
+  partners: Partner[];
+  partner_types: PartnerType[];
+}
+
+export interface PartnerUpsert {
+  id: string;
+  name: string;
+  short: string;
+  bot_id: string | null;
+  links: Link[];
+  type: string;
+  user_id: string;
+}
+
+export type PartnerAction =
+  | "List"
+  | { Create: { partner: PartnerUpsert } }
+  | { Update: { partner: PartnerUpsert } }
+  | { Delete: { id: string } };

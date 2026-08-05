@@ -546,11 +546,11 @@ export interface PartnerType {
 export interface Partner {
   id: string;
   name: string;
-  avatar: AssetMetadata | null;
   short: string;
   links: Link[];
   type: string;
   created_at: string;
+  /** Use `user.avatar` for a partner's image — Popplio never sends a separate one. */
   user: PlatformUser | null;
   bot_id: string | null;
 }

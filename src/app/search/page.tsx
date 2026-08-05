@@ -1,16 +1,19 @@
 "use client";
 
+import { Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
-import { useSearch } from "@/hooks/useSearch";
+import { Suspense, useEffect, useState } from "react";
 import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
-import { BotCardSkeleton } from "@/components/ui/Skeleton";
-import { Badge } from "@/components/ui/Badge";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
-import { Search } from "lucide-react";
+import { Pagination } from "@/components/search/Pagination";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { BotCardSkeleton } from "@/components/ui/Skeleton";
+import { useSearch } from "@/hooks/useSearch";
+import { bots, servers } from "@/lib/api";
+import type { IndexBot, IndexServer, PagedResult } from "@/lib/api/types";
 
 const AVAILABLE_TAGS = [
   "Auto-Mod",
@@ -27,11 +30,24 @@ const AVAILABLE_TAGS = [
   "Welcome",
 ];
 
+const PAGE_SIZE = 12;
+
 function SearchPageInner() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
 
   const { query, setQuery, results, isLoading, hasResults, run } = useSearch();
+
+  // Browse mode (no active search yet) — real backend pagination, since
+  // /list/search has none and returns the whole matching set at once.
+  const [browseBots, setBrowseBots] = useState<PagedResult<IndexBot[]> | null>(
+    null,
+  );
+  const [browseServers, setBrowseServers] = useState<PagedResult<
+    IndexServer[]
+  > | null>(null);
+  const [botsPage, setBotsPage] = useState(1);
+  const [serversPage, setServersPage] = useState(1);
 
   useEffect(() => {
     if (initialQuery) {
@@ -40,6 +56,21 @@ function SearchPageInner() {
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (hasResults) return;
+    bots.getAll(botsPage).then(setBrowseBots);
+  }, [hasResults, botsPage]);
+
+  useEffect(() => {
+    if (hasResults) return;
+    servers.getAll(serversPage).then(setBrowseServers);
+  }, [hasResults, serversPage]);
+
+  // Active search results have no server-side pagination, so it's sliced
+  // client-side instead — same approach the admin search page uses.
+  const [resultsBotsPage, setResultsBotsPage] = useState(1);
+  const [resultsServersPage, setResultsServersPage] = useState(1);
 
   const toggleTag = (tag: string) => {
     const tags = query.tags?.tags ?? [];
@@ -54,11 +85,27 @@ function SearchPageInner() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    run({ ...query, target_types: query.target_types?.length ? query.target_types : ["bot", "server"] });
+    setResultsBotsPage(1);
+    setResultsServersPage(1);
+    run({
+      ...query,
+      target_types: query.target_types?.length
+        ? query.target_types
+        : ["bot", "server"],
+    });
   };
 
-  const totalResults =
-    (results?.bots?.length ?? 0) + (results?.servers?.length ?? 0);
+  const resultBots = results?.bots ?? [];
+  const resultServers = results?.servers ?? [];
+  const pagedResultBots = resultBots.slice(
+    (resultsBotsPage - 1) * PAGE_SIZE,
+    resultsBotsPage * PAGE_SIZE,
+  );
+  const pagedResultServers = resultServers.slice(
+    (resultsServersPage - 1) * PAGE_SIZE,
+    resultsServersPage * PAGE_SIZE,
+  );
+  const totalResults = resultBots.length + resultServers.length;
 
   return (
     <Container className="py-10">
@@ -123,41 +170,113 @@ function SearchPageInner() {
             {totalResults} result{totalResults !== 1 ? "s" : ""} found
           </p>
 
-          {(results?.bots?.length ?? 0) > 0 && (
+          {resultBots.length > 0 && (
             <section>
               <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
                 Bots
-                <Badge>{results!.bots!.length}</Badge>
+                <Badge>{resultBots.length}</Badge>
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {results!.bots!.map((bot) => (
+                {pagedResultBots.map((bot) => (
                   <BotCard key={bot.bot_id} bot={bot} />
                 ))}
               </div>
+              {resultBots.length > PAGE_SIZE && (
+                <div className="mt-6">
+                  <Pagination
+                    page={resultsBotsPage}
+                    total={resultBots.length}
+                    perPage={PAGE_SIZE}
+                    onPageChange={setResultsBotsPage}
+                  />
+                </div>
+              )}
             </section>
           )}
 
-          {(results?.servers?.length ?? 0) > 0 && (
+          {resultServers.length > 0 && (
             <section>
               <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
                 Servers
-                <Badge>{results!.servers!.length}</Badge>
+                <Badge>{resultServers.length}</Badge>
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {results!.servers!.map((server) => (
+                {pagedResultServers.map((server) => (
                   <ServerCard key={server.server_id} server={server} />
                 ))}
               </div>
+              {resultServers.length > PAGE_SIZE && (
+                <div className="mt-6">
+                  <Pagination
+                    page={resultsServersPage}
+                    total={resultServers.length}
+                    perPage={PAGE_SIZE}
+                    onPageChange={setResultsServersPage}
+                  />
+                </div>
+              )}
             </section>
           )}
 
           {totalResults === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-500 dark:text-zinc-400">
-              <p className="text-sm">No results found. Try different keywords or tags.</p>
+              <p className="text-sm">
+                No results found. Try different keywords or tags.
+              </p>
             </div>
           )}
         </div>
-      ) : null}
+      ) : (
+        <div className="mt-10 space-y-10">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            Browsing everything — search or pick a tag to narrow it down.
+          </p>
+
+          {browseBots && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                Bots
+                <Badge>{browseBots.count}</Badge>
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {browseBots.results.map((bot) => (
+                  <BotCard key={bot.bot_id} bot={bot} />
+                ))}
+              </div>
+              <div className="mt-6">
+                <Pagination
+                  page={botsPage}
+                  total={browseBots.count}
+                  perPage={browseBots.per_page}
+                  onPageChange={setBotsPage}
+                />
+              </div>
+            </section>
+          )}
+
+          {browseServers && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                Servers
+                <Badge>{browseServers.count}</Badge>
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {browseServers.results.map((server) => (
+                  <ServerCard key={server.server_id} server={server} />
+                ))}
+              </div>
+              <div className="mt-6">
+                <Pagination
+                  page={serversPage}
+                  total={browseServers.count}
+                  perPage={browseServers.per_page}
+                  onPageChange={setServersPage}
+                />
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </Container>
   );
 }

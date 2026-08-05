@@ -2,13 +2,19 @@ import { ARCADIA_URL } from "./config";
 import type {
   AuthorizeAction,
   BaseAnalytics,
+  BlogAction,
+  BlogPost,
   Hello,
   MfaLogin,
   PartialEntity,
+  Partners,
+  PartnerAction,
   PlatformUser,
   RPCLogEntry,
   RPCMethod,
   RPCWebAction,
+  StaffDisciplinaryType,
+  StaffDisciplinaryTypeAction,
   StaffMember,
   StaffMemberAction,
   StaffPosition,
@@ -314,6 +320,153 @@ export const arcadia = {
         UpdateStaffMembers: {
           login_token: loginToken,
           action: { EditMember: member } satisfies StaffMemberAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  staffDisciplinaryTypes: {
+    list: async (loginToken: string): Promise<StaffDisciplinaryType[]> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: "ListDisciplinaryTypes" satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      type: Extract<
+        StaffDisciplinaryTypeAction,
+        { CreateDisciplinaryType: unknown }
+      >["CreateDisciplinaryType"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: {
+            CreateDisciplinaryType: type,
+          } satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      type: Extract<
+        StaffDisciplinaryTypeAction,
+        { EditDisciplinaryType: unknown }
+      >["EditDisciplinaryType"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: {
+            EditDisciplinaryType: type,
+          } satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: {
+            DeleteDisciplinaryType: { id },
+          } satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  blog: {
+    list: async (loginToken: string): Promise<BlogPost[]> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: "ListEntries" satisfies BlogAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      entry: Extract<BlogAction, { CreateEntry: unknown }>["CreateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: { CreateEntry: entry } satisfies BlogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      entry: Extract<BlogAction, { UpdateEntry: unknown }>["UpdateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: { UpdateEntry: entry } satisfies BlogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, itag: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: { DeleteEntry: { itag } } satisfies BlogAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  partners: {
+    list: async (loginToken: string): Promise<Partners> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: "List" satisfies PartnerAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      partner: Extract<PartnerAction, { Create: unknown }>["Create"]["partner"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: { Create: { partner } } satisfies PartnerAction,
+        },
+      });
+      await assertOk(res);
+    },
+    update: async (
+      loginToken: string,
+      partner: Extract<PartnerAction, { Update: unknown }>["Update"]["partner"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: { Update: { partner } } satisfies PartnerAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies PartnerAction,
         },
       });
       await assertOk(res);
