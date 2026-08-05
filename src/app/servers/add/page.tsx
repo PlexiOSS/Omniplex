@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
+import { TeamPicker } from "@/components/teams/TeamPicker";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TagPicker } from "@/components/ui/TagPicker";
 import { useAuth } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
 import { usePersistedFormDraft } from "@/hooks/usePersistedFormDraft";
 import { servers } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -30,6 +32,8 @@ interface AddServerDraft {
   nsfw: boolean;
   tags: string[];
   links: ApiLink[];
+  /** "" means "create a new team for this". */
+  team_owner: string;
 }
 
 const DRAFT_DEFAULT: AddServerDraft = {
@@ -39,6 +43,7 @@ const DRAFT_DEFAULT: AddServerDraft = {
   nsfw: false,
   tags: [],
   links: [],
+  team_owner: "",
 };
 
 export default function AddServerPage() {
@@ -56,6 +61,7 @@ export default function AddServerPage() {
     session?.user_id,
     DRAFT_DEFAULT,
   );
+  const { me } = useMe(session);
 
   const [serverMeta, setServerMeta] = useState<DiscordServerMeta | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -139,6 +145,7 @@ export default function AddServerPage() {
           nsfw: form.nsfw,
           tags: form.tags,
           extra_links: extraLinks,
+          team_owner: form.team_owner || undefined,
         },
         session.token,
       );
@@ -385,6 +392,17 @@ export default function AddServerPage() {
                 onChange={(links) => setForm((f) => ({ ...f, links }))}
               />
             </div>
+
+            <TeamPicker
+              teams={me?.user_teams ?? []}
+              currentUserId={session.user_id}
+              requiredPerm="add_servers"
+              entityLabel="servers"
+              value={form.team_owner}
+              onChange={(team_owner) =>
+                setForm((f) => ({ ...f, team_owner }))
+              }
+            />
 
             <label className="flex items-center gap-3 cursor-pointer">
               <input

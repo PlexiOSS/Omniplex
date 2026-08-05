@@ -101,6 +101,11 @@ export interface Bot {
   vanity_ref: string;
   vanity: string;
   vote_banned: boolean;
+  /** Successful uptime checks out of total_uptime, from Popplio's periodic presence check. */
+  uptime: number;
+  total_uptime: number;
+  /** Null if never checked yet. */
+  uptime_last_checked: string | null;
   prefix: string;
   extra_links: Link[];
   tags: string[];
@@ -556,6 +561,8 @@ export interface CreateBotPayload {
   tags: string[];
   extra_links: Link[];
   nsfw?: boolean;
+  /** An existing team's id to own this bot. Omit (or "") to create a new team for it. */
+  team_owner?: string;
 }
 
 export interface CreateServerPayload {
@@ -566,6 +573,8 @@ export interface CreateServerPayload {
   nsfw: boolean;
   tags: string[];
   extra_links: Link[];
+  /** An existing team's id to own this server. Omit (or "") to create a new team for it. */
+  team_owner?: string;
 }
 
 /** Preview of a bot resolved from `GET /bots/{client_id}/meta`, ahead of submitting Add Bot. */

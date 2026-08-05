@@ -8,19 +8,19 @@ const FOOTER_LINKS = [
   {
     heading: "Discover",
     links: [
-      { href: "/bots", label: "Bots" },
-      { href: "/servers", label: "Servers" },
-      { href: "/packs", label: "Packs" },
-      { href: '/search', label: 'Search' },
+      { href: "/bots", label: "All Bots" },
+      { href: "/servers", label: "All Servers" },
+      { href: "/packs", label: "All Packs" },
+      { href: '/search', label: 'Discovery' },
     ],
   },
   {
-    heading: "Developers",
+    heading: "Documentation",
     links: [
-      { href: "/bots/add", label: "Add a Bot" },
-      { href: "/servers/add", label: "Add a Server" },
-      { href: "/packs/add", label: "Add a Pack" },
-      { href: "https://docs.botlist.site", label: "Developer Docs" },
+      { href: "https://docs.omniplex.gg/docs/api-reference", label: "API Reference" },
+      { href: "https://docs.omniplex.gg/docs#faq", label: "Frequently Asked" },
+      { href: "https://docs.omniplex.gg/docs/guides", label: "User Guides" },
+      { href: "https://docs.omniplex.gg/docs/api-reference/rate-limits", label: "Rate Limits" },
     ],
   },
   {

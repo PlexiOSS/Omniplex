@@ -1,9 +1,9 @@
 "use client";
 
-import { LogOut, Menu, Settings2, Shield, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, Plus, Settings2, Shield, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -25,6 +25,13 @@ const NAV_LINKS = [
   { href: "/servers", label: "Servers" },
   { href: "/packs", label: "Packs" },
   { href: "/search", label: "Search" },
+];
+
+const CREATE_LINKS = [
+  { href: "/bots/add", label: "Add a Bot" },
+  { href: "/servers/add", label: "Add a Server" },
+  { href: "/packs/add", label: "Add a Pack" },
+  { href: "/teams/add", label: "Create a Team" },
 ];
 
 // The staff panel (/admin/**) swaps in its own nav here rather than running
@@ -57,6 +64,19 @@ export function Header() {
   const isStaff = me?.staff ?? false;
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const createMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!createOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (!createMenuRef.current?.contains(e.target as Node)) {
+        setCreateOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [createOpen]);
 
   const isAdminSection =
     pathname.startsWith("/admin") &&
@@ -125,6 +145,46 @@ export function Header() {
 
             {/* Right side */}
             <div className="flex items-center gap-1">
+              {/* Create menu */}
+              {!isAdminSection && (
+                <div ref={createMenuRef} className="relative hidden md:block">
+                  <button
+                    type="button"
+                    onClick={() => setCreateOpen((o) => !o)}
+                    className={[
+                      "flex h-8 items-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-colors",
+                      createOpen
+                        ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                    ].join(" ")}
+                    aria-haspopup="menu"
+                    aria-expanded={createOpen}
+                  >
+                    <Plus size={14} />
+                    Create
+                    <ChevronDown size={12} />
+                  </button>
+                  {createOpen && (
+                    <div
+                      role="menu"
+                      className="absolute right-0 z-50 mt-2 w-44 overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+                    >
+                      {CREATE_LINKS.map(({ href, label }) => (
+                        <Link
+                          key={href}
+                          href={href}
+                          role="menuitem"
+                          onClick={() => setCreateOpen(false)}
+                          className="block px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                        >
+                          {label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Social links */}
               <a
                 href={SOCIAL_LINKS.instagram}
@@ -257,6 +317,22 @@ export function Header() {
                   {label}
                 </Link>
               ))}
+              {!isAdminSection && (
+                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
+                  <p className="px-3 pb-1 text-xs font-medium tracking-wide uppercase text-zinc-400 dark:text-zinc-600">
+                    Create
+                  </p>
+                  {CREATE_LINKS.map(({ href, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              )}
               {isAdminSection && isStaffAuthenticated && (
                 <button
                   type="button"

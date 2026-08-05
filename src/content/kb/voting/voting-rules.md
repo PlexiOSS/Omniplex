@@ -18,8 +18,7 @@ If you try to vote again before your cooldown ends, you'll see how long you need
 
 ## Upvotes and downvotes
 
-- **Bots** only support upvotes bots cannot be downvoted.
-- **Servers, packs, and teams** support both upvotes and downvotes.
+Bots, servers, packs, and teams all support both upvotes and downvotes. Voting again before your cooldown ends is blocked regardless of direction — you can't use a downvote to immediately reverse an upvote (or vice versa) within the same cooldown window.
 
 ## Vote credits
 

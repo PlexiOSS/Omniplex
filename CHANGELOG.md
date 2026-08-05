@@ -5,10 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-08-04
 
 ### Added
 
+- Downvotes: bot and server vote buttons now both show an upvote and a downvote control (bots previously only supported upvoting, both on the API and in the UI — see the matching Popplio change).
+- Statistics: bot and server owners/team members can now view a "Stats" panel from the dashboard, showing votes, page views, invite clicks and (for bots) uptime check results — data the API already returned but the frontend never surfaced.
+- A "Create" menu in the header (Add a Bot/Server/Pack, Create a Team), so those entry points are reachable from anywhere on the site, not just the footer and dashboard.
+- Team management: Add Bot and Add Server now let you choose which of your existing teams (that you have the relevant `add_bots`/`add_servers` permission on) should own the new listing, instead of always creating a brand-new team. A new `/teams/add` page lets you create a team directly, linked from the dashboard's Teams tab and the footer. Since team names aren't unique, the picker shows each team's avatar and member/bot/server counts to tell same-named teams apart, and gains a search box once you have more than a handful of eligible teams.
 - Knowledge base (`/kb`) section, with guide articles ported from the legacy
   site: Getting Started, Server Listing Rules, Pack Rules, Voting Rules & FAQ,
   and Partner Requirements.
@@ -154,6 +158,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `IndexServer.avatar` is now typed as `string` and used directly, matching
   `bots.avatar`. Team/partner avatars are unaffected — those are still
   genuinely removed, unlike servers'.
+- `ARCADIA_PANEL_SCOPE`'s fallback value was `infinity-panel`, which doesn't
+  match any OAuth2 scope Arcadia actually registers (`infinity-list`) —
+  staff panel login failed OAuth validation for anyone relying on the
+  default rather than an explicit `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` env var.
 - The status page's "Staff Panel" check called `arcadia.auth.begin(...)`
   with a hardcoded production redirect URL (`https://omniplex.gg`)
   regardless of which environment was actually running. On staging, this
@@ -189,6 +197,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bot/server/pack listing cards could force the whole page to overflow
   horizontally when tag or description content had no wrap point, due to
   CSS Grid items defaulting to `min-width: auto`.
+- The dashboard's Bots tab had no "Add a Bot" entry point, unlike the
+  Servers/Teams/Packs tabs, which all had one in both their empty and
+  populated states.
 - Team bots on the dashboard always showed "view only," even for users with
   full permissions on that team — traced to a Popplio bug (see Popplio's
   changelog) where team member data was never fetched for embedded teams.

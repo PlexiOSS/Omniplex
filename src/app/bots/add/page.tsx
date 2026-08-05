@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
+import { TeamPicker } from "@/components/teams/TeamPicker";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TagPicker } from "@/components/ui/TagPicker";
 import { useAuth } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
 import { usePersistedFormDraft } from "@/hooks/usePersistedFormDraft";
 import { bots } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -29,6 +31,8 @@ interface AddBotDraft {
   nsfw: boolean;
   tags: string[];
   links: ApiLink[];
+  /** "" means "create a new team for this". */
+  team_owner: string;
 }
 
 const DRAFT_DEFAULT: AddBotDraft = {
@@ -41,6 +45,7 @@ const DRAFT_DEFAULT: AddBotDraft = {
   nsfw: false,
   tags: [],
   links: [],
+  team_owner: "",
 };
 
 const ALREADY_LISTED_TYPES = new Set(["approved", "certified"]);
@@ -60,6 +65,7 @@ export default function AddBotPage() {
     session?.user_id,
     DRAFT_DEFAULT,
   );
+  const { me } = useMe(session);
 
   const [botMeta, setBotMeta] = useState<DiscordBotMeta | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -181,6 +187,7 @@ export default function AddBotPage() {
             { name: "Invite", value: invite },
             ...form.links.filter((l) => l.name.trim() && l.value.trim()),
           ],
+          team_owner: form.team_owner || undefined,
         },
         session.token,
       );
@@ -484,6 +491,17 @@ export default function AddBotPage() {
                 onChange={(links) => setForm((f) => ({ ...f, links }))}
               />
             </div>
+
+            <TeamPicker
+              teams={me?.user_teams ?? []}
+              currentUserId={session.user_id}
+              requiredPerm="add_bots"
+              entityLabel="bots"
+              value={form.team_owner}
+              onChange={(team_owner) =>
+                setForm((f) => ({ ...f, team_owner }))
+              }
+            />
 
             {/* NSFW */}
             <label className="flex items-center gap-3 cursor-pointer">
