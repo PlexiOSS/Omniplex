@@ -14,6 +14,9 @@ _openapi:
       title: Get Servers Index
       url: '#get-servers-index'
     - depth: 2
+      title: Get Server Meta
+      url: '#get-server-meta'
+    - depth: 2
       title: Add Server
       url: '#add-server'
     - depth: 2
@@ -33,6 +36,8 @@ _openapi:
         id: get-random-servers
       - content: Get Servers Index
         id: get-servers-index
+      - content: Get Server Meta
+        id: get-server-meta
       - content: Add Server
         id: add-server
       - content: Get Server
@@ -53,6 +58,12 @@ _openapi:
           ``ListIndexServer`` object
         heading: get-servers-index
       - content: >-
+          Resolves a Discord invite link to a preview of the server it points to
+          (name, icon, member counts, and whether it's already listed), without
+          adding it to the database. Used by Add Server to show the server being
+          added before the user submits.
+        heading: get-server-meta
+      - content: >-
           Adds a server to the database from an invite link. Resolves the guild
           via the invite (the tracking bot does not need to already be in the
           server). Returns 204 on success
@@ -69,4 +80,4 @@ _openapi:
         heading: update-server-settings
 ---
 
-<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/servers/@all"},{"method":"get","path":"/servers/@random"},{"method":"get","path":"/servers/@index"},{"method":"put","path":"/servers"},{"method":"get","path":"/servers/{id}"},{"method":"get","path":"/servers/{id}/seo"},{"method":"patch","path":"/servers/{id}/settings"}]} hasHead={true} />
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/servers/@all"},{"method":"get","path":"/servers/@random"},{"method":"get","path":"/servers/@index"},{"method":"get","path":"/servers/meta"},{"method":"put","path":"/servers"},{"method":"get","path":"/servers/{id}"},{"method":"get","path":"/servers/{id}/seo"},{"method":"patch","path":"/servers/{id}/settings"}]} hasHead={true} />

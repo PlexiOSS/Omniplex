@@ -12,17 +12,12 @@ _openapi:
     - depth: 2
       title: Ping Server (HEAD)
       url: '#ping-server-head'
-    - depth: 2
-      title: Trace Frontend
-      url: '#trace-frontend'
   structuredData:
     headings:
       - content: Ping Server
         id: ping-server
       - content: Ping Server (HEAD)
         id: ping-server-head
-      - content: Trace Frontend
-        id: trace-frontend
     contents:
       - content: >-
           This is a simple ping endpoint to check if the API is online. It will
@@ -34,10 +29,6 @@ _openapi:
           return a simple JSON object with a message, docs link, our site link
           and status page link.
         heading: ping-server-head
-      - content: >-
-          Traces an issue in the frontend. This can either be to our self-hosted
-          Sentry instance or to any other (self-hosted) tracing service
-        heading: trace-frontend
 ---
 
-<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/"},{"method":"head","path":"/"},{"method":"post","path":"/failure-management"}]} hasHead={true} />
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/"},{"method":"head","path":"/"}]} hasHead={true} />

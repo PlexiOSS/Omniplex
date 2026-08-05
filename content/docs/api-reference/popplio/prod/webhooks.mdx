@@ -10,8 +10,14 @@ _openapi:
       title: Get Webhooks
       url: '#get-webhooks'
     - depth: 2
-      title: Update Entity Webhook
-      url: '#update-entity-webhook'
+      title: Create Webhook
+      url: '#create-webhook'
+    - depth: 2
+      title: Update Webhook
+      url: '#update-webhook'
+    - depth: 2
+      title: Delete Webhook
+      url: '#delete-webhook'
     - depth: 2
       title: Get Webhook Logs
       url: '#get-webhook-logs'
@@ -25,8 +31,12 @@ _openapi:
     headings:
       - content: Get Webhooks
         id: get-webhooks
-      - content: Update Entity Webhook
-        id: update-entity-webhook
+      - content: Create Webhook
+        id: create-webhook
+      - content: Update Webhook
+        id: update-webhook
+      - content: Delete Webhook
+        id: delete-webhook
       - content: Get Webhook Logs
         id: get-webhook-logs
       - content: Get Test Webhook Metadata
@@ -36,12 +46,20 @@ _openapi:
     contents:
       - content: >-
           Gets a list of webhooks of a specific entity (excluding the secret due
-          to security concerns). **Requires authentication**
+          to security concerns). **Requires the Get Webhooks permission**
         heading: get-webhooks
       - content: >-
-          Updates the webhooks of an entity. Note that only provided webhooks
-          are edited. Returns 204 on success
-        heading: update-entity-webhook
+          Creates a new webhook for an entity. Returns 204 on success.
+          **Requires Create Webhooks permission**
+        heading: create-webhook
+      - content: >-
+          Updates an existing webhook on an entity. Returns 204 on success.
+          **Requires Edit Webhooks permission**
+        heading: update-webhook
+      - content: >-
+          Updates an existing webhook on an entity. Returns 204 on success.
+          **Requires Edit Webhooks permission**
+        heading: delete-webhook
       - content: >-
           Gets webhook logs of a specific entity. Paginated to 10 at a time.
           **Requires authentication**
@@ -54,4 +72,4 @@ _openapi:
         heading: test-webhook
 ---
 
-<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/users/{uid}/webhooks/{target_id}"},{"method":"patch","path":"/users/{uid}/webhooks/{target_id}"},{"method":"get","path":"/users/{uid}/webhooks/{target_id}/logs"},{"method":"get","path":"/webhooks/tests/meta"},{"method":"post","path":"/users/{uid}/webhooks/{target_id}/test"}]} hasHead={true} />
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/{target_type}/{target_id}/webhooks"},{"method":"post","path":"/{target_type}/{target_id}/webhooks"},{"method":"post","path":"/{target_type}/{target_id}/webhooks/{webhook_id}"},{"method":"delete","path":"/{target_type}/{target_id}/webhooks/{webhook_id}"},{"method":"get","path":"/{target_type}/{target_id}/webhooks/logs"},{"method":"get","path":"/{target_type}/{target_id}/webhooks/test"},{"method":"post","path":"/{target_type}/{target_id}/webhooks/test"}]} hasHead={true} />

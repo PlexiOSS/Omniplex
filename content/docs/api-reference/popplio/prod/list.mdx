@@ -17,9 +17,6 @@ _openapi:
       title: Get List Statistics
       url: '#get-list-statistics'
     - depth: 2
-      title: Test Auth
-      url: '#test-auth'
-    - depth: 2
       title: Get List Partners
       url: '#get-list-partners'
     - depth: 2
@@ -31,15 +28,6 @@ _openapi:
     - depth: 2
       title: Get Current Status
       url: '#get-current-status'
-    - depth: 2
-      title: Get Changelog
-      url: '#get-changelog'
-    - depth: 2
-      title: Get Cache Servers
-      url: '#get-cache-servers'
-    - depth: 2
-      title: Get Oauth2 URL
-      url: '#get-oauth2-url'
   structuredData:
     headings:
       - content: Get RSS Feed
@@ -50,8 +38,6 @@ _openapi:
         id: search-list
       - content: Get List Statistics
         id: get-list-statistics
-      - content: Test Auth
-        id: test-auth
       - content: Get List Partners
         id: get-list-partners
       - content: Get Staff Templates
@@ -60,12 +46,6 @@ _openapi:
         id: get-list-team
       - content: Get Current Status
         id: get-current-status
-      - content: Get Changelog
-        id: get-changelog
-      - content: Get Cache Servers
-        id: get-cache-servers
-      - content: Get Oauth2 URL
-        id: get-oauth2-url
     contents:
       - content: Gets the RSS feed for the site, in XML format
         heading: get-rss-feed
@@ -77,8 +57,6 @@ _openapi:
         heading: search-list
       - content: Gets basic statistics of the list
         heading: get-list-statistics
-      - content: Test your authentication
-        heading: test-auth
       - content: Gets the official partners of the list
         heading: get-list-partners
       - content: Returns all of the staff templates used for reviewing bots
@@ -89,14 +67,6 @@ _openapi:
         heading: get-list-team
       - content: Gets the current status of the list
         heading: get-current-status
-      - content: Gets the changelog of the list
-        heading: get-changelog
-      - content: Returns a list of all available cache servers.
-        heading: get-cache-servers
-      - content: >-
-          Gets the oauth2 url to redirect to. Primarily for externally managed
-          clients (like iblcli)
-        heading: get-oauth2-url
 ---
 
-<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/list/rss.xml"},{"method":"get","path":"/list/sitemap.xml"},{"method":"post","path":"/list/search"},{"method":"get","path":"/list/stats"},{"method":"post","path":"/list/auth-test"},{"method":"get","path":"/list/partners"},{"method":"get","path":"/list/staff-templates"},{"method":"get","path":"/list/team"},{"method":"get","path":"/list/current-status"},{"method":"get","path":"/list/changelog"},{"method":"get","path":"/list/cache-servers"},{"method":"get","path":"/list/oauth2"}]} hasHead={true} />
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/list/rss.xml"},{"method":"get","path":"/list/sitemap.xml"},{"method":"post","path":"/list/search"},{"method":"get","path":"/list/stats"},{"method":"get","path":"/list/partners"},{"method":"get","path":"/list/staff-templates"},{"method":"get","path":"/list/team"},{"method":"get","path":"/list/current-status"}]} hasHead={true} />

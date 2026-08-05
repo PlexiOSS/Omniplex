@@ -17,6 +17,9 @@ _openapi:
       title: Get Bot
       url: '#get-bot'
     - depth: 2
+      title: Delete Bot
+      url: '#delete-bot'
+    - depth: 2
       title: Get Bot Metadata
       url: '#get-bot-metadata'
     - depth: 2
@@ -29,17 +32,11 @@ _openapi:
       title: Add Bot
       url: '#add-bot'
     - depth: 2
-      title: Delete Bot
-      url: '#delete-bot'
-    - depth: 2
       title: Update Bot Settings
       url: '#update-bot-settings'
     - depth: 2
       title: Patch Bot Team
       url: '#patch-bot-team'
-    - depth: 2
-      title: Transfer Bot To Team
-      url: '#transfer-bot-to-team'
   structuredData:
     headings:
       - content: Get All Bots
@@ -50,6 +47,8 @@ _openapi:
         id: get-bots-index
       - content: Get Bot
         id: get-bot
+      - content: Delete Bot
+        id: delete-bot
       - content: Get Bot Metadata
         id: get-bot-metadata
       - content: Get Bot SEO Info
@@ -58,14 +57,10 @@ _openapi:
         id: post-bot-stats
       - content: Add Bot
         id: add-bot
-      - content: Delete Bot
-        id: delete-bot
       - content: Update Bot Settings
         id: update-bot-settings
       - content: Patch Bot Team
         id: patch-bot-team
-      - content: Transfer Bot To Team
-        id: transfer-bot-to-team
     contents:
       - content: >-
           Gets all bots on the list. Returns a set of paginated ``IndexBot``
@@ -80,6 +75,11 @@ _openapi:
       - content: Gets a bot by id
         heading: get-bot
       - content: >-
+          Deletes a bot from the list. This is *irreversible*. You must have
+          'Delete Bots' in the team if the bot is in a team. Returns 204 on
+          success.
+        heading: delete-bot
+      - content: >-
           Gets the metadata of a bot such as whether it is already in the
           database/bot id checks
         heading: get-bot-metadata
@@ -87,23 +87,20 @@ _openapi:
           Gets the minimal SEO information about a bot for embed/search
           purposes. Used by v4 website for meta tags
         heading: get-bot-seo-info
-      - content: This endpoint posts the stats of a bot.
+      - content: >-
+          This endpoint posts the stats of a bot. `status` is optional and
+          self-reports the bot's presence (online/idle/dnd/offline) — post it
+          periodically to keep it fresh, it will otherwise keep showing the last
+          value posted.
         heading: post-bot-stats
-      - content: >-
-          Adds a bot to the database. The main owner will be the user who
-          created the bot. Returns 204 on success
+      - content: Adds a bot to the database. Returns 204 on success
         heading: add-bot
-      - content: >-
-          Deletes a bot from the list. This is *irreversible*. You must have
-          'Delete Bots' in the team if the bot is in a team. Returns 204 on
-          success.
-        heading: delete-bot
       - content: >-
           Updates a bots settings. You must have 'Edit Bot Settings' in the team
           if the bot is in a team. Returns 204 on success
         heading: update-bot-settings
       - content: >-
-          Transfers a bot owned by a team to another team. 
+          Transfers a bot to another team. 
 
 
           Semantically equivalent to:
@@ -125,32 +122,11 @@ _openapi:
           are transferring the bot to
 
 
-          The bots ownership will be transferred to to the team.
+          The bots ownership will be transferred to the new team.
 
 
           Returns a 204 on success
         heading: patch-bot-team
-      - content: >-
-          Transfers a bot owned by a user. 
-
-
-          The below are the requirements for this:
-
-
-          - The bot must not be already owned by a team (see the "Patch Bot
-          Team" endpoint for transferring a bot from a team to a team)
-
-          - The bot must be owned by the user making the request
-
-          - The user must have the "Add New Bots" permission in the team they
-          are transferring the bot to
-
-
-          The bots ownership will be transferred to the team.
-
-
-          Returns a 204 on success
-        heading: transfer-bot-to-team
 ---
 
-<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/bots/@all"},{"method":"get","path":"/bots/@random"},{"method":"get","path":"/bots/@index"},{"method":"get","path":"/bots/{id}"},{"method":"get","path":"/users/{uid}/bots/{cid}/meta"},{"method":"get","path":"/bots/{id}/seo"},{"method":"post","path":"/bots/stats"},{"method":"put","path":"/users/{id}/bots"},{"method":"delete","path":"/users/{uid}/bots/{bid}"},{"method":"patch","path":"/users/{uid}/bots/{bid}/settings"},{"method":"patch","path":"/users/{uid}/bots/{bid}/teams"},{"method":"put","path":"/users/{uid}/bots/{bid}/teams"}]} hasHead={true} />
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/bots/@all"},{"method":"get","path":"/bots/@random"},{"method":"get","path":"/bots/@index"},{"method":"get","path":"/bots/{id}"},{"method":"delete","path":"/bots/{id}"},{"method":"get","path":"/bots/{client_id}/meta"},{"method":"get","path":"/bots/{id}/seo"},{"method":"post","path":"/bots/stats"},{"method":"put","path":"/bots"},{"method":"patch","path":"/bots/{id}/settings"},{"method":"patch","path":"/users/{uid}/bots/{bid}/teams"}]} hasHead={true} />

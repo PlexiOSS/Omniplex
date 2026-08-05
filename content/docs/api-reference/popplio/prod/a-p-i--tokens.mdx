@@ -1,30 +1,61 @@
 ---
-title: API Tokens
+title: A P I Tokens
 description: These API endpoints are related to API Tokens on IBL
 full: true
 _openapi:
   toc:
     - depth: 2
-      title: Get Entity Token
-      url: '#get-entity-token'
+      title: Get Sessions
+      url: '#get-sessions'
     - depth: 2
-      title: Reset Entity Token
-      url: '#reset-entity-token'
+      title: Create Session
+      url: '#create-session'
+    - depth: 2
+      title: Revoke Session
+      url: '#revoke-session'
+    - depth: 2
+      title: Get Oauth2 URL
+      url: '#get-oauth2-url'
+    - depth: 2
+      title: Create OAuth2 Login
+      url: '#create-oauth2-login'
+    - depth: 2
+      title: Test Auth
+      url: '#test-auth'
   structuredData:
     headings:
-      - content: Get Entity Token
-        id: get-entity-token
-      - content: Reset Entity Token
-        id: reset-entity-token
+      - content: Get Sessions
+        id: get-sessions
+      - content: Create Session
+        id: create-session
+      - content: Revoke Session
+        id: revoke-session
+      - content: Get Oauth2 URL
+        id: get-oauth2-url
+      - content: Create OAuth2 Login
+        id: create-oauth2-login
+      - content: Test Auth
+        id: test-auth
     contents:
+      - content: Gets all session tokens of an entity
+        heading: get-sessions
       - content: >-
-          Gets the API token of an entity. You must have 'View Existing Tokens'
-          for the entity in the team.
-        heading: get-entity-token
+          Creates a new session returning the session token. The session token
+          cannot be read after creation.
+        heading: create-session
+      - content: Revokes a session of an entity based on session ID
+        heading: revoke-session
       - content: >-
-          Reset the API token of an entity. You must have 'Reset Tokens' for the
-          entity in the team. Returns the new token on success
-        heading: reset-entity-token
+          Gets the oauth2 url to redirect to. Primarily for externally managed
+          clients (like iblcli)
+        heading: get-oauth2-url
+      - content: >-
+          Takes in a ``code`` query parameter and returns a user ``token``.
+          **Cannot be used outside of the site for security reasons but
+          documented in case we wish to allow its use in the future.**
+        heading: create-oauth2-login
+      - content: Test your authentication
+        heading: test-auth
 ---
 
-<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/users/{uid}/tokens/{target_id}"},{"method":"patch","path":"/users/{uid}/tokens/{target_id}"}]} hasHead={true} />
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/{target_type}/{target_id}/sessions"},{"method":"post","path":"/{target_type}/{target_id}/sessions"},{"method":"delete","path":"/{target_type}/{target_id}/sessions/{session_id}"},{"method":"get","path":"/auth/login/discord-oauth2"},{"method":"post","path":"/auth/login/discord-oauth2"},{"method":"post","path":"/auth/test"}]} hasHead={true} />

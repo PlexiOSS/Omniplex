@@ -5,9 +5,6 @@ full: true
 _openapi:
   toc:
     - depth: 2
-      title: Get HCaptcha Info
-      url: '#get-hcaptcha-info'
-    - depth: 2
       title: Get General Vote Credit Tiers
       url: '#get-general-vote-credit-tiers'
     - depth: 2
@@ -20,18 +17,19 @@ _openapi:
       title: Redeem Vote Credits
       url: '#redeem-vote-credits'
     - depth: 2
-      title: Get All Votes
-      url: '#get-all-votes'
+      title: Get All User Votes
+      url: '#get-all-user-votes'
+    - depth: 2
+      title: Get Votes User List
+      url: '#get-votes-user-list'
     - depth: 2
       title: Get User Entity Votes
       url: '#get-user-entity-votes'
     - depth: 2
-      title: Create User Entity Vote
-      url: '#create-user-entity-vote'
+      title: Create Entity Vote
+      url: '#create-entity-vote'
   structuredData:
     headings:
-      - content: Get HCaptcha Info
-        id: get-hcaptcha-info
       - content: Get General Vote Credit Tiers
         id: get-general-vote-credit-tiers
       - content: Get Vote Credit Tiers
@@ -40,15 +38,15 @@ _openapi:
         id: get-vote-redeem-logs
       - content: Redeem Vote Credits
         id: redeem-vote-credits
-      - content: Get All Votes
-        id: get-all-votes
+      - content: Get All User Votes
+        id: get-all-user-votes
+      - content: Get Votes User List
+        id: get-votes-user-list
       - content: Get User Entity Votes
         id: get-user-entity-votes
-      - content: Create User Entity Vote
-        id: create-user-entity-vote
+      - content: Create Entity Vote
+        id: create-entity-vote
     contents:
-      - content: Gets hcaptcha info (sitekey)
-        heading: get-hcaptcha-info
       - content: >-
           Returns a list of all currently available vote credit tiers sorted in
           ascending order
@@ -60,22 +58,26 @@ _openapi:
       - content: Returns a summary of the vote credit redeem logs
         heading: get-vote-redeem-logs
       - content: >-
-          Redeems all votes into credits towards the shop based on the vote
-          credit tiers
+          Redeems votes into credits towards the shop based on the vote credit
+          tiers
         heading: redeem-vote-credits
       - content: >-
           Gets all votes (paginated by 10) of a user on an entity. This endpoint
           is currently public as the same data can be found through #vote-logs
           in discord. Note that for compatibility, a trailing 's' is removed
-        heading: get-all-votes
+        heading: get-all-user-votes
       - content: >-
-          Gets all votes a user has made for an entity. Note that for
-          compatibility, a trailing 's' is removed
+          Gets the full list of all users who have voted for the entity on
+          Discord as a list of snowflakes. Note that for compatibility, a
+          trailing 's' is removed. This method does not require authentication
+          as it is easily publicly available through other means
+        heading: get-votes-user-list
+      - content: Gets all valid (current) votes a user has made for an entity
         heading: get-user-entity-votes
       - content: >-
           Creates a vote for an entity. Returns 204 on success. Note that for
           compatibility, a trailing 's' is removed
-        heading: create-user-entity-vote
+        heading: create-entity-vote
 ---
 
-<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/votes/security/hcaptcha"},{"method":"get","path":"/votes/credit-tiers"},{"method":"get","path":"/{target_type}/{target_id}/votes/credit-tiers"},{"method":"get","path":"/{target_type}/{target_id}/votes/credits"},{"method":"post","path":"/users/{uid}/{target_type}/{target_id}/votes/credits"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes/@all"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes"},{"method":"put","path":"/users/{uid}/{target_type}/{target_id}/votes"}]} hasHead={true} />
+<APIPage document={"https://spider.omniplex.gg/openapi"} operations={[{"method":"get","path":"/votes/credit-tiers"},{"method":"get","path":"/{target_type}/{target_id}/votes/credit-tiers"},{"method":"get","path":"/{target_type}/{target_id}/votes/credits"},{"method":"post","path":"/{target_type}/{target_id}/votes/credits"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes/@all"},{"method":"get","path":"/{target_type}/{target_id}/votes/user-list"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes"},{"method":"put","path":"/users/{uid}/{target_type}/{target_id}/votes"}]} hasHead={true} />
