@@ -11,7 +11,6 @@ interface PackCardProps {
 
 export function PackCard({ pack }: PackCardProps) {
   const href = pack.url ? `/packs/${pack.url}` : "#";
-  // BotPack has no nsfw flag of its own — inherit it from any bot/server it contains.
   const isNsfw =
     (pack.bots ?? []).some((b) => b.nsfw) ||
     (pack.servers ?? []).some((s) => s.nsfw);
@@ -23,7 +22,6 @@ export function PackCard({ pack }: PackCardProps) {
       className="group flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
     >
       <div className="flex items-start gap-3">
-        {/* Show up to 3 avatars stacked — bots first, falling back to servers for server-only packs */}
         <div className="flex shrink-0 -space-x-2">
           {(pack.bots ?? []).length > 0
             ? (pack.bots ?? [])

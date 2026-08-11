@@ -13,6 +13,7 @@ import { useArcadiaAuth } from "@/hooks/useArcadiaAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { SOCIAL_LINKS } from "@/lib/social";
+import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { Container } from "./Container";
 import { NavGroupMenu } from "./NavGroupMenu";
 import { ThemeToggle } from "./ThemeToggle";
@@ -263,7 +264,11 @@ export function Header() {
                 <div className="items-center hidden gap-2 ml-1 md:flex">
                   <Link href="/dashboard">
                     <Avatar
-                      src={session.avatar}
+                      src={mirroredAvatarUrl(
+                        "users",
+                        session.user_id,
+                        session.avatar,
+                      )}
                       alt={session.username ?? "Your profile"}
                       size={32}
                       className="cursor-pointer ring-2 ring-transparent hover:ring-zinc-300 dark:hover:ring-zinc-600"
@@ -365,7 +370,11 @@ export function Header() {
                 <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
                   <Link href="/dashboard" className="flex items-center gap-2">
                     <Avatar
-                      src={session.avatar}
+                      src={mirroredAvatarUrl(
+                        "users",
+                        session.user_id,
+                        session.avatar,
+                      )}
                       alt={session.username ?? "Your profile"}
                       size={32}
                     />

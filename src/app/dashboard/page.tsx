@@ -41,7 +41,7 @@ import type {
   User as UserType,
 } from "@/lib/api/types";
 import { hasAnyPermString, hasPermString } from "@/lib/permissions";
-import { teamAvatarUrl } from "@/lib/utils/assets";
+import { mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { BotEditModal } from "./BotEditModal";
 import { PacksTab } from "./PacksTab";
@@ -413,7 +413,11 @@ function BotItem({
   return (
     <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
-        <Avatar src={bot.user.avatar} alt={bot.user.username} size={44} />
+        <Avatar
+          src={mirroredAvatarUrl("bots", bot.bot_id, bot.user.avatar)}
+          alt={bot.user.username}
+          size={44}
+        />
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="font-semibold truncate text-zinc-950 dark:text-zinc-50">
@@ -541,6 +545,7 @@ function BotItem({
       {editing && (
         <BotEditModal
           botId={bot.bot_id}
+          userId={userId}
           token={token}
           onClose={() => setEditing(false)}
           onSaved={mutate}
@@ -708,6 +713,7 @@ function ServerItem({
   team,
   canManage,
   myFlags,
+  userId,
   token,
   mutate,
 }: {
@@ -715,6 +721,7 @@ function ServerItem({
   team: Team;
   canManage: boolean;
   myFlags: string[];
+  userId: string;
   token: string;
   mutate: () => void;
 }) {
@@ -733,9 +740,12 @@ function ServerItem({
   ]);
   const canManageWebhooks = hasPermString(myFlags, "manage_webhooks");
   const canViewWebhookLogs = hasPermString(myFlags, "view_webhook_logs");
-  const avatarSrc =
+  const avatarSrc = mirroredAvatarUrl(
+    "servers",
+    server.server_id,
     server.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
+  );
 
   return (
     <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
@@ -847,6 +857,7 @@ function ServerItem({
       {editing && (
         <ServerEditModal
           serverId={server.server_id}
+          userId={userId}
           token={token}
           onClose={() => setEditing(false)}
           onSaved={mutate}
@@ -888,10 +899,12 @@ function ServerItem({
 
 function ServersTab({
   teamServers,
+  userId,
   token,
   mutate,
 }: {
   teamServers: TeamServer[];
+  userId: string;
   token: string;
   mutate: () => void;
 }) {
@@ -937,6 +950,7 @@ function ServersTab({
             team={team}
             canManage={canManage}
             myFlags={myFlags}
+            userId={userId}
             token={token}
             mutate={mutate}
           />
@@ -1095,7 +1109,11 @@ export default function DashboardPage() {
     <Container className="py-10">
       {/* Profile header */}
       <div className="flex items-start gap-4 mb-8">
-        <Avatar src={avatar} alt={username} size={64} />
+        <Avatar
+          src={mirroredAvatarUrl("users", session.user_id, avatar)}
+          alt={username}
+          size={64}
+        />
         <div>
           <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
             {displayName}
@@ -1174,6 +1192,7 @@ export default function DashboardPage() {
       {tab === "servers" && (
         <ServersTab
           teamServers={teamServers}
+          userId={session.user_id}
           token={session.token}
           mutate={mutate}
         />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Upload } from "lucide-react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +11,7 @@ import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { Link } from "@/lib/api/types";
 import type { Partner, PartnerType } from "@/lib/arcadia/types";
 import { partnerAvatarUrl } from "@/lib/utils/assets";
+import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 interface PartnerEditModalProps {
   loginToken: string;
@@ -37,6 +39,28 @@ export function PartnerEditModal({
   const [links, setLinks] = useState<Link[]>(partner?.links ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [logoVersion, setLogoVersion] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !id.trim()) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      await uploadAsset("partner-logo", id.trim(), file, { loginToken });
+      setLogoVersion((v) => v + 1);
+    } catch (err) {
+      setUploadError(
+        err instanceof UploadError ? err.message : "Upload failed.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSave() {
     if (!id.trim() || !name.trim() || !userId.trim() || !type) {
@@ -81,16 +105,38 @@ export function PartnerEditModal({
       <div className="space-y-4">
         {id.trim() && (
           <div className="flex items-center gap-3">
-            <Avatar src={partnerAvatarUrl(id.trim())} alt={name || id} size={44} />
-            <p className="text-xs text-zinc-400 dark:text-zinc-600">
-              There&apos;s no upload here — the site has no CDN write path
-              since it was removed. To set a logo, someone with server access
-              needs to place a <code>.webp</code> file at{" "}
-              <code className="break-all">
-                avatars/partners/{id.trim()}.webp
-              </code>{" "}
-              on the CDN. Falls back to a generated avatar until then.
-            </p>
+            <Avatar
+              src={`${partnerAvatarUrl(id.trim())}${logoVersion ? `?v=${logoVersion}` : ""}`}
+              alt={name || id}
+              size={44}
+            />
+            <div className="flex-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/webp,image/png,image/jpeg,image/gif"
+                className="hidden"
+                onChange={handleLogoChange}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                loading={uploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={14} />
+                {logoVersion ? "Replace logo" : "Upload logo"}
+              </Button>
+              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                WebP, PNG, JPEG, or GIF — 5MB max.
+              </p>
+              {uploadError && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                  {uploadError}
+                </p>
+              )}
+            </div>
           </div>
         )}
         <Input

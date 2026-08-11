@@ -4,7 +4,12 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import type { IndexBot } from "@/lib/api/types";
-import { bannerUrl, botPath, discordDefaultAvatar } from "@/lib/utils/assets";
+import {
+  bannerUrl,
+  botPath,
+  discordDefaultAvatar,
+  mirroredAvatarUrl,
+} from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 interface BotCardProps {
@@ -13,8 +18,11 @@ interface BotCardProps {
 
 export function BotCard({ bot }: BotCardProps) {
   const href = botPath(bot.bot_id, bot.vanity);
-  // bot.user.avatar is already a fully-resolved URL from dovewing
-  const avatarSrc = bot.user.avatar || discordDefaultAvatar();
+  const avatarSrc = mirroredAvatarUrl(
+    "bots",
+    bot.bot_id,
+    bot.user.avatar || discordDefaultAvatar(),
+  );
 
   return (
     <Link

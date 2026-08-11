@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowLeft, Pencil, Plus, Trash2, UserMinus } from "lucide-react";
+import {
+  ArrowLeft,
+  Pencil,
+  Plus,
+  Trash2,
+  Upload,
+  UserMinus,
+} from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -8,6 +15,7 @@ import { Container } from "@/components/layout/Container";
 import { PermSelector } from "@/components/teams/PermSelector";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
@@ -17,6 +25,8 @@ import { teams } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { PermissionData, Team, TeamMember } from "@/lib/api/types";
 import { hasPermString } from "@/lib/permissions";
+import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 type Tab = "overview" | "info" | "members" | "danger";
 
@@ -131,7 +141,12 @@ export default function TeamSettingsPage() {
 
       {tab === "overview" && <OverviewTab team={team} />}
       {tab === "info" && session && (
-        <EditInfoTab team={team} token={session.token} onSaved={load} />
+        <EditInfoTab
+          team={team}
+          userId={session.user_id}
+          token={session.token}
+          onSaved={load}
+        />
       )}
       {tab === "members" && session && (
         <MembersTab
@@ -165,10 +180,12 @@ function OverviewTab({ team }: { team: Team }) {
 
 function EditInfoTab({
   team,
+  userId,
   token,
   onSaved,
 }: {
   team: Team;
+  userId: string;
   token: string;
   onSaved: () => void;
 }) {
@@ -179,6 +196,36 @@ function EditInfoTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [avatarVersion, setAvatarVersion] = useState(0);
+  const [bannerVersion, setBannerVersion] = useState(0);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImageUpload(
+    kind: "team-avatar" | "team-banner",
+    file: File,
+  ) {
+    const setUploading =
+      kind === "team-avatar" ? setUploadingAvatar : setUploadingBanner;
+    const bumpVersion =
+      kind === "team-avatar" ? setAvatarVersion : setBannerVersion;
+    setUploading(true);
+    setImageError(null);
+    try {
+      await uploadAsset(kind, team.id, file, { userId, token });
+      bumpVersion((v) => v + 1);
+    } catch (err) {
+      setImageError(
+        err instanceof UploadError ? err.message : "Upload failed.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -210,6 +257,79 @@ function EditInfoTab({
 
   return (
     <div className="max-w-2xl space-y-5">
+      <div>
+        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          Banner
+        </p>
+        <Banner
+          src={`${bannerUrl("teams", team.id)}${bannerVersion ? `?v=${bannerVersion}` : ""}`}
+          alt={team.name}
+          className="h-32 rounded-xl sm:h-40"
+        />
+        <input
+          ref={bannerInputRef}
+          type="file"
+          accept="image/webp,image/png,image/jpeg,image/gif"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) handleImageUpload("team-banner", file);
+          }}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          loading={uploadingBanner}
+          onClick={() => bannerInputRef.current?.click()}
+          className="mt-2"
+        >
+          <Upload size={14} />
+          {bannerVersion ? "Replace banner" : "Upload banner"}
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Avatar
+          src={`${teamAvatarUrl(team.id)}${avatarVersion ? `?v=${avatarVersion}` : ""}`}
+          alt={team.name}
+          size={56}
+        />
+        <div>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/webp,image/png,image/jpeg,image/gif"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) handleImageUpload("team-avatar", file);
+            }}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            loading={uploadingAvatar}
+            onClick={() => avatarInputRef.current?.click()}
+          >
+            <Upload size={14} />
+            {avatarVersion ? "Replace avatar" : "Upload avatar"}
+          </Button>
+          <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+            WebP, PNG, JPEG, or GIF — 5MB max.
+          </p>
+        </div>
+      </div>
+
+      {imageError && (
+        <p className="text-sm text-red-600 dark:text-red-400">
+          {imageError}
+        </p>
+      )}
+
       <Input
         id="team-name"
         label="Team Name"

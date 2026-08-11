@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Real image hosting, replacing the informal legacy-CDN-path guessing used
+  everywhere so far (`bannerUrl`/`partnerAvatarUrl`/`teamAvatarUrl`
+  previously just hoped a file existed at a fixed path, with no way to add
+  new ones). The old on-disk `cdn.omniplex.gg` static files were migrated
+  into a private RustFS (S3-compatible) bucket; since it's private, none of
+  it is reachable directly, so everything now goes through two new
+  same-origin proxy routes that hold the only S3 credentials (server-side
+  only, never shipped to the client):
+  - `/cdn/[...path]` — serves uploaded assets (partner logos, team
+    avatar/banner, bot/server banner) straight from the bucket.
+  - `/cdn/avatars/{bots,servers}/[id]` — bot/server avatars are Discord's
+    own, synced live via dovewing/Infernoplex, not an upload; this mirrors
+    a copy into the bucket on first request and re-serves it for 24h
+    before quietly re-mirroring, cutting down on repeated live hits to
+    Discord's CDN across every card/avatar in the app.
+  - A new `/api/uploads` route backs real upload UI in the admin partner
+    editor, team settings (avatar + banner), and the bot/server edit
+    modals (banner). Every upload re-verifies identity and the specific
+    permission needed server-side before writing a single byte — a staff
+    `loginToken` checked via `arcadia.hello` for partner logos, or a user
+    session token checked via `POST /auth/test` plus Popplio's entity-perms
+    lookup for everything else — since the client-side `hasPermString`
+    checks that gate the upload buttons were only ever a UI hint, not a
+    security boundary.
 - The Customize panel is now tabbed (Colors / Fonts / Layout / Content)
   instead of one long stacked list, and grew three new levers:
   - **Colors** — 5 more accent options (cyan, teal, lime, red, pink), 12 total.
@@ -154,6 +178,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Partner and team avatars (`/cdn/avatars/{partners,teams}/...`) 404'd on
+  every request, even for files confirmed to exist in the bucket. Next.js's
+  router matched those URLs against the bot/server avatar mirror route
+  (`/cdn/avatars/[targetType]/[id]`, 2 segments after `avatars` — same shape
+  as `avatars/partners/<file>.webp`) instead of the intended static-asset
+  catch-all, and that route 404'd immediately since `"partners"`/`"teams"`
+  aren't `"bots"`/`"servers"`, never touching S3 at all. Moved the mirror
+  route to `/cdn/avatar-mirror/...` so the two can't collide on URL shape.
 - `Team.avatar` was silently blank everywhere it was used (dashboard Teams
   tab, `/teams/[id]`, `TeamPicker`, and the team-owner blocks on bot/server
   detail pages) — the exact same class of bug as the partner-avatar one

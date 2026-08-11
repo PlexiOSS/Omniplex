@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import type { IndexServer } from "@/lib/api/types";
-import { bannerUrl, serverPath } from "@/lib/utils/assets";
+import { bannerUrl, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 interface ServerCardProps {
@@ -13,9 +13,12 @@ interface ServerCardProps {
 
 export function ServerCard({ server }: ServerCardProps) {
   const href = serverPath(server.server_id, server.vanity);
-  const avatarSrc =
+  const avatarSrc = mirroredAvatarUrl(
+    "servers",
+    server.server_id,
     server.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
+  );
 
   return (
     <Link

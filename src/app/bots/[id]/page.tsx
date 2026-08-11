@@ -19,7 +19,7 @@ import { Banner } from "@/components/ui/Banner";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import { bannerUrl, mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
@@ -68,10 +68,12 @@ export default async function BotPage({ params }: Props) {
     .getAll("bot", bot.bot_id)
     .catch(() => ({ reviews: [] }));
 
-  // bot.user.avatar is already a fully-resolved URL from dovewing
-  const avatarSrc =
+  const avatarSrc = mirroredAvatarUrl(
+    "bots",
+    bot.bot_id,
     bot.user.avatar ||
-    `https://cdn.discordapp.com/embed/avatars/${Number(bot.bot_id) % 5}.png`;
+      `https://cdn.discordapp.com/embed/avatars/${Number(bot.bot_id) % 5}.png`,
+  );
 
   return (
     <Container className="py-10">

@@ -21,7 +21,7 @@ import { Banner } from "@/components/ui/Banner";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import { bannerUrl, mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
@@ -72,9 +72,12 @@ export default async function ServerPage({ params }: Props) {
       ? await users.getUser(server.claimed_by).catch(() => null)
       : null;
 
-  const avatarSrc =
+  const avatarSrc = mirroredAvatarUrl(
+    "servers",
+    server.server_id,
     server.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`;
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`,
+  );
 
   const reviewList = await reviews
     .getAll("server", server.server_id)
