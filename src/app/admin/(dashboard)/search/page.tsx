@@ -1,7 +1,7 @@
 "use client";
 
 import { Search as SearchIcon, Server, ShieldOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -15,6 +15,7 @@ import type {
   TargetType,
 } from "@/lib/arcadia/types";
 import { formatCount } from "@/lib/utils/format";
+import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
 import { GenericRpcModal } from "../GenericRpcModal";
 import { ReviewsModal } from "../ReviewsModal";
@@ -49,17 +50,11 @@ export default function AdminSearchPage() {
     SEARCH_PAGE_SIZE,
   );
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (!query.trim()) return;
+  async function runSearch(t: TargetType, q: string) {
     setLoading(true);
     setError(null);
     try {
-      const entries = await arcadia.searchEntitys(
-        loginToken,
-        targetType,
-        query.trim(),
-      );
+      const entries = await arcadia.searchEntitys(loginToken, t, q);
       setResults(
         entries.map((e) =>
           "Bot" in e
@@ -73,6 +68,19 @@ export default function AdminSearchPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // An empty query matches everything (ILIKE '%%'), so this pre-fills the
+  // page with the full Bot list on load instead of an empty results area —
+  // switching the type dropdown re-runs it too.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    runSearch(targetType, query.trim());
+  }, [targetType]);
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    runSearch(targetType, query.trim());
   }
 
   async function openActions(result: Result) {
@@ -96,12 +104,10 @@ export default function AdminSearchPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-        Search
-      </h1>
-      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        Find any bot or server by ID or name to take action outside the queue.
-      </p>
+      <AdminPageHeader
+        title="Search"
+        description="Find any bot or server by ID or name to take action outside the queue. Starts pre-filled with everything — narrow it down as you type."
+      />
 
       <form onSubmit={handleSearch} className="mt-6 flex flex-wrap gap-2">
         <select

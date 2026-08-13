@@ -11,6 +11,7 @@ import { staff } from "@/lib/api";
 import type { PermissionData } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffMember } from "@/lib/arcadia/types";
+import { AdminPageHeader } from "../../../AdminPageHeader";
 import { useAdmin } from "../../../AdminContext";
 import { MemberEditModal } from "./MemberEditModal";
 
@@ -55,7 +56,7 @@ export default function StaffMembersPage() {
 
   if (error && !members) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-10">
+      <div className="mx-auto max-w-5xl px-4 py-10">
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
@@ -63,20 +64,18 @@ export default function StaffMembersPage() {
 
   if (!members) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-10">
+      <div className="mx-auto max-w-5xl px-4 py-10">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-        Staff Members
-      </h1>
-      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        You can only edit members at or below your own rank.
-      </p>
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      <AdminPageHeader
+        title="Staff Members"
+        description="You can only edit members at or below your own rank."
+      />
 
       {error && (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>

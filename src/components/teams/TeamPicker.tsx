@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import type { Team } from "@/lib/api/types";
 import { hasPermString } from "@/lib/permissions";
-import { resolveAsset } from "@/lib/utils/assets";
+import { teamAvatarUrl } from "@/lib/utils/assets";
 
 interface TeamPickerProps {
   teams: Team[];
@@ -101,9 +101,7 @@ export function TeamPicker({
         <div className="max-h-80 space-y-2 overflow-y-auto">
           {filtered.map((team) => {
             const meta = teamMeta(team);
-            const avatarSrc =
-              resolveAsset(team.avatar) ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(team.name)}&size=64&background=random`;
+            const avatarSrc = teamAvatarUrl(team.id);
             return (
               <label
                 key={team.id}

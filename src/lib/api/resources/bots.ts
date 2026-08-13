@@ -2,22 +2,24 @@ import { client } from "../client";
 import type {
   Bot,
   BotSettingsUpdate,
+  CaptchaSolution,
   DiscordBotMeta,
   IndexBot,
   ListIndexBot,
   PagedResult,
+  PatchBotTeamPayload,
   UserVote,
 } from "../types";
 
 export const botsResource = {
   getIndex: () =>
     client.get<ListIndexBot>("/bots/@index", {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
   getAll: (page = 1) =>
     client.get<PagedResult<IndexBot[]>>(`/bots/@all?page=${page}`, {
-      next: { revalidate: 30 },
+      cache: "no-store",
     }),
 
   getRandom: () =>
@@ -28,7 +30,7 @@ export const botsResource = {
   /** Pass include=long to get the long description */
   getBot: (id: string) =>
     client.get<Bot>(`/bots/${id}?include=long`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
   getVoteInfo: (botId: string, userId: string, token: string) =>
@@ -37,10 +39,16 @@ export const botsResource = {
       cache: "no-store",
     }),
 
-  vote: (botId: string, userId: string, upvote: boolean, token: string) =>
+  vote: (
+    botId: string,
+    userId: string,
+    upvote: boolean,
+    token: string,
+    captchaSolution?: CaptchaSolution,
+  ) =>
     client.put<void>(
       `/users/${userId}/bots/${botId}/votes?upvote=${upvote}`,
-      {},
+      captchaSolution ?? {},
       { token },
     ),
 
@@ -60,4 +68,17 @@ export const botsResource = {
 
   updateBot: (botId: string, payload: BotSettingsUpdate, token: string) =>
     client.patch<void>(`/bots/${botId}/settings`, payload, { token }),
+
+  /** Transfers a bot to a different team. Requires "Delete Bots" on the bot's
+   * current team and "Add Bots" on the destination team — servers have no
+   * equivalent endpoint. */
+  transferTeam: (
+    userId: string,
+    botId: string,
+    payload: PatchBotTeamPayload,
+    token: string,
+  ) =>
+    client.patch<void>(`/users/${userId}/bots/${botId}/teams`, payload, {
+      token,
+    }),
 };

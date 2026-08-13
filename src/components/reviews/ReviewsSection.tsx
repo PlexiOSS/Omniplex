@@ -1,11 +1,11 @@
 "use client";
 
 import { MessageSquare, Pencil, Star, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { reviews as reviewsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -78,12 +78,9 @@ export function ReviewsSection({
 
       {!isAuthenticated && (
         <div className="rounded-xl border border-zinc-200 p-4 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-          <Link
-            href="/auth/login"
-            className="text-accent underline underline-offset-2"
-          >
+          <SignInLink className="text-accent underline underline-offset-2">
             Sign in
-          </Link>{" "}
+          </SignInLink>{" "}
           to leave a review.
         </div>
       )}

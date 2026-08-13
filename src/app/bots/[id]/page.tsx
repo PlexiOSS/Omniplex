@@ -1,4 +1,11 @@
-import { ArrowLeft, ExternalLink, Server, Star } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Eye,
+  MousePointerClick,
+  Server,
+  Star,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,10 +15,11 @@ import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { resolveAsset } from "@/lib/utils/assets";
+import { bannerUrl, mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
@@ -60,10 +68,36 @@ export default async function BotPage({ params }: Props) {
     .getAll("bot", bot.bot_id)
     .catch(() => ({ reviews: [] }));
 
-  // bot.user.avatar is already a fully-resolved URL from dovewing
-  const avatarSrc =
+  const avatarSrc = mirroredAvatarUrl(
+    "bots",
+    bot.bot_id,
     bot.user.avatar ||
-    `https://cdn.discordapp.com/embed/avatars/${Number(bot.bot_id) % 5}.png`;
+      `https://cdn.discordapp.com/embed/avatars/${Number(bot.bot_id) % 5}.png`,
+  );
+
+  const actionsCard = (
+    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="flex flex-col gap-2">
+        {bot.invite && (
+          <a
+            href={bot.invite}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+          >
+            <ExternalLink size={14} />
+            Add to Server
+          </a>
+        )}
+        <VoteButton
+          botId={bot.bot_id}
+          currentVotes={bot.approximate_votes}
+          premium={bot.premium}
+          captchaOptOut={bot.captcha_opt_out}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <Container className="py-10">
@@ -74,6 +108,12 @@ export default async function BotPage({ params }: Props) {
         <ArrowLeft size={14} />
         Back to bots
       </Link>
+
+      <Banner
+        src={bannerUrl("bots", bot.bot_id)}
+        alt={bot.user.username}
+        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main */}
@@ -112,6 +152,9 @@ export default async function BotPage({ params }: Props) {
             </div>
           )}
 
+          {/* Actions (mobile only — desktop version lives in the sidebar) */}
+          <div className="mt-5 lg:hidden">{actionsCard}</div>
+
           {/* Long description */}
           <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
@@ -138,26 +181,8 @@ export default async function BotPage({ params }: Props) {
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          {/* Actions */}
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="flex flex-col gap-2">
-              {bot.invite && (
-                <a
-                  href={bot.invite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                >
-                  <ExternalLink size={14} />
-                  Add to Server
-                </a>
-              )}
-              <VoteButton
-                botId={bot.bot_id}
-                currentVotes={bot.approximate_votes}
-              />
-            </div>
-          </div>
+          {/* Actions (desktop only — mobile version renders above the About section) */}
+          <div className="hidden lg:block">{actionsCard}</div>
 
           {/* Stats */}
           <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
@@ -182,11 +207,16 @@ export default async function BotPage({ params }: Props) {
                   value={formatCount(bot.shards)}
                 />
               )}
-              {bot.prefix && (
+              <StatRow
+                icon={<Eye size={14} />}
+                label="Page Views"
+                value={formatCount(bot.clicks)}
+              />
+              {bot.invite_clicks > 0 && (
                 <StatRow
-                  icon={<span className="font-mono text-xs">{bot.prefix}</span>}
-                  label="Prefix"
-                  value={bot.prefix}
+                  icon={<MousePointerClick size={14} />}
+                  label="Invite Clicks"
+                  value={formatCount(bot.invite_clicks)}
                 />
               )}
               {bot.library && (
@@ -207,10 +237,7 @@ export default async function BotPage({ params }: Props) {
                   className="flex items-center gap-2.5"
                 >
                   <Avatar
-                    src={
-                      resolveAsset(bot.team_owner.avatar) ??
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(bot.team_owner.name)}&size=64&background=random`
-                    }
+                    src={teamAvatarUrl(bot.team_owner.id)}
                     alt={bot.team_owner.name}
                     size={32}
                   />

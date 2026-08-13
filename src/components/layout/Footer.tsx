@@ -28,7 +28,7 @@ const FOOTER_LINKS = [
     links: [
       { href: "/about", label: "About Us" },
       { href: "/about/status", label: "System Status" },
-      { href: "/kb", label: "Knowledge Base" },
+      { href: "/partners", label: "Our Partners" },
       { href: "/blog", label: "Blog Posts" },
     ],
   },

@@ -9,9 +9,10 @@ import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { TeamManageLink } from "@/components/teams/TeamManageLink";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import { teams } from "@/lib/api";
 import { hasPermString } from "@/lib/permissions";
-import { resolveAsset } from "@/lib/utils/assets";
+import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 
@@ -40,9 +41,7 @@ export default async function TeamPage({ params }: Props) {
   }
   if (!team) notFound();
 
-  const avatarSrc =
-    resolveAsset(team.avatar) ??
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(team.name)}&size=256&background=random`;
+  const avatarSrc = teamAvatarUrl(team.id);
   const members = team.entities?.members ?? [];
   const bots = team.entities?.bots ?? [];
   const servers = team.entities?.servers ?? [];
@@ -57,6 +56,12 @@ export default async function TeamPage({ params }: Props) {
         <ArrowLeft size={14} />
         Home
       </Link>
+
+      <Banner
+        src={bannerUrl("teams", team.id)}
+        alt={team.name}
+        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+      />
 
       <div className="flex items-start gap-5">
         <Avatar src={avatarSrc} alt={team.name} size={64} />

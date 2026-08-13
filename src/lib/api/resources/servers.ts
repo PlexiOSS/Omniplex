@@ -1,5 +1,6 @@
 import { client } from "../client";
 import type {
+  CaptchaSolution,
   DiscordServerMeta,
   IndexServer,
   ListIndexServer,
@@ -12,17 +13,17 @@ import type {
 export const serversResource = {
   getIndex: () =>
     client.get<ListIndexServer>("/servers/@index", {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
   getAll: (page = 1) =>
     client.get<PagedResult<IndexServer[]>>(`/servers/@all?page=${page}`, {
-      next: { revalidate: 30 },
+      cache: "no-store",
     }),
 
   getServer: (id: string) =>
     client.get<Server>(`/servers/${id}?include=long`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
   getVoteInfo: (serverId: string, userId: string, token: string) =>
@@ -31,10 +32,16 @@ export const serversResource = {
       cache: "no-store",
     }),
 
-  vote: (serverId: string, userId: string, upvote: boolean, token: string) =>
+  vote: (
+    serverId: string,
+    userId: string,
+    upvote: boolean,
+    token: string,
+    captchaSolution?: CaptchaSolution,
+  ) =>
     client.put<void>(
       `/users/${userId}/servers/${serverId}/votes?upvote=${upvote}`,
-      {},
+      captchaSolution ?? {},
       { token },
     ),
 

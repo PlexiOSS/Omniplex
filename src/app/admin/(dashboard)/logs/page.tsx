@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Pagination } from "@/components/search/Pagination";
+import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { usePagination } from "@/hooks/usePagination";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import type { RPCLogEntry } from "@/lib/arcadia/types";
+import type { PlatformUser, RPCLogEntry } from "@/lib/arcadia/types";
+import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
 
 const LOGS_PAGE_SIZE = 20;
@@ -13,6 +15,7 @@ const LOGS_PAGE_SIZE = 20;
 export default function AdminLogsPage() {
   const { loginToken } = useAdmin();
   const [entries, setEntries] = useState<RPCLogEntry[] | null>(null);
+  const [users, setUsers] = useState<Record<string, PlatformUser>>({});
   const [error, setError] = useState<string | null>(null);
   const { page, setPage, pageItems } = usePagination(
     entries ?? [],
@@ -22,7 +25,22 @@ export default function AdminLogsPage() {
   useEffect(() => {
     arcadia
       .getRpcLogEntries(loginToken)
-      .then(setEntries)
+      .then(async (list) => {
+        setEntries(list);
+        const uniqueIds = [...new Set(list.map((e) => e.user_id))];
+        const resolved = await Promise.all(
+          uniqueIds.map((id) =>
+            arcadia.getUser(loginToken, id).catch(() => null),
+          ),
+        );
+        setUsers(
+          Object.fromEntries(
+            uniqueIds
+              .map((id, i) => [id, resolved[i]] as const)
+              .filter((entry): entry is [string, PlatformUser] => !!entry[1]),
+          ),
+        );
+      })
       .catch((err) =>
         setError(
           err instanceof ArcadiaError ? err.message : "Failed to load logs.",
@@ -32,12 +50,10 @@ export default function AdminLogsPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-        RPC Logs
-      </h1>
-      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        Audit trail of every staff action taken through this panel.
-      </p>
+      <AdminPageHeader
+        title="RPC Logs"
+        description="Audit trail of every staff action taken through this panel."
+      />
 
       {error && (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -59,32 +75,40 @@ export default function AdminLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
-              {pageItems.map((entry) => (
-                <tr key={entry.id}>
-                  <td className="px-4 py-2.5 font-medium text-zinc-950 dark:text-zinc-50">
-                    {entry.method}
-                  </td>
-                  <td className="px-4 py-2.5 text-zinc-500 dark:text-zinc-400">
-                    {entry.user_id}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <Badge
-                      variant={
-                        entry.state === "success"
-                          ? "success"
-                          : entry.state === "pending"
-                            ? "warning"
-                            : "danger"
-                      }
-                    >
-                      {entry.state}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-2.5 text-zinc-500 dark:text-zinc-400">
-                    {new Date(entry.created_at).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
+              {pageItems.map((entry) => {
+                const user = users[entry.user_id];
+                return (
+                  <tr key={entry.id}>
+                    <td className="px-4 py-2.5 font-medium text-zinc-950 dark:text-zinc-50">
+                      {entry.method}
+                    </td>
+                    <td className="px-4 py-2.5 text-zinc-500 dark:text-zinc-400">
+                      <div className="flex items-center gap-2">
+                        {user && (
+                          <Avatar src={user.avatar} alt={user.username} size={20} />
+                        )}
+                        {user?.username ?? entry.user_id}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <Badge
+                        variant={
+                          entry.state === "success"
+                            ? "success"
+                            : entry.state === "pending"
+                              ? "warning"
+                              : "danger"
+                        }
+                      >
+                        {entry.state}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-2.5 text-zinc-500 dark:text-zinc-400">
+                      {new Date(entry.created_at).toLocaleString()}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           {entries.length === 0 && (

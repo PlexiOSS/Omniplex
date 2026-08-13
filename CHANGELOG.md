@@ -7,15 +7,127 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.1] - Unreleased
 
-### Changed
-
-- Bot/server dashboard cards were getting crowded as more per-item actions
-  were added (Stats, Tokens, Delete). View and Edit stay as direct buttons;
-  everything else now lives behind a "more actions" dropdown (new
-  `components/ui/Dropdown.tsx`).
-
 ### Added
 
+- New public `/changelog` page, replacing the old database-backed changelog
+  system (`popplio`'s `changelogs` table, `arcadia/panel/ops_content.go`'s
+  `updateChangelog` RPC, and the `ChangelogAction` DTOs) — that system was
+  already fully dead: the RPC unconditionally returned 403 "not
+  implemented", the panel's "Changelogs" stat was hardcoded to 0, and there
+  was no route or admin UI on either side. `/changelog` instead pulls
+  releases directly from GitHub (`lib/github/releases.ts`) for a
+  configurable list of repos (`lib/github/config.ts` — currently Popplio
+  and Omniplex itself), merges them into one reverse-chronological
+  timeline with a per-repo filter, and renders each release's body through
+  the existing sanitized `Markdown` component. No new database or admin
+  surface — GitHub Releases *is* the source of truth now, cutting a release
+  there is the entire authoring flow. Cached for 15 minutes
+  (`next: { revalidate: 900 }`) to stay off GitHub's unauthenticated rate
+  limit without needing a redeploy to pick up a new release; set
+  `GITHUB_TOKEN` (server-only) to raise that limit if it's ever hit.
+- Real image hosting, replacing the informal legacy-CDN-path guessing used
+  everywhere so far (`bannerUrl`/`partnerAvatarUrl`/`teamAvatarUrl`
+  previously just hoped a file existed at a fixed path, with no way to add
+  new ones). The old on-disk `cdn.omniplex.gg` static files were migrated
+  into a private RustFS (S3-compatible) bucket; since it's private, none of
+  it is reachable directly, so everything now goes through two new
+  same-origin proxy routes that hold the only S3 credentials (server-side
+  only, never shipped to the client):
+  - `/cdn/[...path]` — serves uploaded assets (partner logos, team
+    avatar/banner, bot/server banner) straight from the bucket.
+  - `/cdn/avatars/{bots,servers}/[id]` — bot/server avatars are Discord's
+    own, synced live via dovewing/Infernoplex, not an upload; this mirrors
+    a copy into the bucket on first request and re-serves it for 24h
+    before quietly re-mirroring, cutting down on repeated live hits to
+    Discord's CDN across every card/avatar in the app.
+  - A new `/api/uploads` route backs real upload UI in the admin partner
+    editor, team settings (avatar + banner), and the bot/server edit
+    modals (banner). Every upload re-verifies identity and the specific
+    permission needed server-side before writing a single byte — a staff
+    `loginToken` checked via `arcadia.hello` for partner logos, or a user
+    session token checked via `POST /auth/test` plus Popplio's entity-perms
+    lookup for everything else — since the client-side `hasPermString`
+    checks that gate the upload buttons were only ever a UI hint, not a
+    security boundary.
+- The Customize panel is now tabbed (Colors / Fonts / Layout / Content)
+  instead of one long stacked list, and grew three new levers:
+  - **Colors** — 5 more accent options (cyan, teal, lime, red, pink), 12 total.
+  - **Fonts** — added Inter and Space Grotesk alongside the existing four.
+  - **Layout** — Compact/Comfortable/Wide page width, applied through a
+    `--container-max` CSS var so it works on server-rendered pages too
+    (`Container` reads the var instead of a fixed `max-w-7xl`).
+  - **Content** — a "Hide NSFW content" toggle that removes `nsfw`-flagged
+    bots/servers from every browse/search/profile listing site-wide, via a
+    `data-nsfw` attribute on `BotCard`/`ServerCard`/`PackCard` and a plain
+    CSS rule (`[data-hide-nsfw="true"] [data-nsfw="true"] { display: none }`)
+    — no per-page filtering logic needed. Detail pages are unaffected by
+    design (this hides cards from browsing, not a page someone linked
+    directly). A "disable cookies" option was requested alongside it but
+    skipped: Omniplex doesn't set any analytics/tracking cookies to begin
+    with, only the session cookie sign-in itself requires, so there'd be
+    nothing for the toggle to actually do. Alongside it, a "Blur NSFW
+    thumbnails" toggle (on by default) blurs just the avatar/banner images
+    on nsfw-flagged cards via `[data-blur-nsfw="true"] [data-nsfw="true"]
+    img { filter: blur(...) }`, leaving the title/description legible. It's
+    disabled in the UI (and its applied state forced off) whenever "Hide
+    NSFW content" is on, since there's nothing left to blur once nsfw cards
+    never render at all.
+- Banner images for bots, servers, and teams (`BotCard`/`ServerCard`, plus
+  the bot/server/team detail pages). Popplio's live API has no `banner`
+  field at all any more — Popplio's own conformance notes confirm the whole
+  CDN-upload pipeline it depended on was removed — but a historical
+  one-time migration left every existing banner sitting at a fixed CDN path
+  keyed by the entity's own ID (`banners/{bots,servers,teams}/{id}.webp`),
+  discovered from that migration script since Popplio's API no longer
+  advertises it anywhere. New `bannerUrl()` builds that URL; new `Banner`
+  component renders it and falls back to a themed gradient (using the
+  viewer's own accent color, so it tracks Customize) for anything that 404s
+  or never had one uploaded — same idea as the existing partner-avatar CDN
+  fallback.
+- Webhook management for bots and servers, from a new "Webhooks" dashboard
+  dropdown item on each listing: create/edit/delete webhooks (HMAC, simple
+  secret, or legacy auth), pick an event whitelist, send test deliveries
+  with dynamically-rendered variable inputs per event type, and browse
+  paginated delivery logs. Built entirely on existing Popplio webhook
+  routes that had no Omniplex UI before now.
+- A "Change Team" dashboard action for bots, using Popplio's
+  `PATCH /users/{uid}/bots/{bid}/teams`, letting an owner move a bot to any
+  other team they have "Add Bots" on. Servers have no equivalent transfer
+  endpoint in Popplio, so this is bots-only for now.
+- A public `/partners` page — the `GET /list/partners` client and types
+  already existed (used on the homepage) but nothing ever linked to a
+  dedicated page. Groups partners by partner type, shows their links and
+  (if set) a direct link to their bot listing.
+- The main header nav gets the same dropdown-grouping treatment as the admin
+  one: Bots/Servers/Packs collapse into "Browse", and Blog/Partners/
+  Documentation/About — previously footer-only — collapse into "Community",
+  reachable from anywhere now instead of just the footer.
+- Public and admin Search both pre-fill with real content on load instead of
+  a blank page: admin search runs an empty query (which matches everything)
+  on mount and on target-type switch; public search browses the full
+  bot/server listing (real backend pagination via `/bots|servers/@all`)
+  until a query or tag is submitted, at which point it switches to paginated
+  search results (client-side, since `/list/search` has no server-side
+  pagination).
+- Three new staff admin sections, backed by Arcadia panel RPC methods that
+  already existed in Popplio but had no Omniplex UI at all:
+  - **Blog** (`/admin/blog`) — full list/create/edit/delete for posts on the
+    public `/blog` section, using the `UpdateBlog` RPC (`manage_blog`).
+    New posts publish immediately; existing ones can be toggled to draft.
+  - **Partners** (`/admin/partners`) — full CRUD for featured partners
+    (`UpdatePartners`, `manage_partners`), including link validation
+    (must be `https://`). Partner *types* aren't manageable from here yet —
+    there's no RPC for creating one, only for assigning an existing type
+    to a partner.
+  - **Disciplinary Types** (`/admin/staff/disciplinary-types`) — full CRUD
+    for staff warning/suspension templates (`UpdateStaffDisciplinaryType`,
+    `manage_disciplinaries`): self-assignable, additory, needs-approval,
+    max expiry, and a permission-limit picker reusing `ArcadiaPermSelector`.
+
+  Two other backend-ready gaps were identified but deferred (larger scope):
+  staff application review (`GET/PATCH /staff/apps*`) and the shop/economy
+  admin surface (vote-credit tiers, shop items, item benefits, coupons,
+  bot whitelist — five separate CRUD areas under `ops_shop.go`).
 - A "Test" button on a freshly created token, using Popplio's existing
   `POST /auth/test` to confirm it actually authorizes before dismissing it —
   disabled for now pending a Popplio deploy (see Popplio's changelog for the
@@ -30,9 +142,118 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   member permissions), and revoking existing ones. A newly created token's
   raw value is shown exactly once, since Popplio never stores or re-serves
   it after creation.
+- Votes now go through Popplio's new self-hosted proof-of-work captcha
+  (see Popplio's changelog) automatically, when the bot/server hasn't opted
+  out via `captcha_opt_out`. `useVote` fetches a challenge, solves it
+  client-side with `crypto.subtle` (`lib/captcha/pow.ts`), and submits the
+  solution alongside the vote; both vote buttons show "Verifying…" while
+  that's in progress. No user-facing setup — it's invisible on a successful
+  vote and only costs a brief moment of CPU work.
+
+### Changed
+
+- Homepage, bot/server index/listing/detail pages, and blog list/post pages
+  now fetch with `cache: "no-store"` instead of Next's ISR (`revalidate`)
+  — blog posts in particular had crept to a 1-hour window, meaning an edit
+  or correction could take up to an hour to show up. `list.getStats()` and
+  `list.getPartners()` (homepage stats and partner strip) had no cache
+  option set at all, which under Next's fetch defaults meant `force-cache`
+  — cached indefinitely until the next deploy, not just "stale for a
+  while" like everything else. All of it now hits Popplio directly on
+  every request instead. Search was already `no-store`; this just brings
+  the rest in line with it rather than leaving the CDN/ISR layer doing
+  double duty as an ad-hoc data cache on top of what it's actually for
+  (serving images). Worth revisiting if Popplio's own load becomes a
+  problem at higher traffic, but not a concern at current scale.
+- The header's "Create" menu (`NavGroupMenu`) was hardcoded `hidden md:block`,
+  so it silently never rendered below the `md` breakpoint — mobile users
+  could only reach Add Bot/Server/Pack and Create Team by opening the full
+  hamburger drawer. Unhid it; it now works as an actual dropdown from the
+  collapsed mobile header too. Browse/Community's `NavGroupMenu` instances
+  stay desktop-only since their parent nav row already is, so nothing
+  changes for those. Also gave both `NavGroupMenu` and the generic
+  `Dropdown` component a `max-w-[calc(100vw-1.5rem)]` safety clamp so their
+  panels can't overflow off-screen on narrow viewports.
+- Bot detail page dropped the "Prefix" stat — most bots are slash-command
+  only now, so it was frequently blank or stale. Both bot and server detail
+  pages gained "Page Views" and "Invite Clicks" stats instead, using data
+  the API already returned but never displayed. The bot's OpenGraph
+  share-image (a separate, independent stat list from the detail page) had
+  the same stale "Prefix" stat — swapped for "Page Views" there too, and the
+  server OG image gained a third stat ("Page Views") to match.
+- Tightened-up spacing pass: the dashboard and team settings tab bars had
+  almost no top padding (`pt-1`) and nearly-touching tabs (`gap-1`), and the
+  API Tokens list rows used noticeably less padding than every other list
+  card in the app. Bumped both to match the spacing used elsewhere.
+- Admin panel polish pass: the nav bar had grown to 10 flat links as sections
+  were added — related pages now group into "Staff" and "Content" dropdowns
+  (new `NavGroupMenu`, also used to rebuild the existing "Create" menu for
+  consistency). Every admin list page now shares one header component
+  (`AdminPageHeader`) and container width (`max-w-5xl` — several pages were
+  still on `max-w-4xl`, causing the page width to visibly jump between
+  sections). RPC Logs and Partners showed raw Discord user IDs where every
+  other admin page already resolves them to a username/avatar (matching the
+  Bot Queue's existing `claimed_by` resolution) — both now do the same.
+- Bot/server dashboard cards were getting crowded as more per-item actions
+  were added (Stats, Tokens, Delete). View and Edit stay as direct buttons;
+  everything else now lives behind a "more actions" dropdown (new
+  `components/ui/Dropdown.tsx`).
+- Accent-color customization is more visible throughout the site instead of
+  being mostly confined to buttons and links: the homepage hero highlights
+  "best" in the accent color, the header nav's info badges (Certified,
+  Staff, Pending, etc. — previously a hardcoded blue regardless of chosen
+  accent) now tint with the selected accent, and the Bot/Server/Pack/Team
+  dashboard cards all share one accent-tinted hover treatment (border, title
+  color, and arrow icon) instead of Pack and Team cards using a plain zinc
+  hover that Bot/Server cards had already moved past. The homepage's
+  Partners chips and News & Updates cards were missed in that first pass —
+  now match. Dark-mode card borders were also bumped from `zinc-800` to
+  `zinc-700`: against the `zinc-950` page background and `zinc-900` card
+  fill, the old border was too close in lightness to read as a border at
+  rest, so cards looked edgeless until hovered.
 
 ### Fixed
 
+- Partner and team avatars (`/cdn/avatars/{partners,teams}/...`) 404'd on
+  every request, even for files confirmed to exist in the bucket. Next.js's
+  router matched those URLs against the bot/server avatar mirror route
+  (`/cdn/avatars/[targetType]/[id]`, 2 segments after `avatars` — same shape
+  as `avatars/partners/<file>.webp`) instead of the intended static-asset
+  catch-all, and that route 404'd immediately since `"partners"`/`"teams"`
+  aren't `"bots"`/`"servers"`, never touching S3 at all. Moved the mirror
+  route to `/cdn/avatar-mirror/...` so the two can't collide on URL shape.
+- `Team.avatar` was silently blank everywhere it was used (dashboard Teams
+  tab, `/teams/[id]`, `TeamPicker`, and the team-owner blocks on bot/server
+  detail pages) — the exact same class of bug as the partner-avatar one
+  below. Popplio's API dropped `Team.avatar` entirely along with the rest of
+  its CDN pipeline, so `resolveAsset(team.avatar)` always resolved to null;
+  the frontend type still claimed `AssetMetadata | null` as if the field
+  were live. Found while wiring up banner support, which uses the same
+  legacy-CDN-path pattern. Replaced every call site with `teamAvatarUrl()`
+  and removed the stale `avatar`/`banner` fields (and now-unused
+  `AssetMetadata`/`resolveAsset`) from the API types entirely rather than
+  leaving them typed as something Popplio no longer sends.
+- The Customize panel (accent/font picker) was positioned with a hardcoded
+  `fixed inset-0` guess (`pt-16 pr-4`) instead of anchoring to the gear icon
+  that opens it, so it visibly floated in the wrong spot whenever the header
+  layout shifted. Switched to the same anchored-dropdown pattern already
+  used elsewhere (`components/ui/Dropdown.tsx`) — it now opens directly
+  under its trigger button.
+- The homepage's Partners section resolved each partner's avatar via
+  `resolveAsset(partner.avatar)`, but Popplio's public partner response has
+  no `avatar` field at all (only ever had it on the type, not the wire) — a
+  partner's image is `partner.user.avatar`, already a full resolved URL.
+  Every partner avatar on the homepage was silently blank as a result. Fixed
+  there and used correctly in the new `/partners` page.
+- That fix was itself using the wrong source: `partner.user.avatar` is the
+  linked Discord account's avatar, not the partner's actual logo. Popplio's
+  CDN-upload pipeline for partners was removed outright (see its
+  `CONFORMANCE.md` §D11b), but the old manually-uploaded logos are still
+  sitting on the CDN at a fixed, undocumented path keyed by partner ID
+  (`avatars/partners/<id>.webp`). All three partner-avatar call sites
+  (homepage, `/partners`, and the admin edit modal's new preview) now
+  resolve there via `partnerAvatarUrl()`, falling back to a generated
+  avatar for any partner without a file at that path.
 - Staff Panel sign-in on prod failed with a misleading "Method Not Allowed"
   whenever `NEXT_PUBLIC_ARCADIA_URL` was configured with a trailing slash:
   `postQuery()` always appends its own `/`, so the request landed on a
@@ -40,6 +261,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and per the Fetch spec, a `POST` following a `301` is replayed as a `GET`,
   which the panel API correctly (but confusingly) rejects with
   `405 Method Not Allowed`. `ARCADIA_URL` now strips any trailing slash.
+- On mobile, the vote button lived in the sidebar, which renders after the
+  entire About section and reviews in single-column layout — voting meant
+  scrolling past all of it first. Bot/server detail pages now also render a
+  compact copy of the Actions card (Add to Server/Join + vote button) right
+  after the tags, `lg:hidden`, with the sidebar copy switching to
+  `hidden lg:block` so nothing renders twice on desktop.
+- Several sign-in prompts away from the dashboard/add flows — bot and
+  server vote buttons, the review prompt, and both header sign-in links —
+  used a plain `<Link href="/auth/login">` that didn't record where the
+  user came from, so signing in from e.g. a bot's page bounced back to the
+  homepage instead. New `SignInLink` component wraps `next/link` and sets
+  the same `auth_redirect` `localStorage` key `useRequireAuth` already used
+  correctly elsewhere, swapped into all five sites.
+- Downvoting fired immediately on click, with no confirmation and no way to
+  undo it (feedback: a downvote can't be removed or changed once cast).
+  Both vote buttons now confirm via a modal first, stating the entity's
+  actual cooldown window (4h premium / 12h standard, 6h on double-vote
+  weekends — `voteCooldownHours()`) so it's clear voting again isn't
+  possible until then either. Popplio has no vote-removal endpoint today,
+  so "undo" itself is a backend gap being tracked separately, not something
+  this fixes.
+- The widget preview card (`WidgetShare`) clipped its image with
+  `rounded-lg` (8px) while the widget itself draws its own corners at 16px
+  (`WidgetFrame`) — the mismatch let the image's actual corner curve peek
+  past the tighter clip, showing a mismatched color ring at each corner.
+  Clip radius now matches. Separately, the accent-color swatch row sat
+  alongside the theme toggle in one `justify-between` row and overflowed
+  the card at typical sidebar widths (12 swatches don't fit next to the
+  toggle); it now sits on its own wrapping row underneath.
+- Server emoji/sticker galleries were bare icon grids with no name shown
+  and no hover feedback, inconsistent with every other card style in the
+  app. Both now use the shared card hover treatment (accent border/bg, a
+  slight hover scale) and show the emoji/sticker's name as a caption
+  instead of only a `title` tooltip, plus a visible count next to each
+  section heading.
 
 ## [0.1.0] - 2026-08-04
 

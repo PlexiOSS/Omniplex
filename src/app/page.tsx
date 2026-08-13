@@ -12,7 +12,7 @@ import { HomeTabs } from "@/components/home/HomeTabs";
 import { StatsBar } from "@/components/home/StatsBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { resolveAsset } from "@/lib/utils/assets";
+import { partnerAvatarUrl } from "@/lib/utils/assets";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 export default async function HomePage() {
@@ -62,7 +62,8 @@ export default async function HomePage() {
         <Container>
           <div className="mx-auto max-w-2xl text-center">
             <h1 className="text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
-              Discover the best Discord bots
+              Discover the <span className="text-accent">best</span> Discord
+              bots
             </h1>
             <p className="mt-4 text-lg text-zinc-500 dark:text-zinc-400">
               Explore thousands of bots and servers. Vote, review, and find
@@ -183,25 +184,25 @@ export default async function HomePage() {
               Trusted communities and services we work with
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
-              {partners.map((partner) => {
-                const avatarSrc = resolveAsset(partner.avatar);
-                return (
-                  <div
-                    key={partner.id}
-                    className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
-                  >
-                    {avatarSrc && (
-                      <Avatar src={avatarSrc} alt={partner.name} size={28} />
-                    )}
-                    <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                      {partner.name}
-                    </span>
-                    {partner.type && (
-                      <Badge variant="info">{partner.type}</Badge>
-                    )}
-                  </div>
-                );
-              })}
+              {partners.map((partner) => (
+                <Link
+                  key={partner.id}
+                  href="/partners"
+                  className="group flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
+                >
+                  <Avatar
+                    src={partnerAvatarUrl(partner.id)}
+                    alt={partner.name}
+                    size={28}
+                  />
+                  <span className="text-sm font-medium text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
+                    {partner.name}
+                  </span>
+                  {partner.type && (
+                    <Badge variant="info">{partner.type}</Badge>
+                  )}
+                </Link>
+              ))}
             </div>
           </Container>
         </section>
@@ -230,7 +231,7 @@ export default async function HomePage() {
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+                  className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
                 >
                   {post.tags.length > 0 && (
                     <div className="mb-3 flex gap-1.5">
@@ -239,7 +240,7 @@ export default async function HomePage() {
                       ))}
                     </div>
                   )}
-                  <h3 className="font-semibold text-zinc-950 group-hover:underline group-hover:underline-offset-2 dark:text-zinc-50">
+                  <h3 className="font-semibold text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
                     {post.title}
                   </h3>
                   <p className="mt-1.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">

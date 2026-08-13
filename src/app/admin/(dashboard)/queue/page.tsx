@@ -23,6 +23,7 @@ import type {
   RPCWebAction,
 } from "@/lib/arcadia/types";
 import { formatCount } from "@/lib/utils/format";
+import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
 import { GenericRpcModal } from "../GenericRpcModal";
 import { ReviewsModal } from "../ReviewsModal";
@@ -176,13 +177,10 @@ export default function AdminQueuePage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-        Bot Queue
-      </h1>
-      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        {bots.length} bot{bots.length === 1 ? "" : "s"} pending or claimed for
-        review.
-      </p>
+      <AdminPageHeader
+        title="Bot Queue"
+        description={`${bots.length} bot${bots.length === 1 ? "" : "s"} pending or claimed for review.`}
+      />
 
       {resultMessage && (
         <div className="mt-4 whitespace-pre-wrap rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">

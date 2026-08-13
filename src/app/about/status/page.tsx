@@ -2,10 +2,11 @@ import { CheckCircle, XCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
 import { auth, blogs, bots, list, packs, search, servers } from "@/lib/api";
-import { BASE_URL, CDN_URL } from "@/lib/api/config";
+import { BASE_URL } from "@/lib/api/config";
 import { arcadia } from "@/lib/arcadia/client";
 import { ARCADIA_PANEL_SCOPE } from "@/lib/arcadia/config";
 import { SOCIAL_LINKS } from "@/lib/social";
+import { isCdnHealthy } from "@/lib/s3/health";
 
 export const metadata: Metadata = {
   title: "Status",
@@ -53,11 +54,7 @@ export default async function StatusPage() {
     ),
     timedCheck(() => auth.getOAuthMeta()),
     timedCheck(async () => {
-      const res = await fetch(CDN_URL, {
-        method: "HEAD",
-        cache: "no-store",
-      });
-      if (res.status >= 500) throw new Error("CDN unreachable");
+      if (!(await isCdnHealthy())) throw new Error("CDN unreachable");
     }),
     timedCheck(() => arcadia.auth.begin(ARCADIA_PANEL_SCOPE, BASE_URL)),
   ]);

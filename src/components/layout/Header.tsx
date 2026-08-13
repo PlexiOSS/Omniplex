@@ -1,30 +1,58 @@
 "use client";
 
-import { ChevronDown, LogOut, Menu, Plus, Settings2, Shield, X } from "lucide-react";
+import { LogOut, Menu, Plus, Settings2, Shield, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
+import { SignInLink } from "@/components/ui/SignInLink";
 import { useArcadiaAuth } from "@/hooks/useArcadiaAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { SOCIAL_LINKS } from "@/lib/social";
+import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { Container } from "./Container";
+import { NavGroupMenu } from "./NavGroupMenu";
 import { ThemeToggle } from "./ThemeToggle";
+
+interface NavLink {
+  href: string;
+  label: string;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavLink[];
+}
 
 const ICON_BUTTON =
   "flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";
 
-const NAV_LINKS = [
+const NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/", label: "Home" },
-  { href: "/bots", label: "Bots" },
-  { href: "/servers", label: "Servers" },
-  { href: "/packs", label: "Packs" },
+  {
+    label: "Browse",
+    items: [
+      { href: "/bots", label: "Bots" },
+      { href: "/servers", label: "Servers" },
+      { href: "/packs", label: "Packs" },
+    ],
+  },
   { href: "/search", label: "Search" },
+  {
+    label: "Community",
+    items: [
+      { href: "/blog", label: "Blog" },
+      { href: "/changelog", label: "Changelog" },
+      { href: "/partners", label: "Partners" },
+      { href: "https://docs.omniplex.gg", label: "Documentation" },
+      { href: "/about", label: "About Us" },
+    ],
+  },
 ];
 
 const CREATE_LINKS = [
@@ -34,18 +62,31 @@ const CREATE_LINKS = [
   { href: "/teams/add", label: "Create a Team" },
 ];
 
-// The staff panel (/admin/**) swaps in its own nav here rather than running
-// a second header — /admin/login and /admin/auth/callback are excluded since
-// those sit outside the gate and have no staff nav to show yet.
-const ADMIN_NAV_LINKS = [
-  { href: "/", label: "Home" },
+const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/queue", label: "Queue" },
   { href: "/admin/search", label: "Search" },
-  { href: "/admin/staff/positions", label: "Positions" },
-  { href: "/admin/staff/members", label: "Members" },
+  {
+    label: "Staff",
+    items: [
+      { href: "/admin/staff/positions", label: "Positions" },
+      { href: "/admin/staff/members", label: "Members" },
+      { href: "/admin/staff/disciplinary-types", label: "Disciplinary Types" },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { href: "/admin/blog", label: "Blog" },
+      { href: "/admin/partners", label: "Partners" },
+    ],
+  },
   { href: "/admin/logs", label: "Logs" },
 ];
+
+function isNavGroup(item: NavLink | NavGroup): item is NavGroup {
+  return "items" in item;
+}
 
 /**
  * Header component that displays the navigation bar at the top of the page.
@@ -64,19 +105,6 @@ export function Header() {
   const isStaff = me?.staff ?? false;
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
-  const createMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!createOpen) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (!createMenuRef.current?.contains(e.target as Node)) {
-        setCreateOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [createOpen]);
 
   const isAdminSection =
     pathname.startsWith("/admin") &&
@@ -90,7 +118,6 @@ export function Header() {
   }
 
   function exitStaffPanel() {
-    staffLogout();
     router.push("/");
   }
 
@@ -124,95 +151,42 @@ export function Header() {
 
             {/* Nav */}
             <nav className="items-center hidden gap-1 md:flex">
-              {links.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={[
-                    "relative rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                    isActiveLink(href)
-                      ? "bg-accent/10 text-accent"
-                      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                  ].join(" ")}
-                >
-                  {label}
-                  {isActiveLink(href) && (
-                    <span className="absolute inset-x-3 -bottom-2.25 h-0.5 rounded-full bg-accent" />
-                  )}
-                </Link>
-              ))}
+              {links.map((item) =>
+                isNavGroup(item) ? (
+                  <NavGroupMenu
+                    key={item.label}
+                    label={item.label}
+                    items={item.items}
+                    active={item.items.some((i) => isActiveLink(i.href))}
+                  />
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={[
+                      "relative rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                      isActiveLink(item.href)
+                        ? "bg-accent/10 text-accent"
+                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                    ].join(" ")}
+                  >
+                    {item.label}
+                    {isActiveLink(item.href) && (
+                      <span className="absolute inset-x-3 -bottom-2.25 h-0.5 rounded-full bg-accent" />
+                    )}
+                  </Link>
+                ),
+              )}
             </nav>
 
             {/* Right side */}
             <div className="flex items-center gap-1">
               {/* Create menu */}
               {!isAdminSection && (
-                <div ref={createMenuRef} className="relative hidden md:block">
-                  <button
-                    type="button"
-                    onClick={() => setCreateOpen((o) => !o)}
-                    className={[
-                      "flex h-8 items-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-colors",
-                      createOpen
-                        ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                    ].join(" ")}
-                    aria-haspopup="menu"
-                    aria-expanded={createOpen}
-                  >
-                    <Plus size={14} />
-                    Create
-                    <ChevronDown size={12} />
-                  </button>
-                  {createOpen && (
-                    <div
-                      role="menu"
-                      className="absolute right-0 z-50 mt-2 w-44 overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
-                    >
-                      {CREATE_LINKS.map(({ href, label }) => (
-                        <Link
-                          key={href}
-                          href={href}
-                          role="menuitem"
-                          onClick={() => setCreateOpen(false)}
-                          className="block px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                        >
-                          {label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <NavGroupMenu label="Create" icon={Plus} items={CREATE_LINKS} />
               )}
 
               {/* Social links */}
-              <a
-                href={SOCIAL_LINKS.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`hidden md:flex ${ICON_BUTTON}`}
-                aria-label="Omniplex on Instagram"
-              >
-                <BsInstagram size={16} />
-              </a>
-              <a
-                href={SOCIAL_LINKS.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`hidden md:flex ${ICON_BUTTON}`}
-                aria-label="Omniplex on GitHub"
-              >
-                <BsGithub size={16} />
-              </a>
-              <a
-                href={SOCIAL_LINKS.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`hidden md:flex ${ICON_BUTTON}`}
-                aria-label="Omniplex on X"
-              >
-                <BsTwitter size={16} />
-              </a>
               <a
                 href={SOCIAL_LINKS.discord}
                 target="_blank"
@@ -227,7 +201,7 @@ export function Header() {
                 <div className="hidden md:block">
                   <Button variant="ghost" size="sm" onClick={exitStaffPanel}>
                     <LogOut size={14} />
-                    Exit staff panel
+                    Exit panel
                   </Button>
                 </div>
               )}
@@ -257,19 +231,25 @@ export function Header() {
               </button>
 
               {/* Customize */}
-              <button
-                type="button"
-                onClick={() => setCustomizeOpen((o) => !o)}
-                className={[
-                  "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
-                  customizeOpen
-                    ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                ].join(" ")}
-                aria-label="Customize appearance"
-              >
-                <Settings2 size={16} />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCustomizeOpen((o) => !o)}
+                  className={[
+                    "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+                    customizeOpen
+                      ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                  ].join(" ")}
+                  aria-label="Customize appearance"
+                >
+                  <Settings2 size={16} />
+                </button>
+                <CustomizationPanel
+                  open={customizeOpen}
+                  onClose={() => setCustomizeOpen(false)}
+                />
+              </div>
 
               <ThemeToggle />
 
@@ -277,7 +257,11 @@ export function Header() {
                 <div className="items-center hidden gap-2 ml-1 md:flex">
                   <Link href="/dashboard">
                     <Avatar
-                      src={session.avatar}
+                      src={mirroredAvatarUrl(
+                        "users",
+                        session.user_id,
+                        session.avatar,
+                      )}
                       alt={session.username ?? "Your profile"}
                       size={32}
                       className="cursor-pointer ring-2 ring-transparent hover:ring-zinc-300 dark:hover:ring-zinc-600"
@@ -288,12 +272,9 @@ export function Header() {
                   </Button>
                 </div>
               ) : (
-                <Link
-                  href="/auth/login"
-                  className="items-center justify-center hidden h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg md:inline-flex bg-accent text-accent-fg hover:opacity-90"
-                >
+                <SignInLink className="items-center justify-center hidden h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg md:inline-flex bg-accent text-accent-fg hover:opacity-90">
                   Sign in
-                </Link>
+                </SignInLink>
               )}
             </div>
           </div>
@@ -303,35 +284,41 @@ export function Header() {
         {mobileNavOpen && (
           <nav className="border-t border-zinc-200 md:hidden dark:border-zinc-800">
             <Container className="flex flex-col gap-1 py-3">
-              {links.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={[
-                    "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActiveLink(href)
-                      ? "bg-accent/10 text-accent"
-                      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                  ].join(" ")}
-                >
-                  {label}
-                </Link>
-              ))}
-              {!isAdminSection && (
-                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <p className="px-3 pb-1 text-xs font-medium tracking-wide uppercase text-zinc-400 dark:text-zinc-600">
-                    Create
-                  </p>
-                  {CREATE_LINKS.map(({ href, label }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                    >
-                      {label}
-                    </Link>
-                  ))}
-                </div>
+              {links.map((item) =>
+                isNavGroup(item) ? (
+                  <div key={item.label} className="pt-2 mt-2 border-t border-zinc-200 first:mt-0 first:border-0 first:pt-0 dark:border-zinc-800">
+                    <p className="px-3 pb-1 text-xs font-medium tracking-wide uppercase text-zinc-400 dark:text-zinc-600">
+                      {item.label}
+                    </p>
+                    {item.items.map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        className={[
+                          "rounded-lg px-3 py-2 text-sm font-medium transition-colors block",
+                          isActiveLink(sub.href)
+                            ? "bg-accent/10 text-accent"
+                            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                        ].join(" ")}
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={[
+                      "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      isActiveLink(item.href)
+                        ? "bg-accent/10 text-accent"
+                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                    ].join(" ")}
+                  >
+                    {item.label}
+                  </Link>
+                ),
               )}
               {isAdminSection && isStaffAuthenticated && (
                 <button
@@ -357,7 +344,11 @@ export function Header() {
                 <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
                   <Link href="/dashboard" className="flex items-center gap-2">
                     <Avatar
-                      src={session.avatar}
+                      src={mirroredAvatarUrl(
+                        "users",
+                        session.user_id,
+                        session.avatar,
+                      )}
                       alt={session.username ?? "Your profile"}
                       size={32}
                     />
@@ -375,33 +366,12 @@ export function Header() {
                   </Button>
                 </div>
               ) : (
-                <Link
-                  href="/auth/login"
-                  className="inline-flex items-center justify-center px-3 mx-3 text-sm font-medium transition-opacity rounded-lg h-9 bg-accent text-accent-fg hover:opacity-90"
-                >
+                <SignInLink className="inline-flex items-center justify-center px-3 mx-3 text-sm font-medium transition-opacity rounded-lg h-9 bg-accent text-accent-fg hover:opacity-90">
                   Sign in
-                </Link>
+                </SignInLink>
               )}
 
               <div className="flex items-center gap-1 pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                <a
-                  href={SOCIAL_LINKS.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={ICON_BUTTON}
-                  aria-label="Omniplex on GitHub"
-                >
-                  <BsGithub size={16} />
-                </a>
-                <a
-                  href={SOCIAL_LINKS.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={ICON_BUTTON}
-                  aria-label="Omniplex on X"
-                >
-                  <BsTwitter size={16} />
-                </a>
                 <a
                   href={SOCIAL_LINKS.discord}
                   target="_blank"
@@ -416,11 +386,6 @@ export function Header() {
           </nav>
         )}
       </header>
-
-      <CustomizationPanel
-        open={customizeOpen}
-        onClose={() => setCustomizeOpen(false)}
-      />
     </>
   );
 }
