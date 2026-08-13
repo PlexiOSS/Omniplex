@@ -75,6 +75,30 @@ export default async function BotPage({ params }: Props) {
       `https://cdn.discordapp.com/embed/avatars/${Number(bot.bot_id) % 5}.png`,
   );
 
+  const actionsCard = (
+    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="flex flex-col gap-2">
+        {bot.invite && (
+          <a
+            href={bot.invite}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+          >
+            <ExternalLink size={14} />
+            Add to Server
+          </a>
+        )}
+        <VoteButton
+          botId={bot.bot_id}
+          currentVotes={bot.approximate_votes}
+          premium={bot.premium}
+          captchaOptOut={bot.captcha_opt_out}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <Container className="py-10">
       <Link
@@ -128,6 +152,9 @@ export default async function BotPage({ params }: Props) {
             </div>
           )}
 
+          {/* Actions (mobile only — desktop version lives in the sidebar) */}
+          <div className="mt-5 lg:hidden">{actionsCard}</div>
+
           {/* Long description */}
           <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
@@ -154,26 +181,8 @@ export default async function BotPage({ params }: Props) {
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          {/* Actions */}
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="flex flex-col gap-2">
-              {bot.invite && (
-                <a
-                  href={bot.invite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                >
-                  <ExternalLink size={14} />
-                  Add to Server
-                </a>
-              )}
-              <VoteButton
-                botId={bot.bot_id}
-                currentVotes={bot.approximate_votes}
-              />
-            </div>
-          </div>
+          {/* Actions (desktop only — mobile version renders above the About section) */}
+          <div className="hidden lg:block">{actionsCard}</div>
 
           {/* Stats */}
           <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">

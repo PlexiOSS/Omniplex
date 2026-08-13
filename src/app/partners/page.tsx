@@ -13,8 +13,6 @@ export const metadata: Metadata = {
   description: "Communities and services we work with.",
 };
 
-export const revalidate = 300;
-
 function PartnerCard({ partner }: { partner: Partner }) {
   const primaryLink = partner.links[0];
 

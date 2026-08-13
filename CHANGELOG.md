@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New public `/changelog` page, replacing the old database-backed changelog
+  system (`popplio`'s `changelogs` table, `arcadia/panel/ops_content.go`'s
+  `updateChangelog` RPC, and the `ChangelogAction` DTOs) — that system was
+  already fully dead: the RPC unconditionally returned 403 "not
+  implemented", the panel's "Changelogs" stat was hardcoded to 0, and there
+  was no route or admin UI on either side. `/changelog` instead pulls
+  releases directly from GitHub (`lib/github/releases.ts`) for a
+  configurable list of repos (`lib/github/config.ts` — currently Popplio
+  and Omniplex itself), merges them into one reverse-chronological
+  timeline with a per-repo filter, and renders each release's body through
+  the existing sanitized `Markdown` component. No new database or admin
+  surface — GitHub Releases *is* the source of truth now, cutting a release
+  there is the entire authoring flow. Cached for 15 minutes
+  (`next: { revalidate: 900 }`) to stay off GitHub's unauthenticated rate
+  limit without needing a redeploy to pick up a new release; set
+  `GITHUB_TOKEN` (server-only) to raise that limit if it's ever hit.
 - Real image hosting, replacing the informal legacy-CDN-path guessing used
   everywhere so far (`bannerUrl`/`partnerAvatarUrl`/`teamAvatarUrl`
   previously just hoped a file existed at a fixed path, with no way to add
@@ -126,9 +142,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   member permissions), and revoking existing ones. A newly created token's
   raw value is shown exactly once, since Popplio never stores or re-serves
   it after creation.
+- Votes now go through Popplio's new self-hosted proof-of-work captcha
+  (see Popplio's changelog) automatically, when the bot/server hasn't opted
+  out via `captcha_opt_out`. `useVote` fetches a challenge, solves it
+  client-side with `crypto.subtle` (`lib/captcha/pow.ts`), and submits the
+  solution alongside the vote; both vote buttons show "Verifying…" while
+  that's in progress. No user-facing setup — it's invisible on a successful
+  vote and only costs a brief moment of CPU work.
 
 ### Changed
 
+- Homepage, bot/server index/listing/detail pages, and blog list/post pages
+  now fetch with `cache: "no-store"` instead of Next's ISR (`revalidate`)
+  — blog posts in particular had crept to a 1-hour window, meaning an edit
+  or correction could take up to an hour to show up. `list.getStats()` and
+  `list.getPartners()` (homepage stats and partner strip) had no cache
+  option set at all, which under Next's fetch defaults meant `force-cache`
+  — cached indefinitely until the next deploy, not just "stale for a
+  while" like everything else. All of it now hits Popplio directly on
+  every request instead. Search was already `no-store`; this just brings
+  the rest in line with it rather than leaving the CDN/ISR layer doing
+  double duty as an ad-hoc data cache on top of what it's actually for
+  (serving images). Worth revisiting if Popplio's own load becomes a
+  problem at higher traffic, but not a concern at current scale.
 - The header's "Create" menu (`NavGroupMenu`) was hardcoded `hidden md:block`,
   so it silently never rendered below the `md` breakpoint — mobile users
   could only reach Add Bot/Server/Pack and Create Team by opening the full
@@ -225,6 +261,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and per the Fetch spec, a `POST` following a `301` is replayed as a `GET`,
   which the panel API correctly (but confusingly) rejects with
   `405 Method Not Allowed`. `ARCADIA_URL` now strips any trailing slash.
+- On mobile, the vote button lived in the sidebar, which renders after the
+  entire About section and reviews in single-column layout — voting meant
+  scrolling past all of it first. Bot/server detail pages now also render a
+  compact copy of the Actions card (Add to Server/Join + vote button) right
+  after the tags, `lg:hidden`, with the sidebar copy switching to
+  `hidden lg:block` so nothing renders twice on desktop.
+- Several sign-in prompts away from the dashboard/add flows — bot and
+  server vote buttons, the review prompt, and both header sign-in links —
+  used a plain `<Link href="/auth/login">` that didn't record where the
+  user came from, so signing in from e.g. a bot's page bounced back to the
+  homepage instead. New `SignInLink` component wraps `next/link` and sets
+  the same `auth_redirect` `localStorage` key `useRequireAuth` already used
+  correctly elsewhere, swapped into all five sites.
+- Downvoting fired immediately on click, with no confirmation and no way to
+  undo it (feedback: a downvote can't be removed or changed once cast).
+  Both vote buttons now confirm via a modal first, stating the entity's
+  actual cooldown window (4h premium / 12h standard, 6h on double-vote
+  weekends — `voteCooldownHours()`) so it's clear voting again isn't
+  possible until then either. Popplio has no vote-removal endpoint today,
+  so "undo" itself is a backend gap being tracked separately, not something
+  this fixes.
+- The widget preview card (`WidgetShare`) clipped its image with
+  `rounded-lg` (8px) while the widget itself draws its own corners at 16px
+  (`WidgetFrame`) — the mismatch let the image's actual corner curve peek
+  past the tighter clip, showing a mismatched color ring at each corner.
+  Clip radius now matches. Separately, the accent-color swatch row sat
+  alongside the theme toggle in one `justify-between` row and overflowed
+  the card at typical sidebar widths (12 swatches don't fit next to the
+  toggle); it now sits on its own wrapping row underneath.
+- Server emoji/sticker galleries were bare icon grids with no name shown
+  and no hover feedback, inconsistent with every other card style in the
+  app. Both now use the shared card hover treatment (accent border/bg, a
+  slight hover scale) and show the emoji/sticker's name as a caption
+  instead of only a `title` tooltip, plus a visible count next to each
+  section heading.
 
 ## [0.1.0] - 2026-08-04
 

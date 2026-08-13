@@ -2,6 +2,7 @@ import { client } from "../client";
 import type {
   Bot,
   BotSettingsUpdate,
+  CaptchaSolution,
   DiscordBotMeta,
   IndexBot,
   ListIndexBot,
@@ -13,12 +14,12 @@ import type {
 export const botsResource = {
   getIndex: () =>
     client.get<ListIndexBot>("/bots/@index", {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
   getAll: (page = 1) =>
     client.get<PagedResult<IndexBot[]>>(`/bots/@all?page=${page}`, {
-      next: { revalidate: 30 },
+      cache: "no-store",
     }),
 
   getRandom: () =>
@@ -29,7 +30,7 @@ export const botsResource = {
   /** Pass include=long to get the long description */
   getBot: (id: string) =>
     client.get<Bot>(`/bots/${id}?include=long`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
   getVoteInfo: (botId: string, userId: string, token: string) =>
@@ -38,10 +39,16 @@ export const botsResource = {
       cache: "no-store",
     }),
 
-  vote: (botId: string, userId: string, upvote: boolean, token: string) =>
+  vote: (
+    botId: string,
+    userId: string,
+    upvote: boolean,
+    token: string,
+    captchaSolution?: CaptchaSolution,
+  ) =>
     client.put<void>(
       `/users/${userId}/bots/${botId}/votes?upvote=${upvote}`,
-      {},
+      captchaSolution ?? {},
       { token },
     ),
 

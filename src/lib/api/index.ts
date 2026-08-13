@@ -2,6 +2,7 @@ export { ApiError, client } from "./client";
 export { authResource as auth } from "./resources/auth";
 export { blogsResource as blogs } from "./resources/blogs";
 export { botsResource as bots } from "./resources/bots";
+export { captchaResource as captcha } from "./resources/captcha";
 export { listResource as list } from "./resources/list";
 export { packsResource as packs } from "./resources/packs";
 export { reviewsResource as reviews } from "./resources/reviews";

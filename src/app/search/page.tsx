@@ -229,7 +229,7 @@ function SearchPageInner() {
       ) : (
         <div className="mt-10 space-y-10">
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Browsing everything — search or pick a tag to narrow it down.
+            Browsing everything search or pick a tag to narrow it down.
           </p>
 
           {browseBots && (

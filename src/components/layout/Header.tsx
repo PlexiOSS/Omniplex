@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
+import { SignInLink } from "@/components/ui/SignInLink";
 import { useArcadiaAuth } from "@/hooks/useArcadiaAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
@@ -31,9 +32,6 @@ interface NavGroup {
 const ICON_BUTTON =
   "flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";
 
-// Blog/Partners/Knowledge Base/About previously lived only in the footer —
-// grouped into "Community" here so they're reachable from anywhere, while
-// keeping the top-level row from growing past what fits comfortably.
 const NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/", label: "Home" },
   {
@@ -49,6 +47,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
     label: "Community",
     items: [
       { href: "/blog", label: "Blog" },
+      { href: "/changelog", label: "Changelog" },
       { href: "/partners", label: "Partners" },
       { href: "https://docs.omniplex.gg", label: "Documentation" },
       { href: "/about", label: "About Us" },
@@ -63,12 +62,6 @@ const CREATE_LINKS = [
   { href: "/teams/add", label: "Create a Team" },
 ];
 
-// The staff panel (/admin/**) swaps in its own nav here rather than running
-// a second header — /admin/login and /admin/auth/callback are excluded since
-// those sit outside the gate and have no staff nav to show yet. Related
-// pages are grouped into dropdowns (Staff, Content) rather than listed flat —
-// this grows every time a new admin section is added, and a flat row of 10
-// links stopped fitting comfortably.
 const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/queue", label: "Queue" },
@@ -279,12 +272,9 @@ export function Header() {
                   </Button>
                 </div>
               ) : (
-                <Link
-                  href="/auth/login"
-                  className="items-center justify-center hidden h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg md:inline-flex bg-accent text-accent-fg hover:opacity-90"
-                >
+                <SignInLink className="items-center justify-center hidden h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg md:inline-flex bg-accent text-accent-fg hover:opacity-90">
                   Sign in
-                </Link>
+                </SignInLink>
               )}
             </div>
           </div>
@@ -329,22 +319,6 @@ export function Header() {
                     {item.label}
                   </Link>
                 ),
-              )}
-              {!isAdminSection && (
-                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <p className="px-3 pb-1 text-xs font-medium tracking-wide uppercase text-zinc-400 dark:text-zinc-600">
-                    Create
-                  </p>
-                  {CREATE_LINKS.map(({ href, label }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      className="block px-3 py-2 text-sm font-medium transition-colors rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                    >
-                      {label}
-                    </Link>
-                  ))}
-                </div>
               )}
               {isAdminSection && isStaffAuthenticated && (
                 <button
@@ -392,12 +366,9 @@ export function Header() {
                   </Button>
                 </div>
               ) : (
-                <Link
-                  href="/auth/login"
-                  className="inline-flex items-center justify-center px-3 mx-3 text-sm font-medium transition-opacity rounded-lg h-9 bg-accent text-accent-fg hover:opacity-90"
-                >
+                <SignInLink className="inline-flex items-center justify-center px-3 mx-3 text-sm font-medium transition-opacity rounded-lg h-9 bg-accent text-accent-fg hover:opacity-90">
                   Sign in
-                </Link>
+                </SignInLink>
               )}
 
               <div className="flex items-center gap-1 pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">

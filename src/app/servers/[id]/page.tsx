@@ -83,6 +83,35 @@ export default async function ServerPage({ params }: Props) {
     .getAll("server", server.server_id)
     .catch(() => ({ reviews: [] }));
 
+  const actionsCard = (
+    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="flex flex-col gap-2">
+        {(() => {
+          const inviteLink = server.extra_links.find(
+            (l) => l.name === "invite",
+          )?.value;
+          return inviteLink ? (
+            <a
+              href={inviteLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
+              <ExternalLink size={14} />
+              Join Server
+            </a>
+          ) : null;
+        })()}
+        <ServerVoteButton
+          serverId={server.server_id}
+          currentVotes={server.approximate_votes}
+          premium={server.premium}
+          captchaOptOut={server.captcha_opt_out}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <Container className="py-10">
       <Link
@@ -129,6 +158,9 @@ export default async function ServerPage({ params }: Props) {
             </div>
           )}
 
+          {/* Actions (mobile only — desktop version lives in the sidebar) */}
+          <div className="mt-5 lg:hidden">{actionsCard}</div>
+
           <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
               About
@@ -161,30 +193,8 @@ export default async function ServerPage({ params }: Props) {
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="flex flex-col gap-2">
-              {(() => {
-                const inviteLink = server.extra_links.find(
-                  (l) => l.name === "invite",
-                )?.value;
-                return inviteLink ? (
-                  <a
-                    href={inviteLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                  >
-                    <ExternalLink size={14} />
-                    Join Server
-                  </a>
-                ) : null;
-              })()}
-              <ServerVoteButton
-                serverId={server.server_id}
-                currentVotes={server.approximate_votes}
-              />
-            </div>
-          </div>
+          {/* Actions (desktop only — mobile version renders above the About section) */}
+          <div className="hidden lg:block">{actionsCard}</div>
 
           <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">

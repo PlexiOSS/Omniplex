@@ -36,3 +36,17 @@ export function formatCountdown(seconds: number): string {
 export function truncate(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
+
+/**
+ * Mirrors Popplio's EntityVoteInfo cooldown rules for bots/servers: premium
+ * entities get a 4h window, everyone else gets 12h, halved to 6h on
+ * Fri/Sat/Sun "double vote" days. Client-side day-of-week check, so it can be
+ * off by a few hours right at a UTC day boundary — good enough for UI copy,
+ * the server is still the source of truth for enforcement.
+ */
+export function voteCooldownHours(premium: boolean): number {
+  if (premium) return 4;
+  const day = new Date().getDay();
+  const isDoubleVoteDay = day === 0 || day === 5 || day === 6;
+  return isDoubleVoteDay ? 6 : 12;
+}

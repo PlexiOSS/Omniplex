@@ -1,35 +1,41 @@
 "use client";
 
 import { ThumbsDown, ThumbsUp } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useVote } from "@/hooks/useVote";
-import { formatCount } from "@/lib/utils/format";
+import { formatCount, voteCooldownHours } from "@/lib/utils/format";
 
 interface VoteButtonProps {
   botId: string;
   currentVotes: number;
+  premium?: boolean;
+  captchaOptOut?: boolean;
 }
 
-export function VoteButton({ botId, currentVotes }: VoteButtonProps) {
+export function VoteButton({
+  botId,
+  currentVotes,
+  premium = false,
+  captchaOptOut = false,
+}: VoteButtonProps) {
   const { session, isAuthenticated } = useAuth();
-  const { vote, loading, error } = useVote("bot", botId);
+  const { vote, loading, verifying, error } = useVote("bot", botId);
   const [localVotes, setLocalVotes] = useState(currentVotes);
   const [votedDirection, setVotedDirection] = useState<"up" | "down" | null>(
     null,
   );
+  const [confirmingDownvote, setConfirmingDownvote] = useState(false);
 
   if (!isAuthenticated) {
     return (
-      <Link
-        href="/auth/login"
-        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:bg-accent/5 hover:text-accent dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-accent/40 dark:hover:bg-accent/10"
-      >
+      <SignInLink className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:bg-accent/5 hover:text-accent dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-accent/40 dark:hover:bg-accent/10">
         <ThumbsUp size={14} />
         Sign in to vote
-      </Link>
+      </SignInLink>
     );
   }
 
@@ -41,10 +47,20 @@ export function VoteButton({ botId, currentVotes }: VoteButtonProps) {
 
   const handleVote = async (upvote: boolean) => {
     if (!session || voted) return;
-    const ok = await vote(session.user_id, session.token, upvote);
+    const ok = await vote(
+      session.user_id,
+      session.token,
+      upvote,
+      !captchaOptOut,
+    );
     if (!ok) return;
     setLocalVotes((v) => v + (upvote ? 1 : -1));
     setVotedDirection(upvote ? "up" : "down");
+  };
+
+  const confirmDownvote = async () => {
+    setConfirmingDownvote(false);
+    await handleVote(false);
   };
 
   return (
@@ -63,11 +79,13 @@ export function VoteButton({ botId, currentVotes }: VoteButtonProps) {
           />
           {votedDirection === "up"
             ? "Voted!"
-            : `Upvote · ${formatCount(localVotes)}`}
+            : verifying
+              ? "Verifying…"
+              : `Upvote · ${formatCount(localVotes)}`}
         </Button>
         <Button
           variant={votedDirection === "down" ? "danger" : "secondary"}
-          onClick={() => handleVote(false)}
+          onClick={() => setConfirmingDownvote(true)}
           loading={loading && votedDirection === null}
           disabled={voted}
           aria-label="Downvote this bot"
@@ -83,6 +101,26 @@ export function VoteButton({ botId, currentVotes }: VoteButtonProps) {
           {error}
         </p>
       )}
+
+      <Modal
+        open={confirmingDownvote}
+        onClose={() => setConfirmingDownvote(false)}
+        title="Downvote this bot?"
+      >
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          Downvotes can't be removed or changed once submitted, and you can
+          only vote once every {voteCooldownHours(premium)} hours. Are you
+          sure?
+        </p>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setConfirmingDownvote(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDownvote} loading={loading}>
+            Downvote
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
