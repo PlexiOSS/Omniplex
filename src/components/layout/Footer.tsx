@@ -28,9 +28,8 @@ const FOOTER_LINKS = [
     links: [
       { href: "/about", label: "About Us" },
       { href: "/about/status", label: "System Status" },
-      { href: "/about/moderation", label: "Moderation Transparency" },
+      { href: "/about/moderation", label: "Moderation Stats" },
       { href: "/partners", label: "Our Partners" },
-      { href: "/blog", label: "Blog Posts" },
     ],
   },
   {
