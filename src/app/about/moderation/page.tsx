@@ -58,7 +58,7 @@ export default async function ModerationPage() {
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           Anyone can report a bot, server, or pack for a license violation,
           Terms of Service violation, spam, or anything else that needs a
-          look. Reports themselves — and who filed them — are visible only
+          look. Reports themselves and who filed them are visible only
           to staff. What's shown here is just the count, broken down by
           reason and status, so the moderation process isn't a total black
           box.
