@@ -10,6 +10,9 @@ import type {
   Partners,
   PartnerAction,
   PlatformUser,
+  Report,
+  ReportAction,
+  ReportStatus,
   RPCLogEntry,
   RPCMethod,
   RPCWebAction,
@@ -467,6 +470,47 @@ export const arcadia = {
         UpdatePartners: {
           login_token: loginToken,
           action: { Delete: { id } } satisfies PartnerAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  reports: {
+    list: async (
+      loginToken: string,
+      status: ReportStatus | null,
+    ): Promise<Report[]> => {
+      const res = await postQuery({
+        UpdateReports: {
+          login_token: loginToken,
+          action: { List: { status } } satisfies ReportAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    resolve: async (
+      loginToken: string,
+      id: string,
+      note: string,
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateReports: {
+          login_token: loginToken,
+          action: { Resolve: { id, note } } satisfies ReportAction,
+        },
+      });
+      await assertOk(res);
+    },
+    dismiss: async (
+      loginToken: string,
+      id: string,
+      note: string,
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateReports: {
+          login_token: loginToken,
+          action: { Dismiss: { id, note } } satisfies ReportAction,
         },
       });
       await assertOk(res);

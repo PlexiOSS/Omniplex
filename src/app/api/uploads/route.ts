@@ -17,14 +17,28 @@ type Kind =
   | "team-avatar"
   | "team-banner"
   | "bot-banner"
-  | "server-banner";
+  | "server-banner"
+  | "pack-emoji";
 
 interface KindConfig {
-  key: (id: string) => string;
+  /**
+   * Builds the storage key. `targetId` is the entity the permission check
+   * runs against (a pack's URL, for pack-emoji); `assetId` is only set for
+   * kinds where one target can hold many separate uploads (a pack's many
+   * emojis) and is otherwise unused.
+   */
+  key: (targetId: string, assetId?: string) => string;
   perm: string;
   requiresStaff: boolean;
-  popplioTargetType?: "team" | "bot" | "server";
+  popplioTargetType?: "team" | "bot" | "server" | "pack";
+  /** Overrides the global 5MB cap for kinds that need a tighter one. */
+  maxBytes?: number;
 }
+
+// Discord's own per-emoji cap (applies to static and animated alike) — pack
+// emojis follow the same limit rather than the much looser 5MB used for
+// banners, since these are meant to actually behave like real emojis.
+const EMOJI_MAX_BYTES = 256 * 1024;
 
 const KIND_CONFIG: Record<Kind, KindConfig> = {
   "partner-logo": {
@@ -56,6 +70,15 @@ const KIND_CONFIG: Record<Kind, KindConfig> = {
     requiresStaff: false,
     popplioTargetType: "server",
   },
+  "pack-emoji": {
+    // Extension is appended separately (see assetId handling below) since
+    // it depends on whether the emoji is animated, not just its ID.
+    key: (packUrl, assetId) => `emojis/packs/${packUrl}/${assetId}`,
+    perm: "edit_packs",
+    requiresStaff: false,
+    popplioTargetType: "pack",
+    maxBytes: EMOJI_MAX_BYTES,
+  },
 };
 
 function isKind(value: unknown): value is Kind {
@@ -64,8 +87,8 @@ function isKind(value: unknown): value is Kind {
 
 /**
  * Single upload endpoint for every image-upload surface in the app (partner
- * logos, team avatar/banner, bot/server banner). Two things every caller
- * must prove before a single byte reaches the bucket:
+ * logos, team avatar/banner, bot/server banner, pack emojis). Two things
+ * every caller must prove before a single byte reaches the bucket:
  *
  * 1. Identity either an Arcadia staff `loginToken` (verified via
  *    `arcadia.hello`, same call the admin panel already makes on every
@@ -99,14 +122,40 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  if (file.size > MAX_BYTES) {
+
+  const config = KIND_CONFIG[kind];
+  const maxBytes = config.maxBytes ?? MAX_BYTES;
+
+  if (file.size > maxBytes) {
     return NextResponse.json(
-      { error: "File too large — 5MB max." },
+      { error: `File too large — ${Math.floor(maxBytes / 1024)}KB max.` },
       { status: 400 },
     );
   }
 
-  const config = KIND_CONFIG[kind];
+  let assetId: string | undefined;
+
+  if (kind === "pack-emoji") {
+    const rawAssetId = form.get("assetId");
+    if (typeof rawAssetId !== "string" || !rawAssetId) {
+      return NextResponse.json(
+        { error: "Missing assetId for pack-emoji upload" },
+        { status: 400 },
+      );
+    }
+    const animated = form.get("animated") === "true";
+    if (animated !== (file.type === "image/gif")) {
+      return NextResponse.json(
+        {
+          error: animated
+            ? "Animated emojis must be uploaded as GIF."
+            : "Non-animated emojis can't be uploaded as GIF.",
+        },
+        { status: 400 },
+      );
+    }
+    assetId = `${rawAssetId}.${animated ? "gif" : "webp"}`;
+  }
 
   if (config.requiresStaff) {
     const loginToken = form.get("loginToken");
@@ -166,7 +215,7 @@ export async function POST(req: Request) {
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  await putObject(config.key(targetId), bytes, file.type);
+  await putObject(config.key(targetId, assetId), bytes, file.type);
 
   return NextResponse.json({ ok: true });
 }

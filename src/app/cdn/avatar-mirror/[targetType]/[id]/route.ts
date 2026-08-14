@@ -1,6 +1,24 @@
 import { NextResponse } from "next/server";
+import { DISCORD_CDN_URL } from "@/lib/api/config";
 import { AVATAR_MIRROR_MAX_AGE_MS } from "@/lib/s3/config";
 import { getObject, putObject } from "@/lib/s3/objects";
+
+/** Every legitimate `?src=` value is a Discord avatar URL — dovewing only
+ * ever resolves PlatformUser.avatar to cdn.discordapp.com. Anything else is
+ * either a stale/dead value (see mirroredAvatarUrl's isDeadCdnUrl) or, since
+ * this is a public unauthenticated route, a caller trying to make this
+ * server fetch (and then cache-poison the shared bucket with) an arbitrary
+ * URL — classic SSRF. Reject before ever calling fetch(), not after. */
+const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
+
+function isAllowedAvatarSrc(src: string): boolean {
+  try {
+    const url = new URL(src);
+    return url.protocol === "https:" && url.hostname === DISCORD_CDN_HOST;
+  } catch {
+    return false;
+  }
+}
 
 interface Params {
   params: Promise<{ targetType: string; id: string }>;
@@ -43,7 +61,8 @@ export async function GET(req: Request, { params }: Params) {
   }
 
   const key = `avatars/${targetType}/${id}`;
-  const liveSrc = new URL(req.url).searchParams.get("src");
+  const rawSrc = new URL(req.url).searchParams.get("src");
+  const liveSrc = rawSrc && isAllowedAvatarSrc(rawSrc) ? rawSrc : null;
 
   const cached = await getObject(key);
   const isStale =

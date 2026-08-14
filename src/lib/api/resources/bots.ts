@@ -17,10 +17,11 @@ export const botsResource = {
       cache: "no-store",
     }),
 
-  getAll: (page = 1) =>
-    client.get<PagedResult<IndexBot[]>>(`/bots/@all?page=${page}`, {
-      cache: "no-store",
-    }),
+  getAll: (page = 1, sort?: "trending") =>
+    client.get<PagedResult<IndexBot[]>>(
+      `/bots/@all?page=${page}${sort ? `&sort=${sort}` : ""}`,
+      { cache: "no-store" },
+    ),
 
   getRandom: () =>
     client.get<{ bots: IndexBot[] }>("/bots/@random", {

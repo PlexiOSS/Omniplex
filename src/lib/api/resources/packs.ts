@@ -3,14 +3,16 @@ import type {
   BotPack,
   CreatePackPayload,
   PackSettingsUpdate,
+  PackType,
   PagedResult,
 } from "../types";
 
 export const packsResource = {
-  getAll: (page = 1) =>
-    client.get<PagedResult<BotPack[]>>(`/packs/@all?page=${page}`, {
-      next: { revalidate: 30 },
-    }),
+  getAll: (page = 1, packType?: PackType) =>
+    client.get<PagedResult<BotPack[]>>(
+      `/packs/@all?page=${page}${packType ? `&pack_type=${packType}` : ""}`,
+      { next: { revalidate: 30 } },
+    ),
 
   getPack: (url: string) =>
     client.get<BotPack>(`/packs/${url}`, {

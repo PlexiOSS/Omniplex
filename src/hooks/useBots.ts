@@ -8,9 +8,9 @@ export function useBotIndex() {
   return useSWR<ListIndexBot>("bots/index", () => bots.getIndex());
 }
 
-export function useBotList(page = 1) {
-  return useSWR<PagedResult<IndexBot[]>>(`bots/all/${page}`, () =>
-    bots.getAll(page),
+export function useBotList(page = 1, sort?: "trending") {
+  return useSWR<PagedResult<IndexBot[]>>(`bots/all/${page}/${sort ?? ""}`, () =>
+    bots.getAll(page, sort),
   );
 }
 

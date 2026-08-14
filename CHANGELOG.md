@@ -5,6 +5,79 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - Unreleased
+
+### Added
+
+- Packs now come in three flavors — Bot, Server, and Emoji — instead of
+  bots-only. `/packs/add` gains a pack-type selector as its first step;
+  bot/server packs reuse the existing search-and-pick flow restricted to
+  one type at a time, while emoji packs get a new upload sub-flow
+  (`EmojiPackBuilder.tsx`, up to 50 emojis, 256KB each, static or animated
+  GIF) built on the existing `/api/uploads` gateway (new `pack-emoji` kind,
+  gated by a new `edit_packs` permission check against Popplio). Emoji
+  images live at a deterministic CDN path (`packEmojiUrl()`, same
+  convention as `bannerUrl()`) rather than a database-stored URL. Pack
+  cards, the pack detail page, and the `/packs` listing (now filterable by
+  `?pack_type=`) all show a `PackTypeBadge` and type-appropriate preview.
+- A "Report this pack" flow (`components/reports/ReportModal.tsx`, built
+  generic over target type so bots/servers can reuse it later) for
+  flagging license/ToS violations, spam, or anything else — motivated
+  specifically by user-created emoji packs raising real rights questions.
+  Reports are reviewed by staff only, at a new `/admin/reports` page
+  (status-filterable queue + detail modal with Resolve/Dismiss and an
+  optional note) gated on a new `review_reports` permission — reporter
+  identity is visible there and nowhere else; a pack owner never learns
+  who reported them, only that a report exists and its reason category.
+- `ReportModal` rolled out to bot and server detail pages, not just packs —
+  it was already built generic over target type for exactly this.
+- An RSS feed for `/changelog` (`/changelog/rss.xml`), hand-built (no
+  existing precedent in this repo for a manual XML route — sitemap/robots
+  use Next's typed `MetadataRoute` convention, which has no RSS
+  equivalent) from the same `getChangelogEntries()` the page itself uses,
+  same 15-minute cache window. Linked from the changelog page header and
+  its metadata (`<link rel="alternate" type="application/rss+xml">`).
+- A "Trending" sort on `/bots` and `/servers`, alongside the existing
+  newest-first default — ranks by net votes in the last 7 days (via
+  Popplio's new `?sort=trending` param) instead of raw vote count, so a
+  bot/server picking up votes right now surfaces even if its all-time
+  total is small.
+- `/about/moderation`: a public, anonymized breakdown of content reports
+  by reason and status (counts only — no report/target/reporter
+  identity), backed by Popplio's new `GET /reports/stats`. Linked from
+  `/about` and the footer, next to the existing status page link.
+- `/emojis`: a browse page aggregating custom emojis/stickers across every
+  server that's opted in to showing them (`show_emojis`), grouped by
+  source server and reusing the existing `EmojiStickerGallery` card
+  treatment. Backed by Popplio's new `GET /servers/@emojis`, since the
+  regular paginated server listing excludes emoji/sticker data entirely.
+
+### Fixed
+
+- Uploaded images (banners, avatars, pack emojis — anything served through
+  `/cdn/[...path]`) could stay visibly stale for up to a day after a
+  re-upload: the fixed per-entity URL never changes, but the response was
+  cached `max-age=3600, stale-while-revalidate=86400`, so a browser (or
+  anything in front of it) could keep serving the old bytes long after a
+  new upload landed. The route now sets `max-age=0, must-revalidate` and
+  compares the request's `If-None-Match` against RustFS's own ETag (now
+  captured in `getObject`) — an unchanged image gets a bodyless 304 (cheap,
+  effectively instant), a changed one gets the new bytes on the very next
+  request instead of waiting out the old cache window.
+
+### Security
+
+- `/cdn/avatar-mirror/[targetType]/[id]`'s `?src=` param was passed
+  straight to `fetch()` with no validation (CodeQL `js/request-forgery`)
+  — since this route is public and unauthenticated, anyone could point
+  `?src=` at an arbitrary internal URL and make the server fetch it, and
+  the response would then get `putObject`'d into the shared bucket at a
+  predictable path, serving whatever the attacker's URL returned to every
+  future visitor of that avatar. `?src=` is now checked against an
+  allow-list of exactly `cdn.discordapp.com` (the only host dovewing ever
+  actually resolves an avatar to) before the fetch happens at all, not
+  after.
+
 ## [0.1.1] - 2026-08-13
 
 ### Added

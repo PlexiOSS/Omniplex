@@ -49,7 +49,7 @@ export const teamsResource = {
   /** A user's flattened, resolved permissions on a specific entity (public endpoint) */
   getEntityPerms: (
     userId: string,
-    targetType: "team" | "bot" | "server",
+    targetType: "team" | "bot" | "server" | "pack",
     targetId: string,
   ) =>
     client.get<UserEntityPerms>(
