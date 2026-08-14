@@ -40,6 +40,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/bots", label: "Bots" },
       { href: "/servers", label: "Servers" },
       { href: "/packs", label: "Packs" },
+      { href: "/emojis", label: "Emojis" },
     ],
   },
   { href: "/search", label: "Search" },
@@ -65,6 +66,7 @@ const CREATE_LINKS = [
 const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/queue", label: "Queue" },
+  { href: "/admin/reports", label: "Reports" },
   { href: "/admin/search", label: "Search" },
   {
     label: "Staff",

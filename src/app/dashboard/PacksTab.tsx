@@ -100,15 +100,17 @@ function PackItem({
             View
             <ArrowUpRight size={11} />
           </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setEditing(true)}
-            className="h-7 px-2 text-xs"
-          >
-            <Pencil size={12} />
-            Edit
-          </Button>
+          {pack.pack_type !== "emoji" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditing(true)}
+              className="h-7 px-2 text-xs"
+            >
+              <Pencil size={12} />
+              Edit
+            </Button>
+          )}
           <Button
             variant={confirming ? "danger" : "ghost"}
             size="sm"

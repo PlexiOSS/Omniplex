@@ -92,6 +92,22 @@ export function discordDefaultAvatar(discriminator = "0"): string {
   return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
 }
 
+/**
+ * Emoji packs store each emoji as its own durably-uploaded asset (not a
+ * live reference into a server's synced emoji list — see Popplio's
+ * PackEmoji doc comment), at a deterministic path keyed by the pack's URL
+ * and the emoji's own ID, same convention as bannerUrl(). The extension
+ * depends on whether the emoji is animated — set at upload time in
+ * `/api/uploads`'s "pack-emoji" kind, so it must match here exactly.
+ */
+export function packEmojiUrl(
+  packUrl: string,
+  emojiId: string,
+  animated: boolean,
+): string {
+  return `/cdn/emojis/packs/${encodeURIComponent(packUrl)}/${encodeURIComponent(emojiId)}.${animated ? "gif" : "webp"}`;
+}
+
 /** Return the canonical path for a bot (prefers vanity) */
 export function botPath(botId: string, vanity?: string | null): string {
   return `/bots/${vanity || botId}`;

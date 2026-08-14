@@ -166,6 +166,17 @@ export interface ServerSticker {
   url: string;
 }
 
+/** GET /servers/@emojis — minimal per-server shape for the cross-server
+ * emoji/sticker browse page. Only returned for servers with
+ * show_emojis=true. */
+export interface ServerEmojiPreview {
+  server_id: string;
+  name: string;
+  avatar: string;
+  emojis: ServerEmoji[];
+  stickers: ServerSticker[];
+}
+
 export interface TeamMember {
   itag: string;
   team_id: string;
@@ -348,6 +359,17 @@ export interface UserEntityPerms {
 // Packs
 // ---------------------------------------------------------------------------
 
+export type PackType = "bot" | "server" | "emoji";
+
+/** A single emoji in an emoji pack. No asset URL field — build it with
+ * packEmojiUrl(pack.url, id, animated), same convention as bannerUrl(). */
+export interface PackEmoji {
+  id: string;
+  name: string;
+  animated: boolean;
+  position: number;
+}
+
 export interface BotPack {
   owner: PlatformUser;
   name: string;
@@ -356,6 +378,7 @@ export interface BotPack {
   tags: string[];
   url: string;
   created_at: string;
+  pack_type: PackType;
   /** Raw bot IDs */
   bot_ids: string[];
   /** Resolved IndexBot objects */
@@ -364,6 +387,8 @@ export interface BotPack {
   server_ids: string[];
   /** Resolved IndexServer objects */
   servers: IndexServer[];
+  /** Only populated for pack_type "emoji" */
+  emojis: PackEmoji[];
   vote_banned: boolean;
 }
 
@@ -563,6 +588,35 @@ export interface RandomServers {
 }
 
 // ---------------------------------------------------------------------------
+// Reports — PUT /users/{uid}/{target_type}/{target_id}/reports. Individual
+// reports are reviewed only through the Arcadia staff panel (see
+// lib/arcadia/client.ts's `reports` namespace) — there's no public
+// read-back of a filed report. GET /reports/stats is the one public,
+// anonymized exception (aggregate counts only).
+// ---------------------------------------------------------------------------
+
+export type TargetType = "bot" | "server" | "pack";
+
+export type ReportReason =
+  | "license_violation"
+  | "tos_violation"
+  | "spam"
+  | "other";
+
+export interface CreateReportPayload {
+  reason: ReportReason;
+  description: string;
+}
+
+export type ReportStatus = "open" | "under_review" | "resolved" | "dismissed";
+
+export interface ReportStatCount {
+  reason: ReportReason;
+  status: ReportStatus;
+  count: number;
+}
+
+// ---------------------------------------------------------------------------
 // Reviews
 // ---------------------------------------------------------------------------
 
@@ -749,23 +803,38 @@ export interface ServerSettingsUpdate {
   show_emojis: boolean;
 }
 
+/** An emoji submitted at pack create/edit time — the image must already be
+ * uploaded (via /api/uploads, kind "pack-emoji") under this same id before
+ * the pack is submitted. */
+export interface PackEmojiInput {
+  id: string;
+  name: string;
+  animated: boolean;
+}
+
 export interface CreatePackPayload {
   name: string;
   url: string;
   short: string;
   tags: string[];
-  /** At least one of bots/servers must be non-empty. */
+  pack_type: PackType;
+  /** Required for pack_type "bot" */
   bots: string[];
+  /** Required for pack_type "server" */
   servers: string[];
+  /** Required for pack_type "emoji" */
+  emojis: PackEmojiInput[];
 }
 
 export interface PackSettingsUpdate {
   name: string;
   short: string;
   tags: string[];
-  /** At least one of bots/servers must be non-empty. */
+  /** Same per-type requirement as CreatePackPayload — pack_type itself is
+   * immutable and not part of this payload. */
   bots: string[];
   servers: string[];
+  emojis: PackEmojiInput[];
 }
 
 // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ export { botsResource as bots } from "./resources/bots";
 export { captchaResource as captcha } from "./resources/captcha";
 export { listResource as list } from "./resources/list";
 export { packsResource as packs } from "./resources/packs";
+export { reportsResource as reports } from "./resources/reports";
 export { reviewsResource as reviews } from "./resources/reviews";
 export { searchResource as search } from "./resources/search";
 export { serversResource as servers } from "./resources/servers";

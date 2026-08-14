@@ -6,6 +6,7 @@ import type {
   ListIndexServer,
   PagedResult,
   Server,
+  ServerEmojiPreview,
   ServerSettingsUpdate,
   UserVote,
 } from "../types";
@@ -16,10 +17,17 @@ export const serversResource = {
       cache: "no-store",
     }),
 
-  getAll: (page = 1) =>
-    client.get<PagedResult<IndexServer[]>>(`/servers/@all?page=${page}`, {
-      cache: "no-store",
-    }),
+  getAll: (page = 1, sort?: "trending") =>
+    client.get<PagedResult<IndexServer[]>>(
+      `/servers/@all?page=${page}${sort ? `&sort=${sort}` : ""}`,
+      { cache: "no-store" },
+    ),
+
+  getEmojis: (page = 1) =>
+    client.get<PagedResult<ServerEmojiPreview[]>>(
+      `/servers/@emojis?page=${page}`,
+      { cache: "no-store" },
+    ),
 
   getServer: (id: string) =>
     client.get<Server>(`/servers/${id}?include=long`, {

@@ -390,3 +390,38 @@ export type PartnerAction =
   | { Create: { partner: PartnerUpsert } }
   | { Update: { partner: PartnerUpsert } }
   | { Delete: { id: string } };
+
+// ---------------------------------------------------------------------------
+// Reports (UpdateReports RPC) — generic content reports, staff-only. This
+// is the one place reporter identity is ever exposed; the public API never
+// sends it.
+// ---------------------------------------------------------------------------
+
+export type ReportReason =
+  | "license_violation"
+  | "tos_violation"
+  | "spam"
+  | "other";
+
+export type ReportStatus = "open" | "under_review" | "resolved" | "dismissed";
+
+export interface Report {
+  id: string;
+  target_type: string;
+  target_id: string;
+  target_name: string;
+  target_url: string;
+  reporter_id: string;
+  reason: ReportReason;
+  description: string;
+  status: ReportStatus;
+  resolved_by: string | null;
+  resolution_note: string | null;
+  created_at: string;
+  resolved_at: string | null;
+}
+
+export type ReportAction =
+  | { List: { status: ReportStatus | null } }
+  | { Resolve: { id: string; note: string } }
+  | { Dismiss: { id: string; note: string } };

@@ -128,6 +128,12 @@ export default async function AboutPage() {
           >
             Platform Status
           </Link>
+          <Link
+            href="/about/moderation"
+            className="text-sm text-accent underline underline-offset-2 hover:opacity-80"
+          >
+            Moderation Transparency
+          </Link>
         </div>
       </div>
     </Container>

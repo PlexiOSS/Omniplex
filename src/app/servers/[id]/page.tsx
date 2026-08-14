@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Markdown } from "@/components/markdown/Markdown";
+import { ReportModal } from "@/components/reports/ReportModal";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { EmojiStickerGallery } from "@/components/servers/EmojiStickerGallery";
 import { Avatar } from "@/components/ui/Avatar";
@@ -160,6 +161,14 @@ export default async function ServerPage({ params }: Props) {
 
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
           <div className="mt-5 lg:hidden">{actionsCard}</div>
+
+          <div className="mt-3">
+            <ReportModal
+              targetType="server"
+              targetId={server.server_id}
+              targetLabel="server"
+            />
+          </div>
 
           <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">

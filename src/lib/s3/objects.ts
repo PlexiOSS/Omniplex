@@ -7,6 +7,11 @@ export interface FetchedObject {
   contentType: string;
   contentLength?: number;
   lastModified?: Date;
+  /** RustFS's ETag for this object version — changes on every putObject, so
+   * it's what lets /cdn/[...path] tell a browser "your cached copy is
+   * stale" the instant someone re-uploads a banner/avatar, instead of
+   * waiting out a fixed cache lifetime. */
+  etag?: string;
 }
 
 /**
@@ -31,6 +36,7 @@ export async function getObject(key: string): Promise<FetchedObject | null> {
       contentType: res.ContentType ?? "application/octet-stream",
       contentLength: res.ContentLength,
       lastModified: res.LastModified,
+      etag: res.ETag,
     };
   } catch (err) {
     logUnlessNotFound(key, err);
