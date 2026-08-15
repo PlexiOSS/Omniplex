@@ -17,6 +17,17 @@ export const ticketsResource = {
       cache: "no-store",
     }),
 
+  listAll: (token: string, open?: boolean, page?: number) => {
+    const params = new URLSearchParams();
+    if (open !== undefined) params.set("open", String(open));
+    if (page) params.set("page", String(page));
+    const qs = params.toString();
+    return client.get<TicketList>(`/staff/tickets${qs ? `?${qs}` : ""}`, {
+      token,
+      cache: "no-store",
+    });
+  },
+
   get: (id: string, token: string) =>
     client.get<Ticket>(`/tickets/${id}`, { token, cache: "no-store" }),
 

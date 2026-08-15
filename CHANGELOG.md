@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-08-15
+
+### Fixed
+
+- The Exit Panel button was desktop-only (`hidden md:block`) and, on
+  mobile, only reachable by opening the hamburger menu — not a persistent,
+  obvious way back to the main site from anywhere in the admin panel.
+  Replaced with an always-visible icon button in the header's icon row
+  (same treatment as Customize/notifications/theme), on both desktop and
+  mobile.
+
+### Added
+
+- `/admin/tickets` — a staff ticket queue, filterable by open/closed. The
+  API and even a working staff-capable thread view already existed
+  (`/tickets/{id}` already grants any staff member with `view_tickets`
+  view/reply access, and `manage_tickets` for reopening — confirmed by
+  reading `get_ticket`'s existing owner-or-staff check), so this just adds
+  the missing "find a ticket to act on" step: list view backed by
+  Popplio's new `GET /staff/tickets`, each row linking straight into the
+  existing `/tickets/{id}` page rather than a new detail view.
+
 ## [0.1.3] - 2026-08-15
 
 ### Added

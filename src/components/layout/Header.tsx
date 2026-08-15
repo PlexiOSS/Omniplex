@@ -15,7 +15,6 @@ import { useEffect, useState } from "react";
 import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SignInLink } from "@/components/ui/SignInLink";
@@ -79,6 +78,7 @@ const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/admin/queue", label: "Queue" },
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/tickets", label: "Tickets" },
   { href: "/admin/search", label: "Search" },
   {
     label: "Staff",
@@ -207,12 +207,15 @@ export function Header() {
               </a>
 
               {isAdminSection && isStaffAuthenticated && (
-                <div className="hidden md:block">
-                  <Button variant="ghost" size="sm" onClick={exitStaffPanel}>
-                    <LogOut size={14} />
-                    Exit panel
-                  </Button>
-                </div>
+                <button
+                  type="button"
+                  onClick={exitStaffPanel}
+                  className={ICON_BUTTON}
+                  aria-label="Exit staff panel"
+                  title="Exit staff panel"
+                >
+                  <LogOut size={16} />
+                </button>
               )}
               {/* Mobile nav toggle */}
               <button
@@ -339,16 +342,6 @@ export function Header() {
                     {item.label}
                   </Link>
                 ),
-              )}
-              {isAdminSection && isStaffAuthenticated && (
-                <button
-                  type="button"
-                  onClick={exitStaffPanel}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-left transition-colors rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                >
-                  <LogOut size={14} />
-                  Exit staff panel
-                </button>
               )}
               {isAuthenticated && session ? (
                 <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
