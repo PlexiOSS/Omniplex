@@ -6,6 +6,7 @@ import {
   MousePointerClick,
   Star,
   Users,
+  Zap,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -13,16 +14,22 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Markdown } from "@/components/markdown/Markdown";
+import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { EmojiStickerGallery } from "@/components/servers/EmojiStickerGallery";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { VoterList } from "@/components/votes/VoterList";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { bannerUrl, mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  teamAvatarUrl,
+} from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
@@ -84,9 +91,18 @@ export default async function ServerPage({ params }: Props) {
     .getAll("server", server.server_id)
     .catch(() => ({ reviews: [] }));
 
+  const voteBlitzActive =
+    !!server.vote_blitz_until && new Date(server.vote_blitz_until) > new Date();
+
   const actionsCard = (
     <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
       <div className="flex flex-col gap-2">
+        {voteBlitzActive && (
+          <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
+            <Zap size={12} />
+            Vote Blitz active — cooldown is halved right now
+          </div>
+        )}
         {(() => {
           const inviteLink = server.extra_links.find(
             (l) => l.name === "invite",
@@ -143,6 +159,9 @@ export default async function ServerPage({ params }: Props) {
                 {server.type === "certified" && (
                   <Badge variant="success">Certified</Badge>
                 )}
+                {server.supporter_badge && (
+                  <Badge variant="info">Supporter</Badge>
+                )}
                 {server.nsfw && <Badge variant="danger">NSFW</Badge>}
               </div>
               <p className="mt-1 text-zinc-500 dark:text-zinc-400">
@@ -162,12 +181,13 @@ export default async function ServerPage({ params }: Props) {
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
           <div className="mt-5 lg:hidden">{actionsCard}</div>
 
-          <div className="mt-3">
+          <div className="mt-3 flex items-center gap-4">
             <ReportModal
               targetType="server"
               targetId={server.server_id}
               targetLabel="server"
             />
+            <ReminderToggle targetType="server" targetId={server.server_id} />
           </div>
 
           <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
@@ -198,6 +218,8 @@ export default async function ServerPage({ params }: Props) {
             targetId={server.server_id}
             initialReviews={reviewList.reviews}
           />
+
+          <VoterList targetType="server" targetId={server.server_id} />
         </div>
 
         {/* Sidebar */}

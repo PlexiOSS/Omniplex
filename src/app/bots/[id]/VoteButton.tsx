@@ -7,7 +7,11 @@ import { Modal } from "@/components/ui/Modal";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useVote } from "@/hooks/useVote";
-import { formatCount, voteCooldownHours } from "@/lib/utils/format";
+import {
+  formatCount,
+  isWeekendVoteBonusDay,
+  voteCooldownHours,
+} from "@/lib/utils/format";
 
 interface VoteButtonProps {
   botId: string;
@@ -65,6 +69,11 @@ export function VoteButton({
 
   return (
     <div className="flex flex-col gap-1.5">
+      {!premium && isWeekendVoteBonusDay() && (
+        <p className="text-center text-xs font-medium text-accent">
+          🎉 Double-vote weekend: all votes count 2x with a reduced 6h cooldown
+        </p>
+      )}
       <div className="flex items-center gap-2">
         <Button
           variant={votedDirection === "up" ? "secondary" : "primary"}

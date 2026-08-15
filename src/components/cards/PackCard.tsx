@@ -4,7 +4,11 @@ import { PackTypeBadge } from "@/components/packs/PackTypeBadge";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { BotPack } from "@/lib/api/types";
-import { packEmojiUrl } from "@/lib/utils/assets";
+import {
+  discordDefaultAvatar,
+  mirroredAvatarUrl,
+  packEmojiUrl,
+} from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 interface PackCardProps {
@@ -29,7 +33,11 @@ export function PackCard({ pack }: PackCardProps) {
             (pack.bots ?? []).slice(0, 3).map((bot) => (
               <Avatar
                 key={bot.bot_id}
-                src={bot.user.avatar}
+                src={mirroredAvatarUrl(
+                  "bots",
+                  bot.bot_id,
+                  bot.user.avatar || discordDefaultAvatar(),
+                )}
                 alt={bot.user.username}
                 size={32}
                 className="ring-2 ring-white dark:ring-zinc-900"
@@ -39,10 +47,12 @@ export function PackCard({ pack }: PackCardProps) {
             (pack.servers ?? []).slice(0, 3).map((server) => (
               <Avatar
                 key={server.server_id}
-                src={
+                src={mirroredAvatarUrl(
+                  "servers",
+                  server.server_id,
                   server.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`
-                }
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
+                )}
                 alt={server.name}
                 size={32}
                 className="ring-2 ring-white dark:ring-zinc-900"

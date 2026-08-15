@@ -5,6 +5,251 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-08-15
+
+### Added
+
+- A "Security" tab on the dashboard (`src/app/dashboard/SecurityTab.tsx`)
+  exposing Popplio's data-export/account-deletion pipeline
+  (`POST /users/{id}/data`), which existed server-side with zero frontend
+  consumer until now — closes the loop on the Privacy Policy's "Your
+  rights" section, which previously only pointed at a support ticket for
+  something that can be self-service. Download builds a per-table
+  row-count summary plus a client-side JSON download from the completed
+  task's output; deletion requires typing your exact username in a modal
+  before it's enabled, since it's a real, irreversible
+  `DELETE FROM users`. Both poll `GET /users/{id}/tasks/{tid}` every 2s
+  (task id/key persisted to `localStorage` so a page refresh mid-poll
+  resumes instead of losing the reference), capping at 5 minutes before
+  telling the user to check back later rather than erroring.
+- Vanity URL self-management: `BotEditModal`/`ServerEditModal` gained a
+  "Vanity URL" field wired to `PATCH /{target_type}/{target_id}/vanity`
+  (`vanityResource.update`), previously a read-only value in the UI
+  despite the endpoint existing. Server-side validation errors (taken,
+  blacklisted, contains `@`) are surfaced verbatim rather than
+  reimplemented client-side.
+- A "Recent voters" section (`src/components/votes/VoterList.tsx`) on bot
+  and server pages, backed by the public
+  `GET /{target_type}/{target_id}/votes/user-list` endpoint (bare Discord
+  snowflakes, no auth needed) which had no frontend consumer before this.
+  Resolves the first 12 voters to a username/avatar via `users.getUser`
+  (`Promise.allSettled`, falls back to the raw ID if resolution fails for
+  any one voter) with a "+N more" tail count from a real paginated total.
+- A staff "Applications" review page (`/admin/applications`) for the 7
+  positions registered in Popplio's `/apps` system (certification,
+  partnership, server certification, staff, ban appeals, etc.) — the
+  `PATCH /staff/apps/{id}` approve/deny endpoint had no staff-facing UI
+  anywhere before this, not even in Arcadia as far as this workspace can
+  tell. Required adding a new Arcadia RPC wrapper,
+  `arcadia.popplioStaff()` (`src/lib/arcadia/client.ts`), mirroring
+  Popplio's own `popplioStaff` proxy action
+  (`popplio/arcadia/panel/ops_proxy.go`) that relays a request into
+  Popplio's legacy-header-gated `/staff/*` API and returns its status/body
+  verbatim — this wasn't hand-ported into Omniplex's Arcadia client until
+  now, so nothing could reach `/staff/apps*` at all despite the backend
+  bridge already existing. Approve/deny is otherwise fully
+  server-side-driven (grants/unbans happen inside Popplio's own handler);
+  the page only submits `{approved, reason}` and refetches.
+- A self-hosted Legal hub at `/legal`, replacing the Footer's links out to
+  `nodebyte.co.uk/legal/*`. Four documents written fresh for what Omniplex
+  actually does rather than adapted from the parent brand's general-purpose
+  pages: Terms of Service, Privacy Policy, Acceptable Use (the single
+  authoritative version of conduct rules that were previously scattered
+  across a few KB articles), and a Service Agreement covering premium/shop
+  purchases and refunds. Same markdown+frontmatter pattern as the
+  Knowledge Base (`gray-matter`, rendered through the existing `Markdown`
+  component), but flat (`src/content/legal/*.md` → `/legal/[slug]`) since
+  there's no category nesting to model. Two KB articles
+  (`bots/rules.md`, `servers/listing-rules.md`) already linked to
+  `/legal/terms` as if it existed; that link now resolves instead of
+  404ing. Added to the sitemap alongside everything else.
+- The Friday-Sunday double-vote weekend bonus is now actually visible:
+  `VoteButton`/`ServerVoteButton` show a "Double-vote weekend" banner
+  above the vote buttons when it's live and the entity isn't premium
+  (premium already gets a flat shorter cooldown instead). The bonus check
+  now reads UTC (`getUTCDay()`) rather than the viewer's local day, to
+  match Popplio's now-explicit UTC pinning (see Popplio's changelog) —
+  previously the local-time check could disagree with the server near a
+  day boundary depending on the viewer's timezone. Voting Rules also now
+  states the boundary is UTC, not just "Friday through Sunday".
+- Premium and Shop now work for servers, matching bots (backend change,
+  see Popplio's changelog for the full breakdown — servers previously had
+  a `premium` field and a "Certified" badge with no way to actually earn
+  either):
+  - `/premium` and `/shop` both gained a Bot/Server toggle; picking Server
+    lists servers from your teams instead of your own bots, and every
+    checkout/purchase call now sends the target type through.
+  - `ServerCard`, the server detail page, and the dashboard's server
+    cards all get the same Supporter badge / Vote Blitz banner / Upgrade
+    + Shop buttons bots already had.
+  - `/apps` gained a "Server Certification" position alongside the
+    existing bot one.
+- Certification requirements got more lenient and multi-metric instead of
+  a strict two-thresholds-at-once bar (see Popplio's changelog) —
+  Certification and Partner Requirements in the Knowledge Base rewritten
+  to match, and to note certification now covers servers too.
+- Knowledge Base coverage for everything shipped this cycle that had none:
+  three new categories — **Account** (Alerts & Push Notifications, Vote
+  Reminders), **Premium & Shop** (Premium Plans & Checkout, Vote Credits &
+  the Shop), **Support** (Support Tickets) — plus a new **How to Apply**
+  article in Programs covering the `/apps` mechanics that Certification
+  and Partnership used to each describe informally. Also fixed three
+  articles that had gone stale from earlier work this cycle:
+  Partnership's "How to apply" still pointed at Discord instead of the
+  in-app form, Voting Rules' "Vote credits" section predated the Shop and
+  called credits opt-in (they're not), and Getting Started's pack step
+  only described bot packs, not the server/emoji pack types packs have
+  supported for a while.
+- Home page rebalanced toward servers, which previously only got one
+  section (Top Servers) against four bot-only ones:
+  - The hero headline now rotates through "bots" / "servers" / "packs"
+    (`RotatingWord`, crossfades in place with no layout shift, extra
+    words are a one-line addition later) instead of hardcoding "bots".
+  - `HomeTabs` gained a Bots/Servers toggle alongside its existing
+    Top Voted/New/Most Viewed tabs, using server index data
+    (`servers.getIndex()`) that was already being fetched but mostly
+    unused.
+  - Certified and Premium sections (previously bot-only, with servers'
+    certified/premium data fetched but never shown) are now a single
+    "Spotlight" block using the same toggle, replacing three separate
+    sections with one.
+  - The standalone "Top Servers" section was removed since the Bots/
+    Servers toggle on the main tabs now covers the same ground.
+  - The main tabs gained a "Random" tab backed by Popplio's `/bots/@random`
+    and `/servers/@random` (both existed already; `bots.getRandom()` was
+    even already written but never called anywhere, and there was no
+    `servers.getRandom()` at all until now). Re-rolls client-side on every
+    visit to the tab, with a manual shuffle button to draw again.
+  - The home page's "Packs" section (renamed from "Bot Packs", since packs
+    have supported bot/server/emoji for a while) and the Featured Bots
+    section were showing only 6 cards despite Popplio returning up to
+    9/12 — now show 9, matching the Top Voted/Certified/Premium tabs,
+    which were already at 9 on both ends.
+
+- Moderation Transparency page now shows a bot review pipeline (Approved /
+  Certified / Awaiting Review / Denied) alongside the existing report
+  counts. Popplio's `/list/stats` gained `total_pending_bots` and
+  `total_denied_bots` to back it — everything else on the page was already
+  public data, this just closes the last gap.
+- The "Bots" stat on the home page and the "Listed Bots" / "Total
+  Submitted" stats on the About page now consistently read `total_bots` —
+  every bot ever submitted, not just the approved ones — so the same
+  number shows everywhere instead of quietly differing by page.
+- Applications — staff, dev team, partnerships, and certification have had
+  a full submit-and-review pipeline in Popplio that nothing in Omniplex
+  ever surfaced. New frontend-only surface:
+  - `/apps` lists open positions pulled live from Popplio (tags, a short
+    teaser, closed/open state).
+  - `/apps/[id]` renders each position's full description and a form built
+    dynamically from its question set (short answers vs. long-form,
+    matching the backend's own length rules so validation errors are rare
+    by the time it hits the server).
+  - A new "Applications" tab on the dashboard lists everything a user has
+    submitted, with state (Pending/Approved/Denied) and any staff feedback
+    once reviewed.
+- Premium Popplio's Stripe/PayPal checkout and booster-offer redemption
+  have been fully wired backend-side with nothing in Omniplex to start a
+  purchase. New:
+  - `/premium` lists the Bronze/Silver/Gold plans, lets you pick one of
+    your own approved/certified, not-yet-premium bots, and pay with card
+    (Stripe Checkout) or PayPal — both just redirect to the provider's
+    hosted checkout, no card data ever touches Omniplex. Server boosters
+    get an extra "redeem free" option on the Bronze plan.
+  - `/payments/success` and `/payments/cancelled` — Popplio's Stripe and
+    PayPal flows redirect back to these by hardcoded URL, so they had to
+    exist for checkout to complete at all.
+  - An "Upgrade" button on eligible bots in the dashboard's Bots tab links
+    straight into `/premium` with the bot preselected.
+- Shop — votes on a bot have always converted into a spendable credit
+  balance in Popplio, but there was never anything to spend them on. Now
+  there is, backed by five new Popplio-side effects (see Popplio's
+  changelog for the full list — bonus premium days, a priority-placement
+  boost, a featured homepage slot, a cosmetic Supporter badge, and a
+  vote-cooldown-halving blitz):
+  - `/shop` — pick one of your bots, see its available credits, convert
+    unredeemed votes into credits, and buy any item its balance covers.
+  - A "Featured Bots" section on the home page and a "Supporter" badge on
+    bot cards/pages now show the two benefits that have a visible effect
+    beyond stats you'd have to go looking for; a Vote Blitz banner appears
+    on a bot's page while one is active.
+  - A "Shop" button next to "Upgrade" on every bot in the dashboard's
+    Bots tab.
+
+- Alerts & push notifications — Popplio has had a complete notification
+  pipeline (per-user alert inbox, VAPID web push subscribe/unsubscribe,
+  a live cron firing real push notifications when a vote reminder comes
+  due) that Omniplex never consumed until now. No backend changes needed,
+  this is entirely new frontend surface:
+  - A bell icon in the header (signed-in only) opens a dropdown showing
+    recent alerts (`GET /users/{id}/alerts/@featured`), each dismissible
+    individually or via "Mark all read", with an unread-count badge.
+  - `usePushNotifications` (new hook) handles the actual browser
+    subscribe flow: registers `public/sw.js` (a minimal, dependency-free
+    service worker — push/notificationclick handlers only, deliberately
+    outside the Next.js build pipeline), requests notification
+    permission, fetches the VAPID public key
+    (`GET /users/notifications/info`), and posts the resulting
+    `PushSubscription` to Popplio. Surfaced as an Enable/Disable toggle
+    inside the bell dropdown, with a plain "not supported" state for
+    browsers without Push API support.
+  - `ReminderToggle` (new component, generic over bot/server) on bot and
+    server detail pages next to the report button — "remind me to vote
+    for this again," backed by Popplio's existing reminders API, checks
+    current state on mount so it renders correctly whether or not a
+    reminder already exists.
+  - `Dropdown` gained an optional `panelClassName` prop (defaults to the
+    existing `w-44`) so the alert panel isn't squeezed into a menu-width
+    box.
+- `/shop` now shows purchase history — the endpoint and API resource
+  existed from the original build but were never actually rendered
+  anywhere.
+- Support Tickets — Popplio gained a full standalone ticket system (see
+  its own changelog), surfaced here as `/tickets` (your open/closed
+  tickets), `/tickets/new` (topic picker + subject + message form), and
+  `/tickets/[id]` (thread view — reply while open, close any time, reopen
+  if you're staff).
+- A round of visual consistency work:
+  - `BotCard`/`ServerCard` now get a subtle accent-tinted gradient
+    background and border when premium, certified, or (bots only)
+    Supporter-badged, instead of blending into the same plain gray border
+    as every other card.
+  - The home page's Featured and Spotlight sections got a matching
+    accent-tinted band background, since they're literally the paid/
+    hand-picked real estate on the page.
+  - `OmniplexLogo`'s brand-accent shape now fills with `var(--accent)`
+    instead of a hardcoded `#4943cb`, so the logo itself follows whatever
+    accent color a user has picked in Customize.
+  - `HomeTabs` and `/search`'s tag filter chips now use the same
+    `bg-accent/10 text-accent` / `bg-accent text-accent-fg` active-state
+    styling the rest of the app (`/bots`'s Newest/Trending toggle, the
+    dashboard's tab bar) already used — both were quietly still on plain
+    black/white or gray.
+  - `HomeTabs`' tab strip and its Bots/Servers toggle no longer wrap onto
+    a second row on narrow screens; the tab strip scrolls horizontally
+    inside its own flexible region instead, with the toggle pinned to the
+    right on the same line.
+  - The hero's rotating word (`RotatingWord`) no longer stacks onto its
+    own line for longer words like "servers"/"packs" — it stays inline
+    with "Discover the best Discord" the way the static "bots" text
+    always did.
+- `/search`'s query box now nudges toward `/premium`, `/shop`, `/apps`,
+  or `/tickets` when the search text looks like it's after one of those —
+  Popplio's search index only ever covers bots/servers (confirmed in
+  `types/search.go`), so a query for "premium" or "ticket" would
+  otherwise just come back with an empty/irrelevant result set instead of
+  pointing anywhere useful.
+
+### Fixed
+
+- `PackCard`'s avatar stack (bot and server packs alike) read
+  `bot.user.avatar`/`server.avatar` directly instead of going through
+  `mirroredAvatarUrl` like every other avatar in the app — some of those
+  raw URLs 403 through the CDN mirror's stale-URL handling, which is why
+  a pack with 4+ real bots could show fewer real avatars than expected in
+  its card preview while the pack's own detail page rendered them all
+  fine (it already went through `BotCard`/`ServerCard`, which never had
+  this bug).
+
 ## [0.1.2] - 2026-08-14
 
 ### Added

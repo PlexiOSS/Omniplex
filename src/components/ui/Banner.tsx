@@ -25,7 +25,7 @@ export function Banner({ src, alt, className = "" }: BannerProps) {
   return (
     <div
       className={[
-        "relative overflow-hidden bg-gradient-to-br from-accent/30 via-accent/10 to-transparent dark:from-accent/25 dark:via-accent/10",
+        "relative overflow-hidden bg-linear-to-br from-accent/30 via-accent/10 to-transparent dark:from-accent/25 dark:via-accent/10",
         className,
       ].join(" ")}
     >

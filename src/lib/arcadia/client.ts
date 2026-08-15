@@ -7,9 +7,10 @@ import type {
   Hello,
   MfaLogin,
   PartialEntity,
-  Partners,
   PartnerAction,
+  Partners,
   PlatformUser,
+  PopplioStaffQuery,
   Report,
   ReportAction,
   ReportStatus,
@@ -474,6 +475,43 @@ export const arcadia = {
       });
       await assertOk(res);
     },
+  },
+
+  /** Relays a request into Popplio's own /staff/* API — see PopplioStaffQuery's
+   * doc comment. Popplio's own status code and body come back verbatim, so a
+   * non-2xx here means Popplio itself rejected the request (bad input, missing
+   * permission), not a broken Arcadia session — don't treat it as ArcadiaError's
+   * usual "session dead" cases. Body is parsed as JSON when present; Popplio's
+   * 204 responses (e.g. a successful review) come back as an empty string. */
+  popplioStaff: async <T>(
+    loginToken: string,
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<{ status: number; json: T | null }> => {
+    const res = await postQuery({
+      PopplioStaff: {
+        login_token: loginToken,
+        method,
+        path,
+        body: body !== undefined ? JSON.stringify(body) : "",
+      } satisfies PopplioStaffQuery,
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      // Popplio's error bodies are consistently { message, context } JSON —
+      // same ApiErrorBody shape the normal client.ts unwraps. Fall back to
+      // the raw text if it isn't JSON (an upstream 502/proxy failure, etc).
+      let message = text || res.statusText;
+      try {
+        const parsed = JSON.parse(text) as { message?: string };
+        if (parsed.message) message = parsed.message;
+      } catch {
+        // not JSON, use the raw text as-is
+      }
+      throw new ArcadiaError(message, res.status);
+    }
+    return { status: res.status, json: text ? (JSON.parse(text) as T) : null };
   },
 
   reports: {

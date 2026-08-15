@@ -12,7 +12,7 @@ function draftKey(formKey: string, userId: string): string {
 /**
  * Persists a form's draft state to `localStorage`, scoped to the signed-in
  * user, so an in-progress submission survives not just a page refresh but a
- * full browser closure — `sessionStorage` only covers the former.
+ * full browser closure `sessionStorage` only covers the former.
  *
  * Namespaced per user (`omniplex:draft:{formKey}:{userId}`), unlike the
  * legacy site's single global `localStorage['value']` key, which leaked one

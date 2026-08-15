@@ -8,10 +8,10 @@ const FOOTER_LINKS = [
   {
     heading: "Discover",
     links: [
-      { href: "/bots", label: "All Bots" },
-      { href: "/servers", label: "All Servers" },
-      { href: "/packs", label: "All Packs" },
-      { href: '/search', label: 'Discovery' },
+      { href: "/bots", label: "View Bots" },
+      { href: "/servers", label: "View Servers" },
+      { href: "/packs", label: "View Packs" },
+      { href: '/emojis', label: 'View Emojis' },
     ],
   },
   {
@@ -35,13 +35,10 @@ const FOOTER_LINKS = [
   {
     heading: "Legal",
     links: [
-      { href: "https://nodebyte.co.uk/legal", label: "All Policies" },
-      {
-        href: "https://nodebyte.co.uk/legal/service-agreement",
-        label: "Service Agreement",
-      },
-      { href: "https://nodebyte.co.uk/legal/terms", label: "Terms of Service" },
-      { href: "https://nodebyte.co.uk/legal/privacy", label: "Privacy Policy" },
+      { href: "/legal", label: "All Policies" },
+      { href: "/legal/service-agreement", label: "Service Agreement" },
+      { href: "/legal/terms", label: "Terms of Service" },
+      { href: "/legal/privacy", label: "Privacy Policy" },
     ],
   },
 ];

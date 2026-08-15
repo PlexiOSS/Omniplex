@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { TagPicker } from "@/components/ui/TagPicker";
-import { bots } from "@/lib/api";
+import { bots, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Bot, Link } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
@@ -99,6 +99,7 @@ function BotEditForm({
     captchaOptOut: bot.captcha_opt_out,
   });
   const [links, setLinks] = useState<Link[]>(bot.extra_links ?? []);
+  const [vanityCode, setVanityCode] = useState(bot.vanity);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -145,6 +146,23 @@ function BotEditForm({
         },
         token,
       );
+
+      const trimmedVanity = vanityCode.trim();
+      if (trimmedVanity && trimmedVanity !== bot.vanity) {
+        try {
+          await vanity.update("bot", bot.bot_id, trimmedVanity, token);
+        } catch (err) {
+          onSaved();
+          setError(
+            err instanceof ApiError
+              ? `Description saved, but the vanity URL couldn't be changed: ${err.message}`
+              : "Description saved, but the vanity URL couldn't be changed.",
+          );
+          setSaving(false);
+          return;
+        }
+      }
+
       onSaved();
       onClose();
     } catch (err) {
@@ -209,6 +227,13 @@ function BotEditForm({
           required
         />
       </div>
+
+      <Input
+        id="edit-vanity"
+        label="Vanity URL"
+        value={vanityCode}
+        onChange={(e) => setVanityCode(e.target.value)}
+      />
 
       <Input
         id="edit-invite"

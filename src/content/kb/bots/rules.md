@@ -4,7 +4,7 @@ description: The rules that all bots on Omniplex must follow.
 order: 1
 ---
 
-Keep in mind that all of the rules below are just general guidelines — we may offer exemptions or extra restrictions on a case-by-case basis.
+Keep in mind that all of the rules below are just general guidelines — we may offer exemptions or extra restrictions on a case-by-case basis. General conduct rules that apply beyond just bot listings are covered in our [Acceptable Use policy](/legal/acceptable-use).
 
 1. Abide by [Omniplex's Terms of Service](/legal/terms), [Discord's Terms of Service](https://discord.com/terms), [Discord's API rate limits](https://discord.com/developers/docs/topics/rate-limits), and [Discord's Developer Policies](https://discord.com/developers/docs/policies-and-agreements/developer-policy).
 2. Must be online during review as well as public and invitable.

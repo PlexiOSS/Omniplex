@@ -1,6 +1,7 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { BotCard } from "@/components/cards/BotCard";
@@ -14,6 +15,46 @@ import { BotCardSkeleton } from "@/components/ui/Skeleton";
 import { useSearch } from "@/hooks/useSearch";
 import { bots, servers } from "@/lib/api";
 import type { IndexBot, IndexServer, PagedResult } from "@/lib/api/types";
+
+/**
+ * Popplio's search index only ever covers bots/servers (types/search.go's
+ * TargetTypes is hardcoded to those two) — there's no backend support for
+ * indexing Apps/Premium/Shop/Tickets content. Rather than fake a "search"
+ * that doesn't exist, a query that looks like it's after one of those
+ * surfaces just gets a one-line nudge toward the real page alongside
+ * whatever bot/server results did come back.
+ */
+const QUICK_LINKS: {
+  keywords: string[];
+  href: string;
+  label: string;
+  description: string;
+}[] = [
+  {
+    keywords: ["premium", "upgrade", "subscription", "plan", "paypal", "stripe"],
+    href: "/premium",
+    label: "Premium",
+    description: "Buy premium for one of your bots — card, PayPal, or vote credits.",
+  },
+  {
+    keywords: ["shop", "credit", "boost", "featured", "badge", "blitz"],
+    href: "/shop",
+    label: "Shop",
+    description: "Spend a bot's earned vote credits on boosts, badges, and more.",
+  },
+  {
+    keywords: ["apply", "application", "staff team", "dev team", "partner", "certification"],
+    href: "/apps",
+    label: "Apply",
+    description: "Staff, dev team, partnership, and certification applications.",
+  },
+  {
+    keywords: ["ticket", "support", "help", "issue", "bug", "problem"],
+    href: "/tickets",
+    label: "Support Tickets",
+    description: "Get help from staff with your account, a payment, or a listing.",
+  },
+];
 
 const AVAILABLE_TAGS = [
   "Auto-Mod",
@@ -107,6 +148,14 @@ function SearchPageInner() {
   );
   const totalResults = resultBots.length + resultServers.length;
 
+  const matchedQuickLinks = hasResults
+    ? QUICK_LINKS.filter((link) =>
+        link.keywords.some((k) =>
+          (query.query ?? "").toLowerCase().includes(k),
+        ),
+      )
+    : [];
+
   return (
     <Container className="py-10">
       <div className="mb-8">
@@ -145,7 +194,7 @@ function SearchPageInner() {
                 className={[
                   "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                   active
-                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                    ? "bg-accent text-accent-fg"
                     : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700",
                 ].join(" ")}
               >
@@ -155,6 +204,32 @@ function SearchPageInner() {
           })}
         </div>
       </form>
+
+      {/* Quick links — bots/servers are the only thing actually indexed by
+          search, so a query that looks like it's after something else (a
+          plan, the shop, applications, tickets) gets pointed at the real
+          page instead of just coming back empty. */}
+      {matchedQuickLinks.length > 0 && (
+        <div className="mt-6 space-y-2">
+          {matchedQuickLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex items-center justify-between gap-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 transition-colors hover:border-accent/40"
+            >
+              <div>
+                <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                  Looking for {link.label}?
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {link.description}
+                </p>
+              </div>
+              <ArrowRight size={16} className="shrink-0 text-accent" />
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Results */}
       {isLoading ? (

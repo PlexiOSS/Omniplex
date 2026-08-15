@@ -5,6 +5,7 @@ import {
   MousePointerClick,
   Server,
   Star,
+  Zap,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -12,15 +13,21 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Markdown } from "@/components/markdown/Markdown";
+import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { VoterList } from "@/components/votes/VoterList";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { bannerUrl, mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  teamAvatarUrl,
+} from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
@@ -76,9 +83,18 @@ export default async function BotPage({ params }: Props) {
       `https://cdn.discordapp.com/embed/avatars/${Number(bot.bot_id) % 5}.png`,
   );
 
+  const voteBlitzActive =
+    !!bot.vote_blitz_until && new Date(bot.vote_blitz_until) > new Date();
+
   const actionsCard = (
     <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
       <div className="flex flex-col gap-2">
+        {voteBlitzActive && (
+          <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
+            <Zap size={12} />
+            Vote Blitz active — cooldown is halved right now
+          </div>
+        )}
         {bot.invite && (
           <a
             href={bot.invite}
@@ -136,6 +152,7 @@ export default async function BotPage({ params }: Props) {
                 {bot.type === "certified" && (
                   <Badge variant="success">Certified</Badge>
                 )}
+                {bot.supporter_badge && <Badge variant="info">Supporter</Badge>}
                 {bot.nsfw && <Badge variant="danger">NSFW</Badge>}
               </div>
               <p className="mt-1 text-zinc-500 dark:text-zinc-400">
@@ -156,8 +173,13 @@ export default async function BotPage({ params }: Props) {
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
           <div className="mt-5 lg:hidden">{actionsCard}</div>
 
-          <div className="mt-3">
-            <ReportModal targetType="bot" targetId={bot.bot_id} targetLabel="bot" />
+          <div className="mt-3 flex items-center gap-4">
+            <ReportModal
+              targetType="bot"
+              targetId={bot.bot_id}
+              targetLabel="bot"
+            />
+            <ReminderToggle targetType="bot" targetId={bot.bot_id} />
           </div>
 
           {/* Long description */}
@@ -182,6 +204,8 @@ export default async function BotPage({ params }: Props) {
             targetId={bot.bot_id}
             initialReviews={reviewList.reviews}
           />
+
+          <VoterList targetType="bot" targetId={bot.bot_id} />
         </div>
 
         {/* Sidebar */}

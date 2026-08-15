@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BarChart2,
   Bot,
+  ClipboardList,
   GitBranch,
   Globe,
   KeyRound,
@@ -13,6 +14,9 @@ import {
   Pencil,
   Plus,
   Server as ServerIcon,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
   Trash2,
   User,
   Users,
@@ -29,6 +33,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { bots, users } from "@/lib/api";
@@ -43,8 +48,10 @@ import type {
 import { hasAnyPermString, hasPermString } from "@/lib/permissions";
 import { mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
+import { ApplicationsTab } from "./ApplicationsTab";
 import { BotEditModal } from "./BotEditModal";
 import { PacksTab } from "./PacksTab";
+import { SecurityTab } from "./SecurityTab";
 import { ServerEditModal } from "./ServerEditModal";
 import { BotStatsModal, ServerStatsModal } from "./StatsModal";
 import { TokenModal } from "./TokenModal";
@@ -57,8 +64,10 @@ type Tab =
   | "bots"
   | "servers"
   | "packs"
+  | "applications"
   | "teams"
-  | "tokens";
+  | "tokens"
+  | "security";
 
 const BOT_STATUS: Record<
   BotType,
@@ -471,6 +480,21 @@ function BotItem({
               Edit
             </Button>
           )}
+          {!bot.premium &&
+            (bot.type === "approved" || bot.type === "certified") && (
+              <Link href={`/premium?bot=${bot.bot_id}`}>
+                <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
+                  <Sparkles size={12} />
+                  Upgrade
+                </Button>
+              </Link>
+            )}
+          <Link href={`/shop?bot=${bot.bot_id}`}>
+            <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
+              <ShoppingBag size={12} />
+              Shop
+            </Button>
+          </Link>
           <Dropdown
             open={menuOpen}
             onClose={() => setMenuOpen(false)}
@@ -804,6 +828,21 @@ function ServerItem({
               Edit
             </Button>
           )}
+          {!server.premium &&
+            (server.type === "approved" || server.type === "certified") && (
+              <Link href={`/premium?server=${server.server_id}`}>
+                <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
+                  <Sparkles size={12} />
+                  Upgrade
+                </Button>
+              </Link>
+            )}
+          <Link href={`/shop?server=${server.server_id}`}>
+            <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
+              <ShoppingBag size={12} />
+              Shop
+            </Button>
+          </Link>
           <Dropdown
             open={menuOpen}
             onClose={() => setMenuOpen(false)}
@@ -1020,8 +1059,10 @@ const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "bots", label: "Bots", icon: Bot },
   { key: "servers", label: "Servers", icon: ServerIcon },
   { key: "packs", label: "Packs", icon: Package },
+  { key: "applications", label: "Applications", icon: ClipboardList },
   { key: "teams", label: "Teams", icon: Users },
   { key: "tokens", label: "API Tokens", icon: KeyRound },
+  { key: "security", label: "Security", icon: ShieldCheck },
 ];
 
 export default function DashboardPage() {
@@ -1036,6 +1077,7 @@ export default function DashboardPage() {
   }, [authLoading, isAuthenticated, router]);
 
   const { me, loading: meLoading, mutate } = useMe(session);
+  const { apps: myApplications } = useMyApplications(session);
 
   if (authLoading || meLoading || !session) {
     return <DashboardSkeleton />;
@@ -1142,9 +1184,11 @@ export default function DashboardPage() {
                   ? teamServers.length
                   : key === "packs"
                     ? normalizedMe.user_packs.length
-                    : key === "teams"
-                      ? normalizedMe.user_teams.length
-                      : null;
+                    : key === "applications"
+                      ? myApplications.length
+                      : key === "teams"
+                        ? normalizedMe.user_teams.length
+                        : null;
             return (
               <button
                 key={key}
@@ -1206,6 +1250,7 @@ export default function DashboardPage() {
           mutate={mutate}
         />
       )}
+      {tab === "applications" && <ApplicationsTab apps={myApplications} />}
       {tab === "teams" && <TeamsTab teams={normalizedMe.user_teams} />}
       {tab === "tokens" && (
         <div className="max-w-2xl">
@@ -1222,6 +1267,13 @@ export default function DashboardPage() {
             isSelf
           />
         </div>
+      )}
+      {tab === "security" && (
+        <SecurityTab
+          userId={session.user_id}
+          username={username}
+          token={session.token}
+        />
       )}
     </Container>
   );

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { TagPicker } from "@/components/ui/TagPicker";
-import { servers } from "@/lib/api";
+import { servers, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Link, Server, ServerState } from "@/lib/api/types";
 import { SERVER_TAGS } from "@/lib/constants/tags";
@@ -105,6 +106,7 @@ function ServerEditForm({
     showEmojis: server.show_emojis,
   });
   const [links, setLinks] = useState<Link[]>(server.extra_links ?? []);
+  const [vanityCode, setVanityCode] = useState(server.vanity);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -154,6 +156,23 @@ function ServerEditForm({
         },
         token,
       );
+
+      const trimmedVanity = vanityCode.trim();
+      if (trimmedVanity && trimmedVanity !== server.vanity) {
+        try {
+          await vanity.update("server", server.server_id, trimmedVanity, token);
+        } catch (err) {
+          onSaved();
+          setError(
+            err instanceof ApiError
+              ? `Description saved, but the vanity URL couldn't be changed: ${err.message}`
+              : "Description saved, but the vanity URL couldn't be changed.",
+          );
+          setSaving(false);
+          return;
+        }
+      }
+
       onSaved();
       onClose();
     } catch (err) {
@@ -218,6 +237,13 @@ function ServerEditForm({
           required
         />
       </div>
+
+      <Input
+        id="edit-server-vanity"
+        label="Vanity URL"
+        value={vanityCode}
+        onChange={(e) => setVanityCode(e.target.value)}
+      />
 
       <div className="flex flex-col gap-1.5">
         <label

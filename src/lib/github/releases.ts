@@ -16,15 +16,10 @@ export interface GithubRelease {
   };
 }
 
-/** A GithubRelease tagged with which configured repo it came from. */
 export interface ChangelogEntry extends GithubRelease {
   source: ChangelogRepo;
 }
 
-// Optional — set on the server to raise GitHub's unauthenticated rate limit
-// (60 req/hr per IP, shared across every visitor hitting this same server)
-// up to 5000 req/hr. A public-repo read-only token is enough; never expose
-// this as NEXT_PUBLIC_*.
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN ?? "";
 
 async function fetchReleases(source: ChangelogRepo): Promise<ChangelogEntry[]> {
@@ -36,10 +31,6 @@ async function fetchReleases(source: ChangelogRepo): Promise<ChangelogEntry[]> {
         "X-GitHub-Api-Version": "2022-11-28",
         ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
       },
-      // Releases are cut infrequently — a short revalidate window keeps the
-      // page fast and avoids hammering GitHub's rate limit on every request,
-      // without going as far as force-cache (which would need a deploy to
-      // ever pick up a new release).
       next: { revalidate: 900 },
     },
   );
@@ -56,11 +47,6 @@ async function fetchReleases(source: ChangelogRepo): Promise<ChangelogEntry[]> {
     .map((r) => ({ ...r, source }));
 }
 
-/**
- * Fetches releases for every configured repo (see CHANGELOG_REPOS) and
- * merges them into one reverse-chronological timeline. A single repo's
- * fetch failing doesn't take down the whole page — it's just omitted.
- */
 export async function getChangelogEntries(): Promise<ChangelogEntry[]> {
   const results = await Promise.allSettled(
     CHANGELOG_REPOS.map(fetchReleases),
