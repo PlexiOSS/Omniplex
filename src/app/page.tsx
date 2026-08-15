@@ -3,12 +3,12 @@ import { ArrowRight, BookOpen, Handshake } from "lucide-react";
 import { bots, servers, list, blogs } from "@/lib/api";
 import type { Blog, ListStats, PartnerList } from "@/lib/api/types";
 import { BotCard } from "@/components/cards/BotCard";
-import { ServerCard } from "@/components/cards/ServerCard";
 import { PackCard } from "@/components/cards/PackCard";
 import { SearchBar } from "@/components/search/SearchBar";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { HomeTabs } from "@/components/home/HomeTabs";
+import { RotatingWord } from "@/components/home/RotatingWord";
 import { StatsBar } from "@/components/home/StatsBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -43,15 +43,43 @@ export default async function HomePage() {
   }
 
   const tabs = [
-    { key: "top_voted", label: "Top Voted", bots: botIndex?.top_voted ?? [] },
-    { key: "recently_added", label: "New", bots: botIndex?.recently_added ?? [] },
-    { key: "most_viewed", label: "Most Viewed", bots: botIndex?.most_viewed ?? [] },
-  ].filter((t) => t.bots.length > 0);
+    {
+      key: "top_voted",
+      label: "Top Voted",
+      bots: botIndex?.top_voted ?? [],
+      servers: serverIndex?.top_voted ?? [],
+    },
+    {
+      key: "most_viewed",
+      label: "Most Viewed",
+      bots: botIndex?.most_viewed ?? [],
+      servers: serverIndex?.most_viewed ?? [],
+    },
+    {
+      key: "recently_added",
+      label: "New",
+      bots: botIndex?.recently_added ?? [],
+      servers: serverIndex?.recently_added ?? [],
+    },
+  ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
-  const certified = botIndex?.certified ?? [];
-  const premium = botIndex?.premium ?? [];
+  const spotlightTabs = [
+    {
+      key: "certified",
+      label: "Certified",
+      bots: botIndex?.certified ?? [],
+      servers: serverIndex?.certified ?? [],
+    },
+    {
+      key: "premium",
+      label: "Premium",
+      bots: botIndex?.premium ?? [],
+      servers: serverIndex?.premium ?? [],
+    },
+  ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
+
+  const featured = botIndex?.featured ?? [];
   const packs = botIndex?.packs ?? [];
-  const topServers = serverIndex?.top_voted ?? [];
   const recentPosts = (blogData?.posts ?? []).filter((p) => !p.draft).slice(0, 3);
   const partners = partnerList?.partners ?? [];
 
@@ -60,10 +88,10 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="border-b border-zinc-200 bg-zinc-50 py-20 dark:border-zinc-800 dark:bg-zinc-900/50">
         <Container>
-          <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
-              Discover the <span className="text-accent">best</span> Discord
-              bots
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl sm:whitespace-nowrap dark:text-zinc-50">
+              Discover the <span className="text-accent">best</span> Discord{" "}
+              <RotatingWord words={["bots", "servers", "packs"]} className="text-accent" />
             </h1>
             <p className="mt-4 text-lg text-zinc-500 dark:text-zinc-400">
               Explore thousands of bots and servers. Vote, review, and find
@@ -86,84 +114,62 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* Stats bar */}
-      {stats && <StatsBar stats={stats} />}
+      {/* Featured bots (purchased homepage slot) */}
+      {featured.length > 0 && (
+        <section className="border-b border-accent/10 bg-linear-to-b from-accent/6 to-transparent py-14 dark:border-accent/10 dark:from-accent/8">
+          <Container>
+            <SectionHeader
+              title="Featured Bots"
+              subtitle="Spotlighted by their owners through the shop"
+              href="/bots"
+            />
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.slice(0, 9).map((bot) => (
+                <BotCard key={bot.bot_id} bot={bot} />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Main tabbed bot grid */}
       {tabs.length > 0 && (
         <section className="py-14">
           <Container>
-            <HomeTabs tabs={tabs} />
+            <HomeTabs tabs={tabs} showRandom />
           </Container>
         </section>
       )}
 
-      {/* Bot packs */}
+      {/* Spotlight: certified & premium, bots and servers */}
+      {spotlightTabs.length > 0 && (
+        <section className="border-t border-accent/10 bg-linear-to-b from-accent/6 to-transparent py-14 dark:border-accent/10 dark:from-accent/8">
+          <Container>
+            <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+              Spotlight
+            </h2>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              Hand-picked and premium listings, bots and servers alike
+            </p>
+            <div className="mt-6">
+              <HomeTabs tabs={spotlightTabs} />
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* Packs (bot, server, or emoji) */}
       {packs.length > 0 && (
         <section className="border-t border-zinc-200 py-14 dark:border-zinc-800">
           <Container>
             <SectionHeader
-              title="Bot Packs"
-              subtitle="Curated collections of bots that work great together"
+              title="Packs"
+              subtitle="Curated collections of bots, servers, and emojis"
               href="/packs"
             />
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {packs.slice(0, 6).map((pack) => (
+              {packs.slice(0, 9).map((pack) => (
                 <PackCard key={pack.url} pack={pack} />
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* Certified bots */}
-      {certified.length > 0 && (
-        <section className="border-t border-zinc-200 py-14 dark:border-zinc-800">
-          <Container>
-            <SectionHeader
-              title="Certified Bots"
-              subtitle="Hand-picked by our team for quality and reliability"
-              href="/bots"
-            />
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {certified.slice(0, 6).map((bot) => (
-                <BotCard key={bot.bot_id} bot={bot} />
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* Premium bots */}
-      {premium.length > 0 && (
-        <section className="border-t border-zinc-200 py-14 dark:border-zinc-800">
-          <Container>
-            <SectionHeader
-              title="Premium Bots"
-              subtitle="Enhanced features, priority support, and more"
-              href="/bots"
-            />
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {premium.slice(0, 6).map((bot) => (
-                <BotCard key={bot.bot_id} bot={bot} />
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* Top servers */}
-      {topServers.length > 0 && (
-        <section className="border-t border-zinc-200 py-14 dark:border-zinc-800">
-          <Container>
-            <SectionHeader
-              title="Top Servers"
-              subtitle="Popular Discord communities to join today"
-              href="/servers"
-            />
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {topServers.slice(0, 6).map((server) => (
-                <ServerCard key={server.server_id} server={server} />
               ))}
             </div>
           </Container>
@@ -269,8 +275,7 @@ export default async function HomePage() {
 
       {/* Empty state */}
       {tabs.length === 0 &&
-        certified.length === 0 &&
-        premium.length === 0 &&
+        spotlightTabs.length === 0 &&
         packs.length === 0 && (
           <section className="py-24">
             <Container>

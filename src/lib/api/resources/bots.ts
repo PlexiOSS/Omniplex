@@ -8,6 +8,7 @@ import type {
   ListIndexBot,
   PagedResult,
   PatchBotTeamPayload,
+  RandomBots,
   UserVote,
 } from "../types";
 
@@ -24,7 +25,7 @@ export const botsResource = {
     ),
 
   getRandom: () =>
-    client.get<{ bots: IndexBot[] }>("/bots/@random", {
+    client.get<RandomBots>("/bots/@random", {
       cache: "no-store",
     }),
 

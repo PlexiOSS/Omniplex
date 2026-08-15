@@ -1,12 +1,13 @@
 "use client";
 
-import { LogOut, Menu, Plus, Settings2, Shield, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, Plus, Settings2, Shield, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SignInLink } from "@/components/ui/SignInLink";
@@ -43,17 +44,22 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/emojis", label: "Emojis" },
     ],
   },
-  { href: "/search", label: "Search" },
   {
     label: "Community",
     items: [
-      { href: "/blog", label: "Blog" },
+      { href: "/apps", label: "Apply" },
+      { href: "/about", label: "About Us" },
+      { href: "/blog", label: "Blog Posts" },
       { href: "/changelog", label: "Changelog" },
       { href: "/partners", label: "Partners" },
+      { href: "/kb", label: "Knowledge Base" },
       { href: "https://docs.omniplex.gg", label: "Documentation" },
-      { href: "/about", label: "About Us" },
+      { href: "/tickets", label: "Support Tickets" },
     ],
   },
+  { href: "/premium", label: "Premium" },
+  { href: "/shop", label: "Shop" },
+  { href: "/search", label: "Search" },
 ];
 
 const CREATE_LINKS = [
@@ -90,23 +96,17 @@ function isNavGroup(item: NavLink | NavGroup): item is NavGroup {
   return "items" in item;
 }
 
-/**
- * Header component that displays the navigation bar at the top of the page.
- * @returns {JSX.Element} The rendered header component.
- */
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { session, isAuthenticated, logout } = useAuth();
   const { isAuthenticated: isStaffAuthenticated, logout: staffLogout } =
     useArcadiaAuth();
-  // `me.staff` reflects real staff status regardless of whether this browser
-  // has an active Arcadia panel session yet — isStaffAuthenticated alone only
-  // tells us they've logged into /admin before, not whether they're staff.
   const { me } = useMe(session);
   const isStaff = me?.staff ?? false;
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
 
   const isAdminSection =
     pathname.startsWith("/admin") &&
@@ -127,6 +127,7 @@ export function Header() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is a trigger, not read in the body
   useEffect(() => {
     setMobileNavOpen(false);
+    setOpenMobileGroup(null);
   }, [pathname]);
 
   return (
@@ -253,6 +254,8 @@ export function Header() {
                 />
               </div>
 
+              <NotificationBell />
+
               <ThemeToggle />
 
               {isAuthenticated && session ? (
@@ -289,23 +292,48 @@ export function Header() {
               {links.map((item) =>
                 isNavGroup(item) ? (
                   <div key={item.label} className="pt-2 mt-2 border-t border-zinc-200 first:mt-0 first:border-0 first:pt-0 dark:border-zinc-800">
-                    <p className="px-3 pb-1 text-xs font-medium tracking-wide uppercase text-zinc-400 dark:text-zinc-600">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenMobileGroup((g) =>
+                          g === item.label ? null : item.label,
+                        )
+                      }
+                      className={[
+                        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        item.items.some((i) => isActiveLink(i.href))
+                          ? "text-accent"
+                          : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                      ].join(" ")}
+                      aria-expanded={openMobileGroup === item.label}
+                    >
                       {item.label}
-                    </p>
-                    {item.items.map((sub) => (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
+                      <ChevronDown
+                        size={14}
                         className={[
-                          "rounded-lg px-3 py-2 text-sm font-medium transition-colors block",
-                          isActiveLink(sub.href)
-                            ? "bg-accent/10 text-accent"
-                            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                          "transition-transform",
+                          openMobileGroup === item.label ? "rotate-180" : "",
                         ].join(" ")}
-                      >
-                        {sub.label}
-                      </Link>
-                    ))}
+                      />
+                    </button>
+                    {openMobileGroup === item.label && (
+                      <div className="pl-2">
+                        {item.items.map((sub) => (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className={[
+                              "rounded-lg px-3 py-2 text-sm font-medium transition-colors block",
+                              isActiveLink(sub.href)
+                                ? "bg-accent/10 text-accent"
+                                : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                            ].join(" ")}
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <Link

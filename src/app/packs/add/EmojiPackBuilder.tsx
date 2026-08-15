@@ -7,7 +7,7 @@ import type { PackEmojiInput } from "@/lib/api/types";
 import { packEmojiUrl } from "@/lib/utils/assets";
 
 const MAX_EMOJIS = 50;
-const MAX_BYTES = 256 * 1024; // Discord's own per-emoji cap, static and animated alike
+const MAX_BYTES = 256 * 1024;
 const ALLOWED_TYPES = new Set([
   "image/webp",
   "image/png",
@@ -16,8 +16,6 @@ const ALLOWED_TYPES = new Set([
 ]);
 
 interface EmojiPackBuilderProps {
-  /** The pack's not-yet-created URL — emoji uploads are keyed under it, so
-   * a URL must be chosen before any emoji can be uploaded. */
   packUrl: string;
   userId: string;
   token: string;

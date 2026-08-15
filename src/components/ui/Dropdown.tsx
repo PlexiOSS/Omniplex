@@ -9,6 +9,9 @@ interface DropdownProps {
   trigger: ReactNode;
   children: ReactNode;
   align?: "left" | "right";
+  /** Overrides the panel's default `w-44` sizing — for content wider than a
+   * simple item list (e.g. the notification bell's alert previews). */
+  panelClassName?: string;
 }
 
 /** Trigger + panel shell. Doesn't auto-close on item click — callers decide when, so a
@@ -19,6 +22,7 @@ export function Dropdown({
   trigger,
   children,
   align = "right",
+  panelClassName,
 }: DropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -45,7 +49,8 @@ export function Dropdown({
         <div
           role="menu"
           className={[
-            "absolute z-50 mt-1 w-44 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900",
+            "absolute z-50 mt-1 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900",
+            panelClassName ?? "w-44",
             align === "right" ? "right-0" : "left-0",
           ].join(" ")}
         >

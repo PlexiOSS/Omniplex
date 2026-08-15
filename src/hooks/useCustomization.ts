@@ -72,7 +72,7 @@ export const FONT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
-  { value: "sans", label: "Geist", description: "Default — clean, modern" },
+  { value: "sans", label: "Geist", description: "Default, clean, modern" },
   { value: "inter", label: "Inter", description: "Neutral, everywhere" },
   { value: "rounded", label: "Jakarta", description: "Friendly, rounded" },
   { value: "grotesk", label: "Space Grotesk", description: "Geometric, technical" },

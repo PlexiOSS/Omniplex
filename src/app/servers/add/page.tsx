@@ -184,7 +184,7 @@ export default function AddServerPage() {
           <p>
             Before submitting, please read the{" "}
             <Link
-              href="https://docs.omniplex.gg/docs/guides/rules/servers"
+              href="/kb/servers/listing-rules"
               className="font-medium underline text-accent underline-offset-2"
             >
               Listing Rules

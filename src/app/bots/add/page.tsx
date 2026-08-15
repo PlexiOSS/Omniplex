@@ -233,7 +233,7 @@ export default function AddBotPage() {
           <p>
             Before submitting, please read the{" "}
             <Link
-              href="https://docs.omniplex.gg/docs/guides/rules/bots"
+              href="/kb/bots/rules"
               className="font-medium underline text-accent underline-offset-2"
             >
               Bot Rules

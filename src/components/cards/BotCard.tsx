@@ -23,12 +23,19 @@ export function BotCard({ bot }: BotCardProps) {
     bot.bot_id,
     bot.user.avatar || discordDefaultAvatar(),
   );
+  const isStandout =
+    bot.premium || bot.type === "certified" || bot.supporter_badge;
 
   return (
     <Link
       href={href}
       data-nsfw={bot.nsfw || undefined}
-      className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
+      className={[
+        "group flex min-w-0 flex-col overflow-hidden rounded-xl border transition-all hover:shadow-sm",
+        isStandout
+          ? "border-accent/25 bg-linear-to-br from-accent/7 via-white to-white hover:border-accent/50 dark:border-accent/25 dark:from-accent/10 dark:via-zinc-900 dark:to-zinc-900"
+          : "border-zinc-200 bg-white hover:border-accent/40 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40",
+      ].join(" ")}
     >
       <Banner
         src={bannerUrl("bots", bot.bot_id)}
@@ -54,6 +61,7 @@ export function BotCard({ bot }: BotCardProps) {
               {bot.type === "certified" && (
                 <Badge variant="success">Certified</Badge>
               )}
+              {bot.supporter_badge && <Badge variant="info">Supporter</Badge>}
             </div>
             <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
               {bot.short}

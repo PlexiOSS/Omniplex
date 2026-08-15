@@ -1,8 +1,9 @@
 import { ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
-import { reports } from "@/lib/api";
+import { list, reports } from "@/lib/api";
 import type { ReportReason, ReportStatus } from "@/lib/api/types";
+import { formatCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
   title: "Moderation Transparency",
@@ -32,19 +33,37 @@ const STATUS_ORDER: ReportStatus[] = [
 ];
 
 export default async function ModerationPage() {
-  const stats = await reports.getStats().catch(() => null);
+  const [stats, listStats] = await Promise.all([
+    reports.getStats().catch(() => null),
+    list.getStats().catch(() => null),
+  ]);
 
   const byReason = new Map<ReportReason, Map<ReportStatus, number>>();
   let total = 0;
+  let resolvedOrDismissed = 0;
 
   for (const row of stats ?? []) {
     total += row.count;
+    if (row.status === "resolved" || row.status === "dismissed") {
+      resolvedOrDismissed += row.count;
+    }
     if (!byReason.has(row.reason)) byReason.set(row.reason, new Map());
     // biome-ignore lint/style/noNonNullAssertion: just set above
     byReason.get(row.reason)!.set(row.status, row.count);
   }
 
+  const resolutionRate = total > 0 ? Math.round((resolvedOrDismissed / total) * 100) : null;
+
   const reasons = Object.keys(REASON_LABELS) as ReportReason[];
+
+  const pipelineEntries = listStats
+    ? [
+        { label: "Approved", value: listStats.total_approved_bots },
+        { label: "Certified", value: listStats.total_certified_bots },
+        { label: "Awaiting Review", value: listStats.total_pending_bots },
+        { label: "Denied", value: listStats.total_denied_bots },
+      ]
+    : [];
 
   return (
     <Container className="py-16">
@@ -65,9 +84,32 @@ export default async function ModerationPage() {
         </p>
       </div>
 
+      {pipelineEntries.length > 0 && (
+        <div className="mx-auto mt-10 max-w-2xl">
+          <h2 className="text-center text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600">
+            Bot review pipeline
+          </h2>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {pipelineEntries.map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-xl border border-zinc-200 px-3 py-4 text-center dark:border-zinc-800"
+              >
+                <p className="text-xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
+                  {formatCount(value)}
+                </p>
+                <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                  {label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!stats ? (
         <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Couldn't load moderation stats right now — check back shortly.
+          Couldn't load moderation stats right now check back shortly.
         </p>
       ) : total === 0 ? (
         <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
@@ -75,7 +117,7 @@ export default async function ModerationPage() {
         </p>
       ) : (
         <div className="mt-10 overflow-x-auto">
-          <table className="w-full min-w-[480px] border-collapse text-sm">
+          <table className="w-full min-w-120 border-collapse text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
                 <th className="py-2 pr-4 text-left font-medium text-zinc-500 dark:text-zinc-400">
@@ -113,7 +155,8 @@ export default async function ModerationPage() {
             </tbody>
           </table>
           <p className="mt-4 text-center text-xs text-zinc-400 dark:text-zinc-600">
-            {total} report{total === 1 ? "" : "s"} filed in total.
+            {total} report{total === 1 ? "" : "s"} filed in total
+            {resolutionRate !== null && ` — ${resolutionRate}% resolved or dismissed`}.
           </p>
         </div>
       )}

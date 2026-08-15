@@ -69,7 +69,7 @@ export function CustomizationPanel({ open, onClose }: CustomizationPanelProps) {
   return (
     <div
       ref={panelRef}
-      className="absolute right-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+      className="fixed inset-x-3 top-16 z-50 mx-auto max-w-80 rounded-2xl border border-zinc-200 bg-white shadow-xl sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:mx-0 sm:w-80 sm:max-w-[calc(100vw-1.5rem)] dark:border-zinc-700 dark:bg-zinc-900"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">

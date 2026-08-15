@@ -72,7 +72,7 @@ export default async function AboutPage() {
       {stats && (
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: "Listed Bots", value: totalListedBots(stats) },
+            { label: "Listed Bots", value: stats.total_approved_bots },
             { label: "Total Submitted", value: stats.total_bots },
             { label: "Total Votes", value: stats.total_votes },
             { label: "Users", value: stats.total_users },

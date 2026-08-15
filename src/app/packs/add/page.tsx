@@ -176,7 +176,7 @@ export default function AddPackPage() {
             Add a Pack
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Group bots, servers, or emojis into a themed collection — they
+            Group bots, servers, or emojis into a themed collection they
             don't have to be yours.
           </p>
         </div>

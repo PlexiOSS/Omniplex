@@ -5,6 +5,7 @@ import type {
   IndexServer,
   ListIndexServer,
   PagedResult,
+  RandomServers,
   Server,
   ServerEmojiPreview,
   ServerSettingsUpdate,
@@ -22,6 +23,11 @@ export const serversResource = {
       `/servers/@all?page=${page}${sort ? `&sort=${sort}` : ""}`,
       { cache: "no-store" },
     ),
+
+  getRandom: () =>
+    client.get<RandomServers>("/servers/@random", {
+      cache: "no-store",
+    }),
 
   getEmojis: (page = 1) =>
     client.get<PagedResult<ServerEmojiPreview[]>>(

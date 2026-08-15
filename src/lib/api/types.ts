@@ -59,6 +59,9 @@ export interface IndexBot {
   tags: string[];
   premium: boolean;
   created_at: string;
+  supporter_badge: boolean;
+  boosted_until: string | null;
+  featured_until: string | null;
 }
 
 export interface Bot {
@@ -101,6 +104,10 @@ export interface Bot {
   captcha_opt_out: boolean;
   created_at: string;
   updated_at: string;
+  supporter_badge: boolean;
+  boosted_until: string | null;
+  featured_until: string | null;
+  vote_blitz_until: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -130,6 +137,9 @@ export interface IndexServer {
   nsfw: boolean;
   tags: string[];
   premium: boolean;
+  supporter_badge: boolean;
+  boosted_until: string | null;
+  featured_until: string | null;
 }
 
 export interface Server extends IndexServer {
@@ -149,6 +159,7 @@ export interface Server extends IndexServer {
   stickers: ServerSticker[];
   /** Null if never synced (e.g. the tracking bot has never been in this server). */
   emojis_synced_at: string | null;
+  vote_blitz_until: string | null;
 }
 
 export interface ServerEmoji {
@@ -438,12 +449,134 @@ export interface UserVote {
     supports_upvotes: boolean;
     vote_credits: boolean;
     vote_time: number;
+    weekend_bonus: boolean;
   } | null;
   wait: {
     hours: number;
     minutes: number;
     seconds: number;
   } | null;
+}
+
+// ---------------------------------------------------------------------------
+// Vote credits & shop — votes convert into a cents-denominated balance per
+// entity (not per user), spendable on shop items.
+// ---------------------------------------------------------------------------
+
+export interface VoteCreditTier {
+  id: string;
+  target_type: string;
+  position: number;
+  votes: number;
+  cents: number;
+}
+
+export interface VoteCreditTierRedeemSummary {
+  tiers: VoteCreditTier[];
+  votes: number;
+  slab_overview: number[];
+  total_credits: number;
+  vote_info: UserVote["vote_info"];
+}
+
+export interface EntityVoteRedeemLog {
+  id: string;
+  target_id: string;
+  target_type: string;
+  credits: number;
+  redeemed_credits: number;
+  created_at: string;
+  redeemed_at: string | null;
+}
+
+export interface EntityVoteRedeemLogSummary {
+  redeems: EntityVoteRedeemLog[];
+  total_credits: number;
+  available_credits: number;
+  redeemed_credits: number;
+}
+
+export interface ShopItem {
+  id: string;
+  name: string;
+  description: string;
+  cents: number;
+  target_types: string[];
+  benefits: string[];
+  duration: number;
+  created_at: string;
+  last_updated: string;
+  created_by: PlatformUser | null;
+  updated_by: PlatformUser | null;
+}
+
+export interface ShopItemBenefit {
+  id: string;
+  name: string;
+  description: string;
+  target_types: string[];
+  created_at: string;
+  last_updated: string;
+  created_by: PlatformUser | null;
+  updated_by: PlatformUser | null;
+}
+
+export interface ShopPurchase {
+  id: string;
+  target_type: string;
+  target_id: string;
+  item_id: string;
+  cents: number;
+  created_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Support tickets — standalone (no Discord channel behind them); message
+// IDs are still Discord-format snowflakes purely so timestamps decode the
+// same way old Discord-linked tickets already did.
+// ---------------------------------------------------------------------------
+
+export interface TicketTopic {
+  id: string;
+  name: string;
+}
+
+export interface TicketTopicList {
+  topics: TicketTopic[];
+}
+
+export interface TicketMessage {
+  id: string;
+  timestamp: string;
+  content: string;
+  author_id: string;
+  author: PlatformUser | null;
+}
+
+export interface Ticket {
+  id: string;
+  channel_id: string;
+  topic_id: string;
+  issue: string;
+  messages: TicketMessage[];
+  author: PlatformUser | null;
+  close_user: PlatformUser | null;
+  open: boolean;
+  created_at: string;
+}
+
+export interface TicketList {
+  tickets: Ticket[];
+}
+
+export interface CreateTicketPayload {
+  topic: string;
+  issue: string;
+  message: string;
+}
+
+export interface CreatedTicket {
+  id: string;
 }
 
 /** A proof-of-work vote captcha challenge, issued by GET /votes/captcha/challenge. */
@@ -539,6 +672,10 @@ export interface PagedResult<T> {
   results: T;
 }
 
+export interface ItemList<T> {
+  items: T[];
+}
+
 // ---------------------------------------------------------------------------
 // Index responses
 // ---------------------------------------------------------------------------
@@ -550,6 +687,7 @@ export interface ListIndexBot {
   packs: BotPack[];
   recently_added: IndexBot[];
   top_voted: IndexBot[];
+  featured: IndexBot[];
 }
 
 export interface ListIndexServer {
@@ -568,11 +706,105 @@ export interface ListStats {
   total_bots: number;
   total_approved_bots: number;
   total_certified_bots: number;
+  total_pending_bots: number;
+  total_denied_bots: number;
   total_staff: number;
   total_users: number;
   total_votes: number;
   total_packs: number;
   total_tickets: number;
+}
+
+// ---------------------------------------------------------------------------
+// Applications
+// ---------------------------------------------------------------------------
+
+export interface AppQuestion {
+  id: string;
+  question: string;
+  paragraph: string;
+  placeholder: string;
+  short: boolean;
+}
+
+export interface AppPosition {
+  id: string;
+  tags: string[];
+  info: string;
+  name: string;
+  questions: AppQuestion[];
+  hidden: boolean;
+  closed: boolean;
+  /** Go duration string, e.g. "48h0m0s" — 0s means no cooldown. */
+  cooldown: string;
+}
+
+export interface AppMeta {
+  positions: AppPosition[];
+  /** False while the list of positions is pending big changes. */
+  stable: boolean;
+}
+
+export type AppState = "pending" | "approved" | "denied";
+
+export interface AppResponse {
+  app_id: string;
+  user_id: string;
+  questions: AppQuestion[];
+  answers: Record<string, string>;
+  state: AppState;
+  created_at: string;
+  position: string;
+  review_feedback: string | null;
+}
+
+export interface AppListResponse {
+  apps: AppResponse[];
+}
+
+export interface CreateAppPayload {
+  position: string;
+  answers: Record<string, string>;
+}
+
+// ---------------------------------------------------------------------------
+// Payments / Premium
+// ---------------------------------------------------------------------------
+
+export interface PaymentPlan {
+  id: string;
+  name: string;
+  benefit: string;
+  /** Duration in hours. */
+  time_period: number;
+  /** USD. */
+  price: number;
+}
+
+export interface PlanList {
+  plans: PaymentPlan[];
+}
+
+export interface PaypalMeta {
+  paypal_client_id: string;
+}
+
+export interface RedirectUser {
+  url: string;
+}
+
+/** Mirrors Popplio's `CreatePerkData` wire shape exactly — `id` is always
+ * "premium" (the only product category today) and `name` is the plan ID
+ * (bronze/silver/gold), not a display name, despite the field names. */
+export interface CreatePerkPayload {
+  id: "premium";
+  name: string;
+  for: string;
+}
+
+export interface BoosterStatus {
+  is_booster: boolean;
+  remark?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -614,6 +846,106 @@ export interface ReportStatCount {
   reason: ReportReason;
   status: ReportStatus;
   count: number;
+}
+
+// ---------------------------------------------------------------------------
+// Alerts — GET/PATCH/DELETE /users/{id}/alerts[...]. A per-user notification
+// inbox, auto-populated server-side whenever Popplio calls its internal
+// PushNotification() (vote reminders, new-subscription confirmations,
+// etc) — there's no endpoint to create one directly.
+// ---------------------------------------------------------------------------
+
+export type AlertType = "success" | "error" | "info" | "warning";
+
+export interface Alert {
+  itag: string;
+  url: string | null;
+  message: string;
+  type: AlertType;
+  title: string;
+  created_at: string;
+  acked: boolean;
+  alert_data: Record<string, unknown> | null;
+  icon: string;
+  priority: number;
+}
+
+export interface AlertList {
+  unacked_count: number;
+  alerts: Alert[];
+}
+
+export interface FeaturedUserAlerts {
+  unacked_count: number;
+  unacked: Alert[];
+  acked: Alert[];
+}
+
+export type AlertPatchAction = "ack" | "unack" | "delete";
+
+export interface AlertPatchItem {
+  itag: string;
+  patch: AlertPatchAction;
+}
+
+// ---------------------------------------------------------------------------
+// Push notifications — GET /users/notifications/info,
+// GET/POST /users/{id}/notifications, DELETE /users/{id}/notification.
+// VAPID web push; a subscription is exactly what
+// `PushSubscription.toJSON()` returns in the browser.
+// ---------------------------------------------------------------------------
+
+export interface NotificationInfo {
+  public_key: string;
+}
+
+export interface UserSubscriptionPayload {
+  auth: string;
+  p256dh: string;
+  endpoint: string;
+}
+
+export interface NotifBrowserInfo {
+  os: string;
+  browser: string;
+  browser_ver: string;
+  mobile: boolean;
+}
+
+export interface UserNotification {
+  endpoint: string;
+  notif_id: string;
+  created_at: string;
+  browser_info: NotifBrowserInfo;
+}
+
+export interface NotifGetList {
+  notifications: UserNotification[];
+}
+
+// ---------------------------------------------------------------------------
+// Reminders — GET /users/{id}/reminders,
+// PUT/DELETE /users/{uid}/{target_type}/{target_id}/reminders. "Remind me
+// to vote for this again once the cooldown is up" — delivered as a push
+// notification (and alert) by Popplio's votereminders cron.
+// ---------------------------------------------------------------------------
+
+export interface ResolvedReminder {
+  name: string;
+  avatar: string;
+}
+
+export interface Reminder {
+  user_id: string;
+  target_type: string;
+  target_id: string;
+  resolved: ResolvedReminder | null;
+  created_at: string;
+  last_acked: string;
+}
+
+export interface ReminderList {
+  reminders: Reminder[];
 }
 
 // ---------------------------------------------------------------------------

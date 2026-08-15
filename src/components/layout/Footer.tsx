@@ -8,10 +8,10 @@ const FOOTER_LINKS = [
   {
     heading: "Discover",
     links: [
-      { href: "/bots", label: "All Bots" },
-      { href: "/servers", label: "All Servers" },
-      { href: "/packs", label: "All Packs" },
-      { href: '/search', label: 'Discovery' },
+      { href: "/bots", label: "View Bots" },
+      { href: "/servers", label: "View Servers" },
+      { href: "/packs", label: "View Packs" },
+      { href: '/emojis', label: 'View Emojis' },
     ],
   },
   {
