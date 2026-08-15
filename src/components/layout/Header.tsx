@@ -1,13 +1,21 @@
 "use client";
 
-import { ChevronDown, LogOut, Menu, Plus, Settings2, Shield, X } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  Menu,
+  Plus,
+  Settings2,
+  Shield,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SignInLink } from "@/components/ui/SignInLink";
@@ -19,6 +27,7 @@ import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { Container } from "./Container";
 import { NavGroupMenu } from "./NavGroupMenu";
 import { ThemeToggle } from "./ThemeToggle";
+import { UserMenu } from "./UserMenu";
 
 interface NavLink {
   href: string;
@@ -47,18 +56,14 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
   {
     label: "Community",
     items: [
-      { href: "/apps", label: "Apply" },
       { href: "/about", label: "About Us" },
       { href: "/blog", label: "Blog Posts" },
       { href: "/changelog", label: "Changelog" },
-      { href: "/partners", label: "Partners" },
+      { href: "/partners", label: "Our Partners" },
       { href: "/kb", label: "Knowledge Base" },
       { href: "https://docs.omniplex.gg", label: "Documentation" },
-      { href: "/tickets", label: "Support Tickets" },
     ],
   },
-  { href: "/premium", label: "Premium" },
-  { href: "/shop", label: "Shop" },
   { href: "/search", label: "Search" },
 ];
 
@@ -72,6 +77,7 @@ const CREATE_LINKS = [
 const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/queue", label: "Queue" },
+  { href: "/admin/applications", label: "Applications" },
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/search", label: "Search" },
   {
@@ -117,7 +123,7 @@ export function Header() {
     if (isAdminSection) return pathname === href;
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
-  }
+  };
 
   function exitStaffPanel() {
     router.push("/");
@@ -208,15 +214,6 @@ export function Header() {
                   </Button>
                 </div>
               )}
-              {!isAdminSection && isStaff && (
-                <Link href="/admin" className="hidden md:block">
-                  <Button variant="ghost" size="sm">
-                    <Shield size={14} />
-                    Staff panel
-                  </Button>
-                </Link>
-              )}
-
               {/* Mobile nav toggle */}
               <button
                 type="button"
@@ -259,22 +256,12 @@ export function Header() {
               <ThemeToggle />
 
               {isAuthenticated && session ? (
-                <div className="items-center hidden gap-2 ml-1 md:flex">
-                  <Link href="/dashboard">
-                    <Avatar
-                      src={mirroredAvatarUrl(
-                        "users",
-                        session.user_id,
-                        session.avatar,
-                      )}
-                      alt={session.username ?? "Your profile"}
-                      size={32}
-                      className="cursor-pointer ring-2 ring-transparent hover:ring-zinc-300 dark:hover:ring-zinc-600"
-                    />
-                  </Link>
-                  <Button variant="ghost" size="sm" onClick={logout}>
-                    Sign out
-                  </Button>
+                <div className="hidden ml-1 md:block">
+                  <UserMenu
+                    session={session}
+                    isStaff={isStaff}
+                    onLogout={logout}
+                  />
                 </div>
               ) : (
                 <SignInLink className="items-center justify-center hidden h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg md:inline-flex bg-accent text-accent-fg hover:opacity-90">
@@ -291,7 +278,10 @@ export function Header() {
             <Container className="flex flex-col gap-1 py-3">
               {links.map((item) =>
                 isNavGroup(item) ? (
-                  <div key={item.label} className="pt-2 mt-2 border-t border-zinc-200 first:mt-0 first:border-0 first:pt-0 dark:border-zinc-800">
+                  <div
+                    key={item.label}
+                    className="pt-2 mt-2 border-t border-zinc-200 first:mt-0 first:border-0 first:pt-0 dark:border-zinc-800"
+                  >
                     <button
                       type="button"
                       onClick={() =>
@@ -360,19 +350,23 @@ export function Header() {
                   Exit staff panel
                 </button>
               )}
-              {!isAdminSection && isStaff && (
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                >
-                  <Shield size={14} />
-                  Staff panel
-                </Link>
-              )}
-
               {isAuthenticated && session ? (
-                <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
-                  <Link href="/dashboard" className="flex items-center gap-2">
+                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenMobileGroup((g) =>
+                        g === "Account" ? null : "Account",
+                      )
+                    }
+                    className={[
+                      "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
+                      openMobileGroup === "Account"
+                        ? "text-accent"
+                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                    ].join(" ")}
+                    aria-expanded={openMobileGroup === "Account"}
+                  >
                     <Avatar
                       src={mirroredAvatarUrl(
                         "users",
@@ -380,20 +374,76 @@ export function Header() {
                         session.avatar,
                       )}
                       alt={session.username ?? "Your profile"}
-                      size={32}
+                      size={28}
                     />
-                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                      {session.username ?? "Your profile"}
+                    <span className="flex-1 truncate text-zinc-700 dark:text-zinc-300">
+                      {session.username ?? "Your account"}
                     </span>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={logout}
-                    className="ml-auto"
-                  >
-                    Sign out
-                  </Button>
+                    <ChevronDown
+                      size={14}
+                      className={[
+                        "transition-transform",
+                        openMobileGroup === "Account" ? "rotate-180" : "",
+                      ].join(" ")}
+                    />
+                  </button>
+                  {openMobileGroup === "Account" && (
+                    <div className="pl-2">
+                      <Link
+                        href="/dashboard"
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        href={`/user/${session.user_id}`}
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                      >
+                        View Profile
+                      </Link>
+                      <Link
+                        href="/apps"
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                      >
+                        Applications
+                      </Link>
+                      <Link
+                        href="/tickets"
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                      >
+                        Support Tickets
+                      </Link>
+                      {isStaff && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                        >
+                          <Shield size={14} />
+                          Staff Panel
+                        </Link>
+                      )}
+                      <Link
+                        href="/premium"
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                      >
+                        Premium
+                      </Link>
+                      <Link
+                        href="/shop"
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                      >
+                        Shop
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={logout}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                      >
+                        <LogOut size={14} />
+                        Sign out
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <SignInLink className="inline-flex items-center justify-center px-3 mx-3 text-sm font-medium transition-opacity rounded-lg h-9 bg-accent text-accent-fg hover:opacity-90">

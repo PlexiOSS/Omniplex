@@ -14,6 +14,7 @@ import {
   Pencil,
   Plus,
   Server as ServerIcon,
+  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Trash2,
@@ -47,10 +48,11 @@ import type {
 import { hasAnyPermString, hasPermString } from "@/lib/permissions";
 import { mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
+import { ApplicationsTab } from "./ApplicationsTab";
 import { BotEditModal } from "./BotEditModal";
 import { PacksTab } from "./PacksTab";
+import { SecurityTab } from "./SecurityTab";
 import { ServerEditModal } from "./ServerEditModal";
-import { ApplicationsTab } from "./ApplicationsTab";
 import { BotStatsModal, ServerStatsModal } from "./StatsModal";
 import { TokenModal } from "./TokenModal";
 import { TransferTeamModal } from "./TransferTeamModal";
@@ -64,7 +66,8 @@ type Tab =
   | "packs"
   | "applications"
   | "teams"
-  | "tokens";
+  | "tokens"
+  | "security";
 
 const BOT_STATUS: Record<
   BotType,
@@ -477,14 +480,15 @@ function BotItem({
               Edit
             </Button>
           )}
-          {!bot.premium && (bot.type === "approved" || bot.type === "certified") && (
-            <Link href={`/premium?bot=${bot.bot_id}`}>
-              <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
-                <Sparkles size={12} />
-                Upgrade
-              </Button>
-            </Link>
-          )}
+          {!bot.premium &&
+            (bot.type === "approved" || bot.type === "certified") && (
+              <Link href={`/premium?bot=${bot.bot_id}`}>
+                <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
+                  <Sparkles size={12} />
+                  Upgrade
+                </Button>
+              </Link>
+            )}
           <Link href={`/shop?bot=${bot.bot_id}`}>
             <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
               <ShoppingBag size={12} />
@@ -1058,6 +1062,7 @@ const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "applications", label: "Applications", icon: ClipboardList },
   { key: "teams", label: "Teams", icon: Users },
   { key: "tokens", label: "API Tokens", icon: KeyRound },
+  { key: "security", label: "Security", icon: ShieldCheck },
 ];
 
 export default function DashboardPage() {
@@ -1262,6 +1267,13 @@ export default function DashboardPage() {
             isSelf
           />
         </div>
+      )}
+      {tab === "security" && (
+        <SecurityTab
+          userId={session.user_id}
+          username={username}
+          token={session.token}
+        />
       )}
     </Container>
   );

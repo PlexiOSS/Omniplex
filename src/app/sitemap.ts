@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { bots, servers } from "@/lib/api";
 import { BASE_URL } from "@/lib/api/config";
+import { getLegalDocuments } from "@/lib/legal/content";
 
 export const revalidate = 3600; // re-generate every hour
 
@@ -26,6 +27,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.6,
     },
+    {
+      url: `${BASE_URL}/legal`,
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    ...getLegalDocuments().map((doc) => ({
+      url: `${BASE_URL}/legal/${doc.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.3,
+    })),
   ];
 
   // Fetch first page of bots and servers for dynamic URLs.

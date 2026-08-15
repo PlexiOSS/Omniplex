@@ -1170,6 +1170,34 @@ export interface PackSettingsUpdate {
 }
 
 // ---------------------------------------------------------------------------
+// Data export / account deletion tasks
+// ---------------------------------------------------------------------------
+
+export interface TaskCreateResponse {
+  task_id: string;
+  /** Always set for data tasks — required as `?task_key=` on every getTask poll, or polling 401s. */
+  task_key: string;
+  allow_unauthenticated: boolean;
+  task_name: string;
+  /** Postgres interval, e.g. "01:00:00" for the 1-hour task expiry. */
+  expiry: string;
+}
+
+export interface Task {
+  task_id: string;
+  allow_unauthenticated: boolean;
+  task_name: string;
+  /** Only present once state is "completed". Keyed by table name. */
+  output: {
+    data: Record<string, unknown[]>;
+    meta: { request_ip: string };
+  } | null;
+  for_user: string;
+  state: "pending" | "completed" | "failed";
+  created_at: string;
+}
+
+// ---------------------------------------------------------------------------
 // Errors
 // ---------------------------------------------------------------------------
 

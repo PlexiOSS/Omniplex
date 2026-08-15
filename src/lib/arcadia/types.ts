@@ -425,3 +425,20 @@ export type ReportAction =
   | { List: { status: ReportStatus | null } }
   | { Resolve: { id: string; note: string } }
   | { Dismiss: { id: string; note: string } };
+
+// ---------------------------------------------------------------------------
+// PopplioStaff — a signed reverse proxy into Popplio's own /staff/* API
+// (popplio/arcadia/panel/ops_proxy.go's `popplioStaff`). Popplio's /staff/*
+// routes require legacy X-Staff-Auth-Token/X-User-ID headers that neither
+// Arcadia's session nor Omniplex's normal Popplio client can send directly —
+// this proxy relays the request with those headers attached server-side, and
+// returns Popplio's own status/body verbatim as plain text (not Arcadia's
+// usual response envelope).
+// ---------------------------------------------------------------------------
+
+export interface PopplioStaffQuery {
+  login_token: string;
+  path: string;
+  method: string;
+  body: string;
+}

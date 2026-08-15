@@ -21,10 +21,15 @@ import { EmojiStickerGallery } from "@/components/servers/EmojiStickerGallery";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { VoterList } from "@/components/votes/VoterList";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { bannerUrl, mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  teamAvatarUrl,
+} from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
@@ -154,7 +159,9 @@ export default async function ServerPage({ params }: Props) {
                 {server.type === "certified" && (
                   <Badge variant="success">Certified</Badge>
                 )}
-                {server.supporter_badge && <Badge variant="info">Supporter</Badge>}
+                {server.supporter_badge && (
+                  <Badge variant="info">Supporter</Badge>
+                )}
                 {server.nsfw && <Badge variant="danger">NSFW</Badge>}
               </div>
               <p className="mt-1 text-zinc-500 dark:text-zinc-400">
@@ -211,6 +218,8 @@ export default async function ServerPage({ params }: Props) {
             targetId={server.server_id}
             initialReviews={reviewList.reviews}
           />
+
+          <VoterList targetType="server" targetId={server.server_id} />
         </div>
 
         {/* Sidebar */}

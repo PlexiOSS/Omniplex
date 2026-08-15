@@ -9,6 +9,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A "Security" tab on the dashboard (`src/app/dashboard/SecurityTab.tsx`)
+  exposing Popplio's data-export/account-deletion pipeline
+  (`POST /users/{id}/data`), which existed server-side with zero frontend
+  consumer until now — closes the loop on the Privacy Policy's "Your
+  rights" section, which previously only pointed at a support ticket for
+  something that can be self-service. Download builds a per-table
+  row-count summary plus a client-side JSON download from the completed
+  task's output; deletion requires typing your exact username in a modal
+  before it's enabled, since it's a real, irreversible
+  `DELETE FROM users`. Both poll `GET /users/{id}/tasks/{tid}` every 2s
+  (task id/key persisted to `localStorage` so a page refresh mid-poll
+  resumes instead of losing the reference), capping at 5 minutes before
+  telling the user to check back later rather than erroring.
+- Vanity URL self-management: `BotEditModal`/`ServerEditModal` gained a
+  "Vanity URL" field wired to `PATCH /{target_type}/{target_id}/vanity`
+  (`vanityResource.update`), previously a read-only value in the UI
+  despite the endpoint existing. Server-side validation errors (taken,
+  blacklisted, contains `@`) are surfaced verbatim rather than
+  reimplemented client-side.
+- A "Recent voters" section (`src/components/votes/VoterList.tsx`) on bot
+  and server pages, backed by the public
+  `GET /{target_type}/{target_id}/votes/user-list` endpoint (bare Discord
+  snowflakes, no auth needed) which had no frontend consumer before this.
+  Resolves the first 12 voters to a username/avatar via `users.getUser`
+  (`Promise.allSettled`, falls back to the raw ID if resolution fails for
+  any one voter) with a "+N more" tail count from a real paginated total.
+- A staff "Applications" review page (`/admin/applications`) for the 7
+  positions registered in Popplio's `/apps` system (certification,
+  partnership, server certification, staff, ban appeals, etc.) — the
+  `PATCH /staff/apps/{id}` approve/deny endpoint had no staff-facing UI
+  anywhere before this, not even in Arcadia as far as this workspace can
+  tell. Required adding a new Arcadia RPC wrapper,
+  `arcadia.popplioStaff()` (`src/lib/arcadia/client.ts`), mirroring
+  Popplio's own `popplioStaff` proxy action
+  (`popplio/arcadia/panel/ops_proxy.go`) that relays a request into
+  Popplio's legacy-header-gated `/staff/*` API and returns its status/body
+  verbatim — this wasn't hand-ported into Omniplex's Arcadia client until
+  now, so nothing could reach `/staff/apps*` at all despite the backend
+  bridge already existing. Approve/deny is otherwise fully
+  server-side-driven (grants/unbans happen inside Popplio's own handler);
+  the page only submits `{approved, reason}` and refetches.
+- A self-hosted Legal hub at `/legal`, replacing the Footer's links out to
+  `nodebyte.co.uk/legal/*`. Four documents written fresh for what Omniplex
+  actually does rather than adapted from the parent brand's general-purpose
+  pages: Terms of Service, Privacy Policy, Acceptable Use (the single
+  authoritative version of conduct rules that were previously scattered
+  across a few KB articles), and a Service Agreement covering premium/shop
+  purchases and refunds. Same markdown+frontmatter pattern as the
+  Knowledge Base (`gray-matter`, rendered through the existing `Markdown`
+  component), but flat (`src/content/legal/*.md` → `/legal/[slug]`) since
+  there's no category nesting to model. Two KB articles
+  (`bots/rules.md`, `servers/listing-rules.md`) already linked to
+  `/legal/terms` as if it existed; that link now resolves instead of
+  404ing. Added to the sitemap alongside everything else.
 - The Friday-Sunday double-vote weekend bonus is now actually visible:
   `VoteButton`/`ServerVoteButton` show a "Double-vote weekend" banner
   above the vote buttons when it's live and the entity isn't premium

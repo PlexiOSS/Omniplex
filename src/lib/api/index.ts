@@ -5,6 +5,7 @@ export { authResource as auth } from "./resources/auth";
 export { blogsResource as blogs } from "./resources/blogs";
 export { botsResource as bots } from "./resources/bots";
 export { captchaResource as captcha } from "./resources/captcha";
+export { dataResource as data } from "./resources/data";
 export { listResource as list } from "./resources/list";
 export { notificationsResource as notifications } from "./resources/notifications";
 export { packsResource as packs } from "./resources/packs";

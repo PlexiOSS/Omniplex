@@ -30,4 +30,13 @@ export const votesResource = {
       {},
       { token },
     ),
+
+  /** Public, no auth needed. Bare Discord snowflakes, one per distinct voter — no
+   * usernames/avatars/timestamps. Omitting `page` returns every voter unpaginated;
+   * pass page=1 (100/page) to get a real total via response length. */
+  getUserList: (targetType: TargetType, targetId: string, page?: number) =>
+    client.get<string[]>(
+      `/${targetType}/${targetId}/votes/user-list${page ? `?page=${page}` : ""}`,
+      { cache: "no-store" },
+    ),
 };
