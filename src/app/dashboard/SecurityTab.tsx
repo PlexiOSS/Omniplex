@@ -140,16 +140,16 @@ export function SecurityTab({ userId, username, token }: SecurityTabProps) {
   const pending = task?.state === "pending" || (ref && !task);
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="grid gap-6 lg:grid-cols-2">
       {/* Data export */}
-      <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
-        <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
           Download your data
         </h2>
         <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
           Get a copy of your account, team, and activity data as JSON. This
           currently covers your account, teams, votes, reviews, tickets, alerts,
-          and reminders — it doesn't yet include shop purchase history for
+          and reminders it doesn't yet include shop purchase history for
           listings you own, since that's tracked against the listing rather than
           your account.
         </p>
@@ -228,15 +228,15 @@ export function SecurityTab({ userId, username, token }: SecurityTabProps) {
       </div>
 
       {/* Danger zone */}
-      <div className="rounded-xl border border-red-200 p-5 dark:border-red-900/50">
-        <h2 className="flex items-center gap-2 font-semibold text-red-600 dark:text-red-400">
+      <div className="rounded-xl border border-red-200 bg-white p-5 dark:border-red-900/50 dark:bg-zinc-900">
+        <h2 className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400">
           <ShieldAlert size={16} />
           Danger zone
         </h2>
         <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
           Permanently delete your Omniplex account. This removes your account
           and everything tied to it that we're able to identify as yours. It
-          doesn't remove bots or servers owned by a team you're part of — those
+          doesn't remove bots or servers owned by a team you're part of those
           stay with the team. This can't be undone.
         </p>
 

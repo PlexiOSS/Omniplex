@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BsTwitter, BsInstagram, BsDiscord, BsGithub } from "react-icons/bs";
+import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
@@ -11,16 +11,22 @@ const FOOTER_LINKS = [
       { href: "/bots", label: "View Bots" },
       { href: "/servers", label: "View Servers" },
       { href: "/packs", label: "View Packs" },
-      { href: '/emojis', label: 'View Emojis' },
+      { href: "/emojis", label: "View Emojis" },
     ],
   },
   {
     heading: "Documentation",
     links: [
-      { href: "https://docs.omniplex.gg/docs/api-reference", label: "API Reference" },
+      {
+        href: "https://docs.omniplex.gg/docs/api-reference",
+        label: "API Reference",
+      },
       { href: "https://docs.omniplex.gg/docs#faq", label: "Frequently Asked" },
       { href: "https://docs.omniplex.gg/docs/guides", label: "User Guides" },
-      { href: "https://docs.omniplex.gg/docs/api-reference/rate-limits", label: "Rate Limits" },
+      {
+        href: "https://docs.omniplex.gg/docs/api-reference/rate-limits",
+        label: "Rate Limits",
+      },
     ],
   },
   {
@@ -29,6 +35,7 @@ const FOOTER_LINKS = [
       { href: "/about", label: "About Us" },
       { href: "/about/status", label: "System Status" },
       { href: "/about/moderation", label: "Moderation Stats" },
+      { href: "/staff", label: "Staff Hierarchy" },
       { href: "/partners", label: "Our Partners" },
     ],
   },

@@ -23,8 +23,8 @@ import type {
   RPCWebAction,
 } from "@/lib/arcadia/types";
 import { formatCount } from "@/lib/utils/format";
-import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
+import { AdminPageHeader } from "../../AdminPageHeader";
 import { GenericRpcModal } from "../GenericRpcModal";
 import { ReviewsModal } from "../ReviewsModal";
 import { RpcActionModal } from "../RpcActionModal";
@@ -199,7 +199,7 @@ export default function AdminQueuePage() {
           </p>
         </div>
       ) : (
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-2">
           {pageItems.map((bot, i) => (
             <div
               key={bot.bot_id}

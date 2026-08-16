@@ -109,7 +109,7 @@ export function TokenManager({
     }
     if (restrict && permLimits.length === 0) {
       setCreateError(
-        "Pick at least one permission, or uncheck \"Restrict permissions\" if you have full access.",
+        'Pick at least one permission, or uncheck "Restrict permissions" if you have full access.',
       );
       return;
     }
@@ -253,16 +253,116 @@ export function TokenManager({
         </div>
       )}
 
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          {list === null
+            ? "Loading…"
+            : `${list.length} token${list.length === 1 ? "" : "s"}`}
+        </p>
+        {canManage && !creating && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setCreating(true)}
+          >
+            Create Token
+          </Button>
+        )}
+      </div>
+
+      {canManage && creating && (
+        <form
+          onSubmit={handleCreate}
+          className="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+        >
+          <Input
+            label="Name"
+            placeholder="e.g. My Script"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="token-expiry"
+              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Expires in
+            </label>
+            <select
+              id="token-expiry"
+              value={expiry}
+              onChange={(e) => setExpiry(Number(e.target.value))}
+              className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+            >
+              {EXPIRY_OPTIONS.map((o) => (
+                <option key={o.seconds} value={o.seconds}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {isOwner && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={restrict}
+                onChange={(e) => setRestrict(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+              />
+              <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                Restrict permissions
+              </span>
+            </label>
+          )}
+
+          {restrict && (
+            <PermSelector
+              catalog={catalog}
+              granterPerms={myPerms}
+              value={permLimits}
+              onChange={setPermLimits}
+            />
+          )}
+
+          {createError && (
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {createError}
+            </p>
+          )}
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              loading={creatingLoading}
+            >
+              Create
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setCreating(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
+
       {error && (
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      {list === null && !error ? (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading…</p>
-      ) : (
-        <div className="space-y-4">
-          {list?.length === 0 && (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+      {list === null && !error ? null : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {list?.length === 0 && !creating && (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 sm:col-span-2">
               No tokens yet.
             </p>
           )}
@@ -306,100 +406,6 @@ export function TokenManager({
               </div>
             );
           })}
-        </div>
-      )}
-
-      {canManage && (
-        <div className="border-t border-zinc-200 pt-5 dark:border-zinc-800">
-          {!creating ? (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setCreating(true)}
-            >
-              Create Token
-            </Button>
-          ) : (
-            <form onSubmit={handleCreate} className="space-y-3">
-              <Input
-                label="Name"
-                placeholder="e.g. My Script"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="token-expiry"
-                  className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                >
-                  Expires in
-                </label>
-                <select
-                  id="token-expiry"
-                  value={expiry}
-                  onChange={(e) => setExpiry(Number(e.target.value))}
-                  className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
-                >
-                  {EXPIRY_OPTIONS.map((o) => (
-                    <option key={o.seconds} value={o.seconds}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {isOwner && (
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={restrict}
-                    onChange={(e) => setRestrict(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-                  />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
-                    Restrict permissions
-                  </span>
-                </label>
-              )}
-
-              {restrict && (
-                <PermSelector
-                  catalog={catalog}
-                  granterPerms={myPerms}
-                  value={permLimits}
-                  onChange={setPermLimits}
-                />
-              )}
-
-              {createError && (
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {createError}
-                </p>
-              )}
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  loading={creatingLoading}
-                >
-                  Create
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCreating(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          )}
         </div>
       )}
     </div>

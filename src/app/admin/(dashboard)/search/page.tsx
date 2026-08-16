@@ -1,35 +1,112 @@
 "use client";
 
-import { Search as SearchIcon, Server, ShieldOff } from "lucide-react";
+import { Search as SearchIcon, ShieldOff, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { usePagination } from "@/hooks/usePagination";
+import type { ReviewTargetType } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type {
   PartialBot,
+  PartialPack,
   PartialServer,
+  PartialTeam,
+  PartialUser,
   RPCWebAction,
   TargetType,
 } from "@/lib/arcadia/types";
+import { teamAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
-import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
+import { AdminPageHeader } from "../../AdminPageHeader";
 import { GenericRpcModal } from "../GenericRpcModal";
 import { ReviewsModal } from "../ReviewsModal";
 
 type Result =
   | { kind: "bot"; bot: PartialBot }
-  | { kind: "server"; server: PartialServer };
+  | { kind: "server"; server: PartialServer }
+  | { kind: "pack"; pack: PartialPack }
+  | { kind: "team"; team: PartialTeam }
+  | { kind: "user"; user: PartialUser };
 
 const SEARCH_PAGE_SIZE = 10;
 
 const SEARCHABLE_TYPES: { value: TargetType; label: string }[] = [
   { value: "Bot", label: "Bots" },
   { value: "Server", label: "Servers" },
+  { value: "Pack", label: "Packs" },
+  { value: "Team", label: "Teams" },
+  { value: "User", label: "Users" },
 ];
+
+/** Reviews only exist for these target types (Popplio's review routes). */
+const REVIEWABLE_KINDS = new Set(["bot", "server", "team"]);
+
+interface ResultInfo {
+  id: string;
+  name: string;
+  avatar: string;
+  short: string | null;
+  badge: string | null;
+  votes: number | null;
+}
+
+function describeResult(result: Result): ResultInfo {
+  switch (result.kind) {
+    case "bot":
+      return {
+        id: result.bot.bot_id,
+        name: result.bot.user.username,
+        avatar: result.bot.user.avatar,
+        short: result.bot.short,
+        badge: result.bot.type,
+        votes: result.bot.votes,
+      };
+    case "server":
+      return {
+        id: result.server.server_id,
+        name: result.server.name,
+        avatar: result.server.avatar,
+        short: result.server.short,
+        badge: result.server.type,
+        votes: result.server.votes,
+      };
+    case "pack":
+      return {
+        id: result.pack.url,
+        name: result.pack.name,
+        avatar: result.pack.owner.avatar,
+        short: result.pack.short,
+        badge: result.pack.pack_type,
+        votes: result.pack.votes,
+      };
+    case "team":
+      return {
+        id: result.team.id,
+        name: result.team.name,
+        avatar: teamAvatarUrl(result.team.id),
+        short: result.team.short || null,
+        badge: result.team.vote_banned ? "Vote Banned" : null,
+        votes: result.team.votes,
+      };
+    case "user":
+      return {
+        id: result.user.user.id,
+        name: result.user.user.username,
+        avatar: result.user.user.avatar,
+        short: null,
+        badge: result.user.staff
+          ? "Staff"
+          : result.user.banned
+            ? "Banned"
+            : null,
+        votes: null,
+      };
+  }
+}
 
 export default function AdminSearchPage() {
   const { loginToken } = useAdmin();
@@ -56,11 +133,13 @@ export default function AdminSearchPage() {
     try {
       const entries = await arcadia.searchEntitys(loginToken, t, q);
       setResults(
-        entries.map((e) =>
-          "Bot" in e
-            ? { kind: "bot" as const, bot: e.Bot }
-            : { kind: "server" as const, server: e.Server },
-        ),
+        entries.map((e): Result => {
+          if ("Bot" in e) return { kind: "bot", bot: e.Bot };
+          if ("Server" in e) return { kind: "server", server: e.Server };
+          if ("Pack" in e) return { kind: "pack", pack: e.Pack };
+          if ("Team" in e) return { kind: "team", team: e.Team };
+          return { kind: "user", user: e.User };
+        }),
       );
       setPage(1);
     } catch (err) {
@@ -106,7 +185,7 @@ export default function AdminSearchPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Search"
-        description="Find any bot or server by ID or name to take action outside the queue. Starts pre-filled with everything — narrow it down as you type."
+        description="Find any bot, server, pack, team, or user by ID or name to take action outside the queue. Starts pre-filled with everything narrow it down as you type."
       />
 
       <form onSubmit={handleSearch} className="mt-6 flex flex-wrap gap-2">
@@ -158,49 +237,48 @@ export default function AdminSearchPage() {
             </div>
           )}
           {pageItems.map((result) => {
-            const key =
-              result.kind === "bot"
-                ? result.bot.bot_id
-                : result.server.server_id;
-            const name =
-              result.kind === "bot"
-                ? result.bot.user.username
-                : result.server.name;
-            const avatar =
-              result.kind === "bot"
-                ? result.bot.user.avatar
-                : result.server.avatar;
-            const short =
-              result.kind === "bot" ? result.bot.short : result.server.short;
-            const votes =
-              result.kind === "bot" ? result.bot.votes : result.server.votes;
+            const info = describeResult(result);
 
             return (
               <div
-                key={key}
+                key={info.id}
                 className="flex items-start gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
               >
-                <Avatar src={avatar} alt={name} size={40} />
+                <Avatar src={info.avatar} alt={info.name} size={40} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                      {name}
+                      {info.name}
                     </span>
-                    <Badge>
-                      {result.kind === "bot"
-                        ? result.bot.type
-                        : result.server.type}
+                    <Badge variant="default">
+                      {result.kind[0].toUpperCase() + result.kind.slice(1)}
                     </Badge>
+                    {info.badge && (
+                      <Badge
+                        variant={
+                          info.badge === "Banned" ||
+                          info.badge === "Vote Banned"
+                            ? "danger"
+                            : "default"
+                        }
+                      >
+                        {info.badge}
+                      </Badge>
+                    )}
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-                    {short}
-                  </p>
-                  <div className="mt-1.5 flex items-center gap-3 text-xs text-zinc-400 dark:text-zinc-600">
-                    <span className="flex items-center gap-1">
-                      <Server size={11} />
-                      {formatCount(votes)} votes
-                    </span>
-                  </div>
+                  {info.short && (
+                    <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+                      {info.short}
+                    </p>
+                  )}
+                  {info.votes !== null && (
+                    <div className="mt-1.5 flex items-center gap-3 text-xs text-zinc-400 dark:text-zinc-600">
+                      <span className="flex items-center gap-1">
+                        <Star size={11} />
+                        {formatCount(info.votes)} votes
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex shrink-0 flex-col gap-2">
                   <Button
@@ -210,13 +288,15 @@ export default function AdminSearchPage() {
                   >
                     Actions
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setReviewsTarget(result)}
-                  >
-                    Reviews
-                  </Button>
+                  {REVIEWABLE_KINDS.has(result.kind) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setReviewsTarget(result)}
+                    >
+                      Reviews
+                    </Button>
+                  )}
                 </div>
               </div>
             );
@@ -239,16 +319,8 @@ export default function AdminSearchPage() {
         <GenericRpcModal
           loginToken={loginToken}
           targetType={targetType}
-          targetId={
-            actionTarget.kind === "bot"
-              ? actionTarget.bot.bot_id
-              : actionTarget.server.server_id
-          }
-          entityLabel={
-            actionTarget.kind === "bot"
-              ? actionTarget.bot.user.username
-              : actionTarget.server.name
-          }
+          targetId={describeResult(actionTarget).id}
+          entityLabel={describeResult(actionTarget).name}
           methods={actionMethods}
           onClose={() => {
             setActionTarget(null);
@@ -258,19 +330,11 @@ export default function AdminSearchPage() {
         />
       )}
 
-      {reviewsTarget && (
+      {reviewsTarget && REVIEWABLE_KINDS.has(reviewsTarget.kind) && (
         <ReviewsModal
-          targetType={reviewsTarget.kind}
-          targetId={
-            reviewsTarget.kind === "bot"
-              ? reviewsTarget.bot.bot_id
-              : reviewsTarget.server.server_id
-          }
-          entityLabel={
-            reviewsTarget.kind === "bot"
-              ? reviewsTarget.bot.user.username
-              : reviewsTarget.server.name
-          }
+          targetType={reviewsTarget.kind as ReviewTargetType}
+          targetId={describeResult(reviewsTarget).id}
+          entityLabel={describeResult(reviewsTarget).name}
           onClose={() => setReviewsTarget(null)}
         />
       )}

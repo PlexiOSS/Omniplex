@@ -12,7 +12,6 @@ import {
   MoreHorizontal,
   Package,
   Pencil,
-  Plus,
   Server as ServerIcon,
   ShieldCheck,
   ShoppingBag,
@@ -21,11 +20,12 @@ import {
   User,
   Users,
   Webhook as WebhookIcon,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { TeamCard } from "@/components/cards/TeamCard";
+import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { TokenManager } from "@/components/sessions/TokenManager";
 import { Avatar } from "@/components/ui/Avatar";
@@ -46,7 +46,7 @@ import type {
   User as UserType,
 } from "@/lib/api/types";
 import { hasAnyPermString, hasPermString } from "@/lib/permissions";
-import { mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { ApplicationsTab } from "./ApplicationsTab";
 import { BotEditModal } from "./BotEditModal";
@@ -143,19 +143,34 @@ function OverviewTab({ me }: { me: UserType }) {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Bots", value: me.user_bots.length },
-          { label: "Packs", value: me.user_packs.length },
-          { label: "Teams", value: me.user_teams.length },
-        ].map(({ label, value }) => (
+          {
+            icon: <Bot size={14} />,
+            label: "Bots",
+            value: me.user_bots.length,
+          },
+          {
+            icon: <Package size={14} />,
+            label: "Packs",
+            value: me.user_packs.length,
+          },
+          {
+            icon: <Users size={14} />,
+            label: "Teams",
+            value: me.user_teams.length,
+          },
+        ].map(({ icon, label, value }) => (
           <div
             key={label}
-            className="p-4 border rounded-xl border-zinc-200 dark:border-zinc-800"
+            className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
           >
-            <p className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+            <div className="flex items-center gap-2 text-zinc-400 dark:text-zinc-600">
+              {icon}
+              <span className="text-xs font-medium uppercase tracking-wide">
+                {label}
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
               {value}
-            </p>
-            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-              {label}
             </p>
           </div>
         ))}
@@ -173,8 +188,6 @@ function OverviewTab({ me }: { me: UserType }) {
     </div>
   );
 }
-
-const MAX_PROFILE_LINKS = 20;
 
 function EditProfileTab({
   me,
@@ -199,24 +212,6 @@ function EditProfileTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  function updateLink(index: number, patch: Partial<ApiLink>) {
-    setLinks((prev) =>
-      prev.map((link, i) => (i === index ? { ...link, ...patch } : link)),
-    );
-  }
-
-  function removeLink(index: number) {
-    setLinks((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  function addLink() {
-    setLinks((prev) =>
-      prev.length >= MAX_PROFILE_LINKS
-        ? prev
-        : [...prev, { name: "", value: "" }],
-    );
-  }
 
   async function handleSave() {
     setSaving(true);
@@ -266,57 +261,10 @@ function EditProfileTab({
       </div>
 
       <div>
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Links
-          </p>
-          <span className="text-xs text-zinc-400">
-            {links.length}/{MAX_PROFILE_LINKS}
-          </span>
-        </div>
-
-        <div className="space-y-2">
-          {links.map((link, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id until saved
-            <div key={index} className="flex items-center gap-2">
-              <input
-                type="text"
-                value={link.name}
-                onChange={(e) => updateLink(index, { name: e.target.value })}
-                placeholder="Name (e.g. website, github)"
-                className="w-36 shrink-0 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-              />
-              <input
-                type="url"
-                value={link.value}
-                onChange={(e) => updateLink(index, { value: e.target.value })}
-                placeholder="https://…"
-                className="min-w-0 flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-              />
-              <button
-                type="button"
-                onClick={() => removeLink(index)}
-                aria-label="Remove link"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {links.length < MAX_PROFILE_LINKS && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={addLink}
-            className="mt-2"
-          >
-            <Plus size={14} />
-            Add link
-          </Button>
-        )}
+        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          Links
+        </p>
+        <LinksEditor links={links} onChange={setLinks} />
       </div>
 
       <label className="flex cursor-pointer items-start gap-3">
@@ -372,6 +320,7 @@ function BotItem({
   /** The current user's resolved flags on this bot's team — defaults to owner for directly-owned bots. */
   myFlags?: string[];
 }) {
+  const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -480,21 +429,6 @@ function BotItem({
               Edit
             </Button>
           )}
-          {!bot.premium &&
-            (bot.type === "approved" || bot.type === "certified") && (
-              <Link href={`/premium?bot=${bot.bot_id}`}>
-                <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
-                  <Sparkles size={12} />
-                  Upgrade
-                </Button>
-              </Link>
-            )}
-          <Link href={`/shop?bot=${bot.bot_id}`}>
-            <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
-              <ShoppingBag size={12} />
-              Shop
-            </Button>
-          </Link>
           <Dropdown
             open={menuOpen}
             onClose={() => setMenuOpen(false)}
@@ -510,6 +444,27 @@ function BotItem({
               </Button>
             }
           >
+            {!bot.premium &&
+              (bot.type === "approved" || bot.type === "certified") && (
+                <DropdownItem
+                  icon={<Sparkles size={14} />}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push(`/premium?bot=${bot.bot_id}`);
+                  }}
+                >
+                  Upgrade
+                </DropdownItem>
+              )}
+            <DropdownItem
+              icon={<ShoppingBag size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                router.push(`/shop?bot=${bot.bot_id}`);
+              }}
+            >
+              Shop
+            </DropdownItem>
             <DropdownItem
               icon={<BarChart2 size={14} />}
               onClick={() => {
@@ -749,6 +704,7 @@ function ServerItem({
   token: string;
   mutate: () => void;
 }) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [viewingStats, setViewingStats] = useState(false);
   const [viewingTokens, setViewingTokens] = useState(false);
@@ -828,21 +784,6 @@ function ServerItem({
               Edit
             </Button>
           )}
-          {!server.premium &&
-            (server.type === "approved" || server.type === "certified") && (
-              <Link href={`/premium?server=${server.server_id}`}>
-                <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
-                  <Sparkles size={12} />
-                  Upgrade
-                </Button>
-              </Link>
-            )}
-          <Link href={`/shop?server=${server.server_id}`}>
-            <Button variant="ghost" size="sm" className="px-2 text-xs h-7">
-              <ShoppingBag size={12} />
-              Shop
-            </Button>
-          </Link>
           <Dropdown
             open={menuOpen}
             onClose={() => setMenuOpen(false)}
@@ -858,6 +799,27 @@ function ServerItem({
               </Button>
             }
           >
+            {!server.premium &&
+              (server.type === "approved" || server.type === "certified") && (
+                <DropdownItem
+                  icon={<Sparkles size={14} />}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push(`/premium?server=${server.server_id}`);
+                  }}
+                >
+                  Upgrade
+                </DropdownItem>
+              )}
+            <DropdownItem
+              icon={<ShoppingBag size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                router.push(`/shop?server=${server.server_id}`);
+              }}
+            >
+              Shop
+            </DropdownItem>
             <DropdownItem
               icon={<BarChart2 size={14} />}
               onClick={() => {
@@ -999,28 +961,6 @@ function ServersTab({
   );
 }
 
-function TeamItem({ team }: { team: Team }) {
-  const avatarSrc = teamAvatarUrl(team.id);
-  return (
-    <Link
-      href={`/teams/${team.id}`}
-      className="group flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
-    >
-      <Avatar src={avatarSrc} alt={team.name} size={44} />
-      <div className="flex-1 min-w-0">
-        <span className="block font-semibold truncate text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
-          {team.name}
-        </span>
-        {team.short && (
-          <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-            {team.short}
-          </p>
-        )}
-      </div>
-    </Link>
-  );
-}
-
 function TeamsTab({ teams }: { teams: Team[] }) {
   return (
     <div>
@@ -1045,7 +985,7 @@ function TeamsTab({ teams }: { teams: Team[] }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {teams.map((team) => (
-            <TeamItem key={team.id} team={team} />
+            <TeamCard key={team.id} team={team} />
           ))}
         </div>
       )}
@@ -1253,8 +1193,8 @@ export default function DashboardPage() {
       {tab === "applications" && <ApplicationsTab apps={myApplications} />}
       {tab === "teams" && <TeamsTab teams={normalizedMe.user_teams} />}
       {tab === "tokens" && (
-        <div className="max-w-2xl">
-          <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
+        <div>
+          <p className="mb-6 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
             Personal API tokens act as you across every endpoint. Bot- and
             server-scoped tokens can be managed from each listing&apos;s
             &quot;Tokens&quot; button on the Bots/Servers tabs.

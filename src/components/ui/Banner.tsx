@@ -36,6 +36,10 @@ export function Banner({ src, alt, className = "" }: BannerProps) {
           fill
           sizes="100vw"
           className="object-cover"
+          // Always our own /cdn/... proxy — see Avatar.tsx's identical note
+          // on why bypassing Next's optimizer cache is the actual fix for
+          // uploads not showing up instantly.
+          unoptimized
           onError={() => setErrored(true)}
         />
       )}

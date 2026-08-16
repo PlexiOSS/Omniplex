@@ -5,6 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-08-16
+
+### Added
+
+- Admin Search (`/admin/search`) now covers every entity type bots,
+  servers, packs, teams, and users instead of just bots and servers,
+  each with its own Actions menu (backed by Popplio's newly-extended
+  `SearchEntitys`).
+- A `/staff` knowledge base section (redirects to a new `staff` KB
+  category) covering the real staff hierarchy, the full permissions
+  reference, how reports/tickets/applications actually reach staff, and
+  staff conduct/transparency all sourced directly from the live
+  `staff_positions` table and Popplio's permission catalogue, not
+  guessed. Linked from the footer.
+- Public user profiles (`/user/[id]`) now show a user's servers and every
+  public link they've added, not just Bots and a hardcoded website/GitHub
+  pair. New shared `TeamCard` component (also now used on the dashboard's
+  Teams tab, replacing a near-identical inline copy) so Teams can be
+  shown too. The "hasn't listed anything" empty state now checks bots,
+  servers, packs, and teams together instead of just bots.
+- Report detail (`/admin/reports`) now shows the actual bot/server/pack/team
+  the report is about — icon, name, and a link straight to its listing —
+  instead of just the raw target type/id. An "Actions" button next to it
+  loads Arcadia's staff RPC methods filtered to whatever that target type
+  actually supports (e.g. force-removal for bots) via the new, reusable
+  `GenericRpcModal`, so resolving a report and actually acting on the
+  reported content no longer requires leaving the modal.
+- "Platform safety" stats (banned users, vote-banned bots) on the
+  Moderation Transparency page (`/about/moderation`), backed by Popplio's
+  extended `GET /list/stats`. Styled as its own card-grid section,
+  matching the existing "Bot review pipeline" section the reports table
+  itself is unchanged.
+- A "Support Tickets" check on the Status page (`/about/status`), backed
+  by the public `GET /tickets/topics` endpoint.
+
+### Fixed
+
+- Team/server/bot avatar and banner updates weren't reflecting instantly
+  after upload — Next's image optimizer was caching the old asset
+  in front of already-correct origin cache headers. `Avatar`/`Banner` now
+  render with `unoptimized`, since every source is already our own CDN
+  proxy or Discord's hash-versioned CDN.
+- The dashboard's profile editor (`EditProfileTab`) had its own,
+  slightly-different links list (different remove icon, different "Add
+  link" button style) instead of the shared `LinksEditor` component every
+  other edit form already uses — now reuses it.
+
+### Changed
+
+- Admin panel nav decluttered: Queue, Applications, Reports, and Tickets
+  are now grouped under a single "Moderation" dropdown instead of four
+  separate top-level links.
+- Dashboard bot/server cards moved the "Upgrade" and "Shop" actions into
+  the existing "..." menu, keeping only View/Edit inline, to cut down on
+  how crowded each card had gotten.
+- API Tokens tab (`TokenManager`) now puts the "Create Token" button and
+  count at the top, with the create form appearing directly below it
+  instead of at the bottom of the list; button variant matched to the
+  `secondary` convention used by Teams/Packs/Applications.
+- Security tab cards given filled backgrounds and the same heading
+  weight/size as the rest of the dashboard, and laid out side-by-side on
+  wide screens instead of stacked in a narrow column.
+- Consistency pass across the admin panel: list spacing, card padding, and
+  hover treatment brought in line across Applications, Queue, and Tickets;
+  removed the deprecated, permanently-zero "Changelogs" stat from the
+  admin Overview page; Dashboard Overview's stat tiles restyled to match
+  the admin panel's icon+label convention.
+
 ## [0.1.4] - 2026-08-15
 
 ### Fixed

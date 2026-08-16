@@ -101,7 +101,7 @@ export default function AdminTicketsPage() {
             <Link
               key={ticket.id}
               href={`/tickets/${ticket.id}`}
-              className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 px-4 py-3 transition-colors hover:border-accent/40 dark:border-zinc-800"
+              className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:hover:border-accent/40 dark:hover:bg-accent/10"
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
