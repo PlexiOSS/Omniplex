@@ -1109,6 +1109,7 @@ export default function DashboardPage() {
               <Badge variant="success">Certified Dev</Badge>
             )}
             {normalizedMe.bot_developer && <Badge>Bot Developer</Badge>}
+            {normalizedMe.bug_hunters && <Badge variant="danger">Bug Hunter</Badge>}
           </div>
         </div>
       </div>
