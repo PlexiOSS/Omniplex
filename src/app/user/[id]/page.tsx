@@ -75,6 +75,7 @@ export default async function UserPage({ params }: Props) {
             {user.staff && <Badge variant="info">Staff</Badge>}
             {user.certified && <Badge variant="success">Certified Dev</Badge>}
             {user.bot_developer && <Badge>Bot Developer</Badge>}
+            {user.bug_hunters && <Badge variant="danger">Bug Hunter</Badge>}
           </div>
           {displayName !== username && (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
