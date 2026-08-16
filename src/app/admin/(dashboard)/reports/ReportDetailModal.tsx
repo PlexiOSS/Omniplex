@@ -63,15 +63,24 @@ export function ReportDetailModal({
           <p className="text-xs font-medium text-zinc-400 dark:text-zinc-600">
             Target
           </p>
-          <a
-            href={report.target_url || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-0.5 flex items-center gap-1.5 font-medium text-zinc-950 hover:text-accent dark:text-zinc-50"
-          >
-            {report.target_name} ({report.target_type})
-            <ExternalLink size={12} />
-          </a>
+          {report.target_url ? (
+            <a
+              href={report.target_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-0.5 flex items-center gap-1.5 font-medium text-zinc-950 hover:text-accent dark:text-zinc-50"
+            >
+              {report.target_name} ({report.target_type})
+              <ExternalLink size={12} />
+            </a>
+          ) : (
+            <p className="mt-0.5 font-medium text-zinc-950 dark:text-zinc-50">
+              {report.target_name} ({report.target_type})
+              <span className="ml-1.5 text-xs font-normal text-zinc-400 dark:text-zinc-600">
+                — no live link for this target
+              </span>
+            </p>
+          )}
         </div>
 
         <div>
