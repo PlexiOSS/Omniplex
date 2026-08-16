@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, MessageSquare, Server, Ticket, Users } from "lucide-react";
+import { Bot, Server, Ticket, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { BaseAnalytics } from "@/lib/arcadia/types";
@@ -127,11 +127,6 @@ export default function AdminOverviewPage() {
           icon={<Users size={14} />}
           label="Total users"
           value={analytics.total_users}
-        />
-        <StatCard
-          icon={<MessageSquare size={14} />}
-          label="Changelogs"
-          value={analytics.changelogs_count}
         />
       </div>
     </div>

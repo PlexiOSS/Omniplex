@@ -213,7 +213,6 @@ export const arcadia = {
     return (await assertOk(res)).json();
   },
 
-  /** Only Bot and Server are implemented server-side — other target types 501. */
   searchEntitys: async (
     loginToken: string,
     targetType: TargetType,

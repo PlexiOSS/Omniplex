@@ -120,7 +120,7 @@ export default function AdminApplicationsPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-2">
           {apps.map((app) => (
             <div
               key={app.app_id}

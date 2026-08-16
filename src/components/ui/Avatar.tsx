@@ -65,6 +65,13 @@ export function Avatar({
           fill
           sizes={`${size}px`}
           className="object-cover"
+          // Every source here is either our own /cdn/... proxy (already a
+          // correctly-sized webp) or Discord's hash-versioned CDN — nothing
+          // gains from Next's re-optimization, and its optimizer cache sits
+          // in front of /cdn/...'s own (already-fixed) cache headers without
+          // reliably revalidating against them, which is what made a fresh
+          // upload look stale even after the origin had the new bytes.
+          unoptimized
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src = fallbackAvatarUrl(
               alt,

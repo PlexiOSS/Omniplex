@@ -414,6 +414,7 @@ export interface User {
   about: string | null;
   extra_links: Link[];
   user_bots: IndexBot[];
+  user_servers: IndexServer[];
   user_packs: BotPack[];
   user_teams: Team[];
   staff: boolean;
@@ -713,6 +714,8 @@ export interface ListStats {
   total_votes: number;
   total_packs: number;
   total_tickets: number;
+  total_banned_users: number;
+  total_vote_banned_bots: number;
 }
 
 // ---------------------------------------------------------------------------

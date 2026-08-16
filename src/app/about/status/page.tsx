@@ -1,12 +1,21 @@
 import { CheckCircle, XCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
-import { auth, blogs, bots, list, packs, search, servers } from "@/lib/api";
+import {
+  auth,
+  blogs,
+  bots,
+  list,
+  packs,
+  search,
+  servers,
+  tickets,
+} from "@/lib/api";
 import { BASE_URL } from "@/lib/api/config";
 import { arcadia } from "@/lib/arcadia/client";
 import { ARCADIA_PANEL_SCOPE } from "@/lib/arcadia/config";
-import { SOCIAL_LINKS } from "@/lib/social";
 import { isCdnHealthy } from "@/lib/s3/health";
+import { SOCIAL_LINKS } from "@/lib/social";
 
 export const metadata: Metadata = {
   title: "Status",
@@ -43,6 +52,7 @@ export default async function StatusPage() {
     discordAuth,
     cdn,
     staffPanel,
+    ticketService,
   ] = await Promise.all([
     timedCheck(() => list.getStats()),
     timedCheck(() => bots.getAll(1)),
@@ -57,6 +67,7 @@ export default async function StatusPage() {
       if (!(await isCdnHealthy())) throw new Error("CDN unreachable");
     }),
     timedCheck(() => arcadia.auth.begin(ARCADIA_PANEL_SCOPE, BASE_URL)),
+    timedCheck(() => tickets.getTopics()),
   ]);
 
   const services: ServiceStatus[] = [
@@ -104,6 +115,11 @@ export default async function StatusPage() {
       name: "Staff Panel",
       ...staffPanel,
       detail: staffPanel.ok ? "Panel API reachable" : "May be affected",
+    },
+    {
+      name: "Support Tickets",
+      ...ticketService,
+      detail: ticketService.ok ? "Serving normally" : "Degraded",
     },
   ];
 

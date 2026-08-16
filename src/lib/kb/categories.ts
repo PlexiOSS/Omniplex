@@ -72,4 +72,11 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     description: "Getting help from staff when something needs a human.",
     order: 9,
   },
+  {
+    slug: "staff",
+    title: "Staff",
+    description:
+      "How the staff team is structured, what each position can do, and how moderation actually works day to day.",
+    order: 10,
+  },
 ];

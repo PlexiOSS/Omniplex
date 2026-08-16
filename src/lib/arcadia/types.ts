@@ -186,7 +186,40 @@ export interface PartialServer {
   mentionable: string[];
 }
 
-export type PartialEntity = { Bot: PartialBot } | { Server: PartialServer };
+export interface PartialPack {
+  url: string;
+  name: string;
+  short: string;
+  pack_type: string;
+  owner: PlatformUser;
+  votes: number;
+  tags: string[];
+  vote_banned: boolean;
+}
+
+export interface PartialTeam {
+  id: string;
+  name: string;
+  short: string;
+  votes: number;
+  tags: string[];
+  nsfw: boolean;
+  vote_banned: boolean;
+}
+
+export interface PartialUser {
+  user: PlatformUser;
+  staff: boolean;
+  banned: boolean;
+  vote_banned: boolean;
+}
+
+export type PartialEntity =
+  | { Bot: PartialBot }
+  | { Server: PartialServer }
+  | { Pack: PartialPack }
+  | { Team: PartialTeam }
+  | { User: PartialUser };
 
 // --- RPC ------------------------------------------------------------------
 

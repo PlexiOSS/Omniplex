@@ -75,11 +75,15 @@ const CREATE_LINKS = [
 
 const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/admin", label: "Overview" },
-  { href: "/admin/queue", label: "Queue" },
-  { href: "/admin/applications", label: "Applications" },
-  { href: "/admin/reports", label: "Reports" },
-  { href: "/admin/tickets", label: "Tickets" },
-  { href: "/admin/search", label: "Search" },
+  {
+    label: "Moderation",
+    items: [
+      { href: "/admin/queue", label: "Queue" },
+      { href: "/admin/applications", label: "Applications" },
+      { href: "/admin/reports", label: "Reports" },
+      { href: "/admin/tickets", label: "Tickets" },
+    ],
+  },
   {
     label: "Staff",
     items: [
@@ -95,6 +99,7 @@ const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/admin/partners", label: "Partners" },
     ],
   },
+  { href: "/admin/search", label: "Search" },
   { href: "/admin/logs", label: "Logs" },
 ];
 
