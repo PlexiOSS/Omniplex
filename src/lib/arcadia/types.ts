@@ -183,6 +183,7 @@ export interface PartialServer {
   premium: boolean;
   claimed_by: string | null;
   last_claimed: string | null;
+  approval_note: string;
   mentionable: string[];
 }
 
@@ -346,6 +347,146 @@ export interface StaffDisciplinaryTypeUpsert {
 }
 
 // ---------------------------------------------------------------------------
+// Shop admin (UpdateShopItems / UpdateShopItemBenefits / UpdateShopCoupons /
+// UpdateVoteCreditTiers / UpdateBotWhitelist RPCs)
+// ---------------------------------------------------------------------------
+
+export interface ShopItemBenefit {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  last_updated: string;
+  target_types: string[];
+  created_by: string;
+  updated_by: string;
+}
+
+export interface ShopItemBenefitUpsert {
+  id: string;
+  name: string;
+  description: string;
+  target_types: string[];
+}
+
+export type ShopItemBenefitAction =
+  | "List"
+  | { Create: ShopItemBenefitUpsert }
+  | { Edit: ShopItemBenefitUpsert }
+  | { Delete: { id: string } };
+
+export interface ShopItem {
+  id: string;
+  name: string;
+  description: string;
+  cents: number;
+  target_types: string[];
+  benefits: string[];
+  duration: number;
+  created_at: string;
+  last_updated: string;
+  created_by: string;
+  updated_by: string;
+}
+
+export interface ShopItemUpsert {
+  id: string;
+  name: string;
+  description: string;
+  cents: number;
+  target_types: string[];
+  benefits: string[];
+  duration: number;
+}
+
+export type ShopItemAction =
+  | "List"
+  | { Create: ShopItemUpsert }
+  | { Edit: ShopItemUpsert }
+  | { Delete: { id: string } };
+
+export interface VoteCreditTier {
+  id: string;
+  target_type: string;
+  position: number;
+  cents: number;
+  votes: number;
+  created_at: string;
+}
+
+export interface VoteCreditTierUpsert {
+  id: string;
+  target_type: string;
+  position: number;
+  cents: number;
+  votes: number;
+}
+
+export type VoteCreditTierAction =
+  | "ListTiers"
+  | { CreateTier: VoteCreditTierUpsert }
+  | { EditTier: VoteCreditTierUpsert }
+  | { DeleteTier: { id: string } };
+
+export interface ShopCoupon {
+  id: string;
+  code: string;
+  public: boolean;
+  max_uses: number | null;
+  created_at: string;
+  created_by: string;
+  last_updated: string;
+  updated_by: string;
+  reuse_wait_duration: number | null;
+  expiry: number | null;
+  applicable_items: string[];
+  cents: number | null;
+  requirements: string[];
+  allowed_users: string[];
+  usable: boolean;
+  target_types: string[];
+}
+
+export interface ShopCouponUpsert {
+  id: string;
+  code: string;
+  public: boolean;
+  max_uses: number | null;
+  reuse_wait_duration: number | null;
+  expiry: number | null;
+  applicable_items: string[];
+  cents: number | null;
+  requirements: string[];
+  allowed_users: string[];
+  usable: boolean;
+  target_types: string[];
+}
+
+export type ShopCouponAction =
+  | "List"
+  | { Create: ShopCouponUpsert }
+  | { Edit: ShopCouponUpsert }
+  | { Delete: { id: string } };
+
+export interface BotWhitelist {
+  bot_id: string;
+  user_id: string;
+  reason: string;
+  created_at: string;
+}
+
+export interface BotWhitelistUpsert {
+  bot_id: string;
+  reason: string;
+}
+
+export type BotWhitelistAction =
+  | "List"
+  | { Add: BotWhitelistUpsert }
+  | { Edit: BotWhitelistUpsert }
+  | { Delete: { bot_id: string } };
+
+// ---------------------------------------------------------------------------
 // Blog (UpdateBlog RPC — separate from the public Popplio blog reader)
 // ---------------------------------------------------------------------------
 
@@ -366,6 +507,47 @@ export type BlogAction =
   | { CreateEntry: BlogCreateEntry }
   | { UpdateEntry: BlogUpdateEntry }
   | { DeleteEntry: { itag: string } };
+
+// ---------------------------------------------------------------------------
+// Badges (UpdateBadges RPC — catalog only; assigning one to an entity goes
+// through the generic AssignBadge/UnassignBadge RPCMethod instead)
+// ---------------------------------------------------------------------------
+
+export type BadgeColor =
+  | "default"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "premium";
+
+export interface BadgeCatalogEntry {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: BadgeColor;
+  target_types: string[];
+  created_at: string;
+  created_by: string;
+  last_updated: string;
+  updated_by: string;
+}
+
+export interface BadgeUpsert {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: BadgeColor;
+  target_types: string[];
+}
+
+export type BadgeAction =
+  | "List"
+  | { Create: BadgeUpsert }
+  | { Edit: BadgeUpsert }
+  | { Delete: { id: string } };
 
 export interface BlogCreateEntry {
   slug: string;

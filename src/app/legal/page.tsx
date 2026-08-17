@@ -27,7 +27,7 @@ export default function LegalPage() {
         {documents.map((doc) => (
           <Link
             key={doc.slug}
-            href={`/legal/${doc.slug}`}
+            href={`/legal/${encodeURIComponent(doc.slug)}`}
             className="group flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
           >
             <div>

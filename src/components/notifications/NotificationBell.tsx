@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, BellOff, Check } from "lucide-react";
+import { Bell, BellOff, Check, ListChecks } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,16 +28,19 @@ export function NotificationBell() {
 
   const [open, setOpen] = useState(false);
   const [unacked, setUnacked] = useState<Alert[]>([]);
-  const [acked, setAcked] = useState<Alert[]>([]);
   const [unackedCount, setUnackedCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
     if (!session) return;
     try {
-      const data = await alertsApi.getFeatured(session.user_id, session.token);
+      const data = await alertsApi.getFeatured(
+        session.user_id,
+        session.token,
+        0,
+        8,
+      );
       setUnacked(data.unacked);
-      setAcked(data.acked);
       setUnackedCount(data.unacked_count);
     } catch {}
   }, [session]);
@@ -79,7 +83,7 @@ export function NotificationBell() {
 
   if (!isAuthenticated) return null;
 
-  const entries = [...unacked, ...acked].slice(0, 8);
+  const entries = unacked.slice(0, 8);
 
   return (
     <Dropdown
@@ -129,11 +133,11 @@ export function NotificationBell() {
             <button
               key={alert.itag}
               type="button"
-              onClick={() => !alert.acked && ack(alert.itag)}
+              onClick={() => ack(alert.itag)}
               className="flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
             >
               <span
-                className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${TYPE_DOT[alert.type]} ${alert.acked ? "opacity-30" : ""}`}
+                className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${TYPE_DOT[alert.type]}`}
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
@@ -152,13 +156,26 @@ export function NotificationBell() {
       </div>
 
       <div className="border-t border-zinc-100 dark:border-zinc-800">
+        <Link
+          href="/dashboard?tab=notifications"
+          onClick={() => setOpen(false)}
+          className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800/60"
+        >
+          <ListChecks size={13} />
+          View all notifications
+        </Link>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800">
         {push.supported ? (
           <DropdownItem
             onClick={push.subscribed ? push.unsubscribe : push.subscribe}
             icon={push.subscribed ? <BellOff size={14} /> : <Bell size={14} />}
             loading={push.busy}
           >
-            {push.subscribed ? "Disable push notifications" : "Enable push notifications"}
+            {push.subscribed
+              ? "Disable push notifications"
+              : "Enable push notifications"}
           </DropdownItem>
         ) : (
           <p className="px-3 py-2 text-xs text-zinc-400 dark:text-zinc-600">

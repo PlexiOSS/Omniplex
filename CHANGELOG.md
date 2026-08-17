@@ -5,6 +5,104 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - Unreleased
+
+### Added
+
+- The `/shop` page now shows the sitewide vote credit tier ladder (`GET
+  /votes/credit-tiers`, not scoped to an owned entity) and a paginated
+  vote history for the selected bot/server (`GET
+  /users/{id}/{target_type}/{target_id}/votes/@all`) — both existing
+  endpoints had no frontend caller before.
+- `/premium` now checks Stripe's configured-key endpoint (`GET
+  /payments/stripe`) before showing "Pay with Card", the same
+  hide-if-unconfigured treatment PayPal already got. If neither provider
+  is configured, the page says so instead of showing a button that would
+  just fail at checkout.
+- A "Refresh" button on the dashboard's profile tab clears the cached
+  Discord username/avatar for the signed-in account (`DELETE
+  /platform/user/{id}?platform=discord`), for when it looks stale before
+  the next natural resync.
+- A "Notifications" dashboard tab (`/dashboard?tab=notifications`) showing
+  the full, paginated notification history with per-item mark-read and
+  delete, plus a "Clear all" action — all backed by existing Popplio
+  endpoints (`GET /users/{id}/alerts`, the `PATCH` `delete` action,
+  `DELETE /users/{id}/alerts`) that had no frontend caller before. The
+  notification bell now only shows unread alerts (no more dimmed read
+  items sitting in the dropdown) and links to this tab as the place to
+  review or clean up history.
+- `/admin/queue` is now split into Bots / Servers tabs (same underline-tab
+  treatment used elsewhere in the panel). Servers now go through the same
+  claim/approve/deny/unverify review flow bots always have — backed by
+  Popplio's new `ServerQueue` panel op and `Server` support on the
+  existing review RPC actions.
+- A `/banned` page and a ban-appeal login path. Popplio already rejected
+  every authenticated request from a banned user except sessions scoped
+  `ban_exempt`, and already had a `banappeal` application position built
+  for exactly this — the frontend just never used any of it. A banned
+  login attempt now offers "Continue to appeal" instead of a dead end,
+  `/banned` shows the appeal form (or its status, if one's already been
+  submitted) via the existing Applications system, and any page catches an
+  already-active session that gets banned mid-visit and redirects there.
+- `/admin/badges` — a catalog admin page for the new generic badge system
+  (name, description, icon, color, which entity types it applies to).
+  Awarding a badge to a user, bot, server, or team happens through the
+  existing Actions menu in Search/Report detail (new `AssignBadge`/
+  `UnassignBadge` RPC action, fully data-driven like every other staff
+  action — no extra frontend needed there). Public user profiles now show
+  any badges a user's been awarded, alongside the existing Staff/
+  Certified Dev/Bot Developer/Bug Hunter badges.
+- Bot pages are now tabbed (About / Commands / Changelog / Reviews)
+  instead of one long scroll. Commands and Changelog are new — a bot's
+  owner or team can document its commands (grouped by category) and post
+  update/announcement entries, with inline "Edit Commands" / "Post
+  Update" affordances that only show up for someone who actually has
+  edit rights on that bot (checked via the existing entity-permissions
+  endpoint, not a new one).
+- Five new admin pages under `/admin/shop` (Items, Benefits, Vote Credit
+  Tiers, Coupons, Bot Whitelist). Arcadia's shop-administration panel
+  actions had no frontend caller at all what's purchasable, what buying
+  it grants, coupon codes, vote-credit conversion rates, and the bot
+  whitelist could only be edited by hand in the database. The Benefits
+  and Items pages flag benefit IDs the purchase flow doesn't actually
+  recognize (`routes/shop/assets/benefits.go`'s fixed set) as
+  "display only," so staff don't create a benefit that's purchasable but
+  silently does nothing. The Coupons page notes plainly that coupons
+  aren't wired into checkout yet this only manages the catalogue.
+- `/admin/shop/purchases` — the last 100 shop purchases platform-wide, for
+  abuse/fraud monitoring (`GET /staff/shop-purchases`, which already
+  existed server-side with no caller, same shape as the earlier
+  `GET /staff/tickets` gap).
+- The bot Queue's Approve/Deny reason box can now quick-fill from a staff
+  review template (`GET /list/staff-templates`, previously unused) —
+  filtered to the right kind (`approval` templates for Approve, `denial`
+  for Deny), confirmed against the real seeded rows rather than guessed.
+- Sign-in on beta and staging now surfaces a clear message when it's
+  rejected for not holding the Bug Hunter role, instead of a generic
+  login-failure error (matches Popplio's new `checkBugHunterOnly` gate).
+
+### Fixed
+
+- Every image on every page load forced a network round trip: `/cdn/[...path]`
+  served `Cache-Control: max-age=0, must-revalidate`, and even that
+  revalidation pulled the *entire* object down from RustFS via `GetObject`
+  before checking `If-None-Match`, just to discard it on a 304. Now uses
+  `HeadObject` for revalidation (no body transfer) and
+  `max-age=60, stale-while-revalidate=300` (instant from browser cache for
+  a minute, refreshed in the background after) — a re-upload is still
+  visible within about a minute, but repeat page loads no longer touch the
+  network per image.
+- Public user profiles (`/user/[id]`): the Bots/Servers/Packs/Teams
+  selector now uses the same underline-tab treatment as the dashboard's
+  own tab bar (icon, label, count badge, accent underline) instead of a
+  pill toggle borrowed from the homepage's narrower bot/server switcher.
+- The notification bell (`NotificationBell.tsx`) called
+  `GET /users/{id}/alerts/@featured` with no query string, but Popplio
+  requires `acked_count`/`unacked_count` as integers every request
+  400'd, silently swallowed by a bare `catch {}`. The bell has shown
+  nothing since it was built, independent of the earlier `NoSave` fix.
+  Now sends both with sensible defaults.
+
 ## [0.2.0] - 2026-08-16
 
 ### Added

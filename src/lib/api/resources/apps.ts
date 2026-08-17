@@ -2,7 +2,6 @@ import { client } from "../client";
 import type { AppListResponse, AppMeta, CreateAppPayload } from "../types";
 
 export const appsResource = {
-  /** Public — the list of open positions and their questions. */
   getMeta: () => client.get<AppMeta>("/apps/meta", { cache: "no-store" }),
   list: (userId: string, token: string) =>
     client.get<AppListResponse>(`/users/${userId}/apps`, {

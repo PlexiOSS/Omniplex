@@ -20,6 +20,7 @@ export const authResource = {
     code: string,
     clientId: string,
     redirectUri: string,
+    scope: "normal" | "ban_exempt" = "normal",
   ): Promise<AuthSession> => {
     const res = await client.post<CreateSessionResponse>(
       "/auth/login/discord-oauth2",
@@ -28,7 +29,7 @@ export const authResource = {
         redirect_uri: redirectUri,
         client_id: clientId,
         protocol: "persepolis-infernoplex",
-        scope: "normal",
+        scope,
       },
       { cache: "no-store" },
     );

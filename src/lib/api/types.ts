@@ -111,6 +111,52 @@ export interface Bot {
 }
 
 // ---------------------------------------------------------------------------
+// Bot commands & changelogs — owner/team-documented, shown as tabs on the
+// bot's public page
+// ---------------------------------------------------------------------------
+
+export interface BotCommand {
+  id: string;
+  name: string;
+  description: string;
+  usage: string;
+  category: string;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BotCommandList {
+  commands: BotCommand[];
+}
+
+export interface BotCommandInput {
+  name: string;
+  description: string;
+  usage: string;
+  category: string;
+}
+
+export interface BotChangelog {
+  id: string;
+  title: string;
+  content: string;
+  version: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface BotChangelogList {
+  changelogs: BotChangelog[];
+}
+
+export interface CreateBotChangelogPayload {
+  title: string;
+  content: string;
+  version: string;
+}
+
+// ---------------------------------------------------------------------------
 // Servers — note: servers have `name` directly (not via user)
 // ---------------------------------------------------------------------------
 
@@ -497,6 +543,21 @@ export interface EntityVoteRedeemLogSummary {
   redeemed_credits: number;
 }
 
+export interface EntityVote {
+  itag: string;
+  target_type: string;
+  target_id: string;
+  author: string;
+  upvote: boolean;
+  void: boolean;
+  void_reason: string | null;
+  voided_at: string | null;
+  created_at: string;
+  vote_num: number;
+  credit_redeem: string | null;
+  immutable: boolean;
+}
+
 export interface ShopItem {
   id: string;
   name: string;
@@ -792,6 +853,10 @@ export interface PaypalMeta {
   paypal_client_id: string;
 }
 
+export interface StripeMeta {
+  stripe_public_key: string;
+}
+
 export interface RedirectUser {
   url: string;
 }
@@ -952,6 +1017,31 @@ export interface ReminderList {
 }
 
 // ---------------------------------------------------------------------------
+// Badges (public, read-only — assigning one is a staff-only action through
+// Arcadia's panel/RPC layer)
+// ---------------------------------------------------------------------------
+
+export interface BadgeCatalog {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  target_types: string[];
+}
+
+export interface EntityBadge {
+  badge: BadgeCatalog;
+  reason: string;
+  awarded_by: string;
+  created_at: string;
+}
+
+export interface EntityBadgeList {
+  badges: EntityBadge[];
+}
+
+// ---------------------------------------------------------------------------
 // Reviews
 // ---------------------------------------------------------------------------
 
@@ -1014,6 +1104,31 @@ export interface Partner {
 export interface PartnerList {
   partners: Partner[];
   partner_types: PartnerType[];
+}
+
+// ---------------------------------------------------------------------------
+// Staff review templates (canned Approve/Deny reasons for the bot queue)
+// ---------------------------------------------------------------------------
+
+export interface StaffTemplateType {
+  id: string;
+  name: string;
+  icon: string;
+  short: string;
+}
+
+export interface StaffTemplate {
+  id: string;
+  name: string;
+  emoji: string;
+  tags: string[];
+  description: string;
+  type: string;
+}
+
+export interface StaffTemplateList {
+  template_types: StaffTemplateType[];
+  templates: StaffTemplate[];
 }
 
 // ---------------------------------------------------------------------------

@@ -8,17 +8,12 @@ import { getObject, putObject } from "@/lib/s3/objects";
  * either a stale/dead value (see mirroredAvatarUrl's isDeadCdnUrl) or, since
  * this is a public unauthenticated route, a caller trying to make this
  * server fetch (and then cache-poison the shared bucket with) an arbitrary
- * URL — classic SSRF. Reject before ever calling fetch(), not after. */
+ * URL — classic SSRF. Reject before ever calling fetch(), not after. The
+ * check is inlined right next to the fetch() call it guards (rather than a
+ * separate helper feeding a pre-checked variable into it), so the allow-list
+ * comparison sits directly between the request-derived value and the
+ * outgoing request. */
 const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
-
-function isAllowedAvatarSrc(src: string): boolean {
-  try {
-    const url = new URL(src);
-    return url.protocol === "https:" && url.hostname === DISCORD_CDN_HOST;
-  } catch {
-    return false;
-  }
-}
 
 interface Params {
   params: Promise<{ targetType: string; id: string }>;
@@ -62,15 +57,14 @@ export async function GET(req: Request, { params }: Params) {
 
   const key = `avatars/${targetType}/${id}`;
   const rawSrc = new URL(req.url).searchParams.get("src");
-  const liveSrc = rawSrc && isAllowedAvatarSrc(rawSrc) ? rawSrc : null;
 
   const cached = await getObject(key);
   const isStale =
     !cached?.lastModified ||
     Date.now() - cached.lastModified.getTime() > AVATAR_MIRROR_MAX_AGE_MS;
 
-  if ((!cached || isStale) && liveSrc) {
-    const mirrored = await fetchFromDiscord(liveSrc);
+  if ((!cached || isStale) && rawSrc) {
+    const mirrored = await fetchFromDiscord(rawSrc);
     if (mirrored) {
       // Best-effort — doesn't block serving these freshly-fetched bytes.
       putObject(key, mirrored.body, mirrored.contentType);
@@ -106,10 +100,25 @@ export async function GET(req: Request, { params }: Params) {
 }
 
 async function fetchFromDiscord(
-  liveSrc: string,
+  rawSrc: string,
 ): Promise<{ body: Uint8Array; contentType: string } | null> {
+  let url: URL;
+
   try {
-    const res = await fetch(liveSrc, { signal: AbortSignal.timeout(2500) });
+    url = new URL(rawSrc);
+  } catch {
+    return null;
+  }
+
+  // The allow-list check the file's top comment describes, right next to
+  // the fetch() it guards: anything not https + the exact Discord CDN host
+  // is rejected here, before this server ever makes a request to it.
+  if (url.protocol !== "https:" || url.hostname !== DISCORD_CDN_HOST) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(2500) });
     if (!res.ok) return null;
     const contentType = res.headers.get("content-type") ?? "image/webp";
     const body = new Uint8Array(await res.arrayBuffer());

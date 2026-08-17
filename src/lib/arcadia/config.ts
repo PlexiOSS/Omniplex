@@ -5,7 +5,8 @@
 // which lands on the real endpoint as a GET and fails with a misleading
 // "Method Not Allowed", making the panel API look down when it isn't.
 export const ARCADIA_URL = (
-  process.env.NEXT_PUBLIC_ARCADIA_URL ?? "https://staging--panel-api.omniplex.gg"
+  process.env.NEXT_PUBLIC_ARCADIA_URL ??
+  "https://staging--panel-api.omniplex.gg"
 ).replace(/\/+$/, "");
 
 export const ARCADIA_PANEL_SCOPE =

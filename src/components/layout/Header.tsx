@@ -97,6 +97,18 @@ const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
     items: [
       { href: "/admin/blog", label: "Blog" },
       { href: "/admin/partners", label: "Partners" },
+      { href: "/admin/badges", label: "Badges" },
+    ],
+  },
+  {
+    label: "Shop",
+    items: [
+      { href: "/admin/shop/items", label: "Items" },
+      { href: "/admin/shop/benefits", label: "Benefits" },
+      { href: "/admin/shop/tiers", label: "Vote Credit Tiers" },
+      { href: "/admin/shop/coupons", label: "Coupons" },
+      { href: "/admin/shop/whitelist", label: "Bot Whitelist" },
+      { href: "/admin/shop/purchases", label: "Purchases" },
     ],
   },
   { href: "/admin/search", label: "Search" },
@@ -115,6 +127,23 @@ export function Header() {
     useArcadiaAuth();
   const { me } = useMe(session);
   const isStaff = me?.staff ?? false;
+
+  // Catches a session that was already active when the ban was applied —
+  // the fresh-login path (auth/sauron) already sends a new ban straight to
+  // /banned, but an existing session's next page navigation is the only
+  // chance to catch one that happened mid-session, since GET /users/{id}
+  // is a public, unauthenticated endpoint and never itself rejects them.
+  useEffect(() => {
+    if (
+      me?.banned &&
+      pathname !== "/banned" &&
+      !pathname.startsWith("/apps/banappeal") &&
+      !pathname.startsWith("/auth")
+    ) {
+      router.replace("/banned");
+    }
+  }, [me?.banned, pathname, router]);
+
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
