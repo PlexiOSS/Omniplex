@@ -19,6 +19,18 @@ const KNOWN_LINK_ICONS: Record<string, typeof Globe> = {
   github: GitBranch,
 };
 
+function dedupeById<T>(a: T[], b: T[], idOf: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const item of [...a, ...b]) {
+    const id = idOf(item);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(item);
+  }
+  return out;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const user = await users.getUser(id).catch(() => null);
@@ -51,9 +63,27 @@ export default async function UserPage({ params }: Props) {
     (l: ApiLink) => !l.name.startsWith("_"),
   );
 
+  // user_bots/user_servers only cover directly-owned entities. Bots and
+  // servers owned by a team this user belongs to live under
+  // user_teams[].entities instead (same aggregation the dashboard does for
+  // "my bots/servers") — merge them in so the profile isn't missing
+  // anything the user can actually see on their own dashboard.
+  const teamBots = user.user_teams.flatMap(
+    (team) => team.entities?.bots ?? [],
+  );
+  const teamServers = user.user_teams.flatMap(
+    (team) => team.entities?.servers ?? [],
+  );
+  const allBots = dedupeById(user.user_bots, teamBots, (b) => b.bot_id);
+  const allServers = dedupeById(
+    user.user_servers,
+    teamServers,
+    (s) => s.server_id,
+  );
+
   const hasNothingListed =
-    user.user_bots.length === 0 &&
-    user.user_servers.length === 0 &&
+    allBots.length === 0 &&
+    allServers.length === 0 &&
     user.user_packs.length === 0 &&
     user.user_teams.length === 0;
 
@@ -127,8 +157,8 @@ export default async function UserPage({ params }: Props) {
       </div>
 
       <UserEntityTabs
-        bots={user.user_bots}
-        servers={user.user_servers}
+        bots={allBots}
+        servers={allServers}
         packs={user.user_packs}
         teams={user.user_teams}
       />

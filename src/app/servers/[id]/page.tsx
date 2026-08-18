@@ -13,15 +13,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Markdown } from "@/components/markdown/Markdown";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
-import { ReviewsSection } from "@/components/reviews/ReviewsSection";
-import { EmojiStickerGallery } from "@/components/servers/EmojiStickerGallery";
+import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import { VoterList } from "@/components/votes/VoterList";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -190,36 +187,14 @@ export default async function ServerPage({ params }: Props) {
             <ReminderToggle targetType="server" targetId={server.server_id} />
           </div>
 
-          <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-            <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-              About
-            </h2>
-            {server.long?.trim() ? (
-              <Markdown
-                content={server.long}
-                className="text-sm text-zinc-700 dark:text-zinc-300"
-              />
-            ) : (
-              <p className="text-sm text-zinc-400 dark:text-zinc-600">
-                No description provided.
-              </p>
-            )}
-          </div>
-
-          {server.show_emojis && (
-            <EmojiStickerGallery
-              emojis={server.emojis}
-              stickers={server.stickers}
-            />
-          )}
-
-          <ReviewsSection
-            targetType="server"
-            targetId={server.server_id}
+          <ServerPageTabs
+            serverId={server.server_id}
+            longDescription={server.long ?? ""}
+            showEmojis={server.show_emojis}
+            emojis={server.emojis}
+            stickers={server.stickers}
             initialReviews={reviewList.reviews}
           />
-
-          <VoterList targetType="server" targetId={server.server_id} />
         </div>
 
         {/* Sidebar */}

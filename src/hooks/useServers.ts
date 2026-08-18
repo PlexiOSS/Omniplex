@@ -3,6 +3,8 @@
 import useSWR from "swr";
 import { servers } from "@/lib/api";
 import type {
+  FlatEmoji,
+  FlatSticker,
   IndexServer,
   ListIndexServer,
   PagedResult,
@@ -29,5 +31,18 @@ export function useServerEmojis(page = 1) {
   return useSWR<PagedResult<ServerEmojiPreview[]>>(
     `servers/emojis/${page}`,
     () => servers.getEmojis(page),
+  );
+}
+
+export function useFlatEmojis(page = 1) {
+  return useSWR<PagedResult<FlatEmoji[]>>(`servers/emojis/flat/${page}`, () =>
+    servers.getFlatEmojis(page),
+  );
+}
+
+export function useFlatStickers(page = 1) {
+  return useSWR<PagedResult<FlatSticker[]>>(
+    `servers/stickers/flat/${page}`,
+    () => servers.getFlatStickers(page),
   );
 }

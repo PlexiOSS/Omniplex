@@ -38,7 +38,7 @@ const FOOTER_LINKS = [
     heading: "Company",
     links: [
       { href: "/about", label: "About Us" },
-      { href: "/about/status", label: "System Status" },
+      { href: "https://status.omniplex.gg", label: "System Status" },
       { href: "/about/moderation", label: "Moderation Stats" },
       { href: "/staff", label: "Staff Hierarchy" },
       { href: "/partners", label: "Our Partners" },

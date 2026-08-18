@@ -234,6 +234,30 @@ export interface ServerEmojiPreview {
   stickers: ServerSticker[];
 }
 
+/** GET /servers/@emojis/flat — one emoji per row, flattened across every
+ * opted-in server, for the item-level-paginated browse page. */
+export interface FlatEmoji {
+  server_id: string;
+  server_name: string;
+  server_avatar: string;
+  id: string;
+  name: string;
+  animated: boolean;
+  url: string;
+}
+
+/** GET /servers/@stickers/flat — sticker counterpart of FlatEmoji. */
+export interface FlatSticker {
+  server_id: string;
+  server_name: string;
+  server_avatar: string;
+  id: string;
+  name: string;
+  /** "png" | "apng" | "lottie" | "gif" */
+  format: string;
+  url: string;
+}
+
 export interface TeamMember {
   itag: string;
   team_id: string;

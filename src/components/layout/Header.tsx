@@ -61,6 +61,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/partners", label: "Our Partners" },
       { href: "/kb", label: "Knowledge Base" },
       { href: "https://docs.omniplex.gg", label: "Documentation" },
+      { href: "https://status.omniplex.gg", label: "System Status" }
     ],
   },
   { href: "/search", label: "Search" },

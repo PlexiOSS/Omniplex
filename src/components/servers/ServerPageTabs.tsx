@@ -1,71 +1,56 @@
 "use client";
 
-import { BookOpen, Megaphone, MessageSquare, Terminal, Users } from "lucide-react";
+import { BookOpen, MessageSquare, Smile, Users } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
-import { useAuth } from "@/hooks/useAuth";
-import { teams as teamsApi } from "@/lib/api";
-import type { BotChangelog, BotCommand, Review } from "@/lib/api/types";
-import { hasPermString } from "@/lib/permissions";
-import { BotChangelogSection } from "./BotChangelogSection";
-import { BotCommandsSection } from "./BotCommandsSection";
+import type { Review, ServerEmoji, ServerSticker } from "@/lib/api/types";
+import { EmojiStickerGallery } from "./EmojiStickerGallery";
 
-type Tab = "about" | "commands" | "changelog" | "reviews" | "voters";
+type Tab = "about" | "emojis" | "reviews" | "voters";
 
-interface BotPageTabsProps {
-  botId: string;
+interface ServerPageTabsProps {
+  serverId: string;
   longDescription: string;
-  commands: BotCommand[];
-  changelogs: BotChangelog[];
+  showEmojis: boolean;
+  emojis: ServerEmoji[];
+  stickers: ServerSticker[];
   initialReviews: Review[];
 }
 
-const TAB_KEYS: Tab[] = ["about", "commands", "changelog", "reviews", "voters"];
+const TAB_KEYS: Tab[] = ["about", "emojis", "reviews", "voters"];
 
-export function BotPageTabs(props: BotPageTabsProps) {
+export function ServerPageTabs(props: ServerPageTabsProps) {
   return (
-    <Suspense fallback={<BotPageTabsInner {...props} initialTab="about" />}>
-      <BotPageTabsWithSearchParams {...props} />
+    <Suspense fallback={<ServerPageTabsInner {...props} initialTab="about" />}>
+      <ServerPageTabsWithSearchParams {...props} />
     </Suspense>
   );
 }
 
-function BotPageTabsWithSearchParams(props: BotPageTabsProps) {
+function ServerPageTabsWithSearchParams(props: ServerPageTabsProps) {
   const searchParams = useSearchParams();
   const requested = searchParams.get("tab");
-  const initialTab: Tab = (
-    TAB_KEYS as string[]
-  ).includes(requested ?? "")
+  const initialTab: Tab = (TAB_KEYS as string[]).includes(requested ?? "")
     ? (requested as Tab)
     : "about";
-  return <BotPageTabsInner {...props} initialTab={initialTab} />;
+  return <ServerPageTabsInner {...props} initialTab={initialTab} />;
 }
 
-function BotPageTabsInner({
-  botId,
+function ServerPageTabsInner({
+  serverId,
   longDescription,
-  commands,
-  changelogs,
+  showEmojis,
+  emojis,
+  stickers,
   initialReviews,
   initialTab,
-}: BotPageTabsProps & { initialTab: Tab }) {
-  const { session } = useAuth();
+}: ServerPageTabsProps & { initialTab: Tab }) {
   const [tab, setTab] = useState<Tab>(initialTab);
-  const [canEdit, setCanEdit] = useState(false);
 
-  useEffect(() => {
-    if (!session) {
-      setCanEdit(false);
-      return;
-    }
-    teamsApi
-      .getEntityPerms(session.user_id, "bot", botId)
-      .then((data) => setCanEdit(hasPermString(data.perms, "edit_bots")))
-      .catch(() => setCanEdit(false));
-  }, [session, botId]);
+  const hasEmojiTab = showEmojis && (emojis.length > 0 || stickers.length > 0);
 
   const tabs: {
     key: Tab;
@@ -74,18 +59,16 @@ function BotPageTabsInner({
     count: number | null;
   }[] = [
     { key: "about", label: "About", icon: BookOpen, count: null },
-    {
-      key: "commands",
-      label: "Commands",
-      icon: Terminal,
-      count: commands.length,
-    },
-    {
-      key: "changelog",
-      label: "Changelog",
-      icon: Megaphone,
-      count: changelogs.length,
-    },
+    ...(hasEmojiTab
+      ? [
+          {
+            key: "emojis" as Tab,
+            label: "Emojis & Stickers",
+            icon: Smile,
+            count: emojis.length + stickers.length,
+          },
+        ]
+      : []),
     {
       key: "reviews",
       label: "Reviews",
@@ -136,33 +119,21 @@ function BotPageTabsInner({
             </p>
           ))}
 
-        {tab === "commands" && (
-          <BotCommandsSection
-            botId={botId}
-            initialCommands={commands}
-            canEdit={canEdit}
-            token={session?.token}
-          />
-        )}
-
-        {tab === "changelog" && (
-          <BotChangelogSection
-            botId={botId}
-            initialChangelogs={changelogs}
-            canEdit={canEdit}
-            token={session?.token}
-          />
+        {tab === "emojis" && hasEmojiTab && (
+          <EmojiStickerGallery emojis={emojis} stickers={stickers} noTopBorder />
         )}
 
         {tab === "reviews" && (
           <ReviewsSection
-            targetType="bot"
-            targetId={botId}
+            targetType="server"
+            targetId={serverId}
             initialReviews={initialReviews}
           />
         )}
 
-        {tab === "voters" && <VoterList targetType="bot" targetId={botId} />}
+        {tab === "voters" && (
+          <VoterList targetType="server" targetId={serverId} />
+        )}
       </div>
     </div>
   );
