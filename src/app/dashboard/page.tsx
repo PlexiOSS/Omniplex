@@ -10,6 +10,7 @@ import {
   Globe,
   KeyRound,
   LayoutDashboard,
+  Megaphone,
   MoreHorizontal,
   Package,
   Pencil,
@@ -17,6 +18,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   Sparkles,
+  Terminal,
   Trash2,
   User,
   Users,
@@ -515,6 +517,28 @@ function BotItem({
             >
               Stats
             </DropdownItem>
+            {canManage && (
+              <DropdownItem
+                icon={<Terminal size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=commands`);
+                }}
+              >
+                Commands
+              </DropdownItem>
+            )}
+            {canManage && (
+              <DropdownItem
+                icon={<Megaphone size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=changelog`);
+                }}
+              >
+                Changelog
+              </DropdownItem>
+            )}
             {canSeeTokens && (
               <DropdownItem
                 icon={<KeyRound size={14} />}

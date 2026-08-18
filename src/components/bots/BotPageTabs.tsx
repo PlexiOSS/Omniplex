@@ -1,7 +1,8 @@
 "use client";
 
 import { BookOpen, Megaphone, MessageSquare, Terminal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
@@ -21,15 +22,37 @@ interface BotPageTabsProps {
   initialReviews: Review[];
 }
 
-export function BotPageTabs({
+const TAB_KEYS: Tab[] = ["about", "commands", "changelog", "reviews"];
+
+export function BotPageTabs(props: BotPageTabsProps) {
+  return (
+    <Suspense fallback={<BotPageTabsInner {...props} initialTab="about" />}>
+      <BotPageTabsWithSearchParams {...props} />
+    </Suspense>
+  );
+}
+
+function BotPageTabsWithSearchParams(props: BotPageTabsProps) {
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("tab");
+  const initialTab: Tab = (
+    TAB_KEYS as string[]
+  ).includes(requested ?? "")
+    ? (requested as Tab)
+    : "about";
+  return <BotPageTabsInner {...props} initialTab={initialTab} />;
+}
+
+function BotPageTabsInner({
   botId,
   longDescription,
   commands,
   changelogs,
   initialReviews,
-}: BotPageTabsProps) {
+  initialTab,
+}: BotPageTabsProps & { initialTab: Tab }) {
   const { session } = useAuth();
-  const [tab, setTab] = useState<Tab>("about");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [canEdit, setCanEdit] = useState(false);
 
   useEffect(() => {
