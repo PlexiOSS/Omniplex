@@ -61,7 +61,7 @@ export function ReviewsSection({
     : 0;
 
   return (
-    <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+    <div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
           Reviews
@@ -111,9 +111,28 @@ export function ReviewsSection({
 
       <div className="mt-4 space-y-4">
         {roots.length === 0 && (
-          <p className="text-sm text-zinc-400 dark:text-zinc-600">
-            No reviews yet.
-          </p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <MessageSquare
+              size={28}
+              className="mb-3 text-zinc-300 dark:text-zinc-700"
+            />
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              No reviews yet.
+            </p>
+            {!isAuthenticated && (
+              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                <SignInLink className="text-accent underline underline-offset-2">
+                  Sign in
+                </SignInLink>{" "}
+                to be the first to leave one.
+              </p>
+            )}
+            {isAuthenticated && !myReview && (
+              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                Be the first to leave one.
+              </p>
+            )}
+          </div>
         )}
 
         {roots.map((review) => (

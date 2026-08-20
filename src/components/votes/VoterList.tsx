@@ -1,5 +1,6 @@
 "use client";
 
+import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { users, votes } from "@/lib/api";
@@ -65,33 +66,43 @@ export function VoterList({ targetType, targetId }: VoterListProps) {
     };
   }, [targetType, targetId]);
 
-  if (!voters || voters.length === 0) return null;
+  if (voters === null) {
+    return (
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+    );
+  }
+
+  if (voters.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <Users size={28} className="mb-3 text-zinc-300 dark:text-zinc-700" />
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          No votes yet.
+        </p>
+      </div>
+    );
+  }
 
   const extra = total !== null ? Math.max(total - voters.length, 0) : 0;
 
   return (
-    <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-      <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-        Recent voters
-      </h2>
-      <div className="flex flex-wrap gap-3">
-        {voters.map((voter) => (
-          <div
-            key={voter.id}
-            className="flex items-center gap-2 rounded-xl border border-zinc-200 py-1.5 pr-3 pl-1.5 dark:border-zinc-800"
-          >
-            <Avatar src={voter.avatar} alt={voter.username} size={24} />
-            <span className="max-w-32 truncate text-sm text-zinc-700 dark:text-zinc-300">
-              {voter.username}
-            </span>
-          </div>
-        ))}
-        {extra > 0 && (
-          <div className="flex items-center rounded-xl border border-zinc-200 px-3 py-1.5 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-            +{extra} more
-          </div>
-        )}
-      </div>
+    <div className="flex flex-wrap gap-3">
+      {voters.map((voter) => (
+        <div
+          key={voter.id}
+          className="flex items-center gap-2 rounded-xl border border-zinc-200 py-1.5 pr-3 pl-1.5 dark:border-zinc-800"
+        >
+          <Avatar src={voter.avatar} alt={voter.username} size={24} />
+          <span className="max-w-32 truncate text-sm text-zinc-700 dark:text-zinc-300">
+            {voter.username}
+          </span>
+        </div>
+      ))}
+      {extra > 0 && (
+        <div className="flex items-center rounded-xl border border-zinc-200 px-3 py-1.5 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+          +{extra} more
+        </div>
+      )}
     </div>
   );
 }

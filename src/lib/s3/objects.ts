@@ -1,6 +1,10 @@
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { S3_BUCKET } from "./config";
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getS3Client } from "./client";
+import { S3_BUCKET } from "./config";
 
 export interface FetchedObject {
   stream: ReadableStream;
@@ -12,6 +16,29 @@ export interface FetchedObject {
    * stale" the instant someone re-uploads a banner/avatar, instead of
    * waiting out a fixed cache lifetime. */
   etag?: string;
+}
+
+export interface ObjectMeta {
+  etag?: string;
+  lastModified?: Date;
+}
+
+/**
+ * Metadata only, no body — what a conditional request (If-None-Match)
+ * should use instead of getObject. A HEAD is a fraction of the cost of a
+ * GET on a multi-MB banner, and previously every single request pulled the
+ * full object down from RustFS just to potentially throw it away on a 304.
+ */
+export async function headObject(key: string): Promise<ObjectMeta | null> {
+  try {
+    const res = await getS3Client().send(
+      new HeadObjectCommand({ Bucket: S3_BUCKET, Key: key }),
+    );
+    return { etag: res.ETag, lastModified: res.LastModified };
+  } catch (err) {
+    logUnlessNotFound(key, err);
+    return null;
+  }
 }
 
 /**
@@ -66,7 +93,10 @@ export async function putObject(
 }
 
 function logUnlessNotFound(key: string, err: unknown): void {
-  const name = err && typeof err === "object" ? (err as { name?: string }).name : undefined;
+  const name =
+    err && typeof err === "object"
+      ? (err as { name?: string }).name
+      : undefined;
   if (name === "NoSuchKey" || name === "NotFound") return;
   console.error(`[s3] getObject(${key}) failed:`, err);
 }

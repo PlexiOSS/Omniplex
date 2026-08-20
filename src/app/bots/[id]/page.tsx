@@ -10,16 +10,14 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BotPageTabs } from "@/components/bots/BotPageTabs";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Markdown } from "@/components/markdown/Markdown";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
-import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import { VoterList } from "@/components/votes/VoterList";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -72,9 +70,11 @@ export default async function BotPage({ params }: Props) {
   }
   if (!bot) notFound();
 
-  const reviewList = await reviews
-    .getAll("bot", bot.bot_id)
-    .catch(() => ({ reviews: [] }));
+  const [reviewList, commandList, changelogList] = await Promise.all([
+    reviews.getAll("bot", bot.bot_id).catch(() => ({ reviews: [] })),
+    bots.getCommands(bot.bot_id).catch(() => ({ commands: [] })),
+    bots.getChangelogs(bot.bot_id).catch(() => ({ changelogs: [] })),
+  ]);
 
   const avatarSrc = mirroredAvatarUrl(
     "bots",
@@ -182,30 +182,13 @@ export default async function BotPage({ params }: Props) {
             <ReminderToggle targetType="bot" targetId={bot.bot_id} />
           </div>
 
-          {/* Long description */}
-          <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-            <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-              About
-            </h2>
-            {bot.long?.trim() ? (
-              <Markdown
-                content={bot.long}
-                className="text-sm text-zinc-700 dark:text-zinc-300"
-              />
-            ) : (
-              <p className="text-sm text-zinc-400 dark:text-zinc-600">
-                No description provided.
-              </p>
-            )}
-          </div>
-
-          <ReviewsSection
-            targetType="bot"
-            targetId={bot.bot_id}
+          <BotPageTabs
+            botId={bot.bot_id}
+            longDescription={bot.long ?? ""}
+            commands={commandList.commands}
+            changelogs={changelogList.changelogs}
             initialReviews={reviewList.reviews}
           />
-
-          <VoterList targetType="bot" targetId={bot.bot_id} />
         </div>
 
         {/* Sidebar */}

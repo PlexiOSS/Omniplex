@@ -1,86 +1,140 @@
-import Image from "next/image";
+"use client";
+
+import { Check, Copy, Sparkles } from "lucide-react";
+import { useState } from "react";
 import type { ServerEmoji, ServerSticker } from "@/lib/api/types";
+import { EmojiImage, isAnimatedSticker, StickerMedia } from "./EmojiStickerMedia";
 
 interface EmojiStickerGalleryProps {
   emojis: ServerEmoji[];
   stickers: ServerSticker[];
+  /** Set when rendered inside its own tab panel (ServerPageTabs), which already provides its own separation from the tab bar above. */
+  noTopBorder?: boolean;
 }
 
+/** A single server's own emoji/sticker list — shown on that server's own page, where the "which server" context is already obvious from the page you're on. */
 export function EmojiStickerGallery({
   emojis,
   stickers,
+  noTopBorder = false,
 }: EmojiStickerGalleryProps) {
-  // Lottie stickers are a JSON animation format, not an image — there's
-  // nothing to put in an <img>/<Image> for them.
-  const renderableStickers = stickers.filter((s) => s.format !== "lottie");
-
-  if (emojis.length === 0 && renderableStickers.length === 0) return null;
+  if (emojis.length === 0 && stickers.length === 0) return null;
 
   return (
-    <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+    <div
+      className={
+        noTopBorder
+          ? ""
+          : "mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800"
+      }
+    >
       {emojis.length > 0 && (
-        <div className={renderableStickers.length > 0 ? "mb-6" : ""}>
+        <div className={stickers.length > 0 ? "mb-8" : ""}>
           <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
             Emojis
             <span className="ml-2 text-sm font-normal text-zinc-400 dark:text-zinc-600">
               {emojis.length}
             </span>
           </h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-3">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(88px,1fr))] gap-3">
             {emojis.map((emoji) => (
-              <div
-                key={emoji.id}
-                title={`:${emoji.name}:`}
-                className="group flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
-              >
-                <Image
-                  src={emoji.url}
-                  alt={emoji.name}
-                  width={32}
-                  height={32}
-                  unoptimized={emoji.animated}
-                  className="transition-transform group-hover:scale-110"
-                />
-                <span className="w-full truncate text-center text-[11px] text-zinc-500 dark:text-zinc-400">
-                  {emoji.name}
-                </span>
-              </div>
+              <EmojiTile key={emoji.id} emoji={emoji} />
             ))}
           </div>
         </div>
       )}
 
-      {renderableStickers.length > 0 && (
+      {stickers.length > 0 && (
         <div>
           <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
             Stickers
             <span className="ml-2 text-sm font-normal text-zinc-400 dark:text-zinc-600">
-              {renderableStickers.length}
+              {stickers.length}
             </span>
           </h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-3">
-            {renderableStickers.map((sticker) => (
-              <div
-                key={sticker.id}
-                title={sticker.name}
-                className="group flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50 p-3 transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
-              >
-                <Image
-                  src={sticker.url}
-                  alt={sticker.name}
-                  width={64}
-                  height={64}
-                  unoptimized={sticker.format === "gif"}
-                  className="object-contain transition-transform group-hover:scale-110"
-                />
-                <span className="w-full truncate text-center text-[11px] text-zinc-500 dark:text-zinc-400">
-                  {sticker.name}
-                </span>
-              </div>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3">
+            {stickers.map((sticker) => (
+              <StickerTile key={sticker.id} sticker={sticker} />
             ))}
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function EmojiTile({ emoji }: { emoji: ServerEmoji }) {
+  const [copied, setCopied] = useState(false);
+
+  function copy() {
+    navigator.clipboard.writeText(`:${emoji.name}:`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      title={`:${emoji.name}: — click to copy`}
+      className="group relative flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
+    >
+      {emoji.animated && (
+        <Sparkles
+          size={11}
+          className="absolute right-1.5 top-1.5 text-accent"
+        />
+      )}
+      <EmojiImage url={emoji.url} name={emoji.name} animated={emoji.animated} />
+      <span className="flex w-full items-center justify-center gap-1 text-center text-[11px] text-zinc-500 dark:text-zinc-400">
+        <span className="min-w-0 truncate">{emoji.name}</span>
+        {copied ? (
+          <Check size={10} className="shrink-0 text-emerald-500" />
+        ) : (
+          <Copy
+            size={10}
+            className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+          />
+        )}
+      </span>
+    </button>
+  );
+}
+
+function StickerTile({ sticker }: { sticker: ServerSticker }) {
+  const [copied, setCopied] = useState(false);
+
+  function copy() {
+    navigator.clipboard.writeText(sticker.name);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      title={`${sticker.name} — click to copy`}
+      className="group relative flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
+    >
+      {isAnimatedSticker(sticker.format) && (
+        <Sparkles
+          size={11}
+          className="absolute right-1.5 top-1.5 text-accent"
+        />
+      )}
+      <StickerMedia url={sticker.url} name={sticker.name} format={sticker.format} />
+      <span className="flex w-full items-center justify-center gap-1 text-center text-[11px] text-zinc-500 dark:text-zinc-400">
+        <span className="min-w-0 truncate">{sticker.name}</span>
+        {copied ? (
+          <Check size={10} className="shrink-0 text-emerald-500" />
+        ) : (
+          <Copy
+            size={10}
+            className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+          />
+        )}
+      </span>
+    </button>
   );
 }

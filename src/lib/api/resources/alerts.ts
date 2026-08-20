@@ -13,12 +13,16 @@ export const alertsResource = {
       cache: "no-store",
     }),
 
-  /** Unpaginated unacked+acked split — what the header bell dropdown uses. */
-  getFeatured: (userId: string, token: string) =>
-    client.get<FeaturedUserAlerts>(`/users/${userId}/alerts/@featured`, {
-      token,
-      cache: "no-store",
-    }),
+  getFeatured: (
+    userId: string,
+    token: string,
+    ackedCount = 8,
+    unackedCount = 8,
+  ) =>
+    client.get<FeaturedUserAlerts>(
+      `/users/${userId}/alerts/@featured?acked_count=${ackedCount}&unacked_count=${unackedCount}`,
+      { token, cache: "no-store" },
+    ),
 
   patch: (
     userId: string,

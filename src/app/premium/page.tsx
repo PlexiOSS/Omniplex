@@ -22,7 +22,9 @@ function durationLabel(hours: number): string {
   const days = Math.round(hours / 24);
   if (days >= 28) {
     const months = Math.round(days / 30);
-    return months >= 11 ? `${Math.round(months / 12)} year` : `${months} months`;
+    return months >= 11
+      ? `${Math.round(months / 12)} year`
+      : `${months} months`;
   }
   return `${days} days`;
 }
@@ -34,6 +36,7 @@ function PremiumPageInner() {
 
   const [plans, setPlans] = useState<PaymentPlan[] | null>(null);
   const [paypalAvailable, setPaypalAvailable] = useState(false);
+  const [stripeAvailable, setStripeAvailable] = useState(false);
   const [booster, setBooster] = useState<BoosterStatus | null>(null);
 
   const [entity, setEntity] = useState<Entity>(
@@ -42,7 +45,9 @@ function PremiumPageInner() {
   const [botId, setBotId] = useState(searchParams.get("bot") ?? "");
   const [serverId, setServerId] = useState(searchParams.get("server") ?? "");
   const [planId, setPlanId] = useState("");
-  const [submitting, setSubmitting] = useState<Provider | "redeem" | null>(null);
+  const [submitting, setSubmitting] = useState<Provider | "redeem" | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,6 +56,10 @@ function PremiumPageInner() {
       .getPaypalMeta()
       .then(() => setPaypalAvailable(true))
       .catch(() => setPaypalAvailable(false));
+    payments
+      .getStripeMeta()
+      .then((meta) => setStripeAvailable(Boolean(meta.stripe_public_key)))
+      .catch(() => setStripeAvailable(false));
   }, []);
 
   useEffect(() => {
@@ -106,7 +115,9 @@ function PremiumPageInner() {
             );
       window.location.href = url;
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to start checkout.");
+      setError(
+        err instanceof ApiError ? err.message : "Failed to start checkout.",
+      );
       setSubmitting(null);
     }
   }
@@ -126,7 +137,9 @@ function PremiumPageInner() {
       window.location.href = "/payments/success";
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Failed to redeem booster offer.",
+        err instanceof ApiError
+          ? err.message
+          : "Failed to redeem booster offer.",
       );
       setSubmitting(null);
     }
@@ -213,8 +226,8 @@ function PremiumPageInner() {
         <div className="mx-auto mt-10 max-w-md">
           {eligibleCount === 0 ? (
             <p className="rounded-xl border border-zinc-200 px-4 py-3 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-              None of your {entity}s are eligible right now a {entity} needs
-              to be approved or certified, and not already premium.
+              None of your {entity}s are eligible right now a {entity} needs to
+              be approved or certified, and not already premium.
             </p>
           ) : (
             <>
@@ -283,8 +296,8 @@ function PremiumPageInner() {
                   <Gift size={16} className="mt-0.5 shrink-0 text-accent" />
                   <div className="flex-1">
                     <p>
-                      You&apos;re a server booster redeem the Bronze plan
-                      free instead of paying.
+                      You&apos;re a server booster redeem the Bronze plan free
+                      instead of paying.
                     </p>
                     <Button
                       variant="secondary"
@@ -307,18 +320,20 @@ function PremiumPageInner() {
               )}
 
               <div className="mt-5 flex flex-col gap-2">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  loading={submitting === "stripe"}
-                  disabled={!targetId || !planId || submitting !== null}
-                  onClick={() => handleCheckout("stripe")}
-                >
-                  Pay with Card
-                </Button>
+                {stripeAvailable && (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    loading={submitting === "stripe"}
+                    disabled={!targetId || !planId || submitting !== null}
+                    onClick={() => handleCheckout("stripe")}
+                  >
+                    Pay with Card
+                  </Button>
+                )}
                 {paypalAvailable && (
                   <Button
-                    variant="secondary"
+                    variant={stripeAvailable ? "secondary" : "primary"}
                     size="lg"
                     loading={submitting === "paypal"}
                     disabled={!targetId || !planId || submitting !== null}
@@ -326,6 +341,12 @@ function PremiumPageInner() {
                   >
                     Pay with PayPal
                   </Button>
+                )}
+                {!stripeAvailable && !paypalAvailable && (
+                  <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+                    No payment methods are currently available. Please check
+                    back later.
+                  </p>
                 )}
               </div>
             </>

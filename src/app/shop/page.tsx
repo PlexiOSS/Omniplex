@@ -1,10 +1,19 @@
 "use client";
 
-import { Award, Coins, Megaphone, ShoppingBag, Sparkles, Star, Zap } from "lucide-react";
+import {
+  Award,
+  Coins,
+  Megaphone,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
+import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
@@ -13,11 +22,14 @@ import { useMe } from "@/hooks/useMe";
 import { shop, votes } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type {
+  EntityVote,
   EntityVoteRedeemLogSummary,
+  PagedResult,
   ShopItem,
   ShopItemBenefit,
   ShopPurchase,
   TargetType,
+  VoteCreditTier,
   VoteCreditTierRedeemSummary,
 } from "@/lib/api/types";
 import { mirroredAvatarUrl } from "@/lib/utils/assets";
@@ -51,18 +63,32 @@ function ShopPageInner() {
   );
   const [botId, setBotId] = useState(searchParams.get("bot") ?? "");
   const [serverId, setServerId] = useState(searchParams.get("server") ?? "");
-  const [creditSummary, setCreditSummary] = useState<EntityVoteRedeemLogSummary | null>(null);
-  const [voteSummary, setVoteSummary] = useState<VoteCreditTierRedeemSummary | null>(null);
+  const [creditSummary, setCreditSummary] =
+    useState<EntityVoteRedeemLogSummary | null>(null);
+  const [voteSummary, setVoteSummary] =
+    useState<VoteCreditTierRedeemSummary | null>(null);
   const [purchases, setPurchases] = useState<ShopPurchase[] | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [redeeming, setRedeeming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [tiers, setTiers] = useState<VoteCreditTier[] | null>(null);
+  const [voteHistory, setVoteHistory] = useState<PagedResult<
+    EntityVote[]
+  > | null>(null);
+  const [voteHistoryPage, setVoteHistoryPage] = useState(1);
 
   useEffect(() => {
     shop.getItems().then((res) => setItems(res.items));
     shop.getBenefits().then((res) => setBenefits(res.items));
   }, []);
+
+  useEffect(() => {
+    votes
+      .getGeneralCreditTiers(entity)
+      .then(setTiers)
+      .catch(() => setTiers(null));
+  }, [entity]);
 
   const ownedBots = me?.user_bots ?? [];
   const ownedServers = (me?.user_teams ?? []).flatMap(
@@ -79,10 +105,32 @@ function ShopPageInner() {
 
   const targetId = entity === "bot" ? botId : serverId;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: entity/targetId are triggers, not read in the body
+  useEffect(() => {
+    setVoteHistoryPage(1);
+  }, [entity, targetId]);
+
+  useEffect(() => {
+    if (!session || !targetId) {
+      setVoteHistory(null);
+      return;
+    }
+    votes
+      .getUserVotes(session.user_id, entity, targetId, voteHistoryPage)
+      .then(setVoteHistory)
+      .catch(() => setVoteHistory(null));
+  }, [session, entity, targetId, voteHistoryPage]);
+
   const refreshBalances = useCallback(() => {
     if (!targetId) return;
-    votes.getRedeemLogs(entity, targetId).then(setCreditSummary).catch(() => setCreditSummary(null));
-    votes.getCreditSummary(entity, targetId).then(setVoteSummary).catch(() => setVoteSummary(null));
+    votes
+      .getRedeemLogs(entity, targetId)
+      .then(setCreditSummary)
+      .catch(() => setCreditSummary(null));
+    votes
+      .getCreditSummary(entity, targetId)
+      .then(setVoteSummary)
+      .catch(() => setVoteSummary(null));
     shop
       .getPurchases(entity, targetId)
       .then((res) => setPurchases(res.items))
@@ -102,11 +150,18 @@ function ShopPageInner() {
     setRedeeming(true);
     setError(null);
     try {
-      await votes.redeemCredits(entity, targetId, voteSummary.votes, session.token);
+      await votes.redeemCredits(
+        entity,
+        targetId,
+        voteSummary.votes,
+        session.token,
+      );
       setNotice("Votes converted to credits.");
       refreshBalances();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to redeem votes.");
+      setError(
+        err instanceof ApiError ? err.message : "Failed to redeem votes.",
+      );
     } finally {
       setRedeeming(false);
     }
@@ -122,7 +177,9 @@ function ShopPageInner() {
       setNotice(`Purchased ${item.name}.`);
       refreshBalances();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to purchase item.");
+      setError(
+        err instanceof ApiError ? err.message : "Failed to purchase item.",
+      );
     } finally {
       setPurchasing(null);
     }
@@ -141,9 +198,9 @@ function ShopPageInner() {
           Shop
         </h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          Every vote a bot or server earns converts into credits. Spend them
-          on priority placement, a featured homepage slot, bonus premium
-          days, and more no card needed.
+          Every vote a bot or server earns converts into credits. Spend them on
+          priority placement, a featured homepage slot, bonus premium days, and
+          more no card needed.
         </p>
       </div>
 
@@ -164,6 +221,29 @@ function ShopPageInner() {
           </button>
         ))}
       </div>
+
+      {tiers && tiers.length > 0 && (
+        <div className="mx-auto mt-8 max-w-md">
+          <p className="text-center text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600">
+            Vote credit tiers
+          </p>
+          <div className="mt-2 divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+            {tiers.map((tier) => (
+              <div
+                key={tier.id}
+                className="flex items-center justify-between px-4 py-2 text-sm"
+              >
+                <span className="text-zinc-700 dark:text-zinc-300">
+                  {tier.votes} vote{tier.votes === 1 ? "" : "s"}
+                </span>
+                <span className="font-medium text-zinc-950 dark:text-zinc-50">
+                  {(tier.cents / 100).toFixed(2)} credits
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {authLoading || meLoading ? null : !isAuthenticated ? (
         <div className="mx-auto mt-10 max-w-md rounded-2xl border border-zinc-200 p-8 text-center dark:border-zinc-800">
@@ -200,7 +280,11 @@ function ShopPageInner() {
                     ].join(" ")}
                   >
                     <Avatar
-                      src={mirroredAvatarUrl("bots", bot.bot_id, bot.user.avatar)}
+                      src={mirroredAvatarUrl(
+                        "bots",
+                        bot.bot_id,
+                        bot.user.avatar,
+                      )}
                       alt={bot.user.username}
                       size={28}
                     />
@@ -255,7 +339,8 @@ function ShopPageInner() {
                   onClick={handleRedeem}
                 >
                   Convert {voteSummary.votes} vote
-                  {voteSummary.votes === 1 ? "" : "s"} ({(voteSummary.total_credits / 100).toFixed(2)})
+                  {voteSummary.votes === 1 ? "" : "s"} (
+                  {(voteSummary.total_credits / 100).toFixed(2)})
                 </Button>
               )}
             </div>
@@ -280,7 +365,8 @@ function ShopPageInner() {
             .filter((item) => item.target_types.includes(entity))
             .map((item) => {
               const Icon = BENEFIT_ICONS[item.benefits[0] ?? ""] ?? ShoppingBag;
-              const affordable = targetId && availableCredits >= Math.round(item.cents);
+              const affordable =
+                targetId && availableCredits >= Math.round(item.cents);
               return (
                 <div
                   key={item.id}
@@ -312,7 +398,8 @@ function ShopPageInner() {
                   <div className="mt-4 flex items-center justify-between">
                     <span className="text-sm text-zinc-500 dark:text-zinc-400">
                       {(item.cents / 100).toFixed(2)} credits
-                      {item.duration > 0 && ` · ${durationLabel(item.duration)}`}
+                      {item.duration > 0 &&
+                        ` · ${durationLabel(item.duration)}`}
                     </span>
                     <Button
                       variant="primary"
@@ -360,6 +447,53 @@ function ShopPageInner() {
           </div>
         </div>
       )}
+
+      {targetId &&
+        voteHistory &&
+        (voteHistory.results.length > 0 || voteHistoryPage > 1) && (
+          <div className="mx-auto mt-10 max-w-3xl">
+            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Vote history
+            </h2>
+            {voteHistory.results.length === 0 ? (
+              <p className="mt-3 text-sm text-zinc-400 dark:text-zinc-600">
+                No votes on this page.
+              </p>
+            ) : (
+              <div className="mt-3 divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+                {voteHistory.results.map((vote) => (
+                  <div
+                    key={vote.itag}
+                    className="flex items-center justify-between px-4 py-3 text-sm"
+                  >
+                    <span className="text-zinc-700 dark:text-zinc-300">
+                      Vote #{vote.vote_num}
+                      {vote.void && (
+                        <span className="ml-2 text-xs text-red-500 dark:text-red-400">
+                          Voided
+                          {vote.void_reason ? `: ${vote.void_reason}` : ""}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                      {formatRelativeTime(vote.created_at)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {voteHistory.count > voteHistory.per_page && (
+              <div className="mt-4">
+                <Pagination
+                  page={voteHistoryPage}
+                  total={voteHistory.count}
+                  perPage={voteHistory.per_page}
+                  onPageChange={setVoteHistoryPage}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
       <p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-600">
         Want to buy premium directly instead?{" "}

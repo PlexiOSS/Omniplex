@@ -4,6 +4,7 @@ import type {
   PaypalMeta,
   PlanList,
   RedirectUser,
+  StripeMeta,
   TargetType,
 } from "../types";
 
@@ -15,6 +16,12 @@ export const paymentsResource = {
    * that as "hide the PayPal option" rather than a hard error. */
   getPaypalMeta: () =>
     client.get<PaypalMeta>("/payments/paypal", { cache: "no-store" }),
+
+  /** Unlike PayPal's endpoint, this never errors even when unconfigured —
+   * it just returns an empty `stripe_public_key`. Callers should treat an
+   * empty key as "hide the Stripe option", not just a rejected request. */
+  getStripeMeta: () =>
+    client.get<StripeMeta>("/payments/stripe", { cache: "no-store" }),
 
   getBoosterStatus: (userId: string) =>
     client.get<BoosterStatus>(`/users/${userId}/booster`, {

@@ -3,12 +3,14 @@
 import {
   ArrowUpRight,
   BarChart2,
+  Bell,
   Bot,
   ClipboardList,
   GitBranch,
   Globe,
   KeyRound,
   LayoutDashboard,
+  Megaphone,
   MoreHorizontal,
   Package,
   Pencil,
@@ -16,14 +18,15 @@ import {
   ShieldCheck,
   ShoppingBag,
   Sparkles,
+  Terminal,
   Trash2,
   User,
   Users,
   Webhook as WebhookIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { TeamCard } from "@/components/cards/TeamCard";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
@@ -36,7 +39,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { bots, users } from "@/lib/api";
+import { bots, platform, users } from "@/lib/api";
 import type {
   Link as ApiLink,
   BotType,
@@ -50,6 +53,7 @@ import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { ApplicationsTab } from "./ApplicationsTab";
 import { BotEditModal } from "./BotEditModal";
+import { NotificationsTab } from "./NotificationsTab";
 import { PacksTab } from "./PacksTab";
 import { SecurityTab } from "./SecurityTab";
 import { ServerEditModal } from "./ServerEditModal";
@@ -67,6 +71,7 @@ type Tab =
   | "applications"
   | "teams"
   | "tokens"
+  | "notifications"
   | "security";
 
 const BOT_STATUS: Record<
@@ -212,6 +217,25 @@ function EditProfileTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshingDiscord, setRefreshingDiscord] = useState(false);
+  const [discordRefreshed, setDiscordRefreshed] = useState(false);
+
+  async function handleRefreshDiscord() {
+    const discordId = me.user?.id;
+    if (!discordId) return;
+    setRefreshingDiscord(true);
+    setDiscordRefreshed(false);
+    try {
+      await platform.clearDiscordUser(discordId);
+      mutate();
+      setDiscordRefreshed(true);
+      setTimeout(() => setDiscordRefreshed(false), 3000);
+    } catch {
+      // Best-effort — the cache just stays as it was.
+    } finally {
+      setRefreshingDiscord(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -243,6 +267,25 @@ function EditProfileTab({
 
   return (
     <div className="max-w-2xl space-y-5">
+      <div className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
+        <div>
+          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Discord username or avatar out of date?
+          </p>
+          <p className="text-xs text-zinc-400 dark:text-zinc-600">
+            Refreshes the cached copy we show across the site.
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={refreshingDiscord}
+          onClick={handleRefreshDiscord}
+        >
+          {discordRefreshed ? "Refreshed!" : "Refresh"}
+        </Button>
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="about"
@@ -474,6 +517,28 @@ function BotItem({
             >
               Stats
             </DropdownItem>
+            {canManage && (
+              <DropdownItem
+                icon={<Terminal size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=commands`);
+                }}
+              >
+                Commands
+              </DropdownItem>
+            )}
+            {canManage && (
+              <DropdownItem
+                icon={<Megaphone size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=changelog`);
+                }}
+              >
+                Changelog
+              </DropdownItem>
+            )}
             {canSeeTokens && (
               <DropdownItem
                 icon={<KeyRound size={14} />}
@@ -1002,13 +1067,30 @@ const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "applications", label: "Applications", icon: ClipboardList },
   { key: "teams", label: "Teams", icon: Users },
   { key: "tokens", label: "API Tokens", icon: KeyRound },
+  { key: "notifications", label: "Notifications", icon: Bell },
   { key: "security", label: "Security", icon: ShieldCheck },
 ];
 
+const VALID_TABS = new Set(TABS.map((t) => t.key));
+
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardPageInner />
+    </Suspense>
+  );
+}
+
+function DashboardPageInner() {
   const { session, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("overview");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => {
+    const requested = searchParams.get("tab");
+    return requested && VALID_TABS.has(requested as Tab)
+      ? (requested as Tab)
+      : "overview";
+  });
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -1109,6 +1191,9 @@ export default function DashboardPage() {
               <Badge variant="success">Certified Dev</Badge>
             )}
             {normalizedMe.bot_developer && <Badge>Bot Developer</Badge>}
+            {normalizedMe.bug_hunters && (
+              <Badge variant="danger">Bug Hunter</Badge>
+            )}
           </div>
         </div>
       </div>
@@ -1207,6 +1292,9 @@ export default function DashboardPage() {
             isSelf
           />
         </div>
+      )}
+      {tab === "notifications" && (
+        <NotificationsTab userId={session.user_id} token={session.token} />
       )}
       {tab === "security" && (
         <SecurityTab

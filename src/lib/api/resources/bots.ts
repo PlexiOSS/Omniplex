@@ -1,8 +1,13 @@
 import { client } from "../client";
 import type {
   Bot,
+  BotChangelog,
+  BotChangelogList,
+  BotCommandInput,
+  BotCommandList,
   BotSettingsUpdate,
   CaptchaSolution,
+  CreateBotChangelogPayload,
   DiscordBotMeta,
   IndexBot,
   ListIndexBot,
@@ -81,6 +86,34 @@ export const botsResource = {
     token: string,
   ) =>
     client.patch<void>(`/users/${userId}/bots/${botId}/teams`, payload, {
+      token,
+    }),
+
+  getCommands: (botId: string) =>
+    client.get<BotCommandList>(`/bots/${botId}/commands`, {
+      cache: "no-store",
+    }),
+
+  /** Replaces the whole command list — same "PUT the full array" convention as extra_links. */
+  updateCommands: (botId: string, commands: BotCommandInput[], token: string) =>
+    client.put<void>(`/bots/${botId}/commands`, { commands }, { token }),
+
+  getChangelogs: (botId: string) =>
+    client.get<BotChangelogList>(`/bots/${botId}/changelogs`, {
+      cache: "no-store",
+    }),
+
+  createChangelog: (
+    botId: string,
+    payload: CreateBotChangelogPayload,
+    token: string,
+  ) =>
+    client.post<BotChangelog>(`/bots/${botId}/changelogs`, payload, {
+      token,
+    }),
+
+  deleteChangelog: (botId: string, changelogId: string, token: string) =>
+    client.delete<void>(`/bots/${botId}/changelogs/${changelogId}`, {
       token,
     }),
 };

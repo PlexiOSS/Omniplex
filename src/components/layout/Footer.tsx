@@ -12,6 +12,7 @@ const FOOTER_LINKS = [
       { href: "/servers", label: "View Servers" },
       { href: "/packs", label: "View Packs" },
       { href: "/emojis", label: "View Emojis" },
+      { href: "/search", label: "Discovery" },
     ],
   },
   {
@@ -27,13 +28,17 @@ const FOOTER_LINKS = [
         href: "https://docs.omniplex.gg/docs/api-reference/rate-limits",
         label: "Rate Limits",
       },
+      {
+        href: "https://docs.omniplex.gg/docs/api-reference/webhooks",
+        label: "Webhooks"
+      }
     ],
   },
   {
     heading: "Company",
     links: [
       { href: "/about", label: "About Us" },
-      { href: "/about/status", label: "System Status" },
+      { href: "https://status.omniplex.gg", label: "System Status" },
       { href: "/about/moderation", label: "Moderation Stats" },
       { href: "/staff", label: "Staff Hierarchy" },
       { href: "/partners", label: "Our Partners" },
@@ -43,6 +48,7 @@ const FOOTER_LINKS = [
     heading: "Legal",
     links: [
       { href: "/legal", label: "All Policies" },
+      { href: "/legal/acceptable-use", label: "Acceptable Usage" },
       { href: "/legal/service-agreement", label: "Service Agreement" },
       { href: "/legal/terms", label: "Terms of Service" },
       { href: "/legal/privacy", label: "Privacy Policy" },
