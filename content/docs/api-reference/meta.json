@@ -2,5 +2,5 @@
   "title": "API Reference",
   "description": "The Popplio API",
   "root": true,
-  "pages": ["index", "rate-limits", "bot-stats", "webhooks", "popplio"]
+  "pages": ["index", "rate-limits", "bot-stats", "server-stats", "webhooks", "popplio"]
 }
