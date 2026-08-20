@@ -77,7 +77,7 @@ export default function BadgesPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Badges"
-        description="The catalog of purely decorative badges — award one to a user, bot, server, or team from its Actions menu in Search or Report detail."
+        description="The catalog of purely decorative badges award one to a user, bot, server, or team from its Actions menu in Search or Report detail."
         action={
           hasPerm("manage_badges") && (
             <Button

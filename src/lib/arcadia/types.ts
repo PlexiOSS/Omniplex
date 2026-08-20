@@ -106,6 +106,17 @@ export interface StaffMember {
   unaccounted: boolean;
   mfa_verified: boolean;
   created_at: string;
+  /**
+   * The index of this member's most senior held position, lower being more
+   * senior — mirrors Go's perms.StaffGrants.Rank() exactly. An instance
+   * owner gets a very large negative number (outranks every position
+   * without holding one); a member with no positions gets a very large
+   * positive number (outranked by every position). Compare a position's
+   * own `index` against this directly rather than re-deriving a "lowest
+   * held index" from `positions` — an owner holding none would otherwise
+   * look, incorrectly, like they rank below everyone.
+   */
+  rank: number;
 }
 
 export interface InstanceConfig {
@@ -547,6 +558,23 @@ export type BadgeAction =
   | "List"
   | { Create: BadgeUpsert }
   | { Edit: BadgeUpsert }
+  | { Delete: { id: string } };
+
+export interface StaffTemplateUpsert {
+  id: string;
+  name: string;
+  emoji: string;
+  tags: string[];
+  description: string;
+  type: string;
+  /** "bot" or "server" — which review queue this template shows up in. */
+  entity_type: "bot" | "server";
+}
+
+export type StaffTemplateAction =
+  | "List"
+  | { Create: StaffTemplateUpsert }
+  | { Edit: StaffTemplateUpsert }
   | { Delete: { id: string } };
 
 export interface BlogCreateEntry {

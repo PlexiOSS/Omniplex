@@ -99,6 +99,7 @@ const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/admin/blog", label: "Blog" },
       { href: "/admin/partners", label: "Partners" },
       { href: "/admin/badges", label: "Badges" },
+      { href: "/admin/templates", label: "Templates" },
     ],
   },
   {

@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `/admin/templates` and `/admin/badges` weren't linked from the admin
+  nav — added "Templates" next to "Badges" under Content in
+  `Header.tsx`'s `ADMIN_NAV_LINKS`.
+- An instance owner holding no explicit staff position (common — owners
+  come from Popplio's config, not a `staff_positions` row) showed every
+  position as "Locked," including ones they should always be able to
+  edit. `staff/positions` and `staff/members` both derived a "my lowest
+  index" from `staffMember.positions`, defaulting to `Infinity` for an
+  empty array — indistinguishable from an owner who legitimately
+  outranks everyone. Now reads the new `staffMember.rank`/`member.rank`
+  field Popplio exposes instead of re-deriving it.
+
+- `/admin/templates` — a new admin page for the staff-template catalog
+  (pre-built answers used when approving/denying a bot or server), with
+  create/edit/delete and a bot/server filter. Previously there was no way
+  to manage these at all short of a manual DB insert; backed by Popplio's
+  new `UpdateStaffTemplates` panel op.
+- Certify, Premium, and the new Feature staff actions now work on servers
+  as well as bots — no new frontend needed for this specifically, since
+  the admin panel's Actions menu (`GenericRpcModal`) is already fully
+  data-driven off Popplio's `GetRpcMethods` response.
+
 ## [0.2.2] - 2026-08-18
 
 ### Added

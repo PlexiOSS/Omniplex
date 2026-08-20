@@ -33,6 +33,8 @@ import type {
   StaffMemberAction,
   StaffPosition,
   StaffPositionAction,
+  StaffTemplateAction,
+  StaffTemplateUpsert,
   StartAuth,
   TargetType,
   VoteCreditTier,
@@ -670,6 +672,51 @@ export const arcadia = {
         UpdateBadges: {
           login_token: loginToken,
           action: { Delete: { id } } satisfies BadgeAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  staffTemplates: {
+    list: async (loginToken: string): Promise<StaffTemplateUpsert[]> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: "List" satisfies StaffTemplateAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      template: Extract<StaffTemplateAction, { Create: unknown }>["Create"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Create: template } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      template: Extract<StaffTemplateAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Edit: template } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies StaffTemplateAction,
         },
       });
       await assertOk(res);

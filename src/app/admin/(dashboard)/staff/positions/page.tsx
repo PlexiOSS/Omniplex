@@ -23,10 +23,11 @@ export default function StaffPositionsPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const myLowestIndex = staffMember.positions.reduce(
-    (min, p) => Math.min(min, p.index),
-    Number.POSITIVE_INFINITY,
-  );
+  // staffMember.rank mirrors the backend's perms.StaffGrants.Rank() exactly
+  // (including the instance-owner case, which outranks every position
+  // without holding one) — deriving this from `positions` instead would
+  // rank an owner holding none below everyone, which is backwards.
+  const myLowestIndex = staffMember.rank;
 
   const load = useCallback(async () => {
     try {

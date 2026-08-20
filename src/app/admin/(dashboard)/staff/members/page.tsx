@@ -25,10 +25,11 @@ export default function StaffMembersPage() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<StaffMember | null>(null);
 
-  const myLowestIndex = staffMember.positions.reduce(
-    (min, p) => Math.min(min, p.index),
-    Number.POSITIVE_INFINITY,
-  );
+  // staffMember.rank mirrors the backend's perms.StaffGrants.Rank() exactly
+  // (including the instance-owner case) — see the same fix in
+  // staff/positions/page.tsx for why deriving this from `positions`
+  // instead is wrong for an owner holding none.
+  const myLowestIndex = staffMember.rank;
 
   const { page, setPage, pageItems } = usePagination(
     members ?? [],
@@ -83,11 +84,7 @@ export default function StaffMembersPage() {
 
       <div className="mt-6 space-y-2">
         {pageItems.map((member) => {
-          const targetLowestIndex = member.positions.reduce(
-            (min, p) => Math.min(min, p.index),
-            Number.POSITIVE_INFINITY,
-          );
-          const locked = targetLowestIndex < myLowestIndex;
+          const locked = member.rank < myLowestIndex;
 
           return (
             <div
