@@ -1,26 +1,42 @@
-# documentation
+# Omniplex Documentation
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+The documentation site for Omniplex, built with [Fumadocs](https://fumadocs.vercel.app) on Next.js. Runs in production at [docs.omniplex.gg](https://docs.omniplex.gg).
 
-Run development server:
+## Getting started
 
 ```bash
-npm run dev
-# or
-pnpm dev
-# or
-yarn dev
+bun install
+bun dev
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see it.
 
-## Learn More
+Other scripts:
 
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
+```bash
+bun run build   # production build
+bun run start   # run a production build locally
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.vercel.app) - learn about Fumadocs
+`postinstall` runs `fumadocs-mdx`, which generates the content index from `content/` — this happens automatically on `bun install`.
+
+## Deployment
+
+Runs self-hosted on the same server as the main site and status page, behind nginx with a Cloudflare Origin CA certificate, as its own dedicated low-privilege systemd account (`docs`, `nologin` shell — every command against it goes through `sudo -u docs ...`, not `-i`, since `-i` tries to invoke the account's shell and fails against `nologin`).
+
+```bash
+sudo -u docs scripts/deploy.sh
+```
+
+The script deliberately doesn't restart the service itself, since that account has no `sudo` rights — apply the build manually (or via CI):
+
+```bash
+sudo systemctl restart omniplex-docs
+```
+
+Repo access on the server is via a read-only SSH deploy key on this repo, not a personal GitHub credential.
+
+## Learn more
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Fumadocs](https://fumadocs.vercel.app)
