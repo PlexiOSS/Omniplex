@@ -13,6 +13,12 @@ _openapi:
     - depth: 2
       title: Get Shop Items
       url: '#get-shop-items-1'
+    - depth: 2
+      title: Get Shop Purchases
+      url: '#get-shop-purchases'
+    - depth: 2
+      title: Purchase Shop Item
+      url: '#purchase-shop-item'
   structuredData:
     headings:
       - content: Get Shop Coupons
@@ -21,6 +27,10 @@ _openapi:
         id: get-shop-items
       - content: Get Shop Items
         id: get-shop-items-1
+      - content: Get Shop Purchases
+        id: get-shop-purchases
+      - content: Purchase Shop Item
+        id: purchase-shop-item
     contents:
       - content: Gets the publicly viewable shop coupons on the list
         heading: get-shop-coupons
@@ -28,6 +38,12 @@ _openapi:
         heading: get-shop-items
       - content: Gets the publicly viewable shop items on the list
         heading: get-shop-items-1
+      - content: Returns the purchase history for an entity.
+        heading: get-shop-purchases
+      - content: >-
+          Spends an entity's earned vote credits on a shop item. Returns a 204
+          on success.
+        heading: purchase-shop-item
 ---
 
-<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/shop/public-coupons"},{"method":"get","path":"/shop/items"},{"method":"get","path":"/shop/item-benefits"}]} hasHead={true} />
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/shop/public-coupons"},{"method":"get","path":"/shop/items"},{"method":"get","path":"/shop/item-benefits"},{"method":"get","path":"/{target_type}/{target_id}/shop/purchases"},{"method":"post","path":"/{target_type}/{target_id}/shop/purchase"}]} hasHead={true} />

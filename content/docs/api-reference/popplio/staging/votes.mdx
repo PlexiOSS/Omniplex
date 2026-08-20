@@ -8,6 +8,9 @@ _openapi:
       title: Get General Vote Credit Tiers
       url: '#get-general-vote-credit-tiers'
     - depth: 2
+      title: Get Vote Captcha Challenge
+      url: '#get-vote-captcha-challenge'
+    - depth: 2
       title: Get Vote Credit Tiers
       url: '#get-vote-credit-tiers'
     - depth: 2
@@ -32,6 +35,8 @@ _openapi:
     headings:
       - content: Get General Vote Credit Tiers
         id: get-general-vote-credit-tiers
+      - content: Get Vote Captcha Challenge
+        id: get-vote-captcha-challenge
       - content: Get Vote Credit Tiers
         id: get-vote-credit-tiers
       - content: Get Vote Redeem Logs
@@ -51,6 +56,10 @@ _openapi:
           Returns a list of all currently available vote credit tiers sorted in
           ascending order
         heading: get-general-vote-credit-tiers
+      - content: >-
+          Issues a proof-of-work captcha challenge that must be solved and
+          submitted alongside a vote
+        heading: get-vote-captcha-challenge
       - content: >-
           Returns a summary of the tiers and the slab based breakdown of votes
           for a given entity
@@ -76,8 +85,11 @@ _openapi:
         heading: get-user-entity-votes
       - content: >-
           Creates a vote for an entity. Returns 204 on success. Note that for
-          compatibility, a trailing 's' is removed
+          compatibility, a trailing 's' is removed. If the target is a bot or
+          server that has not opted out of captchas, the request body must
+          contain a solved captcha.Solution obtained from GET
+          /votes/captcha/challenge
         heading: create-entity-vote
 ---
 
-<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/votes/credit-tiers"},{"method":"get","path":"/{target_type}/{target_id}/votes/credit-tiers"},{"method":"get","path":"/{target_type}/{target_id}/votes/credits"},{"method":"post","path":"/{target_type}/{target_id}/votes/credits"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes/@all"},{"method":"get","path":"/{target_type}/{target_id}/votes/user-list"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes"},{"method":"put","path":"/users/{uid}/{target_type}/{target_id}/votes"}]} hasHead={true} />
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/votes/credit-tiers"},{"method":"get","path":"/votes/captcha/challenge"},{"method":"get","path":"/{target_type}/{target_id}/votes/credit-tiers"},{"method":"get","path":"/{target_type}/{target_id}/votes/credits"},{"method":"post","path":"/{target_type}/{target_id}/votes/credits"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes/@all"},{"method":"get","path":"/{target_type}/{target_id}/votes/user-list"},{"method":"get","path":"/users/{uid}/{target_type}/{target_id}/votes"},{"method":"put","path":"/users/{uid}/{target_type}/{target_id}/votes"}]} hasHead={true} />

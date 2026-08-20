@@ -35,6 +35,21 @@ _openapi:
       title: Update Bot Settings
       url: '#update-bot-settings'
     - depth: 2
+      title: Get Bot Commands
+      url: '#get-bot-commands'
+    - depth: 2
+      title: Update Bot Commands
+      url: '#update-bot-commands'
+    - depth: 2
+      title: Get Bot Changelogs
+      url: '#get-bot-changelogs'
+    - depth: 2
+      title: Create Bot Changelog
+      url: '#create-bot-changelog'
+    - depth: 2
+      title: Delete Bot Changelog
+      url: '#delete-bot-changelog'
+    - depth: 2
       title: Patch Bot Team
       url: '#patch-bot-team'
   structuredData:
@@ -59,6 +74,16 @@ _openapi:
         id: add-bot
       - content: Update Bot Settings
         id: update-bot-settings
+      - content: Get Bot Commands
+        id: get-bot-commands
+      - content: Update Bot Commands
+        id: update-bot-commands
+      - content: Get Bot Changelogs
+        id: get-bot-changelogs
+      - content: Create Bot Changelog
+        id: create-bot-changelog
+      - content: Delete Bot Changelog
+        id: delete-bot-changelog
       - content: Patch Bot Team
         id: patch-bot-team
     contents:
@@ -99,6 +124,22 @@ _openapi:
           Updates a bots settings. You must have 'Edit Bot Settings' in the team
           if the bot is in a team. Returns 204 on success
         heading: update-bot-settings
+      - content: Gets the commands a bot's owner/team has documented for it.
+        heading: get-bot-commands
+      - content: >-
+          Replaces the whole list of documented commands for a bot. You must
+          have 'Edit Bot Settings' in the team if the bot is in a team.
+        heading: update-bot-commands
+      - content: Gets the changelog/announcement entries a bot's owner/team has posted.
+        heading: get-bot-changelogs
+      - content: >-
+          Posts a new changelog/announcement entry for a bot. You must have
+          'Edit Bot Settings' in the team if the bot is in a team.
+        heading: create-bot-changelog
+      - content: >-
+          Removes a changelog/announcement entry. You must have 'Edit Bot
+          Settings' in the team if the bot is in a team.
+        heading: delete-bot-changelog
       - content: >-
           Transfers a bot to another team. 
 
@@ -129,4 +170,4 @@ _openapi:
         heading: patch-bot-team
 ---
 
-<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/bots/@all"},{"method":"get","path":"/bots/@random"},{"method":"get","path":"/bots/@index"},{"method":"get","path":"/bots/{id}"},{"method":"delete","path":"/bots/{id}"},{"method":"get","path":"/bots/{client_id}/meta"},{"method":"get","path":"/bots/{id}/seo"},{"method":"post","path":"/bots/stats"},{"method":"put","path":"/bots"},{"method":"patch","path":"/bots/{id}/settings"},{"method":"patch","path":"/users/{uid}/bots/{bid}/teams"}]} hasHead={true} />
+<APIPage document={"https://spider-staging.omniplex.gg/openapi"} operations={[{"method":"get","path":"/bots/@all"},{"method":"get","path":"/bots/@random"},{"method":"get","path":"/bots/@index"},{"method":"get","path":"/bots/{id}"},{"method":"delete","path":"/bots/{id}"},{"method":"get","path":"/bots/{client_id}/meta"},{"method":"get","path":"/bots/{id}/seo"},{"method":"post","path":"/bots/stats"},{"method":"put","path":"/bots"},{"method":"patch","path":"/bots/{id}/settings"},{"method":"get","path":"/bots/{id}/commands"},{"method":"put","path":"/bots/{id}/commands"},{"method":"get","path":"/bots/{id}/changelogs"},{"method":"post","path":"/bots/{id}/changelogs"},{"method":"delete","path":"/bots/{id}/changelogs/{changelog_id}"},{"method":"patch","path":"/users/{uid}/bots/{bid}/teams"}]} hasHead={true} />
