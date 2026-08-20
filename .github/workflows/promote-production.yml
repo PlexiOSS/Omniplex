@@ -1,0 +1,32 @@
+name: Promote staging to master
+
+# Manual only, on purpose — this opens the PR, it never merges it. Deciding
+# staging is actually ready to go live is a human call, not a timer.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open or report existing promotion PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh pr list --base master --head staging --state open --json url --jq '.[0].url // empty')
+          if [ -n "$existing" ]; then
+            echo "A promotion PR is already open: $existing"
+            exit 0
+          fi
+
+          gh pr create \
+            --base master \
+            --head staging \
+            --title "Promote staging → master ($(date -u +%Y-%m-%d))" \
+            --body "Opened via the **Promote staging to master** workflow. This does not merge automatically — review the diff before merging."
