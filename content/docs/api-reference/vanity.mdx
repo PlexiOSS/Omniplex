@@ -1,0 +1,35 @@
+---
+title: Vanity
+description: These API endpoints are related to vanity codes on IGL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Resolve Vanity
+      url: '#resolve-vanity'
+    - depth: 2
+      title: Redirect Vanity
+      url: '#redirect-vanity'
+    - depth: 2
+      title: Update Entity Vanity
+      url: '#update-entity-vanity'
+  structuredData:
+    headings:
+      - content: Resolve Vanity
+        id: resolve-vanity
+      - content: Redirect Vanity
+        id: redirect-vanity
+      - content: Update Entity Vanity
+        id: update-entity-vanity
+    contents:
+      - content: Resolve a vanity by its code or (then) its target id
+        heading: resolve-vanity
+      - content: >-
+          Resolve a vanity by its code or (then) its target id, then redirects
+          to the API url. Useful for debugging mainly
+        heading: redirect-vanity
+      - content: Updates an entities vanity. Returns 204 on success
+        heading: update-entity-vanity
+---
+
+<APIPage document={"https://api.omniplex.gg/openapi"} operations={[{"method":"get","path":"/vanity/{code}"},{"method":"get","path":"/@{code}"},{"method":"patch","path":"/{target_type}/{target_id}/vanity"}]} hasHead={true} />

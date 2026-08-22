@@ -37,14 +37,8 @@ export default async function Page(props: {
 export async function generateStaticParams() {
   const params = await source.generateParams();
 
-  // Generated OpenAPI reference pages (content/docs/api-reference/popplio)
-  // pull from a live external schema and render fine on demand, but crash
-  // during static export's serialization step in this fumadocs-openapi
-  // version. Excluding them from static generation here just means they're
-  // rendered per-request instead of prebuilt, which suits pages backed by a
-  // live schema anyway.
   return params.filter(
-    (p) => !(p.slug?.[0] === 'api-reference' && p.slug?.[1] === 'popplio'),
+    (p) => !(p.slug?.[0] === 'api-reference' && p.slug?.[1] !== undefined),
   );
 }
 

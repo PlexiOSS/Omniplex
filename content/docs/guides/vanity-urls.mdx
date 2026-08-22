@@ -1,0 +1,56 @@
+---
+title: Vanity URLs
+description: Setting a custom URL slug for a bot, server, or team listing.
+---
+
+Every bot, server, and team gets a vanity code, a short slug used in its
+listing URL. Bots get one automatically when submitted (derived from the
+bot's Discord name), but it can be changed at any time.
+
+## Setting a vanity
+
+```
+PATCH /{target_type}/{target_id}/vanity
+```
+
+`target_type` is `bot`, `server`, or `team`. Requires the `set_vanity`
+permission on that entity, see
+[Teams & Permissions](/docs/developer/permissions).
+
+```json
+{
+  "code": "my-cool-bot"
+}
+```
+
+The code is normalized before it's saved:
+
+- Non-ASCII characters are stripped.
+- It's lowercased, and spaces become dashes.
+- A trailing dash is removed.
+- It can't contain `@`, and can't already be taken by something else.
+
+If the entity doesn't have a vanity yet, this creates one; if it already
+has one, this replaces it. Sending back the same code you already have
+just fails with "already taken", there's no no-op case.
+
+## Looking one up
+
+```
+GET /vanity/{code}
+```
+
+Resolves a vanity code to the entity it points at:
+
+```json
+{
+  "itag": "...",
+  "target_id": "1234567890",
+  "target_type": "bot",
+  "code": "my-cool-bot",
+  "created_at": "2026-01-01T00:00:00Z"
+}
+```
+
+This is a public, unauthenticated endpoint, it's what the frontend uses
+to resolve `omniplex.gg/my-cool-bot` to the right listing page.

@@ -1,6 +1,34 @@
 {
   "title": "API Reference",
-  "description": "The Popplio API",
+  "description": "Popplio endpoints and information.",
   "root": true,
-  "pages": ["index", "popplio"]
+  "pages": [
+    "index",
+    "bots",
+    "servers",
+    "teams",
+    "packs",
+    "users",
+    "votes",
+    "webhooks",
+    "reviews",
+    "vanity",
+    "payments",
+    "shop",
+    "reminders",
+    "notifications",
+    "alerts",
+    "badges",
+    "reports",
+    "health",
+    "a-p-i--tokens",
+    "apps",
+    "blog",
+    "list",
+    "platform--specific",
+    "staff",
+    "tasks",
+    "tickets",
+    "diagnostics"
+  ]
 }

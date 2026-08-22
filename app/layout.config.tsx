@@ -1,8 +1,28 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { Code2, SquareChevronRight, Webhook } from 'lucide-react';
+import type { LinkItemType } from 'fumadocs-ui/layouts/docs';
+import { Code2, Globe, SquareChevronRight, Webhook, X } from 'lucide-react';
 import { OmniplexLogo } from '@/components/OmniplexLogo';
+import { FaDiscord, FaTwitter } from 'react-icons/fa';
+
+export const linkItems: LinkItemType[] = [
+  {
+    type: 'icon',
+    text: 'Discord',
+    icon: <FaDiscord className="size-4" />,
+    url: 'https://discord.gg/zmQE9TZF9J',
+    label: 'Discord',
+  },
+  {
+    type: 'icon',
+    text: 'Twitter / X',
+    icon: <FaTwitter className="size-4" />,
+    url: 'https://twitter.com/InfinityBotList',
+    label: 'Twitter / X',
+  },
+];
 
 export const baseOptions: BaseLayoutProps = {
+  githubUrl: 'https://github.com/PlexiOSS',
   nav: {
     title: (
       <>
@@ -25,29 +45,23 @@ export const baseOptions: BaseLayoutProps = {
         },
         {
           icon: <Webhook />,
-          text: 'Webhooks',
-          description: 'Real time notifications for votes and more.',
-          url: '/docs/developer/webhooks',
+          text: 'Developer Docs',
+          description: 'Guides for building against the Popplio API.',
+          url: '/docs/developer',
         },
         {
           icon: <SquareChevronRight />,
-          text: 'Discord Bot Commands',
-          description: "Slash commands for managing your server's listing.",
-          url: '/docs/guides/bot-commands',
+          text: 'User Guides',
+          description: "Discord bot commands and other developer-facing guides.",
+          url: '/docs/guides',
         },
       ],
     },
     {
-      text: 'Production',
+      text: 'Main Website',
       url: 'https://omniplex.gg',
+      icon: <Globe />
     },
-    {
-      text: 'Staging',
-      url: 'https://reedwhisker.omniplex.gg',
-    },
-    {
-      text: 'GitHub Repository',
-      url: 'https://github.com/PlexiOSS'
-    }
+    ...linkItems
   ],
 };

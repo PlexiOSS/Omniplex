@@ -1,0 +1,75 @@
+---
+title: Listing a Bot
+description: How to submit a Discord bot to Omniplex and manage it afterward.
+---
+
+Bots are submitted through the API, there's no Discord command for this,
+unlike managing a server listing (see [Infernoplex](/docs/guides/infernoplex)).
+
+<Callout type="info">
+  You'll need to authenticate first. See [Authentication](/docs/developer/authentication)
+  for how to get a user or bot token.
+</Callout>
+
+## Before you submit
+
+A few things have to be true before `PUT /bots` will accept your bot:
+
+- **The bot must already be in Discord and public.** Omniplex looks the bot
+  up by ID and rejects the submission if it isn't a real, public bot.
+- **It can't already be listed.** Submitting the same bot ID twice returns a
+  conflict.
+- Submissions are rate limited to **5 per minute**.
+
+## What you send
+
+```
+PUT /bots
+```
+
+| Field         | Requirement                                             |
+| ------------- | -------------------------------------------------------- |
+| `bot_id`      | Numeric Discord user ID                                  |
+| `client_id`   | Numeric Discord application ID                           |
+| `short`       | 30–150 characters                                         |
+| `long`        | At least 500 characters                                   |
+| `prefix`      | 1–10 characters                                            |
+| `invite`      | HTTPS URL                                                 |
+| `library`     | 1–50 characters                                            |
+| `extra_links` | Required, may be empty                                    |
+| `tags`        | 1–5 unique tags, each 3–30 characters                      |
+| `nsfw`        | Boolean                                                   |
+| `staff_note`  | Optional, up to 512 characters                             |
+| `team_owner`  | Optional, see below                                      |
+
+Your server count and avatar are read directly from Discord, not sent by
+you.
+
+## Ownership
+
+If you don't send `team_owner`, Omniplex creates a brand-new team for you
+automatically and makes you its owner. If you do send one, you need the
+`add_bots` permission on that team, see
+[Teams & Permissions](/docs/developer/permissions) for how team permissions
+work.
+
+## After submission
+
+New listings go through moderation before appearing publicly. Content is
+also run through an automated check as a reviewer signal, this never
+blocks submission, it just flags things for a human to look at.
+
+## Managing your bot afterward
+
+- **Update settings**: `PATCH /bots/{id}/settings` (short/long
+  description, prefix, invite, library, links, tags, NSFW flag, and
+  whether the bot opts out of the CAPTCHA on its vote page). Requires
+  `edit_bots`.
+- **Sync slash commands**: `PUT /bots/{id}/commands` keeps the command
+  list shown on your listing up to date.
+- **Post changelogs**: `POST /bots/{id}/changelogs` publishes a changelog
+  entry to your listing's page.
+- **Delete the listing**: `DELETE /bots/{id}`, requires `delete_bots`.
+
+Any of these can be called with a user token, a team token, or, for
+settings, the bot's own token.

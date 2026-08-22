@@ -1,0 +1,58 @@
+---
+title: Users
+description: These API endpoints are related to users on IBL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Check Booster Status
+      url: '#check-booster-status'
+    - depth: 2
+      title: Create Data Task
+      url: '#create-data-task'
+    - depth: 2
+      title: Get User
+      url: '#get-user'
+    - depth: 2
+      title: Update User Profile
+      url: '#update-user-profile'
+    - depth: 2
+      title: Get User Perms
+      url: '#get-user-perms'
+    - depth: 2
+      title: Get User SEO Info
+      url: '#get-user-seo-info'
+  structuredData:
+    headings:
+      - content: Check Booster Status
+        id: check-booster-status
+      - content: Create Data Task
+        id: create-data-task
+      - content: Get User
+        id: get-user
+      - content: Update User Profile
+        id: update-user-profile
+      - content: Get User Perms
+        id: get-user-perms
+      - content: Get User SEO Info
+        id: get-user-seo-info
+    contents:
+      - content: >-
+          Returns the booster status of a user. This can be used to check
+          eligibility to redeem booster perks.
+        heading: check-booster-status
+      - content: >-
+          Creates a data task for a user (delete or request). Returns the task
+          id if this is successful.
+        heading: create-data-task
+      - content: Gets a user by id
+        heading: get-user
+      - content: Updates a users profile. Returns 204 on success
+        heading: update-user-profile
+      - content: Gets a users permissions by ID
+        heading: get-user-perms
+      - content: Gets a users SEO data by id
+        heading: get-user-seo-info
+---
+
+<APIPage document={"https://api.omniplex.gg/openapi"} operations={[{"method":"get","path":"/users/{id}/booster"},{"method":"post","path":"/users/{id}/data"},{"method":"get","path":"/users/{id}"},{"method":"patch","path":"/users/{id}"},{"method":"get","path":"/users/{id}/perms"},{"method":"get","path":"/users/{id}/seo"}]} hasHead={true} />
