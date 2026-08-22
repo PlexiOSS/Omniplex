@@ -2,9 +2,7 @@
 
 import { Settings } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { teams } from "@/lib/api";
+import { useEntityPermission } from "@/hooks/useEntityPermission";
 
 interface TeamManageLinkProps {
   teamId: string;
@@ -12,26 +10,9 @@ interface TeamManageLinkProps {
 
 /** Shows a "Manage Team" link only if the signed-in user has any permission on this team. */
 export function TeamManageLink({ teamId }: TeamManageLinkProps) {
-  const { session, isAuthenticated } = useAuth();
-  const [canManage, setCanManage] = useState(false);
+  const { hasAny } = useEntityPermission("team", teamId);
 
-  useEffect(() => {
-    if (!isAuthenticated || !session) return;
-    let cancelled = false;
-    teams
-      .getEntityPerms(session.user_id, "team", teamId)
-      .then((res) => {
-        if (!cancelled) setCanManage(res.perms.length > 0);
-      })
-      .catch(() => {
-        if (!cancelled) setCanManage(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated, session, teamId]);
-
-  if (!canManage) return null;
+  if (!hasAny) return null;
 
   return (
     <Link

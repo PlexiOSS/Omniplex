@@ -2,14 +2,13 @@
 
 import { BookOpen, Megaphone, MessageSquare, Terminal, Users } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
 import { useAuth } from "@/hooks/useAuth";
-import { teams as teamsApi } from "@/lib/api";
+import { useEntityPermission } from "@/hooks/useEntityPermission";
 import type { BotChangelog, BotCommand, Review } from "@/lib/api/types";
-import { hasPermString } from "@/lib/permissions";
 import { BotChangelogSection } from "./BotChangelogSection";
 import { BotCommandsSection } from "./BotCommandsSection";
 
@@ -36,12 +35,25 @@ export function BotPageTabs(props: BotPageTabsProps) {
 function BotPageTabsWithSearchParams(props: BotPageTabsProps) {
   const searchParams = useSearchParams();
   const requested = searchParams.get("tab");
-  const initialTab: Tab = (
-    TAB_KEYS as string[]
-  ).includes(requested ?? "")
+  const highlightReviewId = searchParams.get("review") ?? undefined;
+  const highlightChangelogId = searchParams.get("changelog") ?? undefined;
+
+  let initialTab: Tab = (TAB_KEYS as string[]).includes(requested ?? "")
     ? (requested as Tab)
     : "about";
-  return <BotPageTabsInner {...props} initialTab={initialTab} />;
+  if (!requested) {
+    if (highlightReviewId) initialTab = "reviews";
+    else if (highlightChangelogId) initialTab = "changelog";
+  }
+
+  return (
+    <BotPageTabsInner
+      {...props}
+      initialTab={initialTab}
+      highlightReviewId={highlightReviewId}
+      highlightChangelogId={highlightChangelogId}
+    />
+  );
 }
 
 function BotPageTabsInner({
@@ -51,21 +63,17 @@ function BotPageTabsInner({
   changelogs,
   initialReviews,
   initialTab,
-}: BotPageTabsProps & { initialTab: Tab }) {
+  highlightReviewId,
+  highlightChangelogId,
+}: BotPageTabsProps & {
+  initialTab: Tab;
+  highlightReviewId?: string;
+  highlightChangelogId?: string;
+}) {
   const { session } = useAuth();
   const [tab, setTab] = useState<Tab>(initialTab);
-  const [canEdit, setCanEdit] = useState(false);
-
-  useEffect(() => {
-    if (!session) {
-      setCanEdit(false);
-      return;
-    }
-    teamsApi
-      .getEntityPerms(session.user_id, "bot", botId)
-      .then((data) => setCanEdit(hasPermString(data.perms, "edit_bots")))
-      .catch(() => setCanEdit(false));
-  }, [session, botId]);
+  const { hasPerm } = useEntityPermission("bot", botId);
+  const canEdit = hasPerm("edit_bots");
 
   const tabs: {
     key: Tab;
@@ -151,6 +159,7 @@ function BotPageTabsInner({
             initialChangelogs={changelogs}
             canEdit={canEdit}
             token={session?.token}
+            highlightId={highlightChangelogId}
           />
         )}
 
@@ -159,6 +168,7 @@ function BotPageTabsInner({
             targetType="bot"
             targetId={botId}
             initialReviews={initialReviews}
+            highlightId={highlightReviewId}
           />
         )}
 

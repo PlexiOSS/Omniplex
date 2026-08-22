@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { BotWhitelist } from "@/lib/arcadia/types";
 import { formatRelativeTime } from "@/lib/utils/format";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../../AdminContext";
 import { AdminPageHeader } from "../../../AdminPageHeader";
 import { BotWhitelistEditModal } from "./BotWhitelistEditModal";
@@ -97,38 +98,13 @@ export default function BotWhitelistPage() {
 
       <div className="mt-6 space-y-2">
         {entries.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No bots are whitelisted.
-          </p>
+          <AdminEmptyState message="No bots are whitelisted." />
         )}
         {entries.map((entry) => (
-          <div
+          <AdminListRow
             key={entry.bot_id}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <a
-                  href={`/bots/${entry.bot_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 font-mono text-sm font-semibold text-zinc-950 hover:text-accent dark:text-zinc-50"
-                >
-                  {entry.bot_id}
-                  <ExternalLink size={11} className="shrink-0" />
-                </a>
-              </div>
-              <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-                {entry.reason}
-              </p>
-              <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
-                Added by {entry.user_id} ·{" "}
-                {formatRelativeTime(entry.created_at)}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_bot_whitelist") && (
+            actions={
+              hasPerm("manage_bot_whitelist") && (
                 <>
                   <Button
                     variant="ghost"
@@ -148,9 +124,27 @@ export default function BotWhitelistPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
-              )}
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <a
+                href={`/bots/${entry.bot_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 font-mono text-sm font-semibold text-zinc-950 hover:text-accent dark:text-zinc-50"
+              >
+                {entry.bot_id}
+                <ExternalLink size={11} className="shrink-0" />
+              </a>
             </div>
-          </div>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              {entry.reason}
+            </p>
+            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
+              Added by {entry.user_id} · {formatRelativeTime(entry.created_at)}
+            </p>
+          </AdminListRow>
         ))}
       </div>
 

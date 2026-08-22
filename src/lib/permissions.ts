@@ -1,7 +1,7 @@
 /**
  * Client-side mirror of Popplio's flat permission model (perms.Catalogue /
  * perms.Set). A permission is a flat, opaque name — `edit_servers`,
- * `manage_webhooks`, `review_bots` — with no namespaces, wildcards or
+ * `manage_webhooks`, `review_entities` — with no namespaces, wildcards or
  * negators: a holder either has it or doesn't. Each domain declares one
  * "super" permission that implies every other one in that domain — `owner`
  * for team/entity permissions, `administrator` for staff permissions — and

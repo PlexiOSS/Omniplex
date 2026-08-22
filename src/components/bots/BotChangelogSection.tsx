@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { useHighlightScroll } from "@/hooks/useHighlightScroll";
 import { bots as botsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { BotChangelog } from "@/lib/api/types";
@@ -16,6 +17,7 @@ interface BotChangelogSectionProps {
   initialChangelogs: BotChangelog[];
   canEdit: boolean;
   token?: string;
+  highlightId?: string;
 }
 
 export function BotChangelogSection({
@@ -23,11 +25,14 @@ export function BotChangelogSection({
   initialChangelogs,
   canEdit,
   token,
+  highlightId,
 }: BotChangelogSectionProps) {
   const [changelogs, setChangelogs] = useState(initialChangelogs);
   const [posting, setPosting] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  useHighlightScroll(highlightId ? `changelog-${highlightId}` : undefined);
 
   function handleDelete(id: string) {
     if (!token) return;
@@ -78,7 +83,14 @@ export function BotChangelogSection({
           {changelogs.map((entry) => (
             <div
               key={entry.id}
-              className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+              id={`changelog-${entry.id}`}
+              className={[
+                "scroll-mt-24 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800",
+                entry.id === highlightId &&
+                  "ring-2 ring-accent ring-offset-2 dark:ring-offset-zinc-950",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">

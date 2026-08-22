@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ShopCoupon, ShopItem } from "@/lib/arcadia/types";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../../AdminContext";
 import { AdminPageHeader } from "../../../AdminPageHeader";
 import { ShopCouponEditModal } from "./ShopCouponEditModal";
@@ -101,38 +102,13 @@ export default function ShopCouponsPage() {
 
       <div className="mt-6 space-y-2">
         {coupons.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No shop coupons yet.
-          </p>
+          <AdminEmptyState message="No shop coupons yet." />
         )}
         {coupons.map((coupon) => (
-          <div
+          <AdminListRow
             key={coupon.id}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-mono font-semibold text-zinc-950 dark:text-zinc-50">
-                  {coupon.code}
-                </span>
-                {coupon.public && <Badge variant="info">Public</Badge>}
-                {!coupon.usable && <Badge variant="danger">Disabled</Badge>}
-                {coupon.cents != null && (
-                  <Badge variant="premium">
-                    {(coupon.cents / 100).toFixed(2)} off
-                  </Badge>
-                )}
-              </div>
-              <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
-                {coupon.id} · {coupon.max_uses ?? "?"} uses ·{" "}
-                {coupon.applicable_items.length === 0
-                  ? "all items"
-                  : `${coupon.applicable_items.length} item(s)`}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_shop") && (
+            actions={
+              hasPerm("manage_shop") && (
                 <>
                   <Button
                     variant="ghost"
@@ -150,9 +126,28 @@ export default function ShopCouponsPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-mono font-semibold text-zinc-950 dark:text-zinc-50">
+                {coupon.code}
+              </span>
+              {coupon.public && <Badge variant="info">Public</Badge>}
+              {!coupon.usable && <Badge variant="danger">Disabled</Badge>}
+              {coupon.cents != null && (
+                <Badge variant="premium">
+                  {(coupon.cents / 100).toFixed(2)} off
+                </Badge>
               )}
             </div>
-          </div>
+            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
+              {coupon.id} · {coupon.max_uses ?? "?"} uses ·{" "}
+              {coupon.applicable_items.length === 0
+                ? "all items"
+                : `${coupon.applicable_items.length} item(s)`}
+            </p>
+          </AdminListRow>
         ))}
       </div>
 

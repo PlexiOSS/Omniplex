@@ -176,6 +176,8 @@ export interface PartialBot {
   approval_note: string;
   mentionable: string[];
   invite: string;
+  moderation_flagged: boolean;
+  moderation_categories: string[];
 }
 
 export interface PartialServer {
@@ -190,12 +192,16 @@ export interface PartialServer {
   invite_clicks: number;
   clicks: number;
   nsfw: boolean;
+  discord_nsfw_level: number;
+  nsfw_channel_count: number;
   tags: string[];
   premium: boolean;
   claimed_by: string | null;
   last_claimed: string | null;
   approval_note: string;
   mentionable: string[];
+  moderation_flagged: boolean;
+  moderation_categories: string[];
 }
 
 export interface PartialPack {

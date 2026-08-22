@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
+import { useHighlightScroll } from "@/hooks/useHighlightScroll";
 import { reviews as reviewsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Review, ReviewTargetType } from "@/lib/api/types";
@@ -17,12 +18,14 @@ interface ReviewsSectionProps {
   targetType: ReviewTargetType;
   targetId: string;
   initialReviews: Review[];
+  highlightId?: string;
 }
 
 export function ReviewsSection({
   targetType,
   targetId,
   initialReviews,
+  highlightId,
 }: ReviewsSectionProps) {
   const { session, isAuthenticated } = useAuth();
   const [reviews, setReviews] = useState(initialReviews);
@@ -59,6 +62,8 @@ export function ReviewsSection({
   const avgStars = roots.length
     ? roots.reduce((sum, r) => sum + r.stars, 0) / roots.length
     : 0;
+
+  useHighlightScroll(highlightId ? `review-${highlightId}` : undefined);
 
   return (
     <div>
@@ -140,6 +145,7 @@ export function ReviewsSection({
             <ReviewItem
               review={review}
               isOwn={review.author.id === session?.user_id}
+              isHighlighted={review.id === highlightId}
               isEditing={editingId === review.id}
               onEdit={() => setEditingId(review.id)}
               onCancelEdit={() => setEditingId(null)}
@@ -189,6 +195,7 @@ export function ReviewsSection({
                     key={reply.id}
                     review={reply}
                     isOwn={reply.author.id === session?.user_id}
+                    isHighlighted={reply.id === highlightId}
                     isEditing={editingId === reply.id}
                     onEdit={() => setEditingId(reply.id)}
                     onCancelEdit={() => setEditingId(null)}
@@ -221,6 +228,7 @@ export function ReviewsSection({
 interface ReviewItemProps {
   review: Review;
   isOwn: boolean;
+  isHighlighted?: boolean;
   isEditing: boolean;
   onEdit: () => void;
   onCancelEdit: () => void;
@@ -236,6 +244,7 @@ interface ReviewItemProps {
 function ReviewItem({
   review,
   isOwn,
+  isHighlighted,
   isEditing,
   onEdit,
   onCancelEdit,
@@ -262,7 +271,16 @@ function ReviewItem({
   }
 
   return (
-    <div className="flex items-start gap-3">
+    <div
+      id={`review-${review.id}`}
+      className={[
+        "flex items-start gap-3 scroll-mt-24",
+        isHighlighted &&
+          "-mx-3 rounded-xl p-3 ring-2 ring-accent ring-offset-2 dark:ring-offset-zinc-950",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <Avatar
         src={review.author.avatar}
         alt={review.author.username}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ShopItemBenefit } from "@/lib/arcadia/types";
 import { isRecognizedBenefit } from "@/lib/constants/shopBenefits";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../../AdminContext";
 import { AdminPageHeader } from "../../../AdminPageHeader";
 import { ShopItemBenefitEditModal } from "./ShopItemBenefitEditModal";
@@ -96,39 +97,13 @@ export default function ShopBenefitsPage() {
 
       <div className="mt-6 space-y-2">
         {benefits.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No shop benefits yet.
-          </p>
+          <AdminEmptyState message="No shop benefits yet." />
         )}
         {benefits.map((benefit) => (
-          <div
+          <AdminListRow
             key={benefit.id}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  {benefit.name}
-                </span>
-                <span className="text-xs text-zinc-400 dark:text-zinc-600">
-                  {benefit.id}
-                </span>
-                {isRecognizedBenefit(benefit.id) ? (
-                  <Badge variant="success">Functional</Badge>
-                ) : (
-                  <Badge variant="warning">Display only</Badge>
-                )}
-                {benefit.target_types.map((t) => (
-                  <Badge key={t}>{t}</Badge>
-                ))}
-              </div>
-              <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-                {benefit.description}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_shop") && (
+            actions={
+              hasPerm("manage_shop") && (
                 <>
                   <Button
                     variant="ghost"
@@ -148,9 +123,29 @@ export default function ShopBenefitsPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-semibold text-zinc-950 dark:text-zinc-50">
+                {benefit.name}
+              </span>
+              <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                {benefit.id}
+              </span>
+              {isRecognizedBenefit(benefit.id) ? (
+                <Badge variant="success">Functional</Badge>
+              ) : (
+                <Badge variant="warning">Display only</Badge>
               )}
+              {benefit.target_types.map((t) => (
+                <Badge key={t}>{t}</Badge>
+              ))}
             </div>
-          </div>
+            <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+              {benefit.description}
+            </p>
+          </AdminListRow>
         ))}
       </div>
 

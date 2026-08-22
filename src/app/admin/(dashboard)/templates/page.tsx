@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffTemplateUpsert } from "@/lib/arcadia/types";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
 import { TemplateEditModal } from "./TemplateEditModal";
@@ -128,33 +129,13 @@ export default function StaffTemplatesPage() {
 
       <div className="mt-6 space-y-2">
         {visible?.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No templates yet.
-          </p>
+          <AdminEmptyState message="No templates yet." />
         )}
         {visible?.map((template) => (
-          <div
+          <AdminListRow
             key={template.id}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                  {template.emoji} {template.name}
-                </span>
-                <Badge>{template.entity_type}</Badge>
-                {template.type && <Badge>{template.type}</Badge>}
-                {template.tags.map((t) => (
-                  <Badge key={t}>{t}</Badge>
-                ))}
-              </div>
-              <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-                {template.description}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_templates") && (
+            actions={
+              hasPerm("manage_templates") && (
                 <>
                   <Button
                     variant="ghost"
@@ -174,9 +155,23 @@ export default function StaffTemplatesPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
-              )}
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                {template.emoji} {template.name}
+              </span>
+              <Badge>{template.entity_type}</Badge>
+              {template.type && <Badge>{template.type}</Badge>}
+              {template.tags.map((t) => (
+                <Badge key={t}>{t}</Badge>
+              ))}
             </div>
-          </div>
+            <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+              {template.description}
+            </p>
+          </AdminListRow>
         ))}
       </div>
 

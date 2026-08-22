@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ShopItem, ShopItemBenefit } from "@/lib/arcadia/types";
 import { isRecognizedBenefit } from "@/lib/constants/shopBenefits";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../../AdminContext";
 import { AdminPageHeader } from "../../../AdminPageHeader";
 import { ShopItemEditModal } from "./ShopItemEditModal";
@@ -105,53 +106,13 @@ export default function ShopItemsPage() {
 
       <div className="mt-6 space-y-2">
         {items.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No shop items yet.
-          </p>
+          <AdminEmptyState message="No shop items yet." />
         )}
         {items.map((item) => (
-          <div
+          <AdminListRow
             key={item.id}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  {item.name}
-                </span>
-                <Badge variant="premium">
-                  {(item.cents / 100).toFixed(2)} credits
-                </Badge>
-                {item.target_types.map((t) => (
-                  <Badge key={t}>{t}</Badge>
-                ))}
-              </div>
-              <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-                {item.description}
-              </p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-600">
-                {item.duration > 0 && <span>{item.duration}h duration ·</span>}
-                {item.benefits.length === 0 ? (
-                  <span>No benefits attached</span>
-                ) : (
-                  item.benefits.map((b) => (
-                    <span
-                      key={b}
-                      className={
-                        isRecognizedBenefit(b)
-                          ? undefined
-                          : "text-amber-600 dark:text-amber-400"
-                      }
-                    >
-                      {benefitName(b)}
-                    </span>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_shop") && (
+            actions={
+              hasPerm("manage_shop") && (
                 <>
                   <Button
                     variant="ghost"
@@ -169,9 +130,43 @@ export default function ShopItemsPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-semibold text-zinc-950 dark:text-zinc-50">
+                {item.name}
+              </span>
+              <Badge variant="premium">
+                {(item.cents / 100).toFixed(2)} credits
+              </Badge>
+              {item.target_types.map((t) => (
+                <Badge key={t}>{t}</Badge>
+              ))}
+            </div>
+            <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+              {item.description}
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-600">
+              {item.duration > 0 && <span>{item.duration}h duration ·</span>}
+              {item.benefits.length === 0 ? (
+                <span>No benefits attached</span>
+              ) : (
+                item.benefits.map((b) => (
+                  <span
+                    key={b}
+                    className={
+                      isRecognizedBenefit(b)
+                        ? undefined
+                        : "text-amber-600 dark:text-amber-400"
+                    }
+                  >
+                    {benefitName(b)}
+                  </span>
+                ))
               )}
             </div>
-          </div>
+          </AdminListRow>
         ))}
       </div>
 

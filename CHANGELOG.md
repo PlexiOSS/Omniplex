@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `useEntityPermission(targetType, targetId)` hook — centralizes the
+  "resolve my permissions on this bot/server/team/pack" fetch that used to
+  be hand-copied at every call site. The two copies had already drifted:
+  `BotPageTabs` compared perms with a raw `.includes("edit_bots")` instead
+  of `hasPermString` (broke for a direct owner, whose perms come back as
+  `["owner"]`, a super-permission — the bug fixed a few versions back),
+  while `TeamManageLink` didn't guard against a stale response landing
+  after unmount at all. Both now use the hook; `teams/[id]/settings`
+  deliberately wasn't migrated — it already used `hasPermString` correctly
+  and its perms fetch is part of a larger coordinated load, not a
+  standalone gate.
+- `AdminListRow`/`AdminEmptyState` (`src/components/admin/AdminListRow.tsx`)
+  and a promoted `StatCard` (`src/components/admin/StatCard.tsx`) — the
+  "rounded card row with edit/delete actions" and "No X yet." markup was
+  hand-duplicated across every admin CRUD list page (badges, blog, staff
+  templates, and all five shop catalogs), and `StatCard` was local to the
+  dashboard overview page only. Nine list pages now share the row
+  component; `partners`, `staff/positions`, and `staff/members` weren't
+  migrated since they each render a leading avatar or reorder-arrow column
+  before the content that the row's two-slot (`children`/`actions`) API
+  can't represent without changing their layout.
+- Deep links to a specific review or bot changelog entry —
+  `?review=<id>` on a bot/server page and `?changelog=<id>` on a bot page
+  jump straight to the reviews/changelog tab (even without an explicit
+  `?tab=` param) and scroll the matching entry into view with a temporary
+  ring highlight. New `useHighlightScroll` hook
+  (`src/hooks/useHighlightScroll.ts`) does the `scrollIntoView` on mount;
+  `ReviewsSection` and `BotChangelogSection` both take an optional
+  `highlightId` prop. Previously the only way to point someone at a
+  specific review or update was "open the bot page and scroll."
+- NSFW compliance badges on the review queue's server cards: an "Ungated
+  NSFW" warning when Popplio reports age-restricted channels but the server
+  isn't tagged `nsfw`, a "No gated channels" note when it's tagged `nsfw`
+  but none were detected, and a gated-channel count alongside vote/member
+  counts otherwise. Backed by Popplio's new `discord_nsfw_level`/
+  `nsfw_channel_count` fields on `PartialServer` (synced by Infernoplex).
+  Previously answering "Server: NSFW Content Not Gated" meant a reviewer
+  joining the server and looking around by hand.
+- "Moderation flagged" badge on both bot and server queue cards when
+  OpenAI's moderation endpoint flagged the submitted description, with the
+  flagged categories in the tooltip. Backed by Popplio's new
+  `moderation_flagged`/`moderation_categories` fields on `PartialBot`/
+  `PartialServer` — a signal for reviewers, not an auto-reject.
+
+### Changed
+
+- The queue page's Claim/Unclaim/Approve/Deny buttons now gate on
+  `review_entities` instead of `review_bots`, matching Popplio's renamed
+  staff permission (the RPC actions they gate have always covered both
+  bots and servers; only the name was bot-specific). **Must ship no
+  earlier than Popplio's `review_bots` → `review_entities` rename** —
+  deploying this before that lands means `hasPerm("review_entities")`
+  never matches anyone's resolved perms, since the backend would still be
+  returning `review_bots`.
+
 ### Fixed
 
 - `/admin/templates` and `/admin/badges` weren't linked from the admin

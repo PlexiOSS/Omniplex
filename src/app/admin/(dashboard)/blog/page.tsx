@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { BlogPost } from "@/lib/arcadia/types";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
 import { BlogEditModal } from "./BlogEditModal";
@@ -97,33 +98,13 @@ export default function BlogAdminPage() {
 
       <div className="mt-6 space-y-2">
         {posts.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No blog posts yet.
-          </p>
+          <AdminEmptyState message="No blog posts yet." />
         )}
         {posts.map((post) => (
-          <div
+          <AdminListRow
             key={post.itag}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  {post.title}
-                </span>
-                {post.draft && <Badge variant="warning">Draft</Badge>}
-              </div>
-              <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-                {post.description}
-              </p>
-              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
-                /blog/{post.slug}
-                {post.tags.length > 0 && ` · ${post.tags.join(", ")}`}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_blog") && (
+            actions={
+              hasPerm("manage_blog") && (
                 <>
                   <Button
                     variant="ghost"
@@ -143,9 +124,23 @@ export default function BlogAdminPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
-              )}
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-semibold text-zinc-950 dark:text-zinc-50">
+                {post.title}
+              </span>
+              {post.draft && <Badge variant="warning">Draft</Badge>}
             </div>
-          </div>
+            <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+              {post.description}
+            </p>
+            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+              /blog/{post.slug}
+              {post.tags.length > 0 && ` · ${post.tags.join(", ")}`}
+            </p>
+          </AdminListRow>
         ))}
       </div>
 
