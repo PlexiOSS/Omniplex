@@ -1,14 +1,8 @@
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Code2, Webhook } from 'lucide-react';
+import { ArrowRight, Code2, SquareChevronRight, Webhook } from 'lucide-react';
 import { OmniplexLogo } from '@/components/OmniplexLogo';
 
 const FEATURES = [
-  {
-    icon: BookOpen,
-    title: 'Guides',
-    description: 'Using the site, the bot, and how everything fits together.',
-    href: '/docs/guides',
-  },
   {
     icon: Code2,
     title: 'API Reference',
@@ -21,7 +15,13 @@ const FEATURES = [
     title: 'Webhooks',
     description:
       'Get notified in real time when a bot or server you own is voted for.',
-    href: '/docs/api-reference/webhooks',
+    href: '/docs/developer/webhooks',
+  },
+  {
+    icon: SquareChevronRight,
+    title: 'Discord Bot Commands',
+    description: "Manage your server's listing without leaving Discord.",
+    href: '/docs/guides/bot-commands',
   },
 ];
 
@@ -34,12 +34,12 @@ export default function HomePage() {
           Omniplex Documentation
         </h1>
         <p className="mt-4 max-w-xl text-lg text-fd-muted-foreground">
-          Guides and reference for building on Omniplex, the Discord bot and
-          server listing platform.
+          API reference and Discord bot commands for building on Omniplex,
+          the Discord bot and server listing platform.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
           <Link
-            href="/docs/guides"
+            href="/docs/api-reference"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-fd-primary px-6 text-base font-medium text-fd-primary-foreground transition-opacity hover:opacity-90"
           >
             Get started

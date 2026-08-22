@@ -1,15 +1,6 @@
 {
-  "title": "User Guides",
-  "description": "Basic guides for using Omniplex.",
+  "title": "Guides",
+  "description": "Discord bot commands and other developer-facing guides.",
   "root": true,
-  "pages": [
-    "index",
-    "getting-started",
-    "voting",
-    "teams",
-    "bot-commands",
-    "rules",
-    "programs",
-    "community"
-  ]
+  "pages": ["bot-commands"]
 }

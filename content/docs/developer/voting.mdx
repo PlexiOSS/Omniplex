@@ -1,0 +1,83 @@
+---
+title: Voting via the API
+description: Casting a vote programmatically, including the proof-of-work captcha flow.
+---
+
+This covers the API calls involved in casting a vote. For cooldowns, the
+weekend bonus, and vote credit values, see the
+[Voting Rules & FAQ](https://omniplex.gg/kb/voting/voting-rules) on the
+main site, this page is about the request sequence, not the policy behind
+it.
+
+## Casting a vote
+
+```
+PUT /users/{uid}/{target_type}/{target_id}/votes?upvote=true
+```
+
+Requires **User-Auth**. `upvote` is a required query parameter, `true` or
+`false`.
+
+Bots and servers require a solved captcha unless the owner has opted out
+(`captcha_opt_out`). Packs and teams never require one. If a captcha is
+required and missing or invalid, the request fails with a 400 telling you
+to fetch a challenge first.
+
+## The captcha
+
+Omniplex uses a self-hosted, stateless proof-of-work captcha rather than a
+third-party service, there's no external API key involved.
+
+### 1. Get a challenge
+
+```
+GET /votes/captcha/challenge
+```
+
+```json
+{
+  "salt": "a1b2c3...",
+  "difficulty": 20,
+  "expires": 1735689600000,
+  "signature": "..."
+}
+```
+
+The challenge is valid for 2 minutes and needs no authentication to
+request.
+
+### 2. Solve it
+
+Find a `nonce` (a decimal-digit string, at most 32 characters) such that
+`sha256(salt + ":" + nonce)` has at least `difficulty` leading zero bits.
+There's no shortcut, this is deliberately real computational work, brute
+force incrementing nonce values until the hash qualifies.
+
+### 3. Submit it with the vote
+
+Send the solved challenge, with the `nonce` added, as the JSON body of the
+vote request:
+
+```json
+{
+  "salt": "a1b2c3...",
+  "difficulty": 20,
+  "expires": 1735689600000,
+  "signature": "...",
+  "nonce": "839201"
+}
+```
+
+The `salt`, `difficulty`, `expires`, and `signature` must be sent back
+exactly as issued, they're part of what the signature covers. Each
+signature can only be used once, resubmitting the same solved challenge on
+a second vote fails.
+
+## Checking vote status
+
+```
+GET /users/{uid}/{target_type}/{target_id}/votes
+```
+
+Tells you whether the user has an active vote for that entity right now,
+and if not, how long until they can vote again.

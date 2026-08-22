@@ -1,0 +1,6 @@
+{
+  "title": "Developer",
+  "description": "Guides for building against the Popplio API: authentication, permissions, rate limits, stats reporting, voting, and webhooks.",
+  "root": true,
+  "pages": ["authentication", "permissions", "rate-limits", "bot-stats", "server-stats", "voting", "webhooks"]
+}

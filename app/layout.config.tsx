@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { BookOpen, Code2, Webhook } from 'lucide-react';
+import { Code2, SquareChevronRight, Webhook } from 'lucide-react';
 import { OmniplexLogo } from '@/components/OmniplexLogo';
 
 export const baseOptions: BaseLayoutProps = {
@@ -18,12 +18,6 @@ export const baseOptions: BaseLayoutProps = {
       url: '/docs',
       items: [
         {
-          icon: <BookOpen />,
-          text: 'User Guides',
-          description: 'Guides and Information for using Omniplex.',
-          url: '/docs/guides',
-        },
-        {
           icon: <Code2 />,
           text: 'API Reference',
           description: 'The Popplio API powering Omniplex.',
@@ -33,7 +27,13 @@ export const baseOptions: BaseLayoutProps = {
           icon: <Webhook />,
           text: 'Webhooks',
           description: 'Real time notifications for votes and more.',
-          url: '/docs/api-reference/webhooks',
+          url: '/docs/developer/webhooks',
+        },
+        {
+          icon: <SquareChevronRight />,
+          text: 'Discord Bot Commands',
+          description: "Slash commands for managing your server's listing.",
+          url: '/docs/guides/bot-commands',
         },
       ],
     },
