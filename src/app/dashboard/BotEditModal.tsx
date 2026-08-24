@@ -13,6 +13,7 @@ import { ApiError } from "@/lib/api/client";
 import type { Bot, Link } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
 import { bannerUrl } from "@/lib/utils/assets";
+import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 interface BotEditModalProps {
@@ -128,6 +129,13 @@ function BotEditForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const markupError =
+      suspiciousMarkupError("Short description", form.short) ??
+      suspiciousMarkupError("Long description", form.long);
+    if (markupError) {
+      setError(markupError);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {

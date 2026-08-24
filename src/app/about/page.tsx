@@ -134,6 +134,12 @@ export default async function AboutPage() {
           >
             Moderation Transparency
           </Link>
+          <Link
+            href="/about/team"
+            className="text-sm text-accent underline underline-offset-2 hover:opacity-80"
+          >
+            Team
+          </Link>
         </div>
       </div>
     </Container>

@@ -9,19 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `useEntityPermission(targetType, targetId)` hook — centralizes the
+- `useEntityPermission(targetType, targetId)` hook centralizes the
   "resolve my permissions on this bot/server/team/pack" fetch that used to
   be hand-copied at every call site. The two copies had already drifted:
   `BotPageTabs` compared perms with a raw `.includes("edit_bots")` instead
   of `hasPermString` (broke for a direct owner, whose perms come back as
-  `["owner"]`, a super-permission — the bug fixed a few versions back),
+  `["owner"]`, a super-permission the bug fixed a few versions back),
   while `TeamManageLink` didn't guard against a stale response landing
   after unmount at all. Both now use the hook; `teams/[id]/settings`
   deliberately wasn't migrated — it already used `hasPermString` correctly
   and its perms fetch is part of a larger coordinated load, not a
   standalone gate.
 - `AdminListRow`/`AdminEmptyState` (`src/components/admin/AdminListRow.tsx`)
-  and a promoted `StatCard` (`src/components/admin/StatCard.tsx`) — the
+  and a promoted `StatCard` (`src/components/admin/StatCard.tsx`) the
   "rounded card row with edit/delete actions" and "No X yet." markup was
   hand-duplicated across every admin CRUD list page (badges, blog, staff
   templates, and all five shop catalogs), and `StatCard` was local to the
@@ -30,8 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   migrated since they each render a leading avatar or reorder-arrow column
   before the content that the row's two-slot (`children`/`actions`) API
   can't represent without changing their layout.
-- Deep links to a specific review or bot changelog entry —
-  `?review=<id>` on a bot/server page and `?changelog=<id>` on a bot page
+- Deep links to a specific review or bot changelog entry `?review=<id>` on a bot/server page and `?changelog=<id>` on a bot page
   jump straight to the reviews/changelog tab (even without an explicit
   `?tab=` param) and scroll the matching entry into view with a temporary
   ring highlight. New `useHighlightScroll` hook
@@ -52,6 +51,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   flagged categories in the tooltip. Backed by Popplio's new
   `moderation_flagged`/`moderation_categories` fields on `PartialBot`/
   `PartialServer` — a signal for reviewers, not an auto-reject.
+- `/about/team` — a public team page listing staff (avatar, name, and the
+  position(s) they hold), backed by Popplio's new public `GET
+  /staff/team`. Linked from the footer and `/about`.
+- Server counts on `/about/moderation`'s pipeline/safety tables (a "Server
+  review pipeline" table alongside the existing bot one, and "Vote-Banned
+  Servers" in platform safety) Popplio's `GET /list/stats` had bot
+  counts from the start but no server equivalent, so the page could only
+  ever show half the picture.
+- Client-side rejection of obvious XSS payload markup (`<script>`,
+  `javascript:`/`vbscript:` URLs, inline event handlers, `<svg>`/
+  `<object>`/`<embed>`/`<meta>`, legacy CSS `expression()`) on the bot/
+  server "Add" forms and the bot edit modal, via a new
+  `containsSuspiciousMarkup`/`suspiciousMarkupError`
+  (`src/lib/utils/detectSuspiciousContent.ts`), mirroring Popplio's new
+  `noxss` field validator so a bad paste gets a specific error immediately
+  instead of round-tripping to the API to find out. The API-side check is
+  the actual enforcement (this only covers the two most common entry
+  points, not every field it now also validates server edit, review
+  create/edit still rely on the API's rejection alone).
+- A real Spotlight section on the home page, backed by Popplio's new
+  staff-only `SpotlightAdd`/`SpotlightRemove` RPC action and `spotlight`
+  index field. Previously "Spotlight" was just a relabeling of the
+  certified+premium tabs with no staff control of its own; that section
+  is now labeled "Highlights" instead, and Spotlight shows whatever staff
+  actually chose to spotlight.
 
 ### Changed
 
@@ -66,6 +90,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The home page's Featured section only ever rendered
+  `botIndex?.featured` servers with an active `featured_until` were never
+  shown even though Popplio's index endpoint already returned them. Now
+  reuses `HomeTabs` (bots/servers toggle) the same way the
+  certified/premium and Spotlight sections already did.
+- The admin panel's duration field (used by Add Premium/Featured/
+  Spotlight) rendered as a bare number input labeled "Time [X unit(s)]"
+  with a placeholder claiming the format was "X years/days/hours" even
+  though Popplio only ever accepts a plain hour count. Staff typing "30
+  days" into it, per the placeholder's own suggestion, would submit that
+  literal string and fail. `GenericRpcModal` now renders a number input
+  plus an hours/days/weeks/years unit dropdown for any `Hour` field and
+  converts to hours before submission, so the field behaves the way its
+  label always implied.
 - `/admin/templates` and `/admin/badges` weren't linked from the admin
   nav — added "Templates" next to "Badges" under Content in
   `Header.tsx`'s `ADMIN_NAV_LINKS`.

@@ -28,11 +28,6 @@ import { defaultSchema } from "rehype-sanitize";
  */
 export const markdownSanitizeSchema: Schema = {
   ...defaultSchema,
-  // Tags that must be removed along with their raw text content, not just
-  // unwrapped. The default schema only strips `script` this way — anything
-  // else disallowed by tagNames (style, svg, ...) has its *tag* dropped but
-  // its text content left behind, which for a <style> block means the raw
-  // CSS/data-URI source gets rendered as visible page text.
   strip: [
     ...(defaultSchema.strip ?? []),
     "style",
