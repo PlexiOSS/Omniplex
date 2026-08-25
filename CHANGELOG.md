@@ -8,7 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
+- Bot and server pages now surface a "Voters" tab of their own, split out
+  of what used to be bundled at the bottom of Reviews — the voter list now
+  shows its own loading/empty state instead of just disappearing when
+  there aren't any yet.
+- `/emojis` is now tabbed (Emojis / Stickers) with a search box, backed by
+  two new flat, item-level-paginated Popplio endpoints
+  (`GET /servers/@emojis/flat`, `GET /servers/@stickers/flat`) instead of
+  one page per server — the old per-server layout meant the page would
+  only ever get more cluttered as more servers opted in, and which server
+  an emoji came from isn't really the organizing question people have
+  when browsing.
+- Emoji/sticker tiles (on both the flat browse page and a server's own
+  page) are now click-to-copy, and animated ones actually render as
+  animated — including Lottie stickers, which were previously dropped
+  entirely since there's no plain `<img>` for a Lottie JSON animation
+  (now rendered via `lottie-react`).
+- Server pages are now tabbed (About / Emojis & Stickers / Reviews /
+  Voters) instead of one long scroll, matching the bot page's tab
+  treatment.
+- Every paginated list in the app (bots, servers, shop, admin
+  queue/logs/staff, webhooks, notifications, search — all share one
+  `Pagination` component) now has a jump-to-page input alongside
+  Previous/Next.
+- The dashboard's bot card menu now has direct "Commands" / "Changelog"
+  links (`/bots/{id}?tab=commands`, `?tab=changelog`) — those tabs
+  already existed on a bot's public page from the last release, but
+  nothing linked to them, so owners had no way to discover the feature
+  existed.
 - The admin queue's server cards now show Discord's own guild-level NSFW
   classification (`discord_nsfw_level`, synced by Infernoplex) as a small
   "Discord: Explicit/Safe/Age-Restricted" label when it's not the default,
@@ -144,43 +171,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as well as bots — no new frontend needed for this specifically, since
   the admin panel's Actions menu (`GenericRpcModal`) is already fully
   data-driven off Popplio's `GetRpcMethods` response.
-
-## [0.2.2] - 2026-08-18
-
-### Added
-
-- Bot and server pages now surface a "Voters" tab of their own, split out
-  of what used to be bundled at the bottom of Reviews — the voter list now
-  shows its own loading/empty state instead of just disappearing when
-  there aren't any yet.
-- `/emojis` is now tabbed (Emojis / Stickers) with a search box, backed by
-  two new flat, item-level-paginated Popplio endpoints
-  (`GET /servers/@emojis/flat`, `GET /servers/@stickers/flat`) instead of
-  one page per server — the old per-server layout meant the page would
-  only ever get more cluttered as more servers opted in, and which server
-  an emoji came from isn't really the organizing question people have
-  when browsing.
-- Emoji/sticker tiles (on both the flat browse page and a server's own
-  page) are now click-to-copy, and animated ones actually render as
-  animated — including Lottie stickers, which were previously dropped
-  entirely since there's no plain `<img>` for a Lottie JSON animation
-  (now rendered via `lottie-react`).
-- Server pages are now tabbed (About / Emojis & Stickers / Reviews /
-  Voters) instead of one long scroll, matching the bot page's tab
-  treatment.
-- Every paginated list in the app (bots, servers, shop, admin
-  queue/logs/staff, webhooks, notifications, search — all share one
-  `Pagination` component) now has a jump-to-page input alongside
-  Previous/Next.
-- The dashboard's bot card menu now has direct "Commands" / "Changelog"
-  links (`/bots/{id}?tab=commands`, `?tab=changelog`) — those tabs
-  already existed on a bot's public page from the last release, but
-  nothing linked to them, so owners had no way to discover the feature
-  existed.
-
-### Fixed
-
-- A direct bot owner (not acting through a team) never saw the
+  - A direct bot owner (not acting through a team) never saw the
   Edit Commands / Post Update buttons on their own bot's page — the
   permission check compared the returned perms array against the literal
   string `"edit_bots"`, but a direct owner's perms come back as `["owner"]`
@@ -204,6 +195,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either). The existing 30-minute server-sync task now also REST-polls
   each server's live approximate counts, the same way `/setup` originally
   got them.
+
 
 ## [0.2.1] - 2026-08-17
 
