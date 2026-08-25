@@ -8,6 +8,7 @@ import type {
   ListIndexServer,
   PagedResult,
   RandomServers,
+  SEO,
   Server,
   ServerEmojiPreview,
   ServerSettingsUpdate,
@@ -19,6 +20,10 @@ export const serversResource = {
     client.get<ListIndexServer>("/servers/@index", {
       cache: "no-store",
     }),
+
+  /** Minimal metadata for generateMetadata() — avoids a full getServer() fetch. */
+  getSeo: (id: string) =>
+    client.get<SEO>(`/servers/${id}/seo`, { cache: "no-store" }),
 
   getAll: (page = 1, sort?: "trending") =>
     client.get<PagedResult<IndexServer[]>>(

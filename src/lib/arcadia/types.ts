@@ -538,6 +538,7 @@ export interface ChangelogEntry {
   version: string;
   added: string[];
   updated: string[];
+  fixed: string[];
   removed: string[];
   extra_description: string;
   prerelease: boolean;
@@ -554,6 +555,7 @@ export interface ChangelogCreateEntry {
   published: boolean;
   added: string[];
   updated: string[];
+  fixed: string[];
   removed: string[];
 }
 
@@ -561,11 +563,26 @@ export interface ChangelogUpdateEntry extends ChangelogCreateEntry {
   itag: string;
 }
 
+export interface ChangelogGenerateRequest {
+  project: ChangelogProject;
+  base: string;
+  head: string;
+}
+
+export interface ChangelogDraft {
+  added: string[];
+  updated: string[];
+  fixed: string[];
+  removed: string[];
+  extra_description: string;
+}
+
 export type ChangelogAction =
   | "ListEntries"
   | { CreateEntry: ChangelogCreateEntry }
   | { UpdateEntry: ChangelogUpdateEntry }
-  | { DeleteEntry: { itag: string } };
+  | { DeleteEntry: { itag: string } }
+  | { Generate: ChangelogGenerateRequest };
 
 // ---------------------------------------------------------------------------
 // Badges (UpdateBadges RPC — catalog only; assigning one to an entity goes

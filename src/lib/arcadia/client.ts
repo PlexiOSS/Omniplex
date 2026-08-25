@@ -1,4 +1,5 @@
 import { ARCADIA_URL } from "./config";
+import { touchArcadiaSession } from "./session";
 import type {
   AuthorizeAction,
   BadgeAction,
@@ -9,7 +10,9 @@ import type {
   BotWhitelist,
   BotWhitelistAction,
   ChangelogAction,
+  ChangelogDraft,
   ChangelogEntry,
+  ChangelogGenerateRequest,
   Hello,
   MfaLogin,
   PartialEntity,
@@ -88,6 +91,11 @@ async function assertOk(res: Response): Promise<Response> {
     const message = await res.text().catch(() => res.statusText);
     throw new ArcadiaError(message, res.status);
   }
+  // A successful call means the token the server just checked is still
+  // good right now — reset the local idle clock to match, so a staff
+  // member actively using the panel never gets logged out from under
+  // themselves by the client's own stale estimate.
+  touchArcadiaSession();
   return res;
 }
 
@@ -812,6 +820,18 @@ export const arcadia = {
         },
       });
       await assertOk(res);
+    },
+    generate: async (
+      loginToken: string,
+      req: ChangelogGenerateRequest,
+    ): Promise<ChangelogDraft> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { Generate: req } satisfies ChangelogAction,
+        },
+      });
+      return (await assertOk(res)).json();
     },
   },
 

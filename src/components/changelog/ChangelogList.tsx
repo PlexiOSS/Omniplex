@@ -1,6 +1,6 @@
 "use client";
 
-import { GitBranch, Minus, Pencil, Plus } from "lucide-react";
+import { GitBranch, Minus, Pencil, Plus, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -104,6 +104,12 @@ function ReleaseCard({ entry }: { entry: ChangelogEntry }) {
             label="Updated"
             items={entry.updated}
             tone="text-blue-600 dark:text-blue-400"
+          />
+          <ChangeGroup
+            icon={Wrench}
+            label="Fixed"
+            items={entry.fixed}
+            tone="text-amber-600 dark:text-amber-400"
           />
           <ChangeGroup
             icon={Minus}

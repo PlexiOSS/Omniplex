@@ -1232,6 +1232,7 @@ export interface ChangelogEntry {
   version: string;
   added: string[];
   updated: string[];
+  fixed: string[];
   removed: string[];
   extra_description: string;
   prerelease: boolean;

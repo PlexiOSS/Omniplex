@@ -59,7 +59,7 @@ export function ServiceUnavailable({
           {onRetry ? "Try again" : "Refresh page"}
         </button>
         <a
-          href="/about/status"
+          href="https://status.omniplex.gg"
           className="text-xs transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
         >
           View status page →

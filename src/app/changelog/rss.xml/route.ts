@@ -30,6 +30,7 @@ export async function GET() {
         entry.extra_description,
         entry.added.length ? `Added: ${entry.added.join("; ")}` : "",
         entry.updated.length ? `Updated: ${entry.updated.join("; ")}` : "",
+        entry.fixed.length ? `Fixed: ${entry.fixed.join("; ")}` : "",
         entry.removed.length ? `Removed: ${entry.removed.join("; ")}` : "",
       ]
         .filter(Boolean)

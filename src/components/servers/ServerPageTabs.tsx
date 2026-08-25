@@ -17,6 +17,8 @@ interface ServerPageTabsProps {
   showEmojis: boolean;
   emojis: ServerEmoji[];
   stickers: ServerSticker[];
+  /** When the tracking bot last synced this server's emojis/stickers. Null if never synced. */
+  emojisSyncedAt: string | null;
   initialReviews: Review[];
 }
 
@@ -55,6 +57,7 @@ function ServerPageTabsInner({
   showEmojis,
   emojis,
   stickers,
+  emojisSyncedAt,
   initialReviews,
   initialTab,
   highlightReviewId,
@@ -131,7 +134,12 @@ function ServerPageTabsInner({
           ))}
 
         {tab === "emojis" && hasEmojiTab && (
-          <EmojiStickerGallery emojis={emojis} stickers={stickers} noTopBorder />
+          <EmojiStickerGallery
+            emojis={emojis}
+            stickers={stickers}
+            syncedAt={emojisSyncedAt}
+            noTopBorder
+          />
         )}
 
         {tab === "reviews" && (

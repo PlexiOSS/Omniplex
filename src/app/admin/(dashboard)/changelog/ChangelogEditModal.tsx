@@ -39,11 +39,43 @@ export function ChangelogEditModal({
   );
   const [added, setAdded] = useState((entry?.added ?? []).join("\n"));
   const [updated, setUpdated] = useState((entry?.updated ?? []).join("\n"));
+  const [fixed, setFixed] = useState((entry?.fixed ?? []).join("\n"));
   const [removed, setRemoved] = useState((entry?.removed ?? []).join("\n"));
   const [prerelease, setPrerelease] = useState(entry?.prerelease ?? false);
   const [published, setPublished] = useState(entry?.published ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [baseRef, setBaseRef] = useState("");
+  const [headRef, setHeadRef] = useState("");
+  const [generating, setGenerating] = useState(false);
+
+  async function handleGenerate() {
+    if (!baseRef.trim() || !headRef.trim()) {
+      setError("Both a base and head ref are required to generate.");
+      return;
+    }
+    setGenerating(true);
+    setError(null);
+    try {
+      const draft = await arcadia.changelog.generate(loginToken, {
+        project,
+        base: baseRef.trim(),
+        head: headRef.trim(),
+      });
+      setAdded(draft.added.join("\n"));
+      setUpdated(draft.updated.join("\n"));
+      setFixed(draft.fixed.join("\n"));
+      setRemoved(draft.removed.join("\n"));
+      if (draft.extra_description) setExtraDescription(draft.extra_description);
+    } catch (err) {
+      setError(
+        err instanceof ArcadiaError ? err.message : "Failed to generate.",
+      );
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   async function handleSave() {
     if (!version.trim()) {
@@ -61,6 +93,7 @@ export function ChangelogEditModal({
         published,
         added: linesToArray(added),
         updated: linesToArray(updated),
+        fixed: linesToArray(fixed),
         removed: linesToArray(removed),
       };
       if (isEdit && entry) {
@@ -116,6 +149,45 @@ export function ChangelogEditModal({
           </div>
         </div>
 
+        <div className="flex flex-col gap-2 rounded-xl border border-dashed border-zinc-200 p-3 dark:border-zinc-800">
+          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Generate from GitHub
+          </p>
+          <p className="text-xs text-zinc-400 dark:text-zinc-600">
+            Pulls the merged PRs between two refs on {project}&apos;s repo and
+            drafts the fields below from them. Review before saving — this
+            overwrites whatever&apos;s currently in Added/Updated/Fixed/Removed.
+          </p>
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-32 flex-1">
+              <Input
+                id="changelog-gen-base"
+                label="Base ref"
+                value={baseRef}
+                onChange={(e) => setBaseRef(e.target.value)}
+                placeholder="v1.4.0"
+              />
+            </div>
+            <div className="min-w-32 flex-1">
+              <Input
+                id="changelog-gen-head"
+                label="Head ref"
+                value={headRef}
+                onChange={(e) => setHeadRef(e.target.value)}
+                placeholder="v1.5.0"
+              />
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={generating}
+              onClick={handleGenerate}
+            >
+              Generate
+            </Button>
+          </div>
+        </div>
+
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="changelog-extra-description"
@@ -137,6 +209,7 @@ export function ChangelogEditModal({
           [
             ["added", "Added", added, setAdded],
             ["updated", "Updated", updated, setUpdated],
+            ["fixed", "Fixed", fixed, setFixed],
             ["removed", "Removed", removed, setRemoved],
           ] as const
         ).map(([key, label, value, setValue]) => (

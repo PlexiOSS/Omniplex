@@ -14,6 +14,7 @@ import type {
   PagedResult,
   PatchBotTeamPayload,
   RandomBots,
+  SEO,
   UserVote,
 } from "../types";
 
@@ -22,6 +23,10 @@ export const botsResource = {
     client.get<ListIndexBot>("/bots/@index", {
       cache: "no-store",
     }),
+
+  /** Minimal metadata for generateMetadata() — avoids a full getBot() fetch. */
+  getSeo: (id: string) =>
+    client.get<SEO>(`/bots/${id}/seo`, { cache: "no-store" }),
 
   getAll: (page = 1, sort?: "trending") =>
     client.get<PagedResult<IndexBot[]>>(

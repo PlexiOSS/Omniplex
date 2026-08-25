@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The admin queue's server cards now show Discord's own guild-level NSFW
+  classification (`discord_nsfw_level`, synced by Infernoplex) as a small
+  "Discord: Explicit/Safe/Age-Restricted" label when it's not the default,
+  alongside the existing gated-channel-count badges. Previously computed
+  and typed but never rendered anywhere — a reviewer could see the derived
+  channel count but not Discord's own classification behind it.
+- A server's Emojis & Stickers tab now shows "Last synced" (relative time)
+  when `emojis_synced_at` is set, so it's clear whether the gallery
+  reflects the server's current state or a stale sync. Threaded through
+  `ServerPageTabs` → `EmojiStickerGallery`.
 - `useEntityPermission(targetType, targetId)` hook centralizes the
   "resolve my permissions on this bot/server/team/pack" fetch that used to
   be hand-copied at every call site. The two copies had already drifted:
@@ -107,6 +117,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/admin/templates` and `/admin/badges` weren't linked from the admin
   nav — added "Templates" next to "Badges" under Content in
   `Header.tsx`'s `ADMIN_NAV_LINKS`.
+- `generateMetadata()` on bot/server/team/pack/blog/user pages fetched
+  the full entity (votes, long description, everything) just to read a
+  name and short description for `<title>`/`<meta>` tags. Popplio already
+  ships purpose-built lightweight `*/seo` endpoints for exactly this
+  ("used by v4 website for meta tags," per their own doc comments) that
+  the current frontend never called. Each resource client now has a
+  `getSeo()` alongside its full fetch, and every `generateMetadata()`
+  uses it instead — same output, a much cheaper query per page load. Bot
+  and server pages keep their vanity-URL fallback (the `/seo` routes take
+  a raw ID, not a vanity slug, same as their full-entity counterparts).
 - An instance owner holding no explicit staff position (common — owners
   come from Popplio's config, not a `staff_positions` row) showed every
   position as "Locked," including ones they should always be able to
@@ -115,7 +135,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   empty array — indistinguishable from an owner who legitimately
   outranks everyone. Now reads the new `staffMember.rank`/`member.rank`
   field Popplio exposes instead of re-deriving it.
-
 - `/admin/templates` — a new admin page for the staff-template catalog
   (pre-built answers used when approving/denying a bot or server), with
   create/edit/delete and a bot/server filter. Previously there was no way

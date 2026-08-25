@@ -33,12 +33,11 @@ function dedupeById<T>(a: T[], b: T[], idOf: (item: T) => string): T[] {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const user = await users.getUser(id).catch(() => null);
-  if (!user) return {};
-  const username = user.user?.username ?? id;
+  const seo = await users.getSeo(id).catch(() => null);
+  if (!seo) return {};
   return {
-    title: username,
-    description: user.about || `${username}'s profile on Omniplex`,
+    title: seo.name,
+    description: seo.short || `${seo.name}'s profile on Omniplex`,
   };
 }
 

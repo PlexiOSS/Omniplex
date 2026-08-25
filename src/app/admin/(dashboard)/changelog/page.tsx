@@ -154,7 +154,7 @@ export default function ChangelogAdminPage() {
             )}
             <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
               {entry.added.length} added · {entry.updated.length} updated ·{" "}
-              {entry.removed.length} removed
+              {entry.fixed.length} fixed · {entry.removed.length} removed
             </p>
           </AdminListRow>
         ))}

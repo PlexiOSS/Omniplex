@@ -59,6 +59,20 @@ function safeInviteUrl(clientId: string): string {
   return `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=0&scope=bot%20applications.commands`;
 }
 
+/** Discord's own guild-level NSFW classification (0=default, 1=explicit, 2=safe, 3=age-restricted). */
+function discordNsfwLevelLabel(level: number): string {
+  switch (level) {
+    case 1:
+      return "Explicit";
+    case 2:
+      return "Safe";
+    case 3:
+      return "Age-Restricted";
+    default:
+      return "Default";
+  }
+}
+
 export default function AdminQueuePage() {
   const { loginToken, hasPerm } = useAdmin();
 
@@ -523,6 +537,13 @@ export default function AdminQueuePage() {
                           <span>
                             {server.nsfw_channel_count} gated channel
                             {server.nsfw_channel_count === 1 ? "" : "s"}
+                          </span>
+                        )}
+                        {server.discord_nsfw_level > 0 && (
+                          <span
+                            title="Discord's own guild-level NSFW classification, distinct from the gated-channel count above"
+                          >
+                            Discord: {discordNsfwLevelLabel(server.discord_nsfw_level)}
                           </span>
                         )}
                         {server.claimed_by && (
