@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-08-25
+
 ### Added
 - Bot and server pages now surface a "Voters" tab of their own, split out
   of what used to be bundled at the bottom of Reviews — the voter list now
