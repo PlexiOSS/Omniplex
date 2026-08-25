@@ -59,7 +59,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/changelog", label: "Changelog" },
       { href: "/kb", label: "Knowledge Base" },
       { href: "https://docs.omniplex.gg", label: "Documentation" },
-      { href: "https://status.omniplex.gg", label: "System Status" }
+      { href: "https://status.omniplex.gg", label: "System Status" },
     ],
   },
   { href: "/search", label: "Search" },
@@ -95,6 +95,7 @@ const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
     label: "Content",
     items: [
       { href: "/admin/blog", label: "Blog" },
+      { href: "/admin/changelog", label: "Changelog" },
       { href: "/admin/partners", label: "Partners" },
       { href: "/admin/badges", label: "Badges" },
       { href: "/admin/templates", label: "Templates" },

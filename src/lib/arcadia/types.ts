@@ -526,6 +526,48 @@ export type BlogAction =
   | { DeleteEntry: { itag: string } };
 
 // ---------------------------------------------------------------------------
+// Changelog (UpdateChangelog RPC — curated release entries for both Popplio
+// and Omniplex, separate from the public GET /changelogs/@all reader)
+// ---------------------------------------------------------------------------
+
+export type ChangelogProject = "popplio" | "omniplex";
+
+export interface ChangelogEntry {
+  itag: string;
+  project: ChangelogProject;
+  version: string;
+  added: string[];
+  updated: string[];
+  removed: string[];
+  extra_description: string;
+  prerelease: boolean;
+  published: boolean;
+  created_by: string;
+  created_at: string;
+}
+
+export interface ChangelogCreateEntry {
+  project: ChangelogProject;
+  version: string;
+  extra_description: string;
+  prerelease: boolean;
+  published: boolean;
+  added: string[];
+  updated: string[];
+  removed: string[];
+}
+
+export interface ChangelogUpdateEntry extends ChangelogCreateEntry {
+  itag: string;
+}
+
+export type ChangelogAction =
+  | "ListEntries"
+  | { CreateEntry: ChangelogCreateEntry }
+  | { UpdateEntry: ChangelogUpdateEntry }
+  | { DeleteEntry: { itag: string } };
+
+// ---------------------------------------------------------------------------
 // Badges (UpdateBadges RPC — catalog only; assigning one to an entity goes
 // through the generic AssignBadge/UnassignBadge RPCMethod instead)
 // ---------------------------------------------------------------------------

@@ -1,9 +1,10 @@
+import { changelogs } from "@/lib/api";
 import { BASE_URL } from "@/lib/api/config";
-import { getChangelogEntries } from "@/lib/github/releases";
 
-// Matches the releases fetch's own cache window (lib/github/releases.ts) —
-// no point revalidating this more often than the data underneath it does.
-export const revalidate = 900;
+const PROJECT_LABEL: Record<string, string> = {
+  popplio: "Popplio",
+  omniplex: "Omniplex",
+};
 
 function escapeXml(value: string): string {
   return value
@@ -15,24 +16,32 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
-  const entries = await getChangelogEntries();
+  const { entries } = await changelogs.getAll();
 
   const items = entries
     .map((entry) => {
       const title = escapeXml(
-        `${entry.source.label}: ${entry.name || entry.tag_name}`,
+        `${PROJECT_LABEL[entry.project] ?? entry.project}: ${entry.version}`,
       );
-      const pubDate = entry.published_at
-        ? new Date(entry.published_at).toUTCString()
-        : new Date().toUTCString();
+      const link = `${BASE_URL}/changelog`;
+      const pubDate = new Date(entry.created_at).toUTCString();
+
+      const description = [
+        entry.extra_description,
+        entry.added.length ? `Added: ${entry.added.join("; ")}` : "",
+        entry.updated.length ? `Updated: ${entry.updated.join("; ")}` : "",
+        entry.removed.length ? `Removed: ${entry.removed.join("; ")}` : "",
+      ]
+        .filter(Boolean)
+        .join(" — ");
 
       return `
     <item>
       <title>${title}</title>
-      <link>${escapeXml(entry.html_url)}</link>
-      <guid isPermaLink="true">${escapeXml(entry.html_url)}</guid>
+      <link>${escapeXml(link)}</link>
+      <guid isPermaLink="false">${escapeXml(entry.itag)}</guid>
       <pubDate>${pubDate}</pubDate>
-      <description>${escapeXml(entry.body ?? "")}</description>
+      <description>${escapeXml(description)}</description>
     </item>`;
     })
     .join("");
@@ -42,7 +51,7 @@ export async function GET() {
   <channel>
     <title>Omniplex Changelog</title>
     <link>${BASE_URL}/changelog</link>
-    <description>Release notes for Popplio and Omniplex, pulled from GitHub.</description>
+    <description>Curated release notes for Popplio and Omniplex.</description>
     <language>en-us</language>${items}
   </channel>
 </rss>`;

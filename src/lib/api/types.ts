@@ -1,4 +1,17 @@
 // ---------------------------------------------------------------------------
+// SEO — minimal metadata for a `/{id}/seo`-style endpoint, used by
+// generateMetadata() so a page's <title>/<meta> tags don't require fetching
+// the full entity.
+// ---------------------------------------------------------------------------
+
+export interface SEO {
+  name: string;
+  id: string;
+  avatar: string;
+  short: string;
+}
+
+// ---------------------------------------------------------------------------
 // Platform user (from eureka/dovewing) — avatar is already a full URL
 // ---------------------------------------------------------------------------
 
@@ -1205,6 +1218,29 @@ export interface Blog {
 
 export interface BlogPost extends BlogListPost {
   content: string;
+}
+
+// ---------------------------------------------------------------------------
+// Changelog
+// ---------------------------------------------------------------------------
+
+export type ChangelogProject = "popplio" | "omniplex";
+
+export interface ChangelogEntry {
+  itag: string;
+  project: ChangelogProject;
+  version: string;
+  added: string[];
+  updated: string[];
+  removed: string[];
+  extra_description: string;
+  prerelease: boolean;
+  author: PlatformUser | null;
+  created_at: string;
+}
+
+export interface ChangelogList {
+  entries: ChangelogEntry[];
 }
 
 // ---------------------------------------------------------------------------

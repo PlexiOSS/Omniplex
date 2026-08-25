@@ -8,6 +8,8 @@ import type {
   BlogPost,
   BotWhitelist,
   BotWhitelistAction,
+  ChangelogAction,
+  ChangelogEntry,
   Hello,
   MfaLogin,
   PartialEntity,
@@ -762,6 +764,51 @@ export const arcadia = {
         UpdateBlog: {
           login_token: loginToken,
           action: { DeleteEntry: { itag } } satisfies BlogAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  changelog: {
+    list: async (loginToken: string): Promise<ChangelogEntry[]> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: "ListEntries" satisfies ChangelogAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      entry: Extract<ChangelogAction, { CreateEntry: unknown }>["CreateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { CreateEntry: entry } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      entry: Extract<ChangelogAction, { UpdateEntry: unknown }>["UpdateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { UpdateEntry: entry } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, itag: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { DeleteEntry: { itag } } satisfies ChangelogAction,
         },
       });
       await assertOk(res);
