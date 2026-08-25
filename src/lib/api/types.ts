@@ -1224,7 +1224,7 @@ export interface BlogPost extends BlogListPost {
 // Changelog
 // ---------------------------------------------------------------------------
 
-export type ChangelogProject = "popplio" | "omniplex";
+export type ChangelogProject = "popplio" | "omniplex" | "keel";
 
 export interface ChangelogEntry {
   itag: string;

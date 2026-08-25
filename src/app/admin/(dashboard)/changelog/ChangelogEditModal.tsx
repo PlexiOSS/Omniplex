@@ -135,6 +135,7 @@ export function ChangelogEditModal({
             >
               <option value="popplio">Popplio</option>
               <option value="omniplex">Omniplex</option>
+              <option value="keel">Keel</option>
             </select>
           </div>
           <div className="flex-1">

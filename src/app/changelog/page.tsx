@@ -8,7 +8,7 @@ import { isApiUnavailable } from "@/lib/utils/errors";
 
 export const metadata: Metadata = {
   title: "Changelog",
-  description: "Curated release notes for Popplio and Omniplex.",
+  description: "Curated release notes for Popplio, Omniplex, and Keel.",
   alternates: {
     types: {
       "application/rss+xml": "/changelog/rss.xml",
@@ -32,7 +32,7 @@ export default async function ChangelogPage() {
             Changelog
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Curated release notes for Popplio and Omniplex.
+            Curated release notes for Popplio, Omniplex, and Keel.
           </p>
         </div>
         <a

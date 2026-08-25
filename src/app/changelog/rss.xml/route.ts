@@ -4,6 +4,7 @@ import { BASE_URL } from "@/lib/api/config";
 const PROJECT_LABEL: Record<string, string> = {
   popplio: "Popplio",
   omniplex: "Omniplex",
+  keel: "Keel",
 };
 
 function escapeXml(value: string): string {
@@ -52,7 +53,7 @@ export async function GET() {
   <channel>
     <title>Omniplex Changelog</title>
     <link>${BASE_URL}/changelog</link>
-    <description>Curated release notes for Popplio and Omniplex.</description>
+    <description>Curated release notes for Popplio, Omniplex, and Keel.</description>
     <language>en-us</language>${items}
   </channel>
 </rss>`;

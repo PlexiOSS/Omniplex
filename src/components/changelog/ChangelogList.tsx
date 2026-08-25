@@ -2,10 +2,23 @@
 
 import { GitBranch, Minus, Pencil, Plus, Wrench } from "lucide-react";
 import { useState } from "react";
+import { Markdown } from "@/components/markdown/Markdown";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { ChangelogEntry, ChangelogProject } from "@/lib/api/types";
 import { formatRelativeTime } from "@/lib/utils/format";
+
+/**
+ * Turns a plain-text list into a GFM bullet list source string, escaping
+ * each item's leading markdown-list-marker-lookalikes (-, *, +, digit+.) so
+ * an item that happens to start with one of those doesn't get misread as
+ * its own nested list syntax by the markdown parser.
+ */
+function toBulletMarkdown(items: string[]): string {
+  return items
+    .map((item) => `- ${item.replace(/^([-*+]|\d+\.)\s/, "\\$1 ")}`)
+    .join("\n");
+}
 
 interface ChangelogListProps {
   entries: ChangelogEntry[];
@@ -14,9 +27,10 @@ interface ChangelogListProps {
 const PROJECT_LABEL: Record<ChangelogProject, string> = {
   popplio: "Popplio",
   omniplex: "Omniplex",
+  keel: "Keel",
 };
 
-const PROJECTS: ChangelogProject[] = ["popplio", "omniplex"];
+const PROJECTS: ChangelogProject[] = ["popplio", "omniplex", "keel"];
 
 export function ChangelogList({ entries }: ChangelogListProps) {
   const [activeProject, setActiveProject] = useState<ChangelogProject | null>(
@@ -87,9 +101,10 @@ function ReleaseCard({ entry }: { entry: ChangelogEntry }) {
 
       <div className="px-6 py-5">
         {entry.extra_description && (
-          <p className="mb-4 text-sm text-zinc-700 dark:text-zinc-300">
-            {entry.extra_description}
-          </p>
+          <Markdown
+            content={entry.extra_description}
+            className="mb-4 text-sm text-zinc-700 dark:text-zinc-300"
+          />
         )}
 
         <div className="space-y-4">
@@ -157,13 +172,10 @@ function ChangeGroup({
         <Icon size={12} />
         {label}
       </div>
-      <ul className="space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
-        {items.map((item) => (
-          <li key={item} className="pl-4">
-            {item}
-          </li>
-        ))}
-      </ul>
+      <Markdown
+        content={toBulletMarkdown(items)}
+        className="text-sm text-zinc-700 dark:text-zinc-300"
+      />
     </div>
   );
 }

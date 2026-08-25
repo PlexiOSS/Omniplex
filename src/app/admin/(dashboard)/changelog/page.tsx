@@ -14,6 +14,7 @@ import { ChangelogEditModal } from "./ChangelogEditModal";
 const PROJECT_LABEL: Record<string, string> = {
   popplio: "Popplio",
   omniplex: "Omniplex",
+  keel: "Keel",
 };
 
 export default function ChangelogAdminPage() {
@@ -85,7 +86,7 @@ export default function ChangelogAdminPage() {
         description={
           <>
             Curated release entries shown on the public <code>/changelog</code>{" "}
-            page, for both Popplio and Omniplex.
+            page, for Popplio, Omniplex, and Keel.
           </>
         }
         action={

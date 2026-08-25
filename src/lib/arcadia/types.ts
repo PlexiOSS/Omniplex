@@ -530,7 +530,7 @@ export type BlogAction =
 // and Omniplex, separate from the public GET /changelogs/@all reader)
 // ---------------------------------------------------------------------------
 
-export type ChangelogProject = "popplio" | "omniplex";
+export type ChangelogProject = "popplio" | "omniplex" | "keel";
 
 export interface ChangelogEntry {
   itag: string;
