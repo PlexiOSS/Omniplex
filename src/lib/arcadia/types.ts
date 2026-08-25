@@ -557,6 +557,9 @@ export interface ChangelogCreateEntry {
   updated: string[];
   fixed: string[];
   removed: string[];
+  /** ISO 8601 timestamp. Omit/undefined to fall back to now (create) or
+   * leave the existing date untouched (update). */
+  created_at?: string;
 }
 
 export interface ChangelogUpdateEntry extends ChangelogCreateEntry {

@@ -23,6 +23,14 @@ function linesToArray(text: string): string[] {
     .filter(Boolean);
 }
 
+/** ISO 8601 -> the local-time value a `datetime-local` input expects. */
+function isoToDatetimeLocal(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function ChangelogEditModal({
   loginToken,
   entry,
@@ -34,6 +42,9 @@ export function ChangelogEditModal({
     entry?.project ?? "popplio",
   );
   const [version, setVersion] = useState(entry?.version ?? "");
+  const [releaseDate, setReleaseDate] = useState(
+    entry?.created_at ? isoToDatetimeLocal(entry.created_at) : "",
+  );
   const [extraDescription, setExtraDescription] = useState(
     entry?.extra_description ?? "",
   );
@@ -95,6 +106,9 @@ export function ChangelogEditModal({
         updated: linesToArray(updated),
         fixed: linesToArray(fixed),
         removed: linesToArray(removed),
+        created_at: releaseDate
+          ? new Date(releaseDate).toISOString()
+          : undefined,
       };
       if (isEdit && entry) {
         await arcadia.changelog.edit(loginToken, {
@@ -148,6 +162,26 @@ export function ChangelogEditModal({
               required
             />
           </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="changelog-release-date"
+            className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Release date{" "}
+            <span className="font-normal text-zinc-400 dark:text-zinc-600">
+              (leave blank to use now{isEdit ? " / keep the current date" : ""}
+              )
+            </span>
+          </label>
+          <input
+            id="changelog-release-date"
+            type="datetime-local"
+            value={releaseDate}
+            onChange={(e) => setReleaseDate(e.target.value)}
+            className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+          />
         </div>
 
         <div className="flex flex-col gap-2 rounded-xl border border-dashed border-zinc-200 p-3 dark:border-zinc-800">
