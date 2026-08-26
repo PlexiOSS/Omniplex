@@ -1,13 +1,14 @@
 import { Rss } from "lucide-react";
 import type { Metadata } from "next";
-import { Container } from "@/components/layout/Container";
 import { ChangelogList } from "@/components/changelog/ChangelogList";
-import { CHANGELOG_REPOS } from "@/lib/github/config";
-import { getChangelogEntries } from "@/lib/github/releases";
+import { Container } from "@/components/layout/Container";
+import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { changelogs } from "@/lib/api";
+import { isApiUnavailable } from "@/lib/utils/errors";
 
 export const metadata: Metadata = {
   title: "Changelog",
-  description: "Release notes for Popplio and Omniplex, pulled from GitHub.",
+  description: "Curated release notes for Popplio, Omniplex, and Keel.",
   alternates: {
     types: {
       "application/rss+xml": "/changelog/rss.xml",
@@ -16,7 +17,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ChangelogPage() {
-  const entries = await getChangelogEntries();
+  let entries: Awaited<ReturnType<typeof changelogs.getAll>>["entries"] = [];
+  try {
+    entries = (await changelogs.getAll()).entries;
+  } catch (err) {
+    if (isApiUnavailable(err)) return <ServiceUnavailable />;
+  }
 
   return (
     <Container className="py-10">
@@ -26,9 +32,7 @@ export default async function ChangelogPage() {
             Changelog
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Release notes for{" "}
-            {CHANGELOG_REPOS.map((r) => r.label).join(" and ")}, pulled
-            straight from GitHub.
+            Curated release notes for Popplio, Omniplex, and Keel.
           </p>
         </div>
         <a
@@ -40,7 +44,7 @@ export default async function ChangelogPage() {
         </a>
       </div>
 
-      <ChangelogList entries={entries} repos={CHANGELOG_REPOS} />
+      <ChangelogList entries={entries} />
     </Container>
   );
 }

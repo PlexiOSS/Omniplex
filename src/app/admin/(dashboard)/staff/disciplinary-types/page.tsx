@@ -8,6 +8,7 @@ import { staff } from "@/lib/api";
 import type { PermissionData } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffDisciplinaryType } from "@/lib/arcadia/types";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { AdminPageHeader } from "../../../AdminPageHeader";
 import { useAdmin } from "../../../AdminContext";
 import { DisciplinaryTypeEditModal } from "./DisciplinaryTypeEditModal";
@@ -103,41 +104,13 @@ export default function DisciplinaryTypesPage() {
 
       <div className="mt-6 space-y-2">
         {types.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No disciplinary types yet.
-          </p>
+          <AdminEmptyState message="No disciplinary types yet." />
         )}
         {types.map((type) => (
-          <div
+          <AdminListRow
             key={type.id}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  {type.name}
-                </span>
-                {type.self_assignable && (
-                  <Badge variant="info">Self-assignable</Badge>
-                )}
-                {type.additory && <Badge>Additory</Badge>}
-                {type.needs_approval && (
-                  <Badge variant="warning">Needs approval</Badge>
-                )}
-              </div>
-              <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-                {type.description}
-              </p>
-              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
-                {type.perm_limits.length} permission
-                {type.perm_limits.length === 1 ? "" : "s"} limited
-                {type.max_expiry != null &&
-                  ` · expires after ${Math.round(type.max_expiry / 3600)}h`}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_disciplinaries") && (
+            actions={
+              hasPerm("manage_disciplinaries") && (
                 <>
                   <Button
                     variant="ghost"
@@ -157,9 +130,31 @@ export default function DisciplinaryTypesPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-semibold text-zinc-950 dark:text-zinc-50">
+                {type.name}
+              </span>
+              {type.self_assignable && (
+                <Badge variant="info">Self-assignable</Badge>
+              )}
+              {type.additory && <Badge>Additory</Badge>}
+              {type.needs_approval && (
+                <Badge variant="warning">Needs approval</Badge>
               )}
             </div>
-          </div>
+            <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+              {type.description}
+            </p>
+            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+              {type.perm_limits.length} permission
+              {type.perm_limits.length === 1 ? "" : "s"} limited
+              {type.max_expiry != null &&
+                ` · expires after ${Math.round(type.max_expiry / 3600)}h`}
+            </p>
+          </AdminListRow>
         ))}
       </div>
 

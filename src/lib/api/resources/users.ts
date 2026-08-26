@@ -1,5 +1,5 @@
 import { client } from "../client";
-import type { UpdateUserPayload, User, UserPerm } from "../types";
+import type { SEO, UpdateUserPayload, User, UserPerm } from "../types";
 
 export const usersResource = {
   getUser: (userId: string, token?: string) =>
@@ -7,6 +7,10 @@ export const usersResource = {
       ? { token, cache: "no-store" }
       : { next: { revalidate: 60 } },
     ),
+
+  /** Minimal metadata for generateMetadata() — avoids a full getUser() fetch. */
+  getSeo: (userId: string) =>
+    client.get<SEO>(`/users/${userId}/seo`, { next: { revalidate: 60 } }),
 
   updateUser: (userId: string, payload: UpdateUserPayload, token: string) =>
     client.patch<User>(`/users/${userId}`, payload, { token }),

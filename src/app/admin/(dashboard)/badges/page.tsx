@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { BadgeCatalogEntry } from "@/lib/arcadia/types";
 import { badgeIcon } from "@/lib/constants/badgeIcons";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../AdminContext";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { BadgeEditModal } from "./BadgeEditModal";
@@ -77,7 +78,7 @@ export default function BadgesPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Badges"
-        description="The catalog of purely decorative badges — award one to a user, bot, server, or team from its Actions menu in Search or Report detail."
+        description="The catalog of purely decorative badges award one to a user, bot, server, or team from its Actions menu in Search or Report detail."
         action={
           hasPerm("manage_badges") && (
             <Button
@@ -97,38 +98,14 @@ export default function BadgesPage() {
       )}
 
       <div className="mt-6 space-y-2">
-        {badges.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No badges yet.
-          </p>
-        )}
+        {badges.length === 0 && <AdminEmptyState message="No badges yet." />}
         {badges.map((badge) => {
           const Icon = badgeIcon(badge.icon);
           return (
-            <div
+            <AdminListRow
               key={badge.id}
-              className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <Badge variant={badge.color}>
-                    <Icon size={12} />
-                    {badge.name}
-                  </Badge>
-                  <span className="text-xs text-zinc-400 dark:text-zinc-600">
-                    {badge.id}
-                  </span>
-                  {badge.target_types.map((t) => (
-                    <Badge key={t}>{t}</Badge>
-                  ))}
-                </div>
-                <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-                  {badge.description}
-                </p>
-              </div>
-
-              <div className="flex shrink-0 items-center gap-2">
-                {hasPerm("manage_badges") && (
+              actions={
+                hasPerm("manage_badges") && (
                   <>
                     <Button
                       variant="ghost"
@@ -148,9 +125,25 @@ export default function BadgesPage() {
                       <Trash2 size={12} />
                     </Button>
                   </>
-                )}
+                )
+              }
+            >
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Badge variant={badge.color}>
+                  <Icon size={12} />
+                  {badge.name}
+                </Badge>
+                <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                  {badge.id}
+                </span>
+                {badge.target_types.map((t) => (
+                  <Badge key={t}>{t}</Badge>
+                ))}
               </div>
-            </div>
+              <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+                {badge.description}
+              </p>
+            </AdminListRow>
           );
         })}
       </div>

@@ -49,13 +49,27 @@ async function fetchBot(id: string) {
   }
 }
 
+async function fetchBotSeo(id: string) {
+  try {
+    return await bots.getSeo(id);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      const resolved = await vanity.resolve(id).catch(() => null);
+      if (resolved?.target_type === "bot") {
+        return bots.getSeo(resolved.target_id);
+      }
+    }
+    throw err;
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const bot = await fetchBot(id).catch(() => null);
-  if (!bot) return {};
+  const seo = await fetchBotSeo(id).catch(() => null);
+  if (!seo) return {};
   return {
-    title: bot.user.username,
-    description: bot.short,
+    title: seo.name,
+    description: seo.short,
   };
 }
 

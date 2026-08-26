@@ -106,6 +106,17 @@ export interface StaffMember {
   unaccounted: boolean;
   mfa_verified: boolean;
   created_at: string;
+  /**
+   * The index of this member's most senior held position, lower being more
+   * senior — mirrors Go's perms.StaffGrants.Rank() exactly. An instance
+   * owner gets a very large negative number (outranks every position
+   * without holding one); a member with no positions gets a very large
+   * positive number (outranked by every position). Compare a position's
+   * own `index` against this directly rather than re-deriving a "lowest
+   * held index" from `positions` — an owner holding none would otherwise
+   * look, incorrectly, like they rank below everyone.
+   */
+  rank: number;
 }
 
 export interface InstanceConfig {
@@ -165,6 +176,8 @@ export interface PartialBot {
   approval_note: string;
   mentionable: string[];
   invite: string;
+  moderation_flagged: boolean;
+  moderation_categories: string[];
 }
 
 export interface PartialServer {
@@ -179,12 +192,16 @@ export interface PartialServer {
   invite_clicks: number;
   clicks: number;
   nsfw: boolean;
+  discord_nsfw_level: number;
+  nsfw_channel_count: number;
   tags: string[];
   premium: boolean;
   claimed_by: string | null;
   last_claimed: string | null;
   approval_note: string;
   mentionable: string[];
+  moderation_flagged: boolean;
+  moderation_categories: string[];
 }
 
 export interface PartialPack {
@@ -509,6 +526,68 @@ export type BlogAction =
   | { DeleteEntry: { itag: string } };
 
 // ---------------------------------------------------------------------------
+// Changelog (UpdateChangelog RPC — curated release entries for both Popplio
+// and Omniplex, separate from the public GET /changelogs/@all reader)
+// ---------------------------------------------------------------------------
+
+export type ChangelogProject = "popplio" | "omniplex" | "keel";
+
+export interface ChangelogEntry {
+  itag: string;
+  project: ChangelogProject;
+  version: string;
+  added: string[];
+  updated: string[];
+  fixed: string[];
+  removed: string[];
+  extra_description: string;
+  prerelease: boolean;
+  published: boolean;
+  created_by: string;
+  created_at: string;
+}
+
+export interface ChangelogCreateEntry {
+  project: ChangelogProject;
+  version: string;
+  extra_description: string;
+  prerelease: boolean;
+  published: boolean;
+  added: string[];
+  updated: string[];
+  fixed: string[];
+  removed: string[];
+  /** ISO 8601 timestamp. Omit/undefined to fall back to now (create) or
+   * leave the existing date untouched (update). */
+  created_at?: string;
+}
+
+export interface ChangelogUpdateEntry extends ChangelogCreateEntry {
+  itag: string;
+}
+
+export interface ChangelogGenerateRequest {
+  project: ChangelogProject;
+  base: string;
+  head: string;
+}
+
+export interface ChangelogDraft {
+  added: string[];
+  updated: string[];
+  fixed: string[];
+  removed: string[];
+  extra_description: string;
+}
+
+export type ChangelogAction =
+  | "ListEntries"
+  | { CreateEntry: ChangelogCreateEntry }
+  | { UpdateEntry: ChangelogUpdateEntry }
+  | { DeleteEntry: { itag: string } }
+  | { Generate: ChangelogGenerateRequest };
+
+// ---------------------------------------------------------------------------
 // Badges (UpdateBadges RPC — catalog only; assigning one to an entity goes
 // through the generic AssignBadge/UnassignBadge RPCMethod instead)
 // ---------------------------------------------------------------------------
@@ -547,6 +626,23 @@ export type BadgeAction =
   | "List"
   | { Create: BadgeUpsert }
   | { Edit: BadgeUpsert }
+  | { Delete: { id: string } };
+
+export interface StaffTemplateUpsert {
+  id: string;
+  name: string;
+  emoji: string;
+  tags: string[];
+  description: string;
+  type: string;
+  /** "bot" or "server" — which review queue this template shows up in. */
+  entity_type: "bot" | "server";
+}
+
+export type StaffTemplateAction =
+  | "List"
+  | { Create: StaffTemplateUpsert }
+  | { Edit: StaffTemplateUpsert }
   | { Delete: { id: string } };
 
 export interface BlogCreateEntry {

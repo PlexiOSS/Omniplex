@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.2] - 2026-08-18
+## [Unreleased]
+
+## [0.2.3] - 2026-08-25
 
 ### Added
-
 - Bot and server pages now surface a "Voters" tab of their own, split out
   of what used to be bundled at the bottom of Reviews — the voter list now
   shows its own loading/empty state instead of just disappearing when
@@ -37,10 +38,142 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   already existed on a bot's public page from the last release, but
   nothing linked to them, so owners had no way to discover the feature
   existed.
+- The admin queue's server cards now show Discord's own guild-level NSFW
+  classification (`discord_nsfw_level`, synced by Infernoplex) as a small
+  "Discord: Explicit/Safe/Age-Restricted" label when it's not the default,
+  alongside the existing gated-channel-count badges. Previously computed
+  and typed but never rendered anywhere — a reviewer could see the derived
+  channel count but not Discord's own classification behind it.
+- A server's Emojis & Stickers tab now shows "Last synced" (relative time)
+  when `emojis_synced_at` is set, so it's clear whether the gallery
+  reflects the server's current state or a stale sync. Threaded through
+  `ServerPageTabs` → `EmojiStickerGallery`.
+- `useEntityPermission(targetType, targetId)` hook centralizes the
+  "resolve my permissions on this bot/server/team/pack" fetch that used to
+  be hand-copied at every call site. The two copies had already drifted:
+  `BotPageTabs` compared perms with a raw `.includes("edit_bots")` instead
+  of `hasPermString` (broke for a direct owner, whose perms come back as
+  `["owner"]`, a super-permission the bug fixed a few versions back),
+  while `TeamManageLink` didn't guard against a stale response landing
+  after unmount at all. Both now use the hook; `teams/[id]/settings`
+  deliberately wasn't migrated — it already used `hasPermString` correctly
+  and its perms fetch is part of a larger coordinated load, not a
+  standalone gate.
+- `AdminListRow`/`AdminEmptyState` (`src/components/admin/AdminListRow.tsx`)
+  and a promoted `StatCard` (`src/components/admin/StatCard.tsx`) the
+  "rounded card row with edit/delete actions" and "No X yet." markup was
+  hand-duplicated across every admin CRUD list page (badges, blog, staff
+  templates, and all five shop catalogs), and `StatCard` was local to the
+  dashboard overview page only. Nine list pages now share the row
+  component; `partners`, `staff/positions`, and `staff/members` weren't
+  migrated since they each render a leading avatar or reorder-arrow column
+  before the content that the row's two-slot (`children`/`actions`) API
+  can't represent without changing their layout.
+- Deep links to a specific review or bot changelog entry `?review=<id>` on a bot/server page and `?changelog=<id>` on a bot page
+  jump straight to the reviews/changelog tab (even without an explicit
+  `?tab=` param) and scroll the matching entry into view with a temporary
+  ring highlight. New `useHighlightScroll` hook
+  (`src/hooks/useHighlightScroll.ts`) does the `scrollIntoView` on mount;
+  `ReviewsSection` and `BotChangelogSection` both take an optional
+  `highlightId` prop. Previously the only way to point someone at a
+  specific review or update was "open the bot page and scroll."
+- NSFW compliance badges on the review queue's server cards: an "Ungated
+  NSFW" warning when Popplio reports age-restricted channels but the server
+  isn't tagged `nsfw`, a "No gated channels" note when it's tagged `nsfw`
+  but none were detected, and a gated-channel count alongside vote/member
+  counts otherwise. Backed by Popplio's new `discord_nsfw_level`/
+  `nsfw_channel_count` fields on `PartialServer` (synced by Infernoplex).
+  Previously answering "Server: NSFW Content Not Gated" meant a reviewer
+  joining the server and looking around by hand.
+- "Moderation flagged" badge on both bot and server queue cards when
+  OpenAI's moderation endpoint flagged the submitted description, with the
+  flagged categories in the tooltip. Backed by Popplio's new
+  `moderation_flagged`/`moderation_categories` fields on `PartialBot`/
+  `PartialServer` — a signal for reviewers, not an auto-reject.
+- `/about/team` — a public team page listing staff (avatar, name, and the
+  position(s) they hold), backed by Popplio's new public `GET
+  /staff/team`. Linked from the footer and `/about`.
+- Server counts on `/about/moderation`'s pipeline/safety tables (a "Server
+  review pipeline" table alongside the existing bot one, and "Vote-Banned
+  Servers" in platform safety) Popplio's `GET /list/stats` had bot
+  counts from the start but no server equivalent, so the page could only
+  ever show half the picture.
+- Client-side rejection of obvious XSS payload markup (`<script>`,
+  `javascript:`/`vbscript:` URLs, inline event handlers, `<svg>`/
+  `<object>`/`<embed>`/`<meta>`, legacy CSS `expression()`) on the bot/
+  server "Add" forms and the bot edit modal, via a new
+  `containsSuspiciousMarkup`/`suspiciousMarkupError`
+  (`src/lib/utils/detectSuspiciousContent.ts`), mirroring Popplio's new
+  `noxss` field validator so a bad paste gets a specific error immediately
+  instead of round-tripping to the API to find out. The API-side check is
+  the actual enforcement (this only covers the two most common entry
+  points, not every field it now also validates server edit, review
+  create/edit still rely on the API's rejection alone).
+- A real Spotlight section on the home page, backed by Popplio's new
+  staff-only `SpotlightAdd`/`SpotlightRemove` RPC action and `spotlight`
+  index field. Previously "Spotlight" was just a relabeling of the
+  certified+premium tabs with no staff control of its own; that section
+  is now labeled "Highlights" instead, and Spotlight shows whatever staff
+  actually chose to spotlight.
+
+### Changed
+
+- The queue page's Claim/Unclaim/Approve/Deny buttons now gate on
+  `review_entities` instead of `review_bots`, matching Popplio's renamed
+  staff permission (the RPC actions they gate have always covered both
+  bots and servers; only the name was bot-specific). **Must ship no
+  earlier than Popplio's `review_bots` → `review_entities` rename** —
+  deploying this before that lands means `hasPerm("review_entities")`
+  never matches anyone's resolved perms, since the backend would still be
+  returning `review_bots`.
 
 ### Fixed
 
-- A direct bot owner (not acting through a team) never saw the
+- The home page's Featured section only ever rendered
+  `botIndex?.featured` servers with an active `featured_until` were never
+  shown even though Popplio's index endpoint already returned them. Now
+  reuses `HomeTabs` (bots/servers toggle) the same way the
+  certified/premium and Spotlight sections already did.
+- The admin panel's duration field (used by Add Premium/Featured/
+  Spotlight) rendered as a bare number input labeled "Time [X unit(s)]"
+  with a placeholder claiming the format was "X years/days/hours" even
+  though Popplio only ever accepts a plain hour count. Staff typing "30
+  days" into it, per the placeholder's own suggestion, would submit that
+  literal string and fail. `GenericRpcModal` now renders a number input
+  plus an hours/days/weeks/years unit dropdown for any `Hour` field and
+  converts to hours before submission, so the field behaves the way its
+  label always implied.
+- `/admin/templates` and `/admin/badges` weren't linked from the admin
+  nav — added "Templates" next to "Badges" under Content in
+  `Header.tsx`'s `ADMIN_NAV_LINKS`.
+- `generateMetadata()` on bot/server/team/pack/blog/user pages fetched
+  the full entity (votes, long description, everything) just to read a
+  name and short description for `<title>`/`<meta>` tags. Popplio already
+  ships purpose-built lightweight `*/seo` endpoints for exactly this
+  ("used by v4 website for meta tags," per their own doc comments) that
+  the current frontend never called. Each resource client now has a
+  `getSeo()` alongside its full fetch, and every `generateMetadata()`
+  uses it instead — same output, a much cheaper query per page load. Bot
+  and server pages keep their vanity-URL fallback (the `/seo` routes take
+  a raw ID, not a vanity slug, same as their full-entity counterparts).
+- An instance owner holding no explicit staff position (common — owners
+  come from Popplio's config, not a `staff_positions` row) showed every
+  position as "Locked," including ones they should always be able to
+  edit. `staff/positions` and `staff/members` both derived a "my lowest
+  index" from `staffMember.positions`, defaulting to `Infinity` for an
+  empty array — indistinguishable from an owner who legitimately
+  outranks everyone. Now reads the new `staffMember.rank`/`member.rank`
+  field Popplio exposes instead of re-deriving it.
+- `/admin/templates` — a new admin page for the staff-template catalog
+  (pre-built answers used when approving/denying a bot or server), with
+  create/edit/delete and a bot/server filter. Previously there was no way
+  to manage these at all short of a manual DB insert; backed by Popplio's
+  new `UpdateStaffTemplates` panel op.
+- Certify, Premium, and the new Feature staff actions now work on servers
+  as well as bots — no new frontend needed for this specifically, since
+  the admin panel's Actions menu (`GenericRpcModal`) is already fully
+  data-driven off Popplio's `GetRpcMethods` response.
+  - A direct bot owner (not acting through a team) never saw the
   Edit Commands / Post Update buttons on their own bot's page — the
   permission check compared the returned perms array against the literal
   string `"edit_bots"`, but a direct owner's perms come back as `["owner"]`
@@ -64,6 +197,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either). The existing 30-minute server-sync task now also REST-polls
   each server's live approximate counts, the same way `/setup` originally
   got them.
+
 
 ## [0.2.1] - 2026-08-17
 

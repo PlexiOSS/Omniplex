@@ -1,34 +1,40 @@
 "use client";
 
-import { ExternalLink, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import type { BotWhitelist } from "@/lib/arcadia/types";
-import { formatRelativeTime } from "@/lib/utils/format";
-import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
-import { useAdmin } from "../../../AdminContext";
-import { AdminPageHeader } from "../../../AdminPageHeader";
-import { BotWhitelistEditModal } from "./BotWhitelistEditModal";
+import type { ChangelogEntry } from "@/lib/arcadia/types";
+import { useAdmin } from "../../AdminContext";
+import { AdminPageHeader } from "../../AdminPageHeader";
+import { ChangelogEditModal } from "./ChangelogEditModal";
 
-export default function BotWhitelistPage() {
+const PROJECT_LABEL: Record<string, string> = {
+  popplio: "Popplio",
+  omniplex: "Omniplex",
+  keel: "Keel",
+};
+
+export default function ChangelogAdminPage() {
   const { loginToken, hasPerm } = useAdmin();
 
-  const [entries, setEntries] = useState<BotWhitelist[] | null>(null);
+  const [entries, setEntries] = useState<ChangelogEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<BotWhitelist | "new" | null>(null);
+  const [editing, setEditing] = useState<ChangelogEntry | "new" | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmDeleteItag, setConfirmDeleteItag] = useState<string | null>(
+    null,
+  );
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     try {
-      setEntries(await arcadia.botWhitelist.list(loginToken));
+      setEntries(await arcadia.changelog.list(loginToken));
     } catch (err) {
       setError(
-        err instanceof ArcadiaError
-          ? err.message
-          : "Failed to load the whitelist.",
+        err instanceof ArcadiaError ? err.message : "Failed to load entries.",
       );
     }
   }, [loginToken]);
@@ -37,17 +43,17 @@ export default function BotWhitelistPage() {
     load();
   }, [load]);
 
-  function handleDeleteClick(botId: string) {
-    if (confirmDeleteId !== botId) {
-      setConfirmDeleteId(botId);
-      confirmRef.current = setTimeout(() => setConfirmDeleteId(null), 3000);
+  function handleDeleteClick(itag: string) {
+    if (confirmDeleteItag !== itag) {
+      setConfirmDeleteItag(itag);
+      confirmRef.current = setTimeout(() => setConfirmDeleteItag(null), 3000);
       return;
     }
     if (confirmRef.current) clearTimeout(confirmRef.current);
-    setConfirmDeleteId(null);
-    setDeleting(botId);
-    arcadia.botWhitelist
-      .delete(loginToken, botId)
+    setConfirmDeleteItag(null);
+    setDeleting(itag);
+    arcadia.changelog
+      .delete(loginToken, itag)
       .then(load)
       .catch((err) =>
         setError(
@@ -76,17 +82,22 @@ export default function BotWhitelistPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
-        title="Bot Whitelist"
-        description="Bots allowed past a restriction they'd otherwise hit for shop purchases."
+        title="Changelog"
+        description={
+          <>
+            Curated release entries shown on the public <code>/changelog</code>{" "}
+            page, for Popplio, Omniplex, and Keel.
+          </>
+        }
         action={
-          hasPerm("manage_bot_whitelist") && (
+          hasPerm("manage_changelog") && (
             <Button
               variant="primary"
               size="sm"
               onClick={() => setEditing("new")}
             >
               <Plus size={14} />
-              Whitelist Bot
+              New Entry
             </Button>
           )
         }
@@ -98,28 +109,28 @@ export default function BotWhitelistPage() {
 
       <div className="mt-6 space-y-2">
         {entries.length === 0 && (
-          <AdminEmptyState message="No bots are whitelisted." />
+          <AdminEmptyState message="No changelog entries yet." />
         )}
         {entries.map((entry) => (
           <AdminListRow
-            key={entry.bot_id}
+            key={entry.itag}
             actions={
-              hasPerm("manage_bot_whitelist") && (
+              hasPerm("manage_changelog") && (
                 <>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setEditing(entry)}
                   >
-                    Edit
+                    <Pencil size={12} />
                   </Button>
                   <Button
                     variant={
-                      confirmDeleteId === entry.bot_id ? "danger" : "ghost"
+                      confirmDeleteItag === entry.itag ? "danger" : "ghost"
                     }
                     size="sm"
-                    loading={deleting === entry.bot_id}
-                    onClick={() => handleDeleteClick(entry.bot_id)}
+                    loading={deleting === entry.itag}
+                    onClick={() => handleDeleteClick(entry.itag)}
                   >
                     <Trash2 size={12} />
                   </Button>
@@ -128,35 +139,37 @@ export default function BotWhitelistPage() {
             }
           >
             <div className="flex flex-wrap items-center gap-1.5">
-              <a
-                href={`/bots/${entry.bot_id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 font-mono text-sm font-semibold text-zinc-950 hover:text-accent dark:text-zinc-50"
-              >
-                {entry.bot_id}
-                <ExternalLink size={11} className="shrink-0" />
-              </a>
+              <Badge variant="info">
+                {PROJECT_LABEL[entry.project] ?? entry.project}
+              </Badge>
+              <span className="font-semibold text-zinc-950 dark:text-zinc-50">
+                {entry.version}
+              </span>
+              {entry.prerelease && <Badge variant="warning">Prerelease</Badge>}
+              {!entry.published && <Badge variant="warning">Draft</Badge>}
             </div>
-            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-              {entry.reason}
-            </p>
-            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
-              Added by {entry.user_id} · {formatRelativeTime(entry.created_at)}
+            {entry.extra_description && (
+              <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+                {entry.extra_description}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+              {entry.added.length} added · {entry.updated.length} updated ·{" "}
+              {entry.fixed.length} fixed · {entry.removed.length} removed
             </p>
           </AdminListRow>
         ))}
       </div>
 
       {editing === "new" && (
-        <BotWhitelistEditModal
+        <ChangelogEditModal
           loginToken={loginToken}
           onClose={() => setEditing(null)}
           onSaved={load}
         />
       )}
       {editing && editing !== "new" && (
-        <BotWhitelistEditModal
+        <ChangelogEditModal
           loginToken={loginToken}
           entry={editing}
           onClose={() => setEditing(null)}

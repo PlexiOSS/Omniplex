@@ -23,11 +23,11 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const pack = await packs.getPack(id).catch(() => null);
-  if (!pack) return {};
+  const seo = await packs.getSeo(id).catch(() => null);
+  if (!seo) return {};
   return {
-    title: pack.name,
-    description: pack.short,
+    title: seo.name,
+    description: seo.short,
   };
 }
 

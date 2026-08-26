@@ -50,13 +50,27 @@ async function fetchServer(id: string) {
   }
 }
 
+async function fetchServerSeo(id: string) {
+  try {
+    return await servers.getSeo(id);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      const resolved = await vanity.resolve(id).catch(() => null);
+      if (resolved?.target_type === "server") {
+        return servers.getSeo(resolved.target_id);
+      }
+    }
+    throw err;
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const server = await fetchServer(id).catch(() => null);
-  if (!server) return {};
+  const seo = await fetchServerSeo(id).catch(() => null);
+  if (!seo) return {};
   return {
-    title: server.name,
-    description: server.short,
+    title: seo.name,
+    description: seo.short,
   };
 }
 
@@ -193,6 +207,7 @@ export default async function ServerPage({ params }: Props) {
             showEmojis={server.show_emojis}
             emojis={server.emojis}
             stickers={server.stickers}
+            emojisSyncedAt={server.emojis_synced_at}
             initialReviews={reviewList.reviews}
           />
         </div>

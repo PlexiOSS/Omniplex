@@ -104,12 +104,21 @@ export default async function ModerationPage() {
 
   const reasons = Object.keys(REASON_LABELS) as ReportReason[];
 
-  const pipelineEntries = listStats
+  const botPipelineEntries = listStats
     ? [
         { label: "Approved", value: listStats.total_approved_bots },
         { label: "Certified", value: listStats.total_certified_bots },
         { label: "Awaiting Review", value: listStats.total_pending_bots },
         { label: "Denied", value: listStats.total_denied_bots },
+      ]
+    : [];
+
+  const serverPipelineEntries = listStats
+    ? [
+        { label: "Approved", value: listStats.total_approved_servers },
+        { label: "Certified", value: listStats.total_certified_servers },
+        { label: "Awaiting Review", value: listStats.total_pending_servers },
+        { label: "Denied", value: listStats.total_denied_servers },
       ]
     : [];
 
@@ -119,6 +128,10 @@ export default async function ModerationPage() {
         {
           label: "Vote-Banned Bots",
           value: listStats.total_vote_banned_bots,
+        },
+        {
+          label: "Vote-Banned Servers",
+          value: listStats.total_vote_banned_servers,
         },
       ]
     : [];
@@ -141,11 +154,19 @@ export default async function ModerationPage() {
         </p>
       </div>
 
-      {pipelineEntries.length > 0 && (
+      {botPipelineEntries.length > 0 && (
         <StatsTable
           title="Bot review pipeline"
           metricLabel="Stage"
-          rows={pipelineEntries}
+          rows={botPipelineEntries}
+        />
+      )}
+
+      {serverPipelineEntries.length > 0 && (
+        <StatsTable
+          title="Server review pipeline"
+          metricLabel="Stage"
+          rows={serverPipelineEntries}
         />
       )}
 

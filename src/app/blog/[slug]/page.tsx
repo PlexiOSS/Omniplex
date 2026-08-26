@@ -17,11 +17,11 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await blogs.getPost(slug).catch(() => null);
-  if (!post) return {};
+  const seo = await blogs.getSeo(slug).catch(() => null);
+  if (!seo) return {};
   return {
-    title: post.title,
-    description: post.description,
+    title: seo.name,
+    description: seo.short,
   };
 }
 

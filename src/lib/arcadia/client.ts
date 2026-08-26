@@ -1,4 +1,5 @@
 import { ARCADIA_URL } from "./config";
+import { touchArcadiaSession } from "./session";
 import type {
   AuthorizeAction,
   BadgeAction,
@@ -8,6 +9,10 @@ import type {
   BlogPost,
   BotWhitelist,
   BotWhitelistAction,
+  ChangelogAction,
+  ChangelogDraft,
+  ChangelogEntry,
+  ChangelogGenerateRequest,
   Hello,
   MfaLogin,
   PartialEntity,
@@ -33,6 +38,8 @@ import type {
   StaffMemberAction,
   StaffPosition,
   StaffPositionAction,
+  StaffTemplateAction,
+  StaffTemplateUpsert,
   StartAuth,
   TargetType,
   VoteCreditTier,
@@ -84,6 +91,11 @@ async function assertOk(res: Response): Promise<Response> {
     const message = await res.text().catch(() => res.statusText);
     throw new ArcadiaError(message, res.status);
   }
+  // A successful call means the token the server just checked is still
+  // good right now — reset the local idle clock to match, so a staff
+  // member actively using the panel never gets logged out from under
+  // themselves by the client's own stale estimate.
+  touchArcadiaSession();
   return res;
 }
 
@@ -676,6 +688,51 @@ export const arcadia = {
     },
   },
 
+  staffTemplates: {
+    list: async (loginToken: string): Promise<StaffTemplateUpsert[]> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: "List" satisfies StaffTemplateAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      template: Extract<StaffTemplateAction, { Create: unknown }>["Create"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Create: template } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      template: Extract<StaffTemplateAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Edit: template } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
   blog: {
     list: async (loginToken: string): Promise<BlogPost[]> => {
       const res = await postQuery({
@@ -718,6 +775,63 @@ export const arcadia = {
         },
       });
       await assertOk(res);
+    },
+  },
+
+  changelog: {
+    list: async (loginToken: string): Promise<ChangelogEntry[]> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: "ListEntries" satisfies ChangelogAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      entry: Extract<ChangelogAction, { CreateEntry: unknown }>["CreateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { CreateEntry: entry } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      entry: Extract<ChangelogAction, { UpdateEntry: unknown }>["UpdateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { UpdateEntry: entry } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, itag: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { DeleteEntry: { itag } } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    generate: async (
+      loginToken: string,
+      req: ChangelogGenerateRequest,
+    ): Promise<ChangelogDraft> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { Generate: req } satisfies ChangelogAction,
+        },
+      });
+      return (await assertOk(res)).json();
     },
   },
 

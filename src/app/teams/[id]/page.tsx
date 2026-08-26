@@ -22,11 +22,11 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const team = await teams.getTeam(id).catch(() => null);
-  if (!team) return {};
+  const seo = await teams.getSeo(id).catch(() => null);
+  if (!seo) return {};
   return {
-    title: team.name,
-    description: team.short || `${team.name} on Omniplex`,
+    title: seo.name,
+    description: seo.short || `${seo.name} on Omniplex`,
   };
 }
 

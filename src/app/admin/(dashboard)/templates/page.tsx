@@ -1,38 +1,41 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import type { ShopCoupon, ShopItem } from "@/lib/arcadia/types";
+import type { StaffTemplateUpsert } from "@/lib/arcadia/types";
 import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
-import { useAdmin } from "../../../AdminContext";
-import { AdminPageHeader } from "../../../AdminPageHeader";
-import { ShopCouponEditModal } from "./ShopCouponEditModal";
+import { AdminPageHeader } from "../../AdminPageHeader";
+import { useAdmin } from "../../AdminContext";
+import { TemplateEditModal } from "./TemplateEditModal";
 
-export default function ShopCouponsPage() {
+type EntityFilter = "all" | "bot" | "server";
+
+export default function StaffTemplatesPage() {
   const { loginToken, hasPerm } = useAdmin();
 
-  const [coupons, setCoupons] = useState<ShopCoupon[] | null>(null);
-  const [items, setItems] = useState<ShopItem[]>([]);
+  const [templates, setTemplates] = useState<StaffTemplateUpsert[] | null>(
+    null,
+  );
+  const [filter, setFilter] = useState<EntityFilter>("all");
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<ShopCoupon | "new" | null>(null);
+  const [editing, setEditing] = useState<StaffTemplateUpsert | "new" | null>(
+    null,
+  );
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [couponList, itemList] = await Promise.all([
-        arcadia.shopCoupons.list(loginToken),
-        arcadia.shopItems.list(loginToken),
-      ]);
-      setCoupons(couponList);
-      setItems(itemList);
+      setTemplates(await arcadia.staffTemplates.list(loginToken));
     } catch (err) {
       setError(
-        err instanceof ArcadiaError ? err.message : "Failed to load coupons.",
+        err instanceof ArcadiaError
+          ? err.message
+          : "Failed to load templates.",
       );
     }
   }, [loginToken]);
@@ -40,6 +43,12 @@ export default function ShopCouponsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const visible = useMemo(
+    () =>
+      templates?.filter((t) => filter === "all" || t.entity_type === filter),
+    [templates, filter],
+  );
 
   function handleDeleteClick(id: string) {
     if (confirmDeleteId !== id) {
@@ -50,7 +59,7 @@ export default function ShopCouponsPage() {
     if (confirmRef.current) clearTimeout(confirmRef.current);
     setConfirmDeleteId(null);
     setDeleting(id);
-    arcadia.shopCoupons
+    arcadia.staffTemplates
       .delete(loginToken, id)
       .then(load)
       .catch((err) =>
@@ -61,7 +70,7 @@ export default function ShopCouponsPage() {
       .finally(() => setDeleting(null));
   }
 
-  if (error && !coupons) {
+  if (error && !templates) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -69,7 +78,7 @@ export default function ShopCouponsPage() {
     );
   }
 
-  if (!coupons) {
+  if (!templates) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
@@ -80,48 +89,68 @@ export default function ShopCouponsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
-        title="Shop Coupons"
-        description="Discount codes, optionally restricted to specific items. Coupons aren't wired into checkout yet — redeeming one isn't possible on the site today, this only manages the catalogue."
+        title="Templates"
+        description="Pre-built answers staff pick from when approving, denying, or otherwise reviewing a bot or server."
         action={
-          hasPerm("manage_shop") && (
+          hasPerm("manage_templates") && (
             <Button
               variant="primary"
               size="sm"
               onClick={() => setEditing("new")}
             >
               <Plus size={14} />
-              New Coupon
+              New Template
             </Button>
           )
         }
       />
+
+      <div className="mt-6 flex items-center gap-1">
+        {(["all", "bot", "server"] as EntityFilter[]).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={[
+              "rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition-colors",
+              filter === f
+                ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+                : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+            ].join(" ")}
+          >
+            {f === "all" ? "All" : `${f}s`}
+          </button>
+        ))}
+      </div>
 
       {error && (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
       <div className="mt-6 space-y-2">
-        {coupons.length === 0 && (
-          <AdminEmptyState message="No shop coupons yet." />
+        {visible?.length === 0 && (
+          <AdminEmptyState message="No templates yet." />
         )}
-        {coupons.map((coupon) => (
+        {visible?.map((template) => (
           <AdminListRow
-            key={coupon.id}
+            key={template.id}
             actions={
-              hasPerm("manage_shop") && (
+              hasPerm("manage_templates") && (
                 <>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setEditing(coupon)}
+                    onClick={() => setEditing(template)}
                   >
                     <Pencil size={12} />
                   </Button>
                   <Button
-                    variant={confirmDeleteId === coupon.id ? "danger" : "ghost"}
+                    variant={
+                      confirmDeleteId === template.id ? "danger" : "ghost"
+                    }
                     size="sm"
-                    loading={deleting === coupon.id}
-                    onClick={() => handleDeleteClick(coupon.id)}
+                    loading={deleting === template.id}
+                    onClick={() => handleDeleteClick(template.id)}
                   >
                     <Trash2 size={12} />
                   </Button>
@@ -130,40 +159,33 @@ export default function ShopCouponsPage() {
             }
           >
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="font-mono font-semibold text-zinc-950 dark:text-zinc-50">
-                {coupon.code}
+              <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                {template.emoji} {template.name}
               </span>
-              {coupon.public && <Badge variant="info">Public</Badge>}
-              {!coupon.usable && <Badge variant="danger">Disabled</Badge>}
-              {coupon.cents != null && (
-                <Badge variant="premium">
-                  {(coupon.cents / 100).toFixed(2)} off
-                </Badge>
-              )}
+              <Badge>{template.entity_type}</Badge>
+              {template.type && <Badge>{template.type}</Badge>}
+              {template.tags.map((t) => (
+                <Badge key={t}>{t}</Badge>
+              ))}
             </div>
-            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
-              {coupon.id} · {coupon.max_uses ?? "?"} uses ·{" "}
-              {coupon.applicable_items.length === 0
-                ? "all items"
-                : `${coupon.applicable_items.length} item(s)`}
+            <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+              {template.description}
             </p>
           </AdminListRow>
         ))}
       </div>
 
       {editing === "new" && (
-        <ShopCouponEditModal
+        <TemplateEditModal
           loginToken={loginToken}
-          items={items}
           onClose={() => setEditing(null)}
           onSaved={load}
         />
       )}
       {editing && editing !== "new" && (
-        <ShopCouponEditModal
+        <TemplateEditModal
           loginToken={loginToken}
-          items={items}
-          coupon={editing}
+          template={editing}
           onClose={() => setEditing(null)}
           onSaved={load}
         />

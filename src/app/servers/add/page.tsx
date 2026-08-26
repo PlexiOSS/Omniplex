@@ -19,6 +19,7 @@ import { servers } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Link as ApiLink, DiscordServerMeta } from "@/lib/api/types";
 import { SERVER_TAGS as AVAILABLE_TAGS } from "@/lib/constants/tags";
+import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
 import { formatCount } from "@/lib/utils/format";
 
 const LONG_MIN = 500;
@@ -123,6 +124,16 @@ export default function AddServerPage() {
       return setError(
         `Long description must be at least ${LONG_MIN} characters.`,
       );
+    const shortMarkupError = suspiciousMarkupError(
+      "Short description",
+      form.short,
+    );
+    if (shortMarkupError) return setError(shortMarkupError);
+    const longMarkupError = suspiciousMarkupError(
+      "Long description",
+      form.long,
+    );
+    if (longMarkupError) return setError(longMarkupError);
     if (form.tags.length === 0) return setError("Select at least one tag.");
 
     if (!session) return;

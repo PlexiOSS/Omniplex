@@ -3,6 +3,7 @@
 import { Check, Copy, Sparkles } from "lucide-react";
 import { useState } from "react";
 import type { ServerEmoji, ServerSticker } from "@/lib/api/types";
+import { formatRelativeTime } from "@/lib/utils/format";
 import { EmojiImage, isAnimatedSticker, StickerMedia } from "./EmojiStickerMedia";
 
 interface EmojiStickerGalleryProps {
@@ -10,6 +11,8 @@ interface EmojiStickerGalleryProps {
   stickers: ServerSticker[];
   /** Set when rendered inside its own tab panel (ServerPageTabs), which already provides its own separation from the tab bar above. */
   noTopBorder?: boolean;
+  /** When the tracking bot last synced this server's emojis/stickers. Null if never synced. */
+  syncedAt?: string | null;
 }
 
 /** A single server's own emoji/sticker list — shown on that server's own page, where the "which server" context is already obvious from the page you're on. */
@@ -17,6 +20,7 @@ export function EmojiStickerGallery({
   emojis,
   stickers,
   noTopBorder = false,
+  syncedAt,
 }: EmojiStickerGalleryProps) {
   if (emojis.length === 0 && stickers.length === 0) return null;
 
@@ -58,6 +62,12 @@ export function EmojiStickerGallery({
             ))}
           </div>
         </div>
+      )}
+
+      {syncedAt && (
+        <p className="mt-4 text-xs text-zinc-400 dark:text-zinc-600">
+          Last synced {formatRelativeTime(syncedAt)}
+        </p>
       )}
     </div>
   );

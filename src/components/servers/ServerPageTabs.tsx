@@ -17,6 +17,8 @@ interface ServerPageTabsProps {
   showEmojis: boolean;
   emojis: ServerEmoji[];
   stickers: ServerSticker[];
+  /** When the tracking bot last synced this server's emojis/stickers. Null if never synced. */
+  emojisSyncedAt: string | null;
   initialReviews: Review[];
 }
 
@@ -33,10 +35,20 @@ export function ServerPageTabs(props: ServerPageTabsProps) {
 function ServerPageTabsWithSearchParams(props: ServerPageTabsProps) {
   const searchParams = useSearchParams();
   const requested = searchParams.get("tab");
-  const initialTab: Tab = (TAB_KEYS as string[]).includes(requested ?? "")
+  const highlightReviewId = searchParams.get("review") ?? undefined;
+
+  let initialTab: Tab = (TAB_KEYS as string[]).includes(requested ?? "")
     ? (requested as Tab)
     : "about";
-  return <ServerPageTabsInner {...props} initialTab={initialTab} />;
+  if (!requested && highlightReviewId) initialTab = "reviews";
+
+  return (
+    <ServerPageTabsInner
+      {...props}
+      initialTab={initialTab}
+      highlightReviewId={highlightReviewId}
+    />
+  );
 }
 
 function ServerPageTabsInner({
@@ -45,9 +57,11 @@ function ServerPageTabsInner({
   showEmojis,
   emojis,
   stickers,
+  emojisSyncedAt,
   initialReviews,
   initialTab,
-}: ServerPageTabsProps & { initialTab: Tab }) {
+  highlightReviewId,
+}: ServerPageTabsProps & { initialTab: Tab; highlightReviewId?: string }) {
   const [tab, setTab] = useState<Tab>(initialTab);
 
   const hasEmojiTab = showEmojis && (emojis.length > 0 || stickers.length > 0);
@@ -120,7 +134,12 @@ function ServerPageTabsInner({
           ))}
 
         {tab === "emojis" && hasEmojiTab && (
-          <EmojiStickerGallery emojis={emojis} stickers={stickers} noTopBorder />
+          <EmojiStickerGallery
+            emojis={emojis}
+            stickers={stickers}
+            syncedAt={emojisSyncedAt}
+            noTopBorder
+          />
         )}
 
         {tab === "reviews" && (
@@ -128,6 +147,7 @@ function ServerPageTabsInner({
             targetType="server"
             targetId={serverId}
             initialReviews={initialReviews}
+            highlightId={highlightReviewId}
           />
         )}
 

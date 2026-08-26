@@ -20,7 +20,6 @@ const COLORS: BadgeColor[] = [
 
 interface BadgeEditModalProps {
   loginToken: string;
-  /** Omit for create; pass an existing badge for edit. */
   badge?: BadgeCatalogEntry;
   onClose: () => void;
   onSaved: () => void;
@@ -102,7 +101,7 @@ export function BadgeEditModal({
                       ? "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400"
                       : color === "info"
                         ? "bg-accent/10 text-accent"
-                        : "bg-gradient-to-r from-amber-500 to-yellow-400 text-white",
+                        : "bg-linear-to-r from-amber-500 to-yellow-400 text-white",
             ].join(" ")}
           >
             <Icon size={12} />

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { VoteCreditTier } from "@/lib/arcadia/types";
+import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../../AdminContext";
 import { AdminPageHeader } from "../../../AdminPageHeader";
 import { VoteCreditTierEditModal } from "./VoteCreditTierEditModal";
@@ -95,29 +96,13 @@ export default function VoteCreditTiersPage() {
 
       <div className="mt-6 space-y-2">
         {tiers.length === 0 && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No vote credit tiers yet.
-          </p>
+          <AdminEmptyState message="No vote credit tiers yet." />
         )}
         {tiers.map((tier) => (
-          <div
+          <AdminListRow
             key={tier.id}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  {tier.votes} votes → {(tier.cents / 100).toFixed(2)} credits
-                </span>
-                <Badge>{tier.target_type}</Badge>
-              </div>
-              <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
-                {tier.id} · position {tier.position}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              {hasPerm("manage_shop") && (
+            actions={
+              hasPerm("manage_shop") && (
                 <>
                   <Button
                     variant="ghost"
@@ -135,9 +120,19 @@ export default function VoteCreditTiersPage() {
                     <Trash2 size={12} />
                   </Button>
                 </>
-              )}
+              )
+            }
+          >
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-semibold text-zinc-950 dark:text-zinc-50">
+                {tier.votes} votes → {(tier.cents / 100).toFixed(2)} credits
+              </span>
+              <Badge>{tier.target_type}</Badge>
             </div>
-          </div>
+            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">
+              {tier.id} · position {tier.position}
+            </p>
+          </AdminListRow>
         ))}
       </div>
 

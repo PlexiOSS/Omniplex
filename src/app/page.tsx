@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, Handshake } from "lucide-react";
 import { bots, servers, list, blogs } from "@/lib/api";
 import type { Blog, ListStats, PartnerList } from "@/lib/api/types";
-import { BotCard } from "@/components/cards/BotCard";
 import { PackCard } from "@/components/cards/PackCard";
 import { SearchBar } from "@/components/search/SearchBar";
 import { Container } from "@/components/layout/Container";
@@ -63,7 +62,7 @@ export default async function HomePage() {
     },
   ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
-  const spotlightTabs = [
+  const highlightsTabs = [
     {
       key: "certified",
       label: "Certified",
@@ -78,7 +77,24 @@ export default async function HomePage() {
     },
   ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
-  const featured = botIndex?.featured ?? [];
+  const featuredTabs = [
+    {
+      key: "featured",
+      label: "Featured",
+      bots: botIndex?.featured ?? [],
+      servers: serverIndex?.featured ?? [],
+    },
+  ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
+
+  const spotlightTabs = [
+    {
+      key: "spotlight",
+      label: "Spotlight",
+      bots: botIndex?.spotlight ?? [],
+      servers: serverIndex?.spotlight ?? [],
+    },
+  ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
+
   const packs = botIndex?.packs ?? [];
   const recentPosts = (blogData?.posts ?? []).filter((p) => !p.draft).slice(0, 3);
   const partners = partnerList?.partners ?? [];
@@ -114,19 +130,18 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* Featured bots (purchased homepage slot) */}
-      {featured.length > 0 && (
+      {/* Featured bots and servers (purchased homepage slot) */}
+      {featuredTabs.length > 0 && (
         <section className="border-b border-accent/10 bg-linear-to-b from-accent/6 to-transparent py-14 dark:border-accent/10 dark:from-accent/8">
           <Container>
-            <SectionHeader
-              title="Featured Bots"
-              subtitle="Spotlighted by their owners through the shop"
-              href="/bots"
-            />
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.slice(0, 9).map((bot) => (
-                <BotCard key={bot.bot_id} bot={bot} />
-              ))}
+            <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+              Featured
+            </h2>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              Purchased homepage placements, bots and servers alike
+            </p>
+            <div className="mt-6">
+              <HomeTabs tabs={featuredTabs} />
             </div>
           </Container>
         </section>
@@ -141,7 +156,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Spotlight: certified & premium, bots and servers */}
+      {/* Spotlight: hand-picked by staff, bots and servers */}
       {spotlightTabs.length > 0 && (
         <section className="border-t border-accent/10 bg-linear-to-b from-accent/6 to-transparent py-14 dark:border-accent/10 dark:from-accent/8">
           <Container>
@@ -149,10 +164,27 @@ export default async function HomePage() {
               Spotlight
             </h2>
             <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-              Hand-picked and premium listings, bots and servers alike
+              Hand-picked by our staff, bots and servers alike
             </p>
             <div className="mt-6">
               <HomeTabs tabs={spotlightTabs} />
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* Highlights: certified & premium, bots and servers */}
+      {highlightsTabs.length > 0 && (
+        <section className="border-t border-zinc-200 py-14 dark:border-zinc-800">
+          <Container>
+            <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+              Highlights
+            </h2>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              Certified and premium listings, bots and servers alike
+            </p>
+            <div className="mt-6">
+              <HomeTabs tabs={highlightsTabs} />
             </div>
           </Container>
         </section>
@@ -275,7 +307,9 @@ export default async function HomePage() {
 
       {/* Empty state */}
       {tabs.length === 0 &&
+        featuredTabs.length === 0 &&
         spotlightTabs.length === 0 &&
+        highlightsTabs.length === 0 &&
         packs.length === 0 && (
           <section className="py-24">
             <Container>

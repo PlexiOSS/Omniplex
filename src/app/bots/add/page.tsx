@@ -18,6 +18,7 @@ import { usePersistedFormDraft } from "@/hooks/usePersistedFormDraft";
 import { bots } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Link as ApiLink, DiscordBotMeta } from "@/lib/api/types";
+import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
 import { BOT_TAGS as AVAILABLE_TAGS } from "@/lib/constants/tags";
 import { formatCount } from "@/lib/utils/format";
 
@@ -149,6 +150,16 @@ export default function AddBotPage() {
       return "Short description must be at least 30 characters.";
     if (form.long.trim().length < 500)
       return "Long description must be at least 500 characters.";
+    const shortMarkupError = suspiciousMarkupError(
+      "Short description",
+      form.short,
+    );
+    if (shortMarkupError) return shortMarkupError;
+    const longMarkupError = suspiciousMarkupError(
+      "Long description",
+      form.long,
+    );
+    if (longMarkupError) return longMarkupError;
     if (!form.prefix.trim()) return "Prefix is required.";
     if (!form.library.trim()) return "Library is required.";
     if (!form.invite.trim() || !form.invite.trim().startsWith("https://"))

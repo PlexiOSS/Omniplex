@@ -23,6 +23,24 @@ interface GenericRpcModalProps {
   onDone: (resultMessage: string | null) => void;
 }
 
+// Popplio's RPC layer only ever accepts a plain hour count (see
+// `time_period_hours`) — there's no compound "30 days" string format on the
+// backend. This picker lets staff enter a number in whatever unit is
+// convenient and converts it to hours before the value ever reaches state.
+const DURATION_UNITS = [
+  { label: "hours", hours: 1 },
+  { label: "days", hours: 24 },
+  { label: "weeks", hours: 24 * 7 },
+  { label: "years", hours: 24 * 365 },
+] as const;
+
+function durationUnitFor(hours: number) {
+  if (hours > 0 && hours % DURATION_UNITS[3].hours === 0) return DURATION_UNITS[3];
+  if (hours > 0 && hours % DURATION_UNITS[2].hours === 0) return DURATION_UNITS[2];
+  if (hours > 0 && hours % DURATION_UNITS[1].hours === 0) return DURATION_UNITS[1];
+  return DURATION_UNITS[0];
+}
+
 function fieldInput(
   field: RPCField,
   value: string | number | boolean,
@@ -41,6 +59,55 @@ function fieldInput(
           {field.label}
         </span>
       </label>
+    );
+  }
+
+  if (field.field_type === "Hour") {
+    const hours = Number(value) || 0;
+    const unit = durationUnitFor(hours);
+    return (
+      <div key={field.id} className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`rpc-${field.id}`}
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+        >
+          {field.label}
+        </label>
+        <div className="flex gap-2">
+          <input
+            id={`rpc-${field.id}`}
+            type="number"
+            min={0}
+            value={hours === 0 ? "" : hours / unit.hours}
+            onChange={(e) =>
+              onChange(Math.round(Number(e.target.value || 0) * unit.hours))
+            }
+            placeholder="0"
+            className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+          />
+          <select
+            value={unit.label}
+            onChange={(e) => {
+              const nextUnit = DURATION_UNITS.find(
+                (u) => u.label === e.target.value,
+              );
+              if (!nextUnit) return;
+              const amount = hours === 0 ? 0 : hours / unit.hours;
+              onChange(Math.round(amount * nextUnit.hours));
+            }}
+            className="shrink-0 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+          >
+            {DURATION_UNITS.map((u) => (
+              <option key={u.label} value={u.label}>
+                {u.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          {hours} hour{hours === 1 ? "" : "s"} total
+        </p>
+      </div>
     );
   }
 
@@ -65,10 +132,7 @@ function fieldInput(
     );
   }
 
-  const inputType =
-    field.field_type === "Number" || field.field_type === "Hour"
-      ? "number"
-      : "text";
+  const inputType = field.field_type === "Number" ? "number" : "text";
 
   return (
     <Input

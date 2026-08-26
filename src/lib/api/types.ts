@@ -1,4 +1,17 @@
 // ---------------------------------------------------------------------------
+// SEO — minimal metadata for a `/{id}/seo`-style endpoint, used by
+// generateMetadata() so a page's <title>/<meta> tags don't require fetching
+// the full entity.
+// ---------------------------------------------------------------------------
+
+export interface SEO {
+  name: string;
+  id: string;
+  avatar: string;
+  short: string;
+}
+
+// ---------------------------------------------------------------------------
 // Platform user (from eureka/dovewing) — avatar is already a full URL
 // ---------------------------------------------------------------------------
 
@@ -62,6 +75,7 @@ export interface IndexBot {
   supporter_badge: boolean;
   boosted_until: string | null;
   featured_until: string | null;
+  spotlighted_until: string | null;
 }
 
 export interface Bot {
@@ -107,6 +121,7 @@ export interface Bot {
   supporter_badge: boolean;
   boosted_until: string | null;
   featured_until: string | null;
+  spotlighted_until: string | null;
   vote_blitz_until: string | null;
 }
 
@@ -186,6 +201,7 @@ export interface IndexServer {
   supporter_badge: boolean;
   boosted_until: string | null;
   featured_until: string | null;
+  spotlighted_until: string | null;
 }
 
 export interface Server extends IndexServer {
@@ -296,6 +312,24 @@ export interface PermissionData {
   desc: string;
   category: string;
   dangerous?: boolean;
+}
+
+/** A position a staff member holds — from GET /staff/team. Public-safe: no permission grants. */
+export interface PublicStaffPosition {
+  name: string;
+  icon: string;
+  /** Lower is more senior */
+  index: number;
+}
+
+/** A staff member as shown on the public team page — from GET /staff/team. */
+export interface PublicStaffMember {
+  user_id: string;
+  username: string;
+  display_name: string;
+  avatar: string;
+  /** Every position this member holds, most senior first */
+  positions: PublicStaffPosition[];
 }
 
 // ---------------------------------------------------------------------------
@@ -774,6 +808,7 @@ export interface ListIndexBot {
   recently_added: IndexBot[];
   top_voted: IndexBot[];
   featured: IndexBot[];
+  spotlight: IndexBot[];
 }
 
 export interface ListIndexServer {
@@ -782,6 +817,8 @@ export interface ListIndexServer {
   most_viewed: IndexServer[];
   recently_added: IndexServer[];
   top_voted: IndexServer[];
+  featured: IndexServer[];
+  spotlight: IndexServer[];
 }
 
 // ---------------------------------------------------------------------------
@@ -801,6 +838,12 @@ export interface ListStats {
   total_tickets: number;
   total_banned_users: number;
   total_vote_banned_bots: number;
+  total_servers: number;
+  total_approved_servers: number;
+  total_certified_servers: number;
+  total_pending_servers: number;
+  total_denied_servers: number;
+  total_vote_banned_servers: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -1175,6 +1218,30 @@ export interface Blog {
 
 export interface BlogPost extends BlogListPost {
   content: string;
+}
+
+// ---------------------------------------------------------------------------
+// Changelog
+// ---------------------------------------------------------------------------
+
+export type ChangelogProject = "popplio" | "omniplex" | "keel";
+
+export interface ChangelogEntry {
+  itag: string;
+  project: ChangelogProject;
+  version: string;
+  added: string[];
+  updated: string[];
+  fixed: string[];
+  removed: string[];
+  extra_description: string;
+  prerelease: boolean;
+  author: PlatformUser | null;
+  created_at: string;
+}
+
+export interface ChangelogList {
+  entries: ChangelogEntry[];
 }
 
 // ---------------------------------------------------------------------------

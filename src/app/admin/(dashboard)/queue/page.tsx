@@ -59,6 +59,20 @@ function safeInviteUrl(clientId: string): string {
   return `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=0&scope=bot%20applications.commands`;
 }
 
+/** Discord's own guild-level NSFW classification (0=default, 1=explicit, 2=safe, 3=age-restricted). */
+function discordNsfwLevelLabel(level: number): string {
+  switch (level) {
+    case 1:
+      return "Explicit";
+    case 2:
+      return "Safe";
+    case 3:
+      return "Age-Restricted";
+    default:
+      return "Default";
+  }
+}
+
 export default function AdminQueuePage() {
   const { loginToken, hasPerm } = useAdmin();
 
@@ -199,7 +213,7 @@ export default function AdminQueuePage() {
   function renderActions(target: ModalTarget, claimedBy: string | null) {
     return (
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-900">
-        {!claimedBy && hasPerm("review_bots") && (
+        {!claimedBy && hasPerm("review_entities") && (
           <Button
             variant="secondary"
             size="sm"
@@ -209,7 +223,7 @@ export default function AdminQueuePage() {
             Claim
           </Button>
         )}
-        {claimedBy && hasPerm("review_bots") && (
+        {claimedBy && hasPerm("review_entities") && (
           <Button
             variant="secondary"
             size="sm"
@@ -218,7 +232,7 @@ export default function AdminQueuePage() {
             Unclaim
           </Button>
         )}
-        {claimedBy && hasPerm("review_bots") && (
+        {claimedBy && hasPerm("review_entities") && (
           <Button
             variant="primary"
             size="sm"
@@ -228,7 +242,7 @@ export default function AdminQueuePage() {
             Approve
           </Button>
         )}
-        {claimedBy && hasPerm("review_bots") && (
+        {claimedBy && hasPerm("review_entities") && (
           <Button
             variant="danger"
             size="sm"
@@ -376,6 +390,14 @@ export default function AdminQueuePage() {
                         <Badge variant={bot.claimed_by ? "warning" : "default"}>
                           {bot.claimed_by ? "Claimed" : "Unclaimed"}
                         </Badge>
+                        {bot.moderation_flagged && (
+                          <Badge
+                            variant="danger"
+                            title={`OpenAI's moderation endpoint flagged this bot's description: ${bot.moderation_categories.join(", ")}`}
+                          >
+                            Moderation flagged
+                          </Badge>
+                        )}
                       </div>
                       <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
                         {bot.short}
@@ -473,6 +495,30 @@ export default function AdminQueuePage() {
                         {server.premium && (
                           <Badge variant="premium">Premium</Badge>
                         )}
+                        {server.nsfw_channel_count > 0 && !server.nsfw && (
+                          <Badge
+                            variant="danger"
+                            title={`${server.nsfw_channel_count} age-restricted channel(s) detected, but this server isn't tagged NSFW`}
+                          >
+                            Ungated NSFW
+                          </Badge>
+                        )}
+                        {server.nsfw && server.nsfw_channel_count === 0 && (
+                          <Badge
+                            variant="warning"
+                            title="Tagged NSFW, but no age-restricted channels were detected on last sync"
+                          >
+                            No gated channels
+                          </Badge>
+                        )}
+                        {server.moderation_flagged && (
+                          <Badge
+                            variant="danger"
+                            title={`OpenAI's moderation endpoint flagged this server's description: ${server.moderation_categories.join(", ")}`}
+                          >
+                            Moderation flagged
+                          </Badge>
+                        )}
                       </div>
                       <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
                         {server.short}
@@ -487,6 +533,19 @@ export default function AdminQueuePage() {
                           {formatCount(server.total_members)} members (
                           {formatCount(server.online_members)} online)
                         </span>
+                        {server.nsfw_channel_count > 0 && (
+                          <span>
+                            {server.nsfw_channel_count} gated channel
+                            {server.nsfw_channel_count === 1 ? "" : "s"}
+                          </span>
+                        )}
+                        {server.discord_nsfw_level > 0 && (
+                          <span
+                            title="Discord's own guild-level NSFW classification, distinct from the gated-channel count above"
+                          >
+                            Discord: {discordNsfwLevelLabel(server.discord_nsfw_level)}
+                          </span>
+                        )}
                         {server.claimed_by && (
                           <span>
                             Claimed by{" "}
