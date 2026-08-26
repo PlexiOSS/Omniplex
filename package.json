@@ -2,7 +2,7 @@
   "name": "orbiplex",
   "description": "Frontend for Omniplex, a Discord Bot and Server listing platform.",
   "license": "AGPL-3.0-or-later",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
