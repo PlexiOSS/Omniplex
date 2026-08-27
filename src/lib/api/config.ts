@@ -1,5 +1,5 @@
 export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://spider-staging.omniplex.gg";
+  process.env.NEXT_PUBLIC_API_URL ?? "https://spider.omniplex.gg";
 
 export const CDN_URL =
   process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.omniplex.gg";

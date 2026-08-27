@@ -8,6 +8,7 @@ import {
   type AccentColor,
   type CustomizationPrefs,
   type FontOption,
+  type LayoutOption,
 } from "@/hooks/useCustomization";
 
 function readPrefs(): CustomizationPrefs {
@@ -24,6 +25,12 @@ function applyPrefs(prefs: CustomizationPrefs) {
   const el = document.documentElement;
   el.dataset.accent = prefs.accent;
   el.dataset.font = prefs.font;
+  el.dataset.layout = prefs.layout;
+  el.dataset.hideNsfw = String(prefs.hideNsfw);
+  // Blurring is meaningless once nsfw content is hidden outright — collapse
+  // both prefs into one applied flag so the CSS rule doesn't need to know
+  // about hideNsfw at all.
+  el.dataset.blurNsfw = String(prefs.blurNsfw && !prefs.hideNsfw);
 }
 
 function savePrefs(prefs: CustomizationPrefs) {
@@ -56,8 +63,38 @@ export function CustomizationProvider({ children }: { children: React.ReactNode 
     savePrefs(next);
   }
 
+  function setLayout(layout: LayoutOption) {
+    const next = { ...prefs, layout };
+    setPrefs(next);
+    applyPrefs(next);
+    savePrefs(next);
+  }
+
+  function setHideNsfw(hideNsfw: boolean) {
+    const next = { ...prefs, hideNsfw };
+    setPrefs(next);
+    applyPrefs(next);
+    savePrefs(next);
+  }
+
+  function setBlurNsfw(blurNsfw: boolean) {
+    const next = { ...prefs, blurNsfw };
+    setPrefs(next);
+    applyPrefs(next);
+    savePrefs(next);
+  }
+
   return (
-    <CustomizationContext.Provider value={{ ...prefs, setAccent, setFont }}>
+    <CustomizationContext.Provider
+      value={{
+        ...prefs,
+        setAccent,
+        setFont,
+        setLayout,
+        setHideNsfw,
+        setBlurNsfw,
+      }}
+    >
       {children}
     </CustomizationContext.Provider>
   );

@@ -111,6 +111,7 @@ export default async function Image({
         <div style={{ display: "flex", gap: 40 }}>
           <OgStat label="Votes" value={formatCount(server.approximate_votes)} />
           <OgStat label="Members" value={formatCount(server.total_members)} />
+          <OgStat label="Page Views" value={formatCount(server.clicks)} />
         </div>
       )}
     </OgFrame>,

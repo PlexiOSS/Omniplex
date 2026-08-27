@@ -36,3 +36,27 @@ export function formatCountdown(seconds: number): string {
 export function truncate(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
+
+/**
+ * Mirrors Popplio's EntityVoteInfo cooldown rules for bots/servers: premium
+ * entities get a 4h window, everyone else gets 12h, halved to 6h on
+ * Fri/Sat/Sun "double vote" days. Popplio's GetDoubleVote() pins this check
+ * to UTC explicitly, so this uses getUTCDay() to match rather than the
+ * viewer's local day — otherwise this copy could disagree with the server
+ * near a day boundary depending on the viewer's timezone. The server
+ * response's `weekend_bonus` field is still the source of truth when
+ * available; this is a fallback for contexts (like the downvote confirm
+ * modal) that only know premium status, not the live vote_info.
+ */
+export function voteCooldownHours(premium: boolean): number {
+  if (premium) return 4;
+  const day = new Date().getUTCDay();
+  const isDoubleVoteDay = day === 0 || day === 5 || day === 6;
+  return isDoubleVoteDay ? 6 : 12;
+}
+
+/** Whether today (UTC) falls on Popplio's double-vote weekend window. */
+export function isWeekendVoteBonusDay(): boolean {
+  const day = new Date().getUTCDay();
+  return day === 0 || day === 5 || day === 6;
+}

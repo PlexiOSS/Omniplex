@@ -3,19 +3,26 @@ import type {
   BotPack,
   CreatePackPayload,
   PackSettingsUpdate,
+  PackType,
   PagedResult,
+  SEO,
 } from "../types";
 
 export const packsResource = {
-  getAll: (page = 1) =>
-    client.get<PagedResult<BotPack[]>>(`/packs/@all?page=${page}`, {
-      next: { revalidate: 30 },
-    }),
+  getAll: (page = 1, packType?: PackType) =>
+    client.get<PagedResult<BotPack[]>>(
+      `/packs/@all?page=${page}${packType ? `&pack_type=${packType}` : ""}`,
+      { next: { revalidate: 30 } },
+    ),
 
   getPack: (url: string) =>
     client.get<BotPack>(`/packs/${url}`, {
       next: { revalidate: 60 },
     }),
+
+  /** Minimal metadata for generateMetadata() — avoids a full getPack() fetch. */
+  getSeo: (url: string) =>
+    client.get<SEO>(`/packs/${url}/seo`, { next: { revalidate: 60 } }),
 
   createPack: (userId: string, payload: CreatePackPayload, token: string) =>
     client.put<void>(`/users/${userId}/packs`, payload, { token }),

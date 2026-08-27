@@ -1,18 +1,32 @@
-import { ArrowLeft, ExternalLink, Globe, Star, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Eye,
+  Globe,
+  MousePointerClick,
+  Star,
+  Users,
+  Zap,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Markdown } from "@/components/markdown/Markdown";
-import { ReviewsSection } from "@/components/reviews/ReviewsSection";
-import { EmojiStickerGallery } from "@/components/servers/EmojiStickerGallery";
+import { ReminderToggle } from "@/components/reminders/ReminderToggle";
+import { ReportModal } from "@/components/reports/ReportModal";
+import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { resolveAsset } from "@/lib/utils/assets";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  teamAvatarUrl,
+} from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
@@ -36,13 +50,27 @@ async function fetchServer(id: string) {
   }
 }
 
+async function fetchServerSeo(id: string) {
+  try {
+    return await servers.getSeo(id);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      const resolved = await vanity.resolve(id).catch(() => null);
+      if (resolved?.target_type === "server") {
+        return servers.getSeo(resolved.target_id);
+      }
+    }
+    throw err;
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const server = await fetchServer(id).catch(() => null);
-  if (!server) return {};
+  const seo = await fetchServerSeo(id).catch(() => null);
+  if (!seo) return {};
   return {
-    title: server.name,
-    description: server.short,
+    title: seo.name,
+    description: seo.short,
   };
 }
 
@@ -63,13 +91,54 @@ export default async function ServerPage({ params }: Props) {
       ? await users.getUser(server.claimed_by).catch(() => null)
       : null;
 
-  const avatarSrc =
+  const avatarSrc = mirroredAvatarUrl(
+    "servers",
+    server.server_id,
     server.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`;
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`,
+  );
 
   const reviewList = await reviews
     .getAll("server", server.server_id)
     .catch(() => ({ reviews: [] }));
+
+  const voteBlitzActive =
+    !!server.vote_blitz_until && new Date(server.vote_blitz_until) > new Date();
+
+  const actionsCard = (
+    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="flex flex-col gap-2">
+        {voteBlitzActive && (
+          <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
+            <Zap size={12} />
+            Vote Blitz active — cooldown is halved right now
+          </div>
+        )}
+        {(() => {
+          const inviteLink = server.extra_links.find(
+            (l) => l.name === "invite",
+          )?.value;
+          return inviteLink ? (
+            <a
+              href={inviteLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
+              <ExternalLink size={14} />
+              Join Server
+            </a>
+          ) : null;
+        })()}
+        <ServerVoteButton
+          serverId={server.server_id}
+          currentVotes={server.approximate_votes}
+          premium={server.premium}
+          captchaOptOut={server.captcha_opt_out}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <Container className="py-10">
@@ -80,6 +149,12 @@ export default async function ServerPage({ params }: Props) {
         <ArrowLeft size={14} />
         Back to servers
       </Link>
+
+      <Banner
+        src={bannerUrl("servers", server.server_id)}
+        alt={server.name}
+        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main */}
@@ -94,6 +169,9 @@ export default async function ServerPage({ params }: Props) {
                 {server.premium && <Badge variant="premium">Premium</Badge>}
                 {server.type === "certified" && (
                   <Badge variant="success">Certified</Badge>
+                )}
+                {server.supporter_badge && (
+                  <Badge variant="info">Supporter</Badge>
                 )}
                 {server.nsfw && <Badge variant="danger">NSFW</Badge>}
               </div>
@@ -111,62 +189,33 @@ export default async function ServerPage({ params }: Props) {
             </div>
           )}
 
-          <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-            <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-              About
-            </h2>
-            {server.long?.trim() ? (
-              <Markdown
-                content={server.long}
-                className="text-sm text-zinc-700 dark:text-zinc-300"
-              />
-            ) : (
-              <p className="text-sm text-zinc-400 dark:text-zinc-600">
-                No description provided.
-              </p>
-            )}
+          {/* Actions (mobile only — desktop version lives in the sidebar) */}
+          <div className="mt-5 lg:hidden">{actionsCard}</div>
+
+          <div className="mt-3 flex items-center gap-4">
+            <ReportModal
+              targetType="server"
+              targetId={server.server_id}
+              targetLabel="server"
+            />
+            <ReminderToggle targetType="server" targetId={server.server_id} />
           </div>
 
-          {server.show_emojis && (
-            <EmojiStickerGallery
-              emojis={server.emojis}
-              stickers={server.stickers}
-            />
-          )}
-
-          <ReviewsSection
-            targetType="server"
-            targetId={server.server_id}
+          <ServerPageTabs
+            serverId={server.server_id}
+            longDescription={server.long ?? ""}
+            showEmojis={server.show_emojis}
+            emojis={server.emojis}
+            stickers={server.stickers}
+            emojisSyncedAt={server.emojis_synced_at}
             initialReviews={reviewList.reviews}
           />
         </div>
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="flex flex-col gap-2">
-              {(() => {
-                const inviteLink = server.extra_links.find(
-                  (l) => l.name === "invite",
-                )?.value;
-                return inviteLink ? (
-                  <a
-                    href={inviteLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                  >
-                    <ExternalLink size={14} />
-                    Join Server
-                  </a>
-                ) : null;
-              })()}
-              <ServerVoteButton
-                serverId={server.server_id}
-                currentVotes={server.approximate_votes}
-              />
-            </div>
-          </div>
+          {/* Actions (desktop only — mobile version renders above the About section) */}
+          <div className="hidden lg:block">{actionsCard}</div>
 
           <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
@@ -190,6 +239,18 @@ export default async function ServerPage({ params }: Props) {
                   value={formatCount(server.online_members)}
                 />
               )}
+              <StatRow
+                icon={<Eye size={14} />}
+                label="Page Views"
+                value={formatCount(server.clicks)}
+              />
+              {server.invite_clicks > 0 && (
+                <StatRow
+                  icon={<MousePointerClick size={14} />}
+                  label="Invite Clicks"
+                  value={formatCount(server.invite_clicks)}
+                />
+              )}
             </dl>
           </div>
 
@@ -201,10 +262,7 @@ export default async function ServerPage({ params }: Props) {
               {server.team_owner ? (
                 <div className="flex items-center gap-2.5">
                   <Avatar
-                    src={
-                      resolveAsset(server.team_owner.avatar) ??
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.team_owner.name)}&size=64&background=random`
-                    }
+                    src={teamAvatarUrl(server.team_owner.id)}
                     alt={server.team_owner.name}
                     size={32}
                   />

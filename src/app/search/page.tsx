@@ -1,16 +1,60 @@
 "use client";
 
+import { ArrowRight, Search } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
-import { useSearch } from "@/hooks/useSearch";
+import { Suspense, useEffect, useState } from "react";
 import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
-import { BotCardSkeleton } from "@/components/ui/Skeleton";
-import { Badge } from "@/components/ui/Badge";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
-import { Search } from "lucide-react";
+import { Pagination } from "@/components/search/Pagination";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { BotCardSkeleton } from "@/components/ui/Skeleton";
+import { useSearch } from "@/hooks/useSearch";
+import { bots, servers } from "@/lib/api";
+import type { IndexBot, IndexServer, PagedResult } from "@/lib/api/types";
+
+/**
+ * Popplio's search index only ever covers bots/servers (types/search.go's
+ * TargetTypes is hardcoded to those two) — there's no backend support for
+ * indexing Apps/Premium/Shop/Tickets content. Rather than fake a "search"
+ * that doesn't exist, a query that looks like it's after one of those
+ * surfaces just gets a one-line nudge toward the real page alongside
+ * whatever bot/server results did come back.
+ */
+const QUICK_LINKS: {
+  keywords: string[];
+  href: string;
+  label: string;
+  description: string;
+}[] = [
+  {
+    keywords: ["premium", "upgrade", "subscription", "plan", "paypal", "stripe"],
+    href: "/premium",
+    label: "Premium",
+    description: "Buy premium for one of your bots — card, PayPal, or vote credits.",
+  },
+  {
+    keywords: ["shop", "credit", "boost", "featured", "badge", "blitz"],
+    href: "/shop",
+    label: "Shop",
+    description: "Spend a bot's earned vote credits on boosts, badges, and more.",
+  },
+  {
+    keywords: ["apply", "application", "staff team", "dev team", "partner", "certification"],
+    href: "/apps",
+    label: "Apply",
+    description: "Staff, dev team, partnership, and certification applications.",
+  },
+  {
+    keywords: ["ticket", "support", "help", "issue", "bug", "problem"],
+    href: "/tickets",
+    label: "Support Tickets",
+    description: "Get help from staff with your account, a payment, or a listing.",
+  },
+];
 
 const AVAILABLE_TAGS = [
   "Auto-Mod",
@@ -27,11 +71,24 @@ const AVAILABLE_TAGS = [
   "Welcome",
 ];
 
+const PAGE_SIZE = 12;
+
 function SearchPageInner() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
 
   const { query, setQuery, results, isLoading, hasResults, run } = useSearch();
+
+  // Browse mode (no active search yet) — real backend pagination, since
+  // /list/search has none and returns the whole matching set at once.
+  const [browseBots, setBrowseBots] = useState<PagedResult<IndexBot[]> | null>(
+    null,
+  );
+  const [browseServers, setBrowseServers] = useState<PagedResult<
+    IndexServer[]
+  > | null>(null);
+  const [botsPage, setBotsPage] = useState(1);
+  const [serversPage, setServersPage] = useState(1);
 
   useEffect(() => {
     if (initialQuery) {
@@ -40,6 +97,21 @@ function SearchPageInner() {
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (hasResults) return;
+    bots.getAll(botsPage).then(setBrowseBots);
+  }, [hasResults, botsPage]);
+
+  useEffect(() => {
+    if (hasResults) return;
+    servers.getAll(serversPage).then(setBrowseServers);
+  }, [hasResults, serversPage]);
+
+  // Active search results have no server-side pagination, so it's sliced
+  // client-side instead — same approach the admin search page uses.
+  const [resultsBotsPage, setResultsBotsPage] = useState(1);
+  const [resultsServersPage, setResultsServersPage] = useState(1);
 
   const toggleTag = (tag: string) => {
     const tags = query.tags?.tags ?? [];
@@ -54,11 +126,35 @@ function SearchPageInner() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    run({ ...query, target_types: query.target_types?.length ? query.target_types : ["bot", "server"] });
+    setResultsBotsPage(1);
+    setResultsServersPage(1);
+    run({
+      ...query,
+      target_types: query.target_types?.length
+        ? query.target_types
+        : ["bot", "server"],
+    });
   };
 
-  const totalResults =
-    (results?.bots?.length ?? 0) + (results?.servers?.length ?? 0);
+  const resultBots = results?.bots ?? [];
+  const resultServers = results?.servers ?? [];
+  const pagedResultBots = resultBots.slice(
+    (resultsBotsPage - 1) * PAGE_SIZE,
+    resultsBotsPage * PAGE_SIZE,
+  );
+  const pagedResultServers = resultServers.slice(
+    (resultsServersPage - 1) * PAGE_SIZE,
+    resultsServersPage * PAGE_SIZE,
+  );
+  const totalResults = resultBots.length + resultServers.length;
+
+  const matchedQuickLinks = hasResults
+    ? QUICK_LINKS.filter((link) =>
+        link.keywords.some((k) =>
+          (query.query ?? "").toLowerCase().includes(k),
+        ),
+      )
+    : [];
 
   return (
     <Container className="py-10">
@@ -98,7 +194,7 @@ function SearchPageInner() {
                 className={[
                   "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                   active
-                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                    ? "bg-accent text-accent-fg"
                     : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700",
                 ].join(" ")}
               >
@@ -108,6 +204,32 @@ function SearchPageInner() {
           })}
         </div>
       </form>
+
+      {/* Quick links — bots/servers are the only thing actually indexed by
+          search, so a query that looks like it's after something else (a
+          plan, the shop, applications, tickets) gets pointed at the real
+          page instead of just coming back empty. */}
+      {matchedQuickLinks.length > 0 && (
+        <div className="mt-6 space-y-2">
+          {matchedQuickLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex items-center justify-between gap-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 transition-colors hover:border-accent/40"
+            >
+              <div>
+                <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                  Looking for {link.label}?
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {link.description}
+                </p>
+              </div>
+              <ArrowRight size={16} className="shrink-0 text-accent" />
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Results */}
       {isLoading ? (
@@ -123,41 +245,113 @@ function SearchPageInner() {
             {totalResults} result{totalResults !== 1 ? "s" : ""} found
           </p>
 
-          {(results?.bots?.length ?? 0) > 0 && (
+          {resultBots.length > 0 && (
             <section>
               <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
                 Bots
-                <Badge>{results!.bots!.length}</Badge>
+                <Badge>{resultBots.length}</Badge>
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {results!.bots!.map((bot) => (
+                {pagedResultBots.map((bot) => (
                   <BotCard key={bot.bot_id} bot={bot} />
                 ))}
               </div>
+              {resultBots.length > PAGE_SIZE && (
+                <div className="mt-6">
+                  <Pagination
+                    page={resultsBotsPage}
+                    total={resultBots.length}
+                    perPage={PAGE_SIZE}
+                    onPageChange={setResultsBotsPage}
+                  />
+                </div>
+              )}
             </section>
           )}
 
-          {(results?.servers?.length ?? 0) > 0 && (
+          {resultServers.length > 0 && (
             <section>
               <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
                 Servers
-                <Badge>{results!.servers!.length}</Badge>
+                <Badge>{resultServers.length}</Badge>
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {results!.servers!.map((server) => (
+                {pagedResultServers.map((server) => (
                   <ServerCard key={server.server_id} server={server} />
                 ))}
               </div>
+              {resultServers.length > PAGE_SIZE && (
+                <div className="mt-6">
+                  <Pagination
+                    page={resultsServersPage}
+                    total={resultServers.length}
+                    perPage={PAGE_SIZE}
+                    onPageChange={setResultsServersPage}
+                  />
+                </div>
+              )}
             </section>
           )}
 
           {totalResults === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-500 dark:text-zinc-400">
-              <p className="text-sm">No results found. Try different keywords or tags.</p>
+              <p className="text-sm">
+                No results found. Try different keywords or tags.
+              </p>
             </div>
           )}
         </div>
-      ) : null}
+      ) : (
+        <div className="mt-10 space-y-10">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            Browsing everything search or pick a tag to narrow it down.
+          </p>
+
+          {browseBots && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                Bots
+                <Badge>{browseBots.count}</Badge>
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {browseBots.results.map((bot) => (
+                  <BotCard key={bot.bot_id} bot={bot} />
+                ))}
+              </div>
+              <div className="mt-6">
+                <Pagination
+                  page={botsPage}
+                  total={browseBots.count}
+                  perPage={browseBots.per_page}
+                  onPageChange={setBotsPage}
+                />
+              </div>
+            </section>
+          )}
+
+          {browseServers && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                Servers
+                <Badge>{browseServers.count}</Badge>
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {browseServers.results.map((server) => (
+                  <ServerCard key={server.server_id} server={server} />
+                ))}
+              </div>
+              <div className="mt-6">
+                <Pagination
+                  page={serversPage}
+                  total={browseServers.count}
+                  perPage={browseServers.per_page}
+                  onPageChange={setServersPage}
+                />
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </Container>
   );
 }

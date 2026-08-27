@@ -55,7 +55,27 @@ Copy `.env.template` to `.env.local` to override any of these for local developm
 
 The app deploys via [Railpack](https://railpack.com) (config in `railpack.json`), which detects Bun from `bun.lock` and runs `bun run build` followed by `bun run start`.
 
-Because the `NEXT_PUBLIC_*` variables above are inlined into the client bundle at build time, they must be set on the hosting platform *before* the build runs, not just at runtime. Setting them as runtime-only environment variables will silently bake in the defaults instead.
+Because the `NEXT_PUBLIC_*` variables above are inlined into the client bundle at build time, they must be set on the hosting platform *before* the build runs, not just at runtime. Setting them as runtime-only environment variables will silently bake in the defaults instead. This applies regardless of which deployment path below is used — Next.js loads `.env` itself during `next build`, so the file just needs to exist in the project directory before `bun run build` runs.
+
+### Self-hosted (systemd + nginx)
+
+`omniplex.gg` (prod) and `beta.omniplex.gg` run this way, each as its own dedicated low-privilege systemd service account (`omniplex` / `omniplexbeta`) with a `nologin` shell — every command against them goes through `sudo -u <account> ...`, not `-i` (which tries to invoke the account's shell and fails against `nologin`).
+
+Beta tracks the `staging` branch specifically, not the default branch — it was cloned with `git clone -b staging`, and `scripts/deploy.sh` just runs `git pull` on whatever branch is currently checked out, so that stays correct as long as the clone itself is on the right branch.
+
+```bash
+sudo -u omniplex scripts/deploy.sh        # prod
+sudo -u omniplexbeta scripts/deploy.sh    # beta
+```
+
+Neither service account has `sudo` rights, so the script deliberately doesn't restart anything itself — that's a manual (or CI-triggered) last step:
+
+```bash
+sudo systemctl restart omniplex        # prod
+sudo systemctl restart omniplex-beta   # beta
+```
+
+Both sit behind nginx with a Cloudflare Origin CA certificate (`ssl_verify_client on` against Cloudflare's origin-pull CA, so only Cloudflare can reach the origin directly — Cloudflare's SSL/TLS mode must be **Full (strict)** for this to work at all). Repo access on the server is via a read-only SSH deploy key per account, not a personal GitHub credential.
 
 ## Project structure
 

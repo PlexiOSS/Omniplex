@@ -9,16 +9,29 @@ import {
 } from "@/lib/constants/accent";
 
 export type { AccentColor };
-export type FontOption = "sans" | "serif" | "rounded" | "mono";
+export type FontOption = "sans" | "serif" | "rounded" | "mono" | "inter" | "grotesk";
+export type LayoutOption = "compact" | "comfortable" | "wide";
 
 export interface CustomizationPrefs {
   accent: AccentColor;
   font: FontOption;
+  layout: LayoutOption;
+  /** Hides bots/servers flagged `nsfw` from every listing/grid (search, browse,
+   * homepage, profiles, packs, teams). Detail pages are unaffected — this hides
+   * cards from browsing surfaces, not access to a page someone linked directly. */
+  hideNsfw: boolean;
+  /** Blurs the avatar/banner images (not the text) on nsfw-flagged cards.
+   * Meaningless when hideNsfw is on (nothing nsfw is ever shown to blur), so
+   * the UI disables this toggle in that case rather than letting it do nothing. */
+  blurNsfw: boolean;
 }
 
 export const CUSTOMIZATION_DEFAULTS: CustomizationPrefs = {
   accent: "indigo",
   font: "sans",
+  layout: "comfortable",
+  hideNsfw: false,
+  blurNsfw: true,
 };
 
 export const STORAGE_KEY = "omniplex-prefs";
@@ -26,12 +39,18 @@ export const STORAGE_KEY = "omniplex-prefs";
 export interface CustomizationContextValue extends CustomizationPrefs {
   setAccent: (accent: AccentColor) => void;
   setFont: (font: FontOption) => void;
+  setLayout: (layout: LayoutOption) => void;
+  setHideNsfw: (hideNsfw: boolean) => void;
+  setBlurNsfw: (blurNsfw: boolean) => void;
 }
 
 export const CustomizationContext = createContext<CustomizationContextValue>({
   ...CUSTOMIZATION_DEFAULTS,
   setAccent: () => {},
   setFont: () => {},
+  setLayout: () => {},
+  setHideNsfw: () => {},
+  setBlurNsfw: () => {},
 });
 
 export function useCustomization() {
@@ -53,8 +72,20 @@ export const FONT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
-  { value: "sans", label: "Geist", description: "Default — clean, modern" },
+  { value: "sans", label: "Geist", description: "Default, clean, modern" },
+  { value: "inter", label: "Inter", description: "Neutral, everywhere" },
   { value: "rounded", label: "Jakarta", description: "Friendly, rounded" },
+  { value: "grotesk", label: "Space Grotesk", description: "Geometric, technical" },
   { value: "serif", label: "Lora", description: "Elegant, literary" },
   { value: "mono", label: "Mono", description: "Developer aesthetic" },
+];
+
+export const LAYOUT_OPTIONS: {
+  value: LayoutOption;
+  label: string;
+  description: string;
+}[] = [
+  { value: "compact", label: "Compact", description: "Narrower, denser pages" },
+  { value: "comfortable", label: "Comfortable", description: "Default page width" },
+  { value: "wide", label: "Wide", description: "Maximize use of large screens" },
 ];

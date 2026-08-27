@@ -2,8 +2,9 @@ import { ArrowUpRight, Star, Users } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import type { IndexServer } from "@/lib/api/types";
-import { serverPath } from "@/lib/utils/assets";
+import { bannerUrl, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
 interface ServerCardProps {
@@ -12,58 +13,79 @@ interface ServerCardProps {
 
 export function ServerCard({ server }: ServerCardProps) {
   const href = serverPath(server.server_id, server.vanity);
-  const avatarSrc =
+  const avatarSrc = mirroredAvatarUrl(
+    "servers",
+    server.server_id,
     server.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
+  );
+  const isStandout = server.premium || server.type === "certified";
 
   return (
     <Link
       href={href}
-      className="group flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40"
+      data-nsfw={server.nsfw || undefined}
+      className={[
+        "group flex min-w-0 flex-col overflow-hidden rounded-xl border transition-all hover:shadow-sm",
+        isStandout
+          ? "border-accent/25 bg-linear-to-br from-accent/7 via-white to-white hover:border-accent/50 dark:border-accent/25 dark:from-accent/10 dark:via-zinc-900 dark:to-zinc-900"
+          : "border-zinc-200 bg-white hover:border-accent/40 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40",
+      ].join(" ")}
     >
-      {/* Header */}
-      <div className="flex items-start gap-3">
-        <Avatar src={avatarSrc} alt={server.name} size={44} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="truncate font-semibold text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
-              {server.name}
-            </span>
-            {server.premium && <Badge variant="premium">Premium</Badge>}
-            {server.type === "certified" && (
-              <Badge variant="success">Certified</Badge>
+      <Banner
+        src={bannerUrl("servers", server.server_id)}
+        alt={server.name}
+        className="h-16"
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col p-4">
+        {/* Header */}
+        <div className="flex items-start gap-3">
+          <Avatar src={avatarSrc} alt={server.name} size={44} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="truncate font-semibold text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
+                {server.name}
+              </span>
+              {server.premium && <Badge variant="premium">Premium</Badge>}
+              {server.type === "certified" && (
+                <Badge variant="success">Certified</Badge>
+              )}
+              {server.supporter_badge && <Badge variant="info">Supporter</Badge>}
+            </div>
+            <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+              {server.short}
+            </p>
+          </div>
+          <ArrowUpRight
+            size={16}
+            className="shrink-0 text-zinc-300 transition-colors group-hover:text-accent dark:text-zinc-700"
+          />
+        </div>
+
+        {/* Tags */}
+        {server.tags.length > 0 && (
+          <div className="mt-3 flex min-w-0 flex-wrap gap-1.5">
+            {server.tags.slice(0, 4).map((tag) => (
+              <Badge key={tag}>{tag}</Badge>
+            ))}
+            {server.tags.length > 4 && (
+              <Badge>+{server.tags.length - 4}</Badge>
             )}
           </div>
-          <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-            {server.short}
-          </p>
-        </div>
-        <ArrowUpRight
-          size={16}
-          className="shrink-0 text-zinc-300 transition-colors group-hover:text-accent dark:text-zinc-700"
-        />
-      </div>
+        )}
 
-      {/* Tags */}
-      {server.tags.length > 0 && (
-        <div className="mt-3 flex min-w-0 flex-wrap gap-1.5">
-          {server.tags.slice(0, 4).map((tag) => (
-            <Badge key={tag}>{tag}</Badge>
-          ))}
-          {server.tags.length > 4 && <Badge>+{server.tags.length - 4}</Badge>}
+        {/* Stats */}
+        <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+          <span className="flex items-center gap-1">
+            <Star size={12} />
+            {formatCount(server.approximate_votes)} votes
+          </span>
+          <span className="flex items-center gap-1">
+            <Users size={12} />
+            {formatCount(server.total_members)} members
+          </span>
         </div>
-      )}
-
-      {/* Stats */}
-      <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
-        <span className="flex items-center gap-1">
-          <Star size={12} />
-          {formatCount(server.approximate_votes)} votes
-        </span>
-        <span className="flex items-center gap-1">
-          <Users size={12} />
-          {formatCount(server.total_members)} members
-        </span>
       </div>
     </Link>
   );

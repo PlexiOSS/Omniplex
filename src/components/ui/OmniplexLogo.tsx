@@ -7,7 +7,8 @@ interface OmniplexLogoProps {
 /**
  * Omniplex logo mark as an inline SVG.
  * White fills use currentColor so they adapt to light/dark mode.
- * The purple accent (#4943cb) is the brand colour and stays constant.
+ * The brand accent fill tracks the viewer's chosen accent color
+ * (--accent, set in Customize) instead of a fixed purple.
  */
 export function OmniplexLogo({ size = 28, className = "" }: OmniplexLogoProps) {
   return (
@@ -38,10 +39,10 @@ export function OmniplexLogo({ size = 28, className = "" }: OmniplexLogoProps) {
         />
       </g>
 
-      {/* Brand accent — always purple */}
+      {/* Brand accent — follows the viewer's chosen accent color */}
       <g clipPath="url(#opx-clip-accent)">
         <path
-          fill="#4943cb"
+          fill="var(--accent)"
           fillRule="evenodd"
           d="M 81.175781 158.316406 C 88.433594 151.0625 96.34375 145.128906 104.917969 140.511719 C 108.875 133.585938 113.820312 127.324219 119.425781 121.71875 C 129.976562 111.167969 142.835938 102.921875 157.34375 98.308594 C 108.542969 96.328125 59.746094 121.71875 35.347656 169.855469 C 34.359375 176.449219 34.027344 183.375 34.027344 190.300781 C 34.027344 231.511719 50.183594 268.769531 76.5625 296.46875 C 44.25 259.210938 40.292969 199.53125 81.175781 158.316406"
         />

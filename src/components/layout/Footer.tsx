@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BsTwitter, BsInstagram, BsDiscord, BsGithub } from "react-icons/bs";
+import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
@@ -8,40 +8,50 @@ const FOOTER_LINKS = [
   {
     heading: "Discover",
     links: [
-      { href: "/bots", label: "Bots" },
-      { href: "/servers", label: "Servers" },
-      { href: "/packs", label: "Packs" },
-      { href: '/search', label: 'Search' },
+      { href: "/bots", label: "View Bots" },
+      { href: "/servers", label: "View Servers" },
+      { href: "/packs", label: "View Packs" },
+      { href: "/emojis", label: "View Emojis" },
+      { href: "/search", label: "Discovery" },
     ],
   },
   {
-    heading: "Developers",
+    heading: "Documentation",
     links: [
-      { href: "/bots/add", label: "Add a Bot" },
-      { href: "/servers/add", label: "Add a Server" },
-      { href: "/packs/add", label: "Add a Pack" },
-      { href: "https://docs.botlist.site", label: "Developer Docs" },
+      {
+        href: "https://docs.omniplex.gg/docs/api-reference",
+        label: "API Reference",
+      },
+      { href: "https://docs.omniplex.gg/docs#faq", label: "Frequently Asked" },
+      { href: "https://docs.omniplex.gg/docs/guides", label: "User Guides" },
+      {
+        href: "https://docs.omniplex.gg/docs/api-reference/rate-limits",
+        label: "Rate Limits",
+      },
+      {
+        href: "https://docs.omniplex.gg/docs/api-reference/webhooks",
+        label: "Webhooks"
+      }
     ],
   },
   {
     heading: "Company",
     links: [
       { href: "/about", label: "About Us" },
-      { href: "/about/status", label: "System Status" },
-      { href: "/kb", label: "Knowledge Base" },
-      { href: "/blog", label: "Blog Posts" },
+      { href: "https://status.omniplex.gg", label: "System Status" },
+      { href: "/about/moderation", label: "Moderation Stats" },
+      { href: "/partners", label: "Our Partners" },
+      { href: "/about/team", label: "Our Team" },
     ],
   },
   {
     heading: "Legal",
     links: [
-      { href: "https://nodebyte.co.uk/legal", label: "All Policies" },
-      {
-        href: "https://nodebyte.co.uk/legal/service-agreement",
-        label: "Service Agreement",
-      },
-      { href: "https://nodebyte.co.uk/legal/terms", label: "Terms of Service" },
-      { href: "https://nodebyte.co.uk/legal/privacy", label: "Privacy Policy" },
+      { href: "/legal", label: "All Policies" },
+      { href: "/legal/acceptable-use", label: "Acceptable Usage" },
+      { href: "/legal/service-agreement", label: "Service Agreement" },
+      { href: "/legal/terms", label: "Terms of Service" },
+      { href: "/legal/privacy", label: "Privacy Policy" },
     ],
   },
 ];

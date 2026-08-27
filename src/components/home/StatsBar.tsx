@@ -8,7 +8,7 @@ interface StatsBarProps {
 
 export function StatsBar({ stats }: StatsBarProps) {
   const entries = [
-    { label: "Bots", value: totalListedBots(stats) },
+    { label: "Bots", value: stats.total_bots },
     { label: "Users", value: stats.total_users },
     { label: "Votes Cast", value: stats.total_votes },
     { label: "Packs", value: stats.total_packs },

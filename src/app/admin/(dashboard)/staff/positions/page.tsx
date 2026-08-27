@@ -8,6 +8,7 @@ import { staff } from "@/lib/api";
 import type { PermissionData } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffPosition } from "@/lib/arcadia/types";
+import { AdminPageHeader } from "../../../AdminPageHeader";
 import { useAdmin } from "../../../AdminContext";
 import { PositionEditModal } from "./PositionEditModal";
 
@@ -22,10 +23,11 @@ export default function StaffPositionsPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const myLowestIndex = staffMember.positions.reduce(
-    (min, p) => Math.min(min, p.index),
-    Number.POSITIVE_INFINITY,
-  );
+  // staffMember.rank mirrors the backend's perms.StaffGrants.Rank() exactly
+  // (including the instance-owner case, which outranks every position
+  // without holding one) — deriving this from `positions` instead would
+  // rank an owner holding none below everyone, which is backwards.
+  const myLowestIndex = staffMember.rank;
 
   const load = useCallback(async () => {
     try {
@@ -79,7 +81,7 @@ export default function StaffPositionsPage() {
 
   if (error && !positions) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-10">
+      <div className="mx-auto max-w-5xl px-4 py-10">
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
@@ -87,31 +89,26 @@ export default function StaffPositionsPage() {
 
   if (!positions) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-10">
+      <div className="mx-auto max-w-5xl px-4 py-10">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Staff Positions
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Lower index = more senior. You can't edit, delete, or reorder
-            positions at or below your own lowest index.
-          </p>
-        </div>
-        {hasPerm("manage_staff_roles") && (
-          <Button variant="primary" size="sm" onClick={() => setEditing("new")}>
-            <Plus size={14} />
-            New Position
-          </Button>
-        )}
-      </div>
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      <AdminPageHeader
+        title="Staff Positions"
+        description="Lower index = more senior. You can't edit, delete, or reorder positions at or below your own lowest index."
+        action={
+          hasPerm("manage_staff_roles") && (
+            <Button variant="primary" size="sm" onClick={() => setEditing("new")}>
+              <Plus size={14} />
+              New Position
+            </Button>
+          )
+        }
+      />
 
       {error && (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>

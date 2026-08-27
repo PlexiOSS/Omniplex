@@ -65,7 +65,7 @@ export default async function Image() {
           <div style={{ display: "flex", gap: 56, marginTop: 48 }}>
             <OgStat
               label="Bots"
-              value={formatCount(stats.total_approved_bots)}
+              value={formatCount(stats.total_bots)}
             />
             <OgStat label="Users" value={formatCount(stats.total_users)} />
             <OgStat label="Votes" value={formatCount(stats.total_votes)} />

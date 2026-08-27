@@ -1,12 +1,13 @@
 "use client";
 
 import { MessageSquare, Pencil, Star, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
+import { useHighlightScroll } from "@/hooks/useHighlightScroll";
 import { reviews as reviewsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Review, ReviewTargetType } from "@/lib/api/types";
@@ -17,12 +18,14 @@ interface ReviewsSectionProps {
   targetType: ReviewTargetType;
   targetId: string;
   initialReviews: Review[];
+  highlightId?: string;
 }
 
 export function ReviewsSection({
   targetType,
   targetId,
   initialReviews,
+  highlightId,
 }: ReviewsSectionProps) {
   const { session, isAuthenticated } = useAuth();
   const [reviews, setReviews] = useState(initialReviews);
@@ -60,8 +63,10 @@ export function ReviewsSection({
     ? roots.reduce((sum, r) => sum + r.stars, 0) / roots.length
     : 0;
 
+  useHighlightScroll(highlightId ? `review-${highlightId}` : undefined);
+
   return (
-    <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+    <div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
           Reviews
@@ -78,12 +83,9 @@ export function ReviewsSection({
 
       {!isAuthenticated && (
         <div className="rounded-xl border border-zinc-200 p-4 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-          <Link
-            href="/auth/login"
-            className="text-accent underline underline-offset-2"
-          >
+          <SignInLink className="text-accent underline underline-offset-2">
             Sign in
-          </Link>{" "}
+          </SignInLink>{" "}
           to leave a review.
         </div>
       )}
@@ -114,9 +116,28 @@ export function ReviewsSection({
 
       <div className="mt-4 space-y-4">
         {roots.length === 0 && (
-          <p className="text-sm text-zinc-400 dark:text-zinc-600">
-            No reviews yet.
-          </p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <MessageSquare
+              size={28}
+              className="mb-3 text-zinc-300 dark:text-zinc-700"
+            />
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              No reviews yet.
+            </p>
+            {!isAuthenticated && (
+              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                <SignInLink className="text-accent underline underline-offset-2">
+                  Sign in
+                </SignInLink>{" "}
+                to be the first to leave one.
+              </p>
+            )}
+            {isAuthenticated && !myReview && (
+              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                Be the first to leave one.
+              </p>
+            )}
+          </div>
         )}
 
         {roots.map((review) => (
@@ -124,6 +145,7 @@ export function ReviewsSection({
             <ReviewItem
               review={review}
               isOwn={review.author.id === session?.user_id}
+              isHighlighted={review.id === highlightId}
               isEditing={editingId === review.id}
               onEdit={() => setEditingId(review.id)}
               onCancelEdit={() => setEditingId(null)}
@@ -173,6 +195,7 @@ export function ReviewsSection({
                     key={reply.id}
                     review={reply}
                     isOwn={reply.author.id === session?.user_id}
+                    isHighlighted={reply.id === highlightId}
                     isEditing={editingId === reply.id}
                     onEdit={() => setEditingId(reply.id)}
                     onCancelEdit={() => setEditingId(null)}
@@ -205,6 +228,7 @@ export function ReviewsSection({
 interface ReviewItemProps {
   review: Review;
   isOwn: boolean;
+  isHighlighted?: boolean;
   isEditing: boolean;
   onEdit: () => void;
   onCancelEdit: () => void;
@@ -220,6 +244,7 @@ interface ReviewItemProps {
 function ReviewItem({
   review,
   isOwn,
+  isHighlighted,
   isEditing,
   onEdit,
   onCancelEdit,
@@ -246,7 +271,16 @@ function ReviewItem({
   }
 
   return (
-    <div className="flex items-start gap-3">
+    <div
+      id={`review-${review.id}`}
+      className={[
+        "flex items-start gap-3 scroll-mt-24",
+        isHighlighted &&
+          "-mx-3 rounded-xl p-3 ring-2 ring-accent ring-offset-2 dark:ring-offset-zinc-950",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <Avatar
         src={review.author.avatar}
         alt={review.author.username}

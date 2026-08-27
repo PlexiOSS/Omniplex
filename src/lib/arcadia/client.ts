@@ -1,20 +1,49 @@
 import { ARCADIA_URL } from "./config";
+import { touchArcadiaSession } from "./session";
 import type {
   AuthorizeAction,
+  BadgeAction,
+  BadgeCatalogEntry,
   BaseAnalytics,
+  BlogAction,
+  BlogPost,
+  BotWhitelist,
+  BotWhitelistAction,
+  ChangelogAction,
+  ChangelogDraft,
+  ChangelogEntry,
+  ChangelogGenerateRequest,
   Hello,
   MfaLogin,
   PartialEntity,
+  PartnerAction,
+  Partners,
   PlatformUser,
+  PopplioStaffQuery,
+  Report,
+  ReportAction,
+  ReportStatus,
   RPCLogEntry,
   RPCMethod,
   RPCWebAction,
+  ShopCoupon,
+  ShopCouponAction,
+  ShopItem,
+  ShopItemAction,
+  ShopItemBenefit,
+  ShopItemBenefitAction,
+  StaffDisciplinaryType,
+  StaffDisciplinaryTypeAction,
   StaffMember,
   StaffMemberAction,
   StaffPosition,
   StaffPositionAction,
+  StaffTemplateAction,
+  StaffTemplateUpsert,
   StartAuth,
   TargetType,
+  VoteCreditTier,
+  VoteCreditTierAction,
 } from "./types";
 import { AUTH_VERSION, HELLO_VERSION } from "./types";
 
@@ -62,6 +91,11 @@ async function assertOk(res: Response): Promise<Response> {
     const message = await res.text().catch(() => res.statusText);
     throw new ArcadiaError(message, res.status);
   }
+  // A successful call means the token the server just checked is still
+  // good right now — reset the local idle clock to match, so a staff
+  // member actively using the panel never gets logged out from under
+  // themselves by the client's own stale estimate.
+  touchArcadiaSession();
   return res;
 }
 
@@ -156,6 +190,11 @@ export const arcadia = {
     return (await assertOk(res)).json();
   },
 
+  serverQueue: async (loginToken: string): Promise<PartialEntity[]> => {
+    const res = await postQuery({ ServerQueue: { login_token: loginToken } });
+    return (await assertOk(res)).json();
+  },
+
   baseAnalytics: async (loginToken: string): Promise<BaseAnalytics> => {
     const res = await postQuery({ BaseAnalytics: { login_token: loginToken } });
     return (await assertOk(res)).json();
@@ -203,7 +242,6 @@ export const arcadia = {
     return (await assertOk(res)).json();
   },
 
-  /** Only Bot and Server are implemented server-side — other target types 501. */
   searchEntitys: async (
     loginToken: string,
     targetType: TargetType,
@@ -314,6 +352,606 @@ export const arcadia = {
         UpdateStaffMembers: {
           login_token: loginToken,
           action: { EditMember: member } satisfies StaffMemberAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  staffDisciplinaryTypes: {
+    list: async (loginToken: string): Promise<StaffDisciplinaryType[]> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: "ListDisciplinaryTypes" satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      type: Extract<
+        StaffDisciplinaryTypeAction,
+        { CreateDisciplinaryType: unknown }
+      >["CreateDisciplinaryType"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: {
+            CreateDisciplinaryType: type,
+          } satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      type: Extract<
+        StaffDisciplinaryTypeAction,
+        { EditDisciplinaryType: unknown }
+      >["EditDisciplinaryType"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: {
+            EditDisciplinaryType: type,
+          } satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffDisciplinaryType: {
+          login_token: loginToken,
+          action: {
+            DeleteDisciplinaryType: { id },
+          } satisfies StaffDisciplinaryTypeAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  shopItemBenefits: {
+    list: async (loginToken: string): Promise<ShopItemBenefit[]> => {
+      const res = await postQuery({
+        UpdateShopItemBenefits: {
+          login_token: loginToken,
+          action: "List" satisfies ShopItemBenefitAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      benefit: Extract<ShopItemBenefitAction, { Create: unknown }>["Create"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopItemBenefits: {
+          login_token: loginToken,
+          action: { Create: benefit } satisfies ShopItemBenefitAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      benefit: Extract<ShopItemBenefitAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopItemBenefits: {
+          login_token: loginToken,
+          action: { Edit: benefit } satisfies ShopItemBenefitAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopItemBenefits: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies ShopItemBenefitAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  shopItems: {
+    list: async (loginToken: string): Promise<ShopItem[]> => {
+      const res = await postQuery({
+        UpdateShopItems: {
+          login_token: loginToken,
+          action: "List" satisfies ShopItemAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      item: Extract<ShopItemAction, { Create: unknown }>["Create"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopItems: {
+          login_token: loginToken,
+          action: { Create: item } satisfies ShopItemAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      item: Extract<ShopItemAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopItems: {
+          login_token: loginToken,
+          action: { Edit: item } satisfies ShopItemAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopItems: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies ShopItemAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  voteCreditTiers: {
+    list: async (loginToken: string): Promise<VoteCreditTier[]> => {
+      const res = await postQuery({
+        UpdateVoteCreditTiers: {
+          login_token: loginToken,
+          action: "ListTiers" satisfies VoteCreditTierAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      tier: Extract<
+        VoteCreditTierAction,
+        { CreateTier: unknown }
+      >["CreateTier"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateVoteCreditTiers: {
+          login_token: loginToken,
+          action: { CreateTier: tier } satisfies VoteCreditTierAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      tier: Extract<VoteCreditTierAction, { EditTier: unknown }>["EditTier"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateVoteCreditTiers: {
+          login_token: loginToken,
+          action: { EditTier: tier } satisfies VoteCreditTierAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateVoteCreditTiers: {
+          login_token: loginToken,
+          action: { DeleteTier: { id } } satisfies VoteCreditTierAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  shopCoupons: {
+    list: async (loginToken: string): Promise<ShopCoupon[]> => {
+      const res = await postQuery({
+        UpdateShopCoupons: {
+          login_token: loginToken,
+          action: "List" satisfies ShopCouponAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      coupon: Extract<ShopCouponAction, { Create: unknown }>["Create"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopCoupons: {
+          login_token: loginToken,
+          action: { Create: coupon } satisfies ShopCouponAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      coupon: Extract<ShopCouponAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopCoupons: {
+          login_token: loginToken,
+          action: { Edit: coupon } satisfies ShopCouponAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateShopCoupons: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies ShopCouponAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  botWhitelist: {
+    list: async (loginToken: string): Promise<BotWhitelist[]> => {
+      const res = await postQuery({
+        UpdateBotWhitelist: {
+          login_token: loginToken,
+          action: "List" satisfies BotWhitelistAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    add: async (
+      loginToken: string,
+      entry: Extract<BotWhitelistAction, { Add: unknown }>["Add"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBotWhitelist: {
+          login_token: loginToken,
+          action: { Add: entry } satisfies BotWhitelistAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      entry: Extract<BotWhitelistAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBotWhitelist: {
+          login_token: loginToken,
+          action: { Edit: entry } satisfies BotWhitelistAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, botId: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateBotWhitelist: {
+          login_token: loginToken,
+          action: { Delete: { bot_id: botId } } satisfies BotWhitelistAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  badges: {
+    list: async (loginToken: string): Promise<BadgeCatalogEntry[]> => {
+      const res = await postQuery({
+        UpdateBadges: {
+          login_token: loginToken,
+          action: "List" satisfies BadgeAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      badge: Extract<BadgeAction, { Create: unknown }>["Create"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBadges: {
+          login_token: loginToken,
+          action: { Create: badge } satisfies BadgeAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      badge: Extract<BadgeAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBadges: {
+          login_token: loginToken,
+          action: { Edit: badge } satisfies BadgeAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateBadges: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies BadgeAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  staffTemplates: {
+    list: async (loginToken: string): Promise<StaffTemplateUpsert[]> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: "List" satisfies StaffTemplateAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      template: Extract<StaffTemplateAction, { Create: unknown }>["Create"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Create: template } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      template: Extract<StaffTemplateAction, { Edit: unknown }>["Edit"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Edit: template } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateStaffTemplates: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies StaffTemplateAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  blog: {
+    list: async (loginToken: string): Promise<BlogPost[]> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: "ListEntries" satisfies BlogAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      entry: Extract<BlogAction, { CreateEntry: unknown }>["CreateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: { CreateEntry: entry } satisfies BlogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      entry: Extract<BlogAction, { UpdateEntry: unknown }>["UpdateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: { UpdateEntry: entry } satisfies BlogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, itag: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateBlog: {
+          login_token: loginToken,
+          action: { DeleteEntry: { itag } } satisfies BlogAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  changelog: {
+    list: async (loginToken: string): Promise<ChangelogEntry[]> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: "ListEntries" satisfies ChangelogAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      entry: Extract<ChangelogAction, { CreateEntry: unknown }>["CreateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { CreateEntry: entry } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    edit: async (
+      loginToken: string,
+      entry: Extract<ChangelogAction, { UpdateEntry: unknown }>["UpdateEntry"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { UpdateEntry: entry } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, itag: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { DeleteEntry: { itag } } satisfies ChangelogAction,
+        },
+      });
+      await assertOk(res);
+    },
+    generate: async (
+      loginToken: string,
+      req: ChangelogGenerateRequest,
+    ): Promise<ChangelogDraft> => {
+      const res = await postQuery({
+        UpdateChangelog: {
+          login_token: loginToken,
+          action: { Generate: req } satisfies ChangelogAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+  },
+
+  partners: {
+    list: async (loginToken: string): Promise<Partners> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: "List" satisfies PartnerAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      partner: Extract<PartnerAction, { Create: unknown }>["Create"]["partner"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: { Create: { partner } } satisfies PartnerAction,
+        },
+      });
+      await assertOk(res);
+    },
+    update: async (
+      loginToken: string,
+      partner: Extract<PartnerAction, { Update: unknown }>["Update"]["partner"],
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: { Update: { partner } } satisfies PartnerAction,
+        },
+      });
+      await assertOk(res);
+    },
+    delete: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdatePartners: {
+          login_token: loginToken,
+          action: { Delete: { id } } satisfies PartnerAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  /** Relays a request into Popplio's own /staff/* API — see PopplioStaffQuery's
+   * doc comment. Popplio's own status code and body come back verbatim, so a
+   * non-2xx here means Popplio itself rejected the request (bad input, missing
+   * permission), not a broken Arcadia session — don't treat it as ArcadiaError's
+   * usual "session dead" cases. Body is parsed as JSON when present; Popplio's
+   * 204 responses (e.g. a successful review) come back as an empty string. */
+  popplioStaff: async <T>(
+    loginToken: string,
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<{ status: number; json: T | null }> => {
+    const res = await postQuery({
+      PopplioStaff: {
+        login_token: loginToken,
+        method,
+        path,
+        body: body !== undefined ? JSON.stringify(body) : "",
+      } satisfies PopplioStaffQuery,
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      // Popplio's error bodies are consistently { message, context } JSON —
+      // same ApiErrorBody shape the normal client.ts unwraps. Fall back to
+      // the raw text if it isn't JSON (an upstream 502/proxy failure, etc).
+      let message = text || res.statusText;
+      try {
+        const parsed = JSON.parse(text) as { message?: string };
+        if (parsed.message) message = parsed.message;
+      } catch {
+        // not JSON, use the raw text as-is
+      }
+      throw new ArcadiaError(message, res.status);
+    }
+    return { status: res.status, json: text ? (JSON.parse(text) as T) : null };
+  },
+
+  reports: {
+    list: async (
+      loginToken: string,
+      status: ReportStatus | null,
+    ): Promise<Report[]> => {
+      const res = await postQuery({
+        UpdateReports: {
+          login_token: loginToken,
+          action: { List: { status } } satisfies ReportAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    resolve: async (
+      loginToken: string,
+      id: string,
+      note: string,
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateReports: {
+          login_token: loginToken,
+          action: { Resolve: { id, note } } satisfies ReportAction,
+        },
+      });
+      await assertOk(res);
+    },
+    dismiss: async (
+      loginToken: string,
+      id: string,
+      note: string,
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdateReports: {
+          login_token: loginToken,
+          action: { Dismiss: { id, note } } satisfies ReportAction,
         },
       });
       await assertOk(res);

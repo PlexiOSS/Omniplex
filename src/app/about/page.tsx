@@ -72,7 +72,7 @@ export default async function AboutPage() {
       {stats && (
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: "Listed Bots", value: totalListedBots(stats) },
+            { label: "Listed Bots", value: stats.total_approved_bots },
             { label: "Total Submitted", value: stats.total_bots },
             { label: "Total Votes", value: stats.total_votes },
             { label: "Users", value: stats.total_users },
@@ -127,6 +127,18 @@ export default async function AboutPage() {
             className="text-sm text-accent underline underline-offset-2 hover:opacity-80"
           >
             Platform Status
+          </Link>
+          <Link
+            href="/about/moderation"
+            className="text-sm text-accent underline underline-offset-2 hover:opacity-80"
+          >
+            Moderation Transparency
+          </Link>
+          <Link
+            href="/about/team"
+            className="text-sm text-accent underline underline-offset-2 hover:opacity-80"
+          >
+            Team
           </Link>
         </div>
       </div>

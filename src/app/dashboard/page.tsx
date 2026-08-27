@@ -2,30 +2,44 @@
 
 import {
   ArrowUpRight,
+  BarChart2,
+  Bell,
   Bot,
+  ClipboardList,
   GitBranch,
   Globe,
+  KeyRound,
   LayoutDashboard,
+  Megaphone,
+  MoreHorizontal,
   Package,
   Pencil,
-  Plus,
   Server as ServerIcon,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Terminal,
   Trash2,
   User,
   Users,
-  X,
+  Webhook as WebhookIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { TeamCard } from "@/components/cards/TeamCard";
+import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
+import { TokenManager } from "@/components/sessions/TokenManager";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { bots, users } from "@/lib/api";
+import { bots, platform, users } from "@/lib/api";
 import type {
   Link as ApiLink,
   BotType,
@@ -34,14 +48,31 @@ import type {
   Team,
   User as UserType,
 } from "@/lib/api/types";
-import { hasPermString } from "@/lib/permissions";
-import { resolveAsset } from "@/lib/utils/assets";
+import { hasAnyPermString, hasPermString } from "@/lib/permissions";
+import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
+import { ApplicationsTab } from "./ApplicationsTab";
 import { BotEditModal } from "./BotEditModal";
+import { NotificationsTab } from "./NotificationsTab";
 import { PacksTab } from "./PacksTab";
+import { SecurityTab } from "./SecurityTab";
 import { ServerEditModal } from "./ServerEditModal";
+import { BotStatsModal, ServerStatsModal } from "./StatsModal";
+import { TokenModal } from "./TokenModal";
+import { TransferTeamModal } from "./TransferTeamModal";
+import { WebhookModal } from "./WebhookModal";
 
-type Tab = "overview" | "profile" | "bots" | "servers" | "packs" | "teams";
+type Tab =
+  | "overview"
+  | "profile"
+  | "bots"
+  | "servers"
+  | "packs"
+  | "applications"
+  | "teams"
+  | "tokens"
+  | "notifications"
+  | "security";
 
 const BOT_STATUS: Record<
   BotType,
@@ -117,19 +148,34 @@ function OverviewTab({ me }: { me: UserType }) {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Bots", value: me.user_bots.length },
-          { label: "Packs", value: me.user_packs.length },
-          { label: "Teams", value: me.user_teams.length },
-        ].map(({ label, value }) => (
+          {
+            icon: <Bot size={14} />,
+            label: "Bots",
+            value: me.user_bots.length,
+          },
+          {
+            icon: <Package size={14} />,
+            label: "Packs",
+            value: me.user_packs.length,
+          },
+          {
+            icon: <Users size={14} />,
+            label: "Teams",
+            value: me.user_teams.length,
+          },
+        ].map(({ icon, label, value }) => (
           <div
             key={label}
-            className="p-4 border rounded-xl border-zinc-200 dark:border-zinc-800"
+            className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
           >
-            <p className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+            <div className="flex items-center gap-2 text-zinc-400 dark:text-zinc-600">
+              {icon}
+              <span className="text-xs font-medium uppercase tracking-wide">
+                {label}
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
               {value}
-            </p>
-            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-              {label}
             </p>
           </div>
         ))}
@@ -147,8 +193,6 @@ function OverviewTab({ me }: { me: UserType }) {
     </div>
   );
 }
-
-const MAX_PROFILE_LINKS = 20;
 
 function EditProfileTab({
   me,
@@ -173,23 +217,24 @@ function EditProfileTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshingDiscord, setRefreshingDiscord] = useState(false);
+  const [discordRefreshed, setDiscordRefreshed] = useState(false);
 
-  function updateLink(index: number, patch: Partial<ApiLink>) {
-    setLinks((prev) =>
-      prev.map((link, i) => (i === index ? { ...link, ...patch } : link)),
-    );
-  }
-
-  function removeLink(index: number) {
-    setLinks((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  function addLink() {
-    setLinks((prev) =>
-      prev.length >= MAX_PROFILE_LINKS
-        ? prev
-        : [...prev, { name: "", value: "" }],
-    );
+  async function handleRefreshDiscord() {
+    const discordId = me.user?.id;
+    if (!discordId) return;
+    setRefreshingDiscord(true);
+    setDiscordRefreshed(false);
+    try {
+      await platform.clearDiscordUser(discordId);
+      mutate();
+      setDiscordRefreshed(true);
+      setTimeout(() => setDiscordRefreshed(false), 3000);
+    } catch {
+      // Best-effort — the cache just stays as it was.
+    } finally {
+      setRefreshingDiscord(false);
+    }
   }
 
   async function handleSave() {
@@ -221,7 +266,26 @@ function EditProfileTab({
   }
 
   return (
-    <div className="max-w-lg space-y-5">
+    <div className="max-w-2xl space-y-5">
+      <div className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
+        <div>
+          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Discord username or avatar out of date?
+          </p>
+          <p className="text-xs text-zinc-400 dark:text-zinc-600">
+            Refreshes the cached copy we show across the site.
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={refreshingDiscord}
+          onClick={handleRefreshDiscord}
+        >
+          {discordRefreshed ? "Refreshed!" : "Refresh"}
+        </Button>
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="about"
@@ -240,57 +304,10 @@ function EditProfileTab({
       </div>
 
       <div>
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Links
-          </p>
-          <span className="text-xs text-zinc-400">
-            {links.length}/{MAX_PROFILE_LINKS}
-          </span>
-        </div>
-
-        <div className="space-y-2">
-          {links.map((link, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable id until saved
-            <div key={index} className="flex items-center gap-2">
-              <input
-                type="text"
-                value={link.name}
-                onChange={(e) => updateLink(index, { name: e.target.value })}
-                placeholder="Name (e.g. website, github)"
-                className="w-36 shrink-0 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-              />
-              <input
-                type="url"
-                value={link.value}
-                onChange={(e) => updateLink(index, { value: e.target.value })}
-                placeholder="https://…"
-                className="min-w-0 flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-              />
-              <button
-                type="button"
-                onClick={() => removeLink(index)}
-                aria-label="Remove link"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {links.length < MAX_PROFILE_LINKS && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={addLink}
-            className="mt-2"
-          >
-            <Plus size={14} />
-            Add link
-          </Button>
-        )}
+        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          Links
+        </p>
+        <LinksEditor links={links} onChange={setLinks} />
       </div>
 
       <label className="flex cursor-pointer items-start gap-3">
@@ -323,24 +340,56 @@ function EditProfileTab({
 function BotItem({
   bot,
   token,
+  userId,
   onDeleted,
   mutate,
   team,
+  userTeams = [],
   canManage = true,
+  myFlags = ["owner"],
 }: {
   bot: IndexBot;
   token: string;
+  /** Needed for the team-transfer endpoint, which is path-scoped to the acting user. */
+  userId: string;
   onDeleted: (id: string) => void;
   mutate: () => void;
   /** Set when this bot is owned by a team the user is a member of, rather than owned directly. */
   team?: Team;
+  /** Every team the user belongs to — used to build the "Change Team" destination picker. */
+  userTeams?: Team[];
   /** Whether the current user has permission to edit/delete this bot. Always true for directly-owned bots. */
   canManage?: boolean;
+  /** The current user's resolved flags on this bot's team — defaults to owner for directly-owned bots. */
+  myFlags?: string[];
 }) {
+  const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [viewingStats, setViewingStats] = useState(false);
+  const [viewingTokens, setViewingTokens] = useState(false);
+  const [viewingWebhooks, setViewingWebhooks] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canSeeTokens = hasAnyPermString(myFlags, [
+    "view_sessions",
+    "manage_sessions",
+  ]);
+  const canSeeWebhooks = hasAnyPermString(myFlags, [
+    "view_webhooks",
+    "manage_webhooks",
+  ]);
+  const canManageWebhooks = hasPermString(myFlags, "manage_webhooks");
+  const canViewWebhookLogs = hasPermString(myFlags, "view_webhook_logs");
+  const canTransferTeam = hasPermString(myFlags, "delete_bots");
+  const transferCandidates = userTeams.filter((t) => {
+    if (team && t.id === team.id) return false;
+    const theirFlags =
+      t.entities?.members?.find((m) => m.user?.id === userId)?.flags ?? [];
+    return hasPermString(theirFlags, "add_bots");
+  });
 
   const status = BOT_STATUS[bot.type];
 
@@ -355,14 +404,21 @@ function BotItem({
     setDeleting(true);
     bots
       .deleteBot(bot.bot_id, token)
-      .then(() => onDeleted(bot.bot_id))
+      .then(() => {
+        setMenuOpen(false);
+        onDeleted(bot.bot_id);
+      })
       .catch(() => setDeleting(false));
   }
 
   return (
     <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
-        <Avatar src={bot.user.avatar} alt={bot.user.username} size={44} />
+        <Avatar
+          src={mirroredAvatarUrl("bots", bot.bot_id, bot.user.avatar)}
+          alt={bot.user.username}
+          size={44}
+        />
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="font-semibold truncate text-zinc-950 dark:text-zinc-50">
@@ -406,37 +462,178 @@ function BotItem({
             <ArrowUpRight size={11} />
           </Link>
           {canManage && (
-            <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditing(true)}
+              className="px-2 text-xs h-7"
+            >
+              <Pencil size={12} />
+              Edit
+            </Button>
+          )}
+          <Dropdown
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            trigger={
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setEditing(true)}
-                className="px-2 text-xs h-7"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="px-1.5 text-xs h-7"
+                aria-label="More actions"
               >
-                <Pencil size={12} />
-                Edit
+                <MoreHorizontal size={14} />
               </Button>
-              <Button
-                variant={confirming ? "danger" : "ghost"}
-                size="sm"
+            }
+          >
+            {!bot.premium &&
+              (bot.type === "approved" || bot.type === "certified") && (
+                <DropdownItem
+                  icon={<Sparkles size={14} />}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push(`/premium?bot=${bot.bot_id}`);
+                  }}
+                >
+                  Upgrade
+                </DropdownItem>
+              )}
+            <DropdownItem
+              icon={<ShoppingBag size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                router.push(`/shop?bot=${bot.bot_id}`);
+              }}
+            >
+              Shop
+            </DropdownItem>
+            <DropdownItem
+              icon={<BarChart2 size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                setViewingStats(true);
+              }}
+            >
+              Stats
+            </DropdownItem>
+            {canManage && (
+              <DropdownItem
+                icon={<Terminal size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=commands`);
+                }}
+              >
+                Commands
+              </DropdownItem>
+            )}
+            {canManage && (
+              <DropdownItem
+                icon={<Megaphone size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=changelog`);
+                }}
+              >
+                Changelog
+              </DropdownItem>
+            )}
+            {canSeeTokens && (
+              <DropdownItem
+                icon={<KeyRound size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingTokens(true);
+                }}
+              >
+                Tokens
+              </DropdownItem>
+            )}
+            {canSeeWebhooks && (
+              <DropdownItem
+                icon={<WebhookIcon size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingWebhooks(true);
+                }}
+              >
+                Webhooks
+              </DropdownItem>
+            )}
+            {canTransferTeam && (
+              <DropdownItem
+                icon={<Users size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setTransferring(true);
+                }}
+              >
+                Change Team
+              </DropdownItem>
+            )}
+            {canManage && (
+              <DropdownItem
+                icon={<Trash2 size={14} />}
+                danger
                 loading={deleting}
                 onClick={handleDeleteClick}
-                className="px-2 text-xs h-7"
               >
-                <Trash2 size={12} />
                 {confirming ? "Confirm?" : "Delete"}
-              </Button>
-            </>
-          )}
+              </DropdownItem>
+            )}
+          </Dropdown>
         </div>
       </div>
 
       {editing && (
         <BotEditModal
           botId={bot.bot_id}
+          userId={userId}
           token={token}
           onClose={() => setEditing(false)}
           onSaved={mutate}
+        />
+      )}
+
+      {viewingTokens && (
+        <TokenModal
+          title="Bot API Tokens"
+          targetType="bot"
+          targetId={bot.bot_id}
+          authToken={token}
+          myPerms={myFlags}
+          onClose={() => setViewingTokens(false)}
+        />
+      )}
+
+      {viewingWebhooks && (
+        <WebhookModal
+          title="Bot Webhooks"
+          targetType="bot"
+          targetId={bot.bot_id}
+          authToken={token}
+          canManage={canManageWebhooks}
+          canViewLogs={canViewWebhookLogs}
+          onClose={() => setViewingWebhooks(false)}
+        />
+      )}
+
+      {transferring && (
+        <TransferTeamModal
+          botId={bot.bot_id}
+          userId={userId}
+          token={token}
+          candidates={transferCandidates}
+          onClose={() => setTransferring(false)}
+          onTransferred={mutate}
+        />
+      )}
+
+      {viewingStats && (
+        <BotStatsModal
+          botId={bot.bot_id}
+          onClose={() => setViewingStats(false)}
         />
       )}
     </div>
@@ -447,17 +644,22 @@ interface TeamBot {
   bot: IndexBot;
   team: Team;
   canManage: boolean;
+  myFlags: string[];
 }
 
 function BotsTab({
   bots: allBots,
   teamBots: allTeamBots,
   token,
+  userId,
+  userTeams,
   mutate,
 }: {
   bots: IndexBot[];
   teamBots: TeamBot[];
   token: string;
+  userId: string;
+  userTeams: Team[];
   mutate: () => void;
 }) {
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -477,6 +679,11 @@ function BotsTab({
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           You haven&apos;t listed any bots yet.
         </p>
+        <Link href="/bots/add" className="mt-4">
+          <Button variant="secondary" size="sm">
+            Add a Bot
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -484,9 +691,16 @@ function BotsTab({
   return (
     <div className="space-y-10">
       <div>
-        <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-          {botList.length} {botList.length === 1 ? "bot" : "bots"}
-        </p>
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {botList.length} {botList.length === 1 ? "bot" : "bots"}
+          </p>
+          <Link href="/bots/add">
+            <Button variant="secondary" size="sm">
+              Add a Bot
+            </Button>
+          </Link>
+        </div>
         {botList.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {botList.map((bot) => (
@@ -494,6 +708,8 @@ function BotsTab({
                 key={bot.bot_id}
                 bot={bot}
                 token={token}
+                userId={userId}
+                userTeams={userTeams}
                 mutate={mutate}
                 onDeleted={handleDeleted}
               />
@@ -508,15 +724,18 @@ function BotsTab({
             Team Bots
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {teamBotList.map(({ bot, team, canManage }) => (
+            {teamBotList.map(({ bot, team, canManage, myFlags }) => (
               <BotItem
                 key={bot.bot_id}
                 bot={bot}
                 token={token}
+                userId={userId}
+                userTeams={userTeams}
                 mutate={mutate}
                 onDeleted={handleDeleted}
                 team={team}
                 canManage={canManage}
+                myFlags={myFlags}
               />
             ))}
           </div>
@@ -530,25 +749,48 @@ interface TeamServer {
   server: IndexServer;
   team: Team;
   canManage: boolean;
+  myFlags: string[];
 }
 
 function ServerItem({
   server,
   team,
   canManage,
+  myFlags,
+  userId,
   token,
   mutate,
 }: {
   server: IndexServer;
   team: Team;
   canManage: boolean;
+  myFlags: string[];
+  userId: string;
   token: string;
   mutate: () => void;
 }) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
-  const avatarSrc =
+  const [viewingStats, setViewingStats] = useState(false);
+  const [viewingTokens, setViewingTokens] = useState(false);
+  const [viewingWebhooks, setViewingWebhooks] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const canSeeTokens = hasAnyPermString(myFlags, [
+    "view_sessions",
+    "manage_sessions",
+  ]);
+  const canSeeWebhooks = hasAnyPermString(myFlags, [
+    "view_webhooks",
+    "manage_webhooks",
+  ]);
+  const canManageWebhooks = hasPermString(myFlags, "manage_webhooks");
+  const canViewWebhookLogs = hasPermString(myFlags, "view_webhook_logs");
+  const avatarSrc = mirroredAvatarUrl(
+    "servers",
+    server.server_id,
     server.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`;
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
+  );
 
   return (
     <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
@@ -607,15 +849,114 @@ function ServerItem({
               Edit
             </Button>
           )}
+          <Dropdown
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            trigger={
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="px-1.5 text-xs h-7"
+                aria-label="More actions"
+              >
+                <MoreHorizontal size={14} />
+              </Button>
+            }
+          >
+            {!server.premium &&
+              (server.type === "approved" || server.type === "certified") && (
+                <DropdownItem
+                  icon={<Sparkles size={14} />}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push(`/premium?server=${server.server_id}`);
+                  }}
+                >
+                  Upgrade
+                </DropdownItem>
+              )}
+            <DropdownItem
+              icon={<ShoppingBag size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                router.push(`/shop?server=${server.server_id}`);
+              }}
+            >
+              Shop
+            </DropdownItem>
+            <DropdownItem
+              icon={<BarChart2 size={14} />}
+              onClick={() => {
+                setMenuOpen(false);
+                setViewingStats(true);
+              }}
+            >
+              Stats
+            </DropdownItem>
+            {canSeeTokens && (
+              <DropdownItem
+                icon={<KeyRound size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingTokens(true);
+                }}
+              >
+                Tokens
+              </DropdownItem>
+            )}
+            {canSeeWebhooks && (
+              <DropdownItem
+                icon={<WebhookIcon size={14} />}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setViewingWebhooks(true);
+                }}
+              >
+                Webhooks
+              </DropdownItem>
+            )}
+          </Dropdown>
         </div>
       </div>
 
       {editing && (
         <ServerEditModal
           serverId={server.server_id}
+          userId={userId}
           token={token}
           onClose={() => setEditing(false)}
           onSaved={mutate}
+        />
+      )}
+
+      {viewingStats && (
+        <ServerStatsModal
+          serverId={server.server_id}
+          onClose={() => setViewingStats(false)}
+        />
+      )}
+
+      {viewingTokens && (
+        <TokenModal
+          title="Server API Tokens"
+          targetType="server"
+          targetId={server.server_id}
+          authToken={token}
+          myPerms={myFlags}
+          onClose={() => setViewingTokens(false)}
+        />
+      )}
+
+      {viewingWebhooks && (
+        <WebhookModal
+          title="Server Webhooks"
+          targetType="server"
+          targetId={server.server_id}
+          authToken={token}
+          canManage={canManageWebhooks}
+          canViewLogs={canViewWebhookLogs}
+          onClose={() => setViewingWebhooks(false)}
         />
       )}
     </div>
@@ -624,10 +965,12 @@ function ServerItem({
 
 function ServersTab({
   teamServers,
+  userId,
   token,
   mutate,
 }: {
   teamServers: TeamServer[];
+  userId: string;
   token: string;
   mutate: () => void;
 }) {
@@ -666,12 +1009,14 @@ function ServersTab({
         </Link>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {teamServers.map(({ server, team, canManage }) => (
+        {teamServers.map(({ server, team, canManage, myFlags }) => (
           <ServerItem
             key={server.server_id}
             server={server}
             team={team}
             canManage={canManage}
+            myFlags={myFlags}
+            userId={userId}
             token={token}
             mutate={mutate}
           />
@@ -681,35 +1026,18 @@ function ServersTab({
   );
 }
 
-function TeamItem({ team }: { team: Team }) {
-  const avatarSrc = resolveAsset(team.avatar) ?? "";
-  return (
-    <Link
-      href={`/teams/${team.id}`}
-      className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
-    >
-      <Avatar src={avatarSrc} alt={team.name} size={44} />
-      <div className="flex-1 min-w-0">
-        <span className="block font-semibold truncate text-zinc-950 dark:text-zinc-50">
-          {team.name}
-        </span>
-        {team.short && (
-          <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-            {team.short}
-          </p>
-        )}
-      </div>
-    </Link>
-  );
-}
-
 function TeamsTab({ teams }: { teams: Team[] }) {
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {teams.length} {teams.length === 1 ? "team" : "teams"}
         </p>
+        <Link href="/teams/add">
+          <Button variant="secondary" size="sm">
+            Create Team
+          </Button>
+        </Link>
       </div>
 
       {teams.length === 0 ? (
@@ -722,7 +1050,7 @@ function TeamsTab({ teams }: { teams: Team[] }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {teams.map((team) => (
-            <TeamItem key={team.id} team={team} />
+            <TeamCard key={team.id} team={team} />
           ))}
         </div>
       )}
@@ -736,13 +1064,33 @@ const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "bots", label: "Bots", icon: Bot },
   { key: "servers", label: "Servers", icon: ServerIcon },
   { key: "packs", label: "Packs", icon: Package },
+  { key: "applications", label: "Applications", icon: ClipboardList },
   { key: "teams", label: "Teams", icon: Users },
+  { key: "tokens", label: "API Tokens", icon: KeyRound },
+  { key: "notifications", label: "Notifications", icon: Bell },
+  { key: "security", label: "Security", icon: ShieldCheck },
 ];
 
+const VALID_TABS = new Set(TABS.map((t) => t.key));
+
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardPageInner />
+    </Suspense>
+  );
+}
+
+function DashboardPageInner() {
   const { session, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("overview");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => {
+    const requested = searchParams.get("tab");
+    return requested && VALID_TABS.has(requested as Tab)
+      ? (requested as Tab)
+      : "overview";
+  });
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -751,6 +1099,7 @@ export default function DashboardPage() {
   }, [authLoading, isAuthenticated, router]);
 
   const { me, loading: meLoading, mutate } = useMe(session);
+  const { apps: myApplications } = useMyApplications(session);
 
   if (authLoading || meLoading || !session) {
     return <DashboardSkeleton />;
@@ -801,6 +1150,7 @@ export default function DashboardPage() {
       bot,
       team,
       canManage,
+      myFlags,
     }));
   });
 
@@ -815,6 +1165,7 @@ export default function DashboardPage() {
       server,
       team,
       canManage,
+      myFlags,
     }));
   });
 
@@ -822,7 +1173,11 @@ export default function DashboardPage() {
     <Container className="py-10">
       {/* Profile header */}
       <div className="flex items-start gap-4 mb-8">
-        <Avatar src={avatar} alt={username} size={64} />
+        <Avatar
+          src={mirroredAvatarUrl("users", session.user_id, avatar)}
+          alt={username}
+          size={64}
+        />
         <div>
           <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
             {displayName}
@@ -836,13 +1191,16 @@ export default function DashboardPage() {
               <Badge variant="success">Certified Dev</Badge>
             )}
             {normalizedMe.bot_developer && <Badge>Bot Developer</Badge>}
+            {normalizedMe.bug_hunters && (
+              <Badge variant="danger">Bug Hunter</Badge>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tab bar */}
-      <div className="mb-8 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex flex-nowrap items-center gap-1">
+      <div className="mb-10 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex flex-nowrap items-center gap-4">
           {TABS.map(({ key, label, icon: Icon }) => {
             const count =
               key === "bots"
@@ -851,16 +1209,18 @@ export default function DashboardPage() {
                   ? teamServers.length
                   : key === "packs"
                     ? normalizedMe.user_packs.length
-                    : key === "teams"
-                      ? normalizedMe.user_teams.length
-                      : null;
+                    : key === "applications"
+                      ? myApplications.length
+                      : key === "teams"
+                        ? normalizedMe.user_teams.length
+                        : null;
             return (
               <button
                 key={key}
                 type="button"
                 onClick={() => setTab(key)}
                 className={[
-                  "relative -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 pb-3 pt-1 text-sm font-medium transition-colors",
+                  "relative -mb-px flex shrink-0 items-center gap-2 border-b-2 px-1 pb-4 pt-3 text-sm font-medium transition-colors",
                   tab === key
                     ? "border-accent text-accent"
                     : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
@@ -893,12 +1253,15 @@ export default function DashboardPage() {
           bots={normalizedMe.user_bots}
           teamBots={teamBots}
           token={session.token}
+          userId={session.user_id}
+          userTeams={normalizedMe.user_teams}
           mutate={mutate}
         />
       )}
       {tab === "servers" && (
         <ServersTab
           teamServers={teamServers}
+          userId={session.user_id}
           token={session.token}
           mutate={mutate}
         />
@@ -912,7 +1275,34 @@ export default function DashboardPage() {
           mutate={mutate}
         />
       )}
+      {tab === "applications" && <ApplicationsTab apps={myApplications} />}
       {tab === "teams" && <TeamsTab teams={normalizedMe.user_teams} />}
+      {tab === "tokens" && (
+        <div>
+          <p className="mb-6 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
+            Personal API tokens act as you across every endpoint. Bot- and
+            server-scoped tokens can be managed from each listing&apos;s
+            &quot;Tokens&quot; button on the Bots/Servers tabs.
+          </p>
+          <TokenManager
+            targetType="user"
+            targetId={session.user_id}
+            authToken={session.token}
+            myPerms={["owner"]}
+            isSelf
+          />
+        </div>
+      )}
+      {tab === "notifications" && (
+        <NotificationsTab userId={session.user_id} token={session.token} />
+      )}
+      {tab === "security" && (
+        <SecurityTab
+          userId={session.user_id}
+          username={username}
+          token={session.token}
+        />
+      )}
     </Container>
   );
 }

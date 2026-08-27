@@ -27,10 +27,10 @@ Go to [Add a Server](/servers/add). You'll need a Server ID, a short description
 
 ## 4. Create a pack
 
-Go to [Add a Pack](/packs/add). Packs need a name, a unique URL, a short description, and 1–10 bots — but only bots you've already submitted yourself can be added to a pack. See [Packs → Pack Rules](/kb/packs/pack-rules).
+Go to [Add a Pack](/packs/add) and pick a type first bot, server, or emoji packs each have their own flow. Bot and server packs need a name, a unique URL, a short description, and a handful of listings you've already submitted yourself; emoji packs let you upload your own emoji images directly. See [Packs → Pack Rules](/kb/packs/pack-rules).
 
 ## What happens after you submit
 
-New bots and servers start in a **pending** review state. A member of our staff team will review the submission against the relevant rules before it's approved and made public. This isn't instant — please don't resubmit or open a support ticket asking for a status update shortly after submitting.
+New bots and servers start in a **pending** review state. A member of our staff team will review the submission against the relevant rules before it's approved and made public. This isn't instant please don't resubmit or open a support ticket asking for a status update shortly after submitting.
 
-Once your listing is live, you can start collecting votes (see [Voting Rules & FAQ](/kb/voting/voting-rules)), and — if it qualifies — apply for [Certification](/kb/programs/certification) later on.
+Once your listing is live, you can start collecting votes (see [Voting Rules & FAQ](/kb/voting/voting-rules)), and if it qualifies apply for [Certification](/kb/programs/certification) later on.

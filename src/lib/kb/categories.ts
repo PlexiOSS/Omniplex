@@ -35,7 +35,7 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     slug: "packs",
     title: "Packs",
     description:
-      "Rules and resources for bot packs — curated collections of bots grouped together.",
+      "Rules and resources for packs curated collections of bots, servers, or emojis grouped together.",
     order: 4,
   },
   {
@@ -49,7 +49,34 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     slug: "programs",
     title: "Programs",
     description:
-      "Information about Omniplex's certification and partnership programs.",
+      "Information about Omniplex's staff, dev team, certification, and partnership programs.",
     order: 6,
+  },
+  {
+    slug: "account",
+    title: "Account",
+    description:
+      "Alerts, push notifications, and reminders staying on top of what's happening with your listings.",
+    order: 7,
+  },
+  {
+    slug: "premium",
+    title: "Premium & Shop",
+    description:
+      "Buying premium directly, and spending a bot's earned vote credits in the shop.",
+    order: 8,
+  },
+  {
+    slug: "support",
+    title: "Support",
+    description: "Getting help from staff when something needs a human.",
+    order: 9,
+  },
+  {
+    slug: "staff",
+    title: "Staff",
+    description:
+      "How the staff team is structured, what each position can do, and how moderation actually works day to day.",
+    order: 10,
   },
 ];

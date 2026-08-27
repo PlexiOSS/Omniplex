@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
+import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { TagPicker } from "@/components/ui/TagPicker";
-import { bots } from "@/lib/api";
+import { bots, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Bot, Link } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
+import { bannerUrl } from "@/lib/utils/assets";
+import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
+import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 interface BotEditModalProps {
   botId: string;
+  userId: string;
   token: string;
   onClose: () => void;
   onSaved: () => void;
@@ -20,6 +26,7 @@ interface BotEditModalProps {
 
 export function BotEditModal({
   botId,
+  userId,
   token,
   onClose,
   onSaved,
@@ -59,6 +66,7 @@ export function BotEditModal({
       ) : (
         <BotEditForm
           bot={bot}
+          userId={userId}
           token={token}
           onClose={onClose}
           onSaved={onSaved}
@@ -70,11 +78,13 @@ export function BotEditModal({
 
 function BotEditForm({
   bot,
+  userId,
   token,
   onClose,
   onSaved,
 }: {
   bot: Bot;
+  userId: string;
   token: string;
   onClose: () => void;
   onSaved: () => void;
@@ -90,11 +100,42 @@ function BotEditForm({
     captchaOptOut: bot.captcha_opt_out,
   });
   const [links, setLinks] = useState<Link[]>(bot.extra_links ?? []);
+  const [vanityCode, setVanityCode] = useState(bot.vanity);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [bannerVersion, setBannerVersion] = useState(0);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadingBanner(true);
+    setBannerError(null);
+    try {
+      await uploadAsset("bot-banner", bot.bot_id, file, { userId, token });
+      setBannerVersion((v) => v + 1);
+    } catch (err) {
+      setBannerError(
+        err instanceof UploadError ? err.message : "Upload failed.",
+      );
+    } finally {
+      setUploadingBanner(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const markupError =
+      suspiciousMarkupError("Short description", form.short) ??
+      suspiciousMarkupError("Long description", form.long);
+    if (markupError) {
+      setError(markupError);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -113,6 +154,23 @@ function BotEditForm({
         },
         token,
       );
+
+      const trimmedVanity = vanityCode.trim();
+      if (trimmedVanity && trimmedVanity !== bot.vanity) {
+        try {
+          await vanity.update("bot", bot.bot_id, trimmedVanity, token);
+        } catch (err) {
+          onSaved();
+          setError(
+            err instanceof ApiError
+              ? `Description saved, but the vanity URL couldn't be changed: ${err.message}`
+              : "Description saved, but the vanity URL couldn't be changed.",
+          );
+          setSaving(false);
+          return;
+        }
+      }
+
       onSaved();
       onClose();
     } catch (err) {
@@ -126,6 +184,40 @@ function BotEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          Banner
+        </p>
+        <Banner
+          src={`${bannerUrl("bots", bot.bot_id)}${bannerVersion ? `?v=${bannerVersion}` : ""}`}
+          alt={bot.user.username}
+          className="h-28 rounded-xl sm:h-36"
+        />
+        <input
+          ref={bannerInputRef}
+          type="file"
+          accept="image/webp,image/png,image/jpeg,image/gif"
+          className="hidden"
+          onChange={handleBannerChange}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          loading={uploadingBanner}
+          onClick={() => bannerInputRef.current?.click()}
+          className="mt-2"
+        >
+          <Upload size={14} />
+          {bannerVersion ? "Replace banner" : "Upload banner"}
+        </Button>
+        {bannerError && (
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            {bannerError}
+          </p>
+        )}
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="edit-short"
@@ -143,6 +235,13 @@ function BotEditForm({
           required
         />
       </div>
+
+      <Input
+        id="edit-vanity"
+        label="Vanity URL"
+        value={vanityCode}
+        onChange={(e) => setVanityCode(e.target.value)}
+      />
 
       <Input
         id="edit-invite"

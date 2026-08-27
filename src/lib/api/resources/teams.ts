@@ -5,6 +5,7 @@ import type {
   CreateTeamResponse,
   EditTeamMemberPayload,
   PermissionData,
+  SEO,
   Team,
   UserEntityPerms,
 } from "../types";
@@ -14,6 +15,10 @@ export const teamsResource = {
     client.get<Team>(`/teams/${id}?targets=team_member,bot,server`, {
       next: { revalidate: 30 },
     }),
+
+  /** Minimal metadata for generateMetadata() — avoids a full getTeam() fetch. */
+  getSeo: (id: string) =>
+    client.get<SEO>(`/teams/${id}/seo`, { next: { revalidate: 30 } }),
 
   createTeam: (payload: CreateEditTeamPayload, token: string) =>
     client.post<CreateTeamResponse>("/teams", payload, { token }),
@@ -49,7 +54,7 @@ export const teamsResource = {
   /** A user's flattened, resolved permissions on a specific entity (public endpoint) */
   getEntityPerms: (
     userId: string,
-    targetType: "team" | "bot" | "server",
+    targetType: "team" | "bot" | "server" | "pack",
     targetId: string,
   ) =>
     client.get<UserEntityPerms>(

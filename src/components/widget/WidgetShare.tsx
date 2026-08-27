@@ -116,7 +116,7 @@ export function WidgetShare({ widgetPath, stats }: WidgetShareProps) {
         href={previewSrc}
         target="_blank"
         rel="noopener noreferrer"
-        className="group block overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800"
+        className="group block overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -134,8 +134,8 @@ export function WidgetShare({ widgetPath, stats }: WidgetShareProps) {
       </a>
 
       {/* Theme + accent controls */}
-      <div className="mt-3 flex items-center justify-between">
-        <div className="flex overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
+      <div className="mt-3 flex flex-col gap-2">
+        <div className="flex w-fit overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
           {(["dark", "light"] as Theme[]).map((t) => (
             <button
               key={t}
@@ -153,7 +153,7 @@ export function WidgetShare({ widgetPath, stats }: WidgetShareProps) {
           ))}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {ACCENT_VALUES.map((value) => (
             <button
               key={value}
@@ -161,7 +161,7 @@ export function WidgetShare({ widgetPath, stats }: WidgetShareProps) {
               onClick={() => setAccent(value)}
               aria-label={value}
               className={[
-                "h-5 w-5 rounded-full transition-transform hover:scale-110",
+                "h-5 w-5 shrink-0 rounded-full transition-transform hover:scale-110",
                 accent === value
                   ? "ring-2 ring-offset-2 ring-offset-white dark:ring-offset-zinc-900"
                   : "",

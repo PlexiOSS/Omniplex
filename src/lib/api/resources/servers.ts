@@ -1,10 +1,16 @@
 import { client } from "../client";
 import type {
+  CaptchaSolution,
   DiscordServerMeta,
+  FlatEmoji,
+  FlatSticker,
   IndexServer,
   ListIndexServer,
   PagedResult,
+  RandomServers,
+  SEO,
   Server,
+  ServerEmojiPreview,
   ServerSettingsUpdate,
   UserVote,
 } from "../types";
@@ -12,17 +18,47 @@ import type {
 export const serversResource = {
   getIndex: () =>
     client.get<ListIndexServer>("/servers/@index", {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
-  getAll: (page = 1) =>
-    client.get<PagedResult<IndexServer[]>>(`/servers/@all?page=${page}`, {
-      next: { revalidate: 30 },
+  /** Minimal metadata for generateMetadata() — avoids a full getServer() fetch. */
+  getSeo: (id: string) =>
+    client.get<SEO>(`/servers/${id}/seo`, { cache: "no-store" }),
+
+  getAll: (page = 1, sort?: "trending") =>
+    client.get<PagedResult<IndexServer[]>>(
+      `/servers/@all?page=${page}${sort ? `&sort=${sort}` : ""}`,
+      { cache: "no-store" },
+    ),
+
+  getRandom: () =>
+    client.get<RandomServers>("/servers/@random", {
+      cache: "no-store",
     }),
+
+  getEmojis: (page = 1) =>
+    client.get<PagedResult<ServerEmojiPreview[]>>(
+      `/servers/@emojis?page=${page}`,
+      { cache: "no-store" },
+    ),
+
+  /** Flat, item-level-paginated emojis across every opted-in server — used by the /emojis browse page instead of getEmojis's per-server grouping. */
+  getFlatEmojis: (page = 1) =>
+    client.get<PagedResult<FlatEmoji[]>>(
+      `/servers/@emojis/flat?page=${page}`,
+      { cache: "no-store" },
+    ),
+
+  /** Sticker counterpart of getFlatEmojis. */
+  getFlatStickers: (page = 1) =>
+    client.get<PagedResult<FlatSticker[]>>(
+      `/servers/@stickers/flat?page=${page}`,
+      { cache: "no-store" },
+    ),
 
   getServer: (id: string) =>
     client.get<Server>(`/servers/${id}?include=long`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }),
 
   getVoteInfo: (serverId: string, userId: string, token: string) =>
@@ -31,10 +67,16 @@ export const serversResource = {
       cache: "no-store",
     }),
 
-  vote: (serverId: string, userId: string, upvote: boolean, token: string) =>
+  vote: (
+    serverId: string,
+    userId: string,
+    upvote: boolean,
+    token: string,
+    captchaSolution?: CaptchaSolution,
+  ) =>
     client.put<void>(
       `/users/${userId}/servers/${serverId}/votes?upvote=${upvote}`,
-      {},
+      captchaSolution ?? {},
       { token },
     ),
 

@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
+import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { TagPicker } from "@/components/ui/TagPicker";
-import { servers } from "@/lib/api";
+import { servers, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Link, Server, ServerState } from "@/lib/api/types";
 import { SERVER_TAGS } from "@/lib/constants/tags";
+import { bannerUrl } from "@/lib/utils/assets";
+import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 interface ServerEditModalProps {
   serverId: string;
+  userId: string;
   token: string;
   onClose: () => void;
   onSaved: () => void;
@@ -19,6 +25,7 @@ interface ServerEditModalProps {
 
 export function ServerEditModal({
   serverId,
+  userId,
   token,
   onClose,
   onSaved,
@@ -58,6 +65,7 @@ export function ServerEditModal({
       ) : (
         <ServerEditForm
           server={server}
+          userId={userId}
           token={token}
           onClose={onClose}
           onSaved={onSaved}
@@ -76,11 +84,13 @@ const STATE_OPTIONS: { value: ServerState; label: string }[] = [
 
 function ServerEditForm({
   server,
+  userId,
   token,
   onClose,
   onSaved,
 }: {
   server: Server;
+  userId: string;
   token: string;
   onClose: () => void;
   onSaved: () => void;
@@ -96,8 +106,35 @@ function ServerEditForm({
     showEmojis: server.show_emojis,
   });
   const [links, setLinks] = useState<Link[]>(server.extra_links ?? []);
+  const [vanityCode, setVanityCode] = useState(server.vanity);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [bannerVersion, setBannerVersion] = useState(0);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadingBanner(true);
+    setBannerError(null);
+    try {
+      await uploadAsset("server-banner", server.server_id, file, {
+        userId,
+        token,
+      });
+      setBannerVersion((v) => v + 1);
+    } catch (err) {
+      setBannerError(
+        err instanceof UploadError ? err.message : "Upload failed.",
+      );
+    } finally {
+      setUploadingBanner(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -119,6 +156,23 @@ function ServerEditForm({
         },
         token,
       );
+
+      const trimmedVanity = vanityCode.trim();
+      if (trimmedVanity && trimmedVanity !== server.vanity) {
+        try {
+          await vanity.update("server", server.server_id, trimmedVanity, token);
+        } catch (err) {
+          onSaved();
+          setError(
+            err instanceof ApiError
+              ? `Description saved, but the vanity URL couldn't be changed: ${err.message}`
+              : "Description saved, but the vanity URL couldn't be changed.",
+          );
+          setSaving(false);
+          return;
+        }
+      }
+
       onSaved();
       onClose();
     } catch (err) {
@@ -132,6 +186,40 @@ function ServerEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          Banner
+        </p>
+        <Banner
+          src={`${bannerUrl("servers", server.server_id)}${bannerVersion ? `?v=${bannerVersion}` : ""}`}
+          alt={server.name}
+          className="h-28 rounded-xl sm:h-36"
+        />
+        <input
+          ref={bannerInputRef}
+          type="file"
+          accept="image/webp,image/png,image/jpeg,image/gif"
+          className="hidden"
+          onChange={handleBannerChange}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          loading={uploadingBanner}
+          onClick={() => bannerInputRef.current?.click()}
+          className="mt-2"
+        >
+          <Upload size={14} />
+          {bannerVersion ? "Replace banner" : "Upload banner"}
+        </Button>
+        {bannerError && (
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            {bannerError}
+          </p>
+        )}
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="edit-server-short"
@@ -149,6 +237,13 @@ function ServerEditForm({
           required
         />
       </div>
+
+      <Input
+        id="edit-server-vanity"
+        label="Vanity URL"
+        value={vanityCode}
+        onChange={(e) => setVanityCode(e.target.value)}
+      />
 
       <div className="flex flex-col gap-1.5">
         <label

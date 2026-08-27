@@ -6,17 +6,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
+import { TeamPicker } from "@/components/teams/TeamPicker";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TagPicker } from "@/components/ui/TagPicker";
 import { useAuth } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
 import { usePersistedFormDraft } from "@/hooks/usePersistedFormDraft";
 import { servers } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Link as ApiLink, DiscordServerMeta } from "@/lib/api/types";
 import { SERVER_TAGS as AVAILABLE_TAGS } from "@/lib/constants/tags";
+import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
 import { formatCount } from "@/lib/utils/format";
 
 const LONG_MIN = 500;
@@ -30,6 +33,8 @@ interface AddServerDraft {
   nsfw: boolean;
   tags: string[];
   links: ApiLink[];
+  /** "" means "create a new team for this". */
+  team_owner: string;
 }
 
 const DRAFT_DEFAULT: AddServerDraft = {
@@ -39,6 +44,7 @@ const DRAFT_DEFAULT: AddServerDraft = {
   nsfw: false,
   tags: [],
   links: [],
+  team_owner: "",
 };
 
 export default function AddServerPage() {
@@ -56,6 +62,7 @@ export default function AddServerPage() {
     session?.user_id,
     DRAFT_DEFAULT,
   );
+  const { me } = useMe(session);
 
   const [serverMeta, setServerMeta] = useState<DiscordServerMeta | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -117,6 +124,16 @@ export default function AddServerPage() {
       return setError(
         `Long description must be at least ${LONG_MIN} characters.`,
       );
+    const shortMarkupError = suspiciousMarkupError(
+      "Short description",
+      form.short,
+    );
+    if (shortMarkupError) return setError(shortMarkupError);
+    const longMarkupError = suspiciousMarkupError(
+      "Long description",
+      form.long,
+    );
+    if (longMarkupError) return setError(longMarkupError);
     if (form.tags.length === 0) return setError("Select at least one tag.");
 
     if (!session) return;
@@ -139,6 +156,7 @@ export default function AddServerPage() {
           nsfw: form.nsfw,
           tags: form.tags,
           extra_links: extraLinks,
+          team_owner: form.team_owner || undefined,
         },
         session.token,
       );
@@ -218,11 +236,11 @@ export default function AddServerPage() {
           </div>
         ) : !confirmed ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800">
+            <div className="p-5 border rounded-2xl border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center gap-4">
                 <Avatar src={avatarSrc} alt={serverMeta.name} size={64} />
                 <div className="min-w-0">
-                  <p className="truncate text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                  <p className="text-lg font-semibold truncate text-zinc-950 dark:text-zinc-50">
                     {serverMeta.name}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -231,7 +249,7 @@ export default function AddServerPage() {
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="flex flex-wrap gap-4 mt-4 text-sm text-zinc-600 dark:text-zinc-400">
                 <span className="flex items-center gap-1.5">
                   <Users size={14} />
                   {formatCount(serverMeta.total_members)} members
@@ -244,7 +262,7 @@ export default function AddServerPage() {
               </div>
 
               {!serverMeta.bot_present && (
-                <div className="mt-4 flex items-start gap-3 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-400">
+                <div className="flex items-start gap-3 p-3 mt-4 text-sm text-yellow-800 border border-yellow-200 rounded-xl bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-400">
                   <AlertTriangle size={16} className="mt-0.5 shrink-0" />
                   <p>
                     Our tracking bot isn't in this server yet. You can still
@@ -296,9 +314,9 @@ export default function AddServerPage() {
             {/* Fetched server identity — name comes straight from the
                 invite and can't be edited here, it's re-fetched from the
                 invite link above. */}
-            <div className="flex items-center gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
+            <div className="flex items-center gap-3 p-3 border rounded-xl border-zinc-200 dark:border-zinc-800">
               <Avatar src={avatarSrc} alt={serverMeta.name} size={40} />
-              <div className="min-w-0 flex-1">
+              <div className="flex-1 min-w-0">
                 <Input
                   id="server_name"
                   label="Server Name"
@@ -385,6 +403,17 @@ export default function AddServerPage() {
                 onChange={(links) => setForm((f) => ({ ...f, links }))}
               />
             </div>
+
+            <TeamPicker
+              teams={me?.user_teams ?? []}
+              currentUserId={session.user_id}
+              requiredPerm="add_servers"
+              entityLabel="servers"
+              value={form.team_owner}
+              onChange={(team_owner) =>
+                setForm((f) => ({ ...f, team_owner }))
+              }
+            />
 
             <label className="flex items-center gap-3 cursor-pointer">
               <input
