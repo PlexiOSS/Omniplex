@@ -4,8 +4,20 @@ import { Check, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pagination } from "@/components/search/Pagination";
 import { Button } from "@/components/ui/Button";
-import { alerts as alertsApi } from "@/lib/api";
-import type { Alert, AlertList, AlertType, PagedResult } from "@/lib/api/types";
+import {
+  alerts as alertsApi,
+  notifications as notificationsApi,
+} from "@/lib/api";
+import { ApiError } from "@/lib/api/client";
+import type {
+  Alert,
+  AlertCategory,
+  AlertList,
+  AlertType,
+  NotificationPrefs,
+  PagedResult,
+} from "@/lib/api/types";
+import { ALERT_CATEGORY_LABELS } from "@/lib/api/types";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 interface NotificationsTabProps {
@@ -101,6 +113,87 @@ function NotificationRow({
   );
 }
 
+const CATEGORY_ORDER: AlertCategory[] = [
+  "bot_server_reviews",
+  "votes",
+  "payments",
+  "shop",
+  "webhooks",
+  "staff_applications",
+  "reports",
+  "account_security",
+];
+
+function NotificationPrefsPanel({ userId, token }: NotificationsTabProps) {
+  const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
+  const [saving, setSaving] = useState<AlertCategory | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    notificationsApi
+      .getPrefs(userId, token)
+      .then(setPrefs)
+      .catch(() => setError("Failed to load notification preferences."));
+  }, [userId, token]);
+
+  async function toggle(category: AlertCategory) {
+    if (!prefs) return;
+    const next = prefs[category] ?? true;
+    setPrefs({ ...prefs, [category]: !next });
+    setSaving(category);
+    setError(null);
+    try {
+      await notificationsApi.updatePrefs(userId, token, { [category]: !next });
+    } catch (err) {
+      setPrefs({ ...prefs, [category]: next });
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Failed to update notification preference.",
+      );
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  if (!prefs) return null;
+
+  return (
+    <div className="mb-6 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+        Notification preferences
+      </p>
+      <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+        Choose which kinds of activity notify you, in the bell and via push.
+      </p>
+
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {CATEGORY_ORDER.map((category) => (
+          <label
+            key={category}
+            className="flex cursor-pointer items-center gap-2.5"
+          >
+            <input
+              type="checkbox"
+              checked={prefs[category] ?? true}
+              disabled={saving === category}
+              onChange={() => toggle(category)}
+              className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+            />
+            <span className="text-sm text-zinc-700 dark:text-zinc-300">
+              {ALERT_CATEGORY_LABELS[category]}
+            </span>
+          </label>
+        ))}
+      </div>
+
+      {error && (
+        <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>
+      )}
+    </div>
+  );
+}
+
 export function NotificationsTab({ userId, token }: NotificationsTabProps) {
   const [data, setData] = useState<PagedResult<AlertList> | null>(null);
   const [page, setPage] = useState(1);
@@ -181,6 +274,8 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
 
   return (
     <div>
+      <NotificationPrefsPanel userId={userId} token={token} />
+
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {data.count} notification{data.count === 1 ? "" : "s"}

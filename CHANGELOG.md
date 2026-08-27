@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-27
+
+### Added
+
+- A notification preferences panel on the dashboard's Notifications tab --
+  8 toggles (Bot & Server Reviews, Votes & Reminders, Payments & Premium,
+  Shop, Webhooks, Staff Applications, Reports, Account & Security) let you
+  mute whole categories of alert instead of it being all-or-nothing.
+- High-priority notifications (payment failures, account bans, and
+  similar) now actually look different in the bell -- an "Urgent" badge
+  and a red accent, and they sort to the top instead of being mixed in
+  with routine alerts. The underlying priority field existed before this
+  but had no effect in the UI.
+- iOS Safari silently can't receive push notifications unless the site's
+  been added to the Home Screen first, with no error or explanation. The
+  bell's push section now detects this and shows an actual "Add to Home
+  Screen to enable notifications" hint instead of a flat "not supported"
+  dead end.
+
+### Fixed
+
+- Vote reminders now actually show up in the notification bell -- they
+  were being sent as push-only and silently never saved to your inbox
+  (Popplio-side fix; see its changelog).
+
 ## [0.3.0] - 2026-08-25
 
 ### Added

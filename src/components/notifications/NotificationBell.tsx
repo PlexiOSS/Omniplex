@@ -22,6 +22,27 @@ const TYPE_DOT: Record<AlertType, string> = {
 
 const POLL_MS = 60_000;
 
+/**
+ * iOS Safari silently refuses Web Push unless the site has been added to
+ * the Home Screen first (installed as a standalone PWA) -- there's no
+ * error, no permission prompt, `PushManager` just isn't there. Detecting
+ * this case lets us tell the user what to actually do instead of the
+ * generic "not supported" message, which reads as a dead end.
+ */
+function isIosNotStandalone(): boolean {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return false;
+  }
+
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone =
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    // iOS Safari's own (non-standard) flag for an installed PWA.
+    (navigator as { standalone?: boolean }).standalone === true;
+
+  return isIos && !isStandalone;
+}
+
 export function NotificationBell() {
   const { session, isAuthenticated } = useAuth();
   const push = usePushNotifications();
@@ -30,6 +51,11 @@ export function NotificationBell() {
   const [unacked, setUnacked] = useState<Alert[]>([]);
   const [unackedCount, setUnackedCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [iosNudge, setIosNudge] = useState(false);
+
+  useEffect(() => {
+    setIosNudge(isIosNotStandalone());
+  }, []);
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -83,7 +109,12 @@ export function NotificationBell() {
 
   if (!isAuthenticated) return null;
 
-  const entries = unacked.slice(0, 8);
+  // High-priority alerts (payment failures, bans, etc.) surface first so
+  // they don't get pushed out of the visible slice by newer-but-routine
+  // ones -- everything else keeps its existing newest-first order.
+  const entries = [...unacked]
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, 8);
 
   return (
     <Dropdown
@@ -134,14 +165,25 @@ export function NotificationBell() {
               key={alert.itag}
               type="button"
               onClick={() => ack(alert.itag)}
-              className="flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+              className={`flex w-full items-start gap-2.5 border-l-2 px-3 py-2.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60 ${
+                alert.priority >= 2
+                  ? "border-red-500 bg-red-50/50 dark:bg-red-950/20"
+                  : "border-transparent"
+              }`}
             >
               <span
                 className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${TYPE_DOT[alert.type]}`}
               />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                  {alert.title}
+                <span className="flex items-center gap-1.5">
+                  <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    {alert.title}
+                  </span>
+                  {alert.priority >= 2 && (
+                    <span className="shrink-0 rounded-full bg-red-100 px-1.5 py-0.5 text-[9px] font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-400">
+                      Urgent
+                    </span>
+                  )}
                 </span>
                 <span className="block line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
                   {alert.message}
@@ -177,6 +219,12 @@ export function NotificationBell() {
               ? "Disable push notifications"
               : "Enable push notifications"}
           </DropdownItem>
+        ) : iosNudge ? (
+          <p className="px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+            Add this site to your Home Screen (Share{" "}
+            <span aria-hidden>&rarr;</span> Add to Home Screen) to enable
+            notifications on iOS.
+          </p>
         ) : (
           <p className="px-3 py-2 text-xs text-zinc-400 dark:text-zinc-600">
             Push notifications aren't supported in this browser.

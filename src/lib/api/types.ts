@@ -1003,6 +1003,7 @@ export interface Alert {
   alert_data: Record<string, unknown> | null;
   icon: string;
   priority: number;
+  category: string;
 }
 
 export interface AlertList {
@@ -1057,6 +1058,35 @@ export interface UserNotification {
 export interface NotifGetList {
   notifications: UserNotification[];
 }
+
+// ---------------------------------------------------------------------------
+// Notification preferences — GET/PATCH /users/{id}/notification-prefs.
+// Per-category opt-out: a category missing from the response defaults to
+// enabled, so a user who's never touched their preferences sees everything.
+// ---------------------------------------------------------------------------
+
+export type AlertCategory =
+  | "votes"
+  | "bot_server_reviews"
+  | "payments"
+  | "shop"
+  | "webhooks"
+  | "staff_applications"
+  | "reports"
+  | "account_security";
+
+export const ALERT_CATEGORY_LABELS: Record<AlertCategory, string> = {
+  votes: "Votes & Reminders",
+  bot_server_reviews: "Bot & Server Reviews",
+  payments: "Payments & Premium",
+  shop: "Shop",
+  webhooks: "Webhooks",
+  staff_applications: "Staff Applications",
+  reports: "Reports",
+  account_security: "Account & Security",
+};
+
+export type NotificationPrefs = Partial<Record<AlertCategory, boolean>>;
 
 // ---------------------------------------------------------------------------
 // Reminders — GET /users/{id}/reminders,
