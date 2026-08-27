@@ -81,6 +81,7 @@ const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/admin/applications", label: "Applications" },
       { href: "/admin/reports", label: "Reports" },
       { href: "/admin/tickets", label: "Tickets" },
+      { href: "/admin/actions", label: "Global Actions" },
     ],
   },
   {

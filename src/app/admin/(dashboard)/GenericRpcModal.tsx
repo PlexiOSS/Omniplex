@@ -35,13 +35,19 @@ const DURATION_UNITS = [
 ] as const;
 
 function durationUnitFor(hours: number) {
-  if (hours > 0 && hours % DURATION_UNITS[3].hours === 0) return DURATION_UNITS[3];
-  if (hours > 0 && hours % DURATION_UNITS[2].hours === 0) return DURATION_UNITS[2];
-  if (hours > 0 && hours % DURATION_UNITS[1].hours === 0) return DURATION_UNITS[1];
+  if (hours > 0 && hours % DURATION_UNITS[3].hours === 0)
+    return DURATION_UNITS[3];
+  if (hours > 0 && hours % DURATION_UNITS[2].hours === 0)
+    return DURATION_UNITS[2];
+  if (hours > 0 && hours % DURATION_UNITS[1].hours === 0)
+    return DURATION_UNITS[1];
   return DURATION_UNITS[0];
 }
 
-function fieldInput(
+/** Exported so pages that render RPC fields outside this modal (e.g. a
+ * global/no-entity action page) don't have to duplicate the per-field-type
+ * rendering logic. */
+export function fieldInput(
   field: RPCField,
   value: string | number | boolean,
   onChange: (v: string | number | boolean) => void,
