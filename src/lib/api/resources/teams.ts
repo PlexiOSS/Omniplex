@@ -8,6 +8,7 @@ import type {
   SEO,
   Team,
   UserEntityPerms,
+  UserVote,
 } from "../types";
 
 export const teamsResource = {
@@ -60,5 +61,20 @@ export const teamsResource = {
     client.get<UserEntityPerms>(
       `/users/${userId}/${targetType}/${targetId}/perms`,
       { cache: "no-store" },
+    ),
+
+  getVoteInfo: (teamId: string, userId: string, token: string) =>
+    client.get<UserVote>(`/users/${userId}/teams/${teamId}/votes`, {
+      token,
+      cache: "no-store",
+    }),
+
+  /** Unlike bots/servers, teams never require a solved captcha — see
+   * create_user_entity_vote's own docs on the backend. */
+  vote: (teamId: string, userId: string, upvote: boolean, token: string) =>
+    client.put<void>(
+      `/users/${userId}/teams/${teamId}/votes?upvote=${upvote}`,
+      {},
+      { token },
     ),
 };

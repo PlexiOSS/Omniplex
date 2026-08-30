@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { bots, captcha, servers } from "@/lib/api";
+import { bots, captcha, packs, servers, teams } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { CaptchaSolution } from "@/lib/api/types";
 import { solveCaptcha } from "@/lib/captcha/pow";
 
-type EntityType = "bot" | "server";
+type EntityType = "bot" | "server" | "team" | "pack";
 
 export function useVote(type: EntityType, id: string) {
   const [loading, setLoading] = useState(false);
@@ -38,10 +38,19 @@ export function useVote(type: EntityType, id: string) {
         }
       }
 
-      if (type === "bot") {
-        await bots.vote(id, userId, upvote, token, solution);
-      } else {
-        await servers.vote(id, userId, upvote, token, solution);
+      switch (type) {
+        case "bot":
+          await bots.vote(id, userId, upvote, token, solution);
+          break;
+        case "server":
+          await servers.vote(id, userId, upvote, token, solution);
+          break;
+        case "team":
+          await teams.vote(id, userId, upvote, token);
+          break;
+        case "pack":
+          await packs.vote(id, userId, upvote, token);
+          break;
       }
       setSuccess(true);
       return true;

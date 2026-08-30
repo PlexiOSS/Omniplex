@@ -962,7 +962,7 @@ export interface RandomServers {
 // anonymized exception (aggregate counts only).
 // ---------------------------------------------------------------------------
 
-export type TargetType = "bot" | "server" | "pack";
+export type TargetType = "bot" | "server" | "team" | "pack";
 
 export type ReportReason =
   | "license_violation"

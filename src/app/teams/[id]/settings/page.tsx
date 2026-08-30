@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { teams } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -28,7 +29,7 @@ import { hasPermString } from "@/lib/permissions";
 import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
-type Tab = "overview" | "info" | "members" | "danger";
+type Tab = "overview" | "info" | "members" | "webhooks" | "danger";
 
 function SettingsSkeleton() {
   return (
@@ -95,14 +96,23 @@ export default function TeamSettingsPage() {
     );
   }
 
-  const TABS: { key: Tab; label: string; perm?: string }[] = [
+  const TABS: { key: Tab; label: string; perm?: string | string[] }[] = [
     { key: "overview", label: "Overview" },
     { key: "info", label: "Edit Info", perm: "edit_team" },
     { key: "members", label: "Members" },
+    {
+      key: "webhooks",
+      label: "Webhooks",
+      perm: ["manage_webhooks", "view_webhook_logs"],
+    },
     { key: "danger", label: "Danger Zone", perm: "owner" },
   ];
   const visibleTabs = TABS.filter(
-    (t) => !t.perm || hasPermString(ownPerms, t.perm),
+    (t) =>
+      !t.perm ||
+      (Array.isArray(t.perm)
+        ? t.perm.some((p) => hasPermString(ownPerms, p))
+        : hasPermString(ownPerms, t.perm)),
   );
 
   return (
@@ -157,6 +167,9 @@ export default function TeamSettingsPage() {
           token={session.token}
           onChanged={load}
         />
+      )}
+      {tab === "webhooks" && session && (
+        <WebhooksTab team={team} ownPerms={ownPerms} token={session.token} />
       )}
       {tab === "danger" && session && (
         <DangerTab team={team} token={session.token} />
@@ -325,9 +338,7 @@ function EditInfoTab({
       </div>
 
       {imageError && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {imageError}
-        </p>
+        <p className="text-sm text-red-600 dark:text-red-400">{imageError}</p>
       )}
 
       <Input
@@ -657,6 +668,28 @@ function EditMemberPermsModal({
         </div>
       </div>
     </Modal>
+  );
+}
+
+function WebhooksTab({
+  team,
+  ownPerms,
+  token,
+}: {
+  team: Team;
+  ownPerms: string[];
+  token: string;
+}) {
+  return (
+    <div className="max-w-2xl">
+      <WebhookManager
+        targetType="team"
+        targetId={team.id}
+        authToken={token}
+        canManage={hasPermString(ownPerms, "manage_webhooks")}
+        canViewLogs={hasPermString(ownPerms, "view_webhook_logs")}
+      />
+    </div>
   );
 }
 
