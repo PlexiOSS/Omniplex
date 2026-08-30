@@ -6,6 +6,7 @@ import type {
   PackType,
   PagedResult,
   SEO,
+  UserVote,
 } from "../types";
 
 export const packsResource = {
@@ -36,4 +37,19 @@ export const packsResource = {
 
   deletePack: (userId: string, url: string, token: string) =>
     client.delete<void>(`/users/${userId}/packs/${url}`, { token }),
+
+  getVoteInfo: (packUrl: string, userId: string, token: string) =>
+    client.get<UserVote>(`/users/${userId}/packs/${packUrl}/votes`, {
+      token,
+      cache: "no-store",
+    }),
+
+  /** Unlike bots/servers, packs never require a solved captcha — see
+   * create_user_entity_vote's own docs on the backend. */
+  vote: (packUrl: string, userId: string, upvote: boolean, token: string) =>
+    client.put<void>(
+      `/users/${userId}/packs/${packUrl}/votes?upvote=${upvote}`,
+      {},
+      { token },
+    ),
 };

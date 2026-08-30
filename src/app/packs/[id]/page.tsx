@@ -16,6 +16,7 @@ import { packEmojiUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 import { PACK_WIDGET_STATS } from "@/lib/widget/shared";
+import { PackVoteButton } from "./PackVoteButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -58,28 +59,32 @@ export default async function PackPage({ params }: Props) {
             preview the first few emojis instead */}
         <div className="flex shrink-0 -space-x-3">
           {pack.pack_type === "bot" &&
-            (pack.bots ?? []).slice(0, 4).map((bot) => (
-              <Avatar
-                key={bot.bot_id}
-                src={bot.user.avatar}
-                alt={bot.user.username}
-                size={52}
-                className="ring-2 ring-white dark:ring-zinc-950"
-              />
-            ))}
+            (pack.bots ?? [])
+              .slice(0, 4)
+              .map((bot) => (
+                <Avatar
+                  key={bot.bot_id}
+                  src={bot.user.avatar}
+                  alt={bot.user.username}
+                  size={52}
+                  className="ring-2 ring-white dark:ring-zinc-950"
+                />
+              ))}
           {pack.pack_type === "server" &&
-            (pack.servers ?? []).slice(0, 4).map((server) => (
-              <Avatar
-                key={server.server_id}
-                src={
-                  server.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`
-                }
-                alt={server.name}
-                size={52}
-                className="ring-2 ring-white dark:ring-zinc-950"
-              />
-            ))}
+            (pack.servers ?? [])
+              .slice(0, 4)
+              .map((server) => (
+                <Avatar
+                  key={server.server_id}
+                  src={
+                    server.avatar ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`
+                  }
+                  alt={server.name}
+                  size={52}
+                  className="ring-2 ring-white dark:ring-zinc-950"
+                />
+              ))}
           {pack.pack_type === "emoji" &&
             (pack.emojis ?? []).slice(0, 4).map((emoji) => (
               <div
@@ -143,8 +148,20 @@ export default async function PackPage({ params }: Props) {
             </div>
           )}
 
-          <div className="mt-3">
-            <ReportModal targetType="pack" targetId={pack.url} targetLabel="pack" />
+          <div className="mt-3 flex items-center gap-4">
+            <ReportModal
+              targetType="pack"
+              targetId={pack.url}
+              targetLabel="pack"
+            />
+          </div>
+
+          <div className="mt-4 max-w-xs">
+            <PackVoteButton
+              packUrl={pack.url}
+              currentVotes={pack.votes}
+              voteBanned={pack.vote_banned}
+            />
           </div>
         </div>
       </div>

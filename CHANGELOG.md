@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-08-29
+
+### Added
+
+- Teams and packs can now be voted for, matching bots and servers -- an
+  upvote/downvote button on both pages, with the same cooldown, weekly
+  double-vote bonus, and "are you sure?" downvote confirmation. Voting on
+  these was already fully supported by the API; the buttons just weren't
+  built yet.
+- Team pages can now be reported and reviewed, the same as bots, servers
+  (and, for reporting, packs) already could both were already fully
+  supported by the API with no frontend caller.
+- A "Webhooks" tab on team settings, so a team can receive the same
+  webhook events a bot or server can Popplio already had a working
+  team webhook driver with no way to configure one from the site.
+
 ## [0.4.0] - 2026-08-27
 
 ### Added

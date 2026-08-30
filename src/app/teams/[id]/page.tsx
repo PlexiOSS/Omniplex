@@ -6,15 +6,18 @@ import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { ReportModal } from "@/components/reports/ReportModal";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { TeamManageLink } from "@/components/teams/TeamManageLink";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import { teams } from "@/lib/api";
+import { reviews, teams } from "@/lib/api";
 import { hasPermString } from "@/lib/permissions";
 import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
+import { TeamVoteButton } from "./TeamVoteButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -40,6 +43,10 @@ export default async function TeamPage({ params }: Props) {
     notFound();
   }
   if (!team) notFound();
+
+  const reviewList = await reviews
+    .getAll("team", team.id)
+    .catch(() => ({ reviews: [] }));
 
   const avatarSrc = teamAvatarUrl(team.id);
   const members = team.entities?.members ?? [];
@@ -98,6 +105,18 @@ export default async function TeamPage({ params }: Props) {
               ))}
             </div>
           )}
+
+          <div className="mt-4 max-w-xs">
+            <TeamVoteButton teamId={team.id} currentVotes={team.votes} />
+          </div>
+
+          <div className="mt-3 flex items-center gap-4">
+            <ReportModal
+              targetType="team"
+              targetId={team.id}
+              targetLabel="team"
+            />
+          </div>
         </div>
       </div>
 
@@ -165,6 +184,17 @@ export default async function TeamPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      <section className="mt-12">
+        <h2 className="mb-5 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+          Reviews
+        </h2>
+        <ReviewsSection
+          targetType="team"
+          targetId={team.id}
+          initialReviews={reviewList.reviews}
+        />
+      </section>
     </Container>
   );
 }
