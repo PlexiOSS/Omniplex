@@ -1,5 +1,11 @@
 import { client } from "../client";
-import type { ItemList, ShopItem, ShopItemBenefit, ShopPurchase, TargetType } from "../types";
+import type {
+  ItemList,
+  ShopItem,
+  ShopItemBenefit,
+  ShopPurchase,
+  TargetType,
+} from "../types";
 
 export const shopResource = {
   getItems: () =>
@@ -21,10 +27,11 @@ export const shopResource = {
     targetId: string,
     itemId: string,
     token: string,
+    couponCode?: string,
   ) =>
     client.post<void>(
       `/${targetType}/${targetId}/shop/purchase`,
-      { item_id: itemId },
+      { item_id: itemId, coupon_code: couponCode || undefined },
       { token },
     ),
 };

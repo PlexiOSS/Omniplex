@@ -743,6 +743,8 @@ export interface SearchResponse {
   target_types: string[];
   bots?: IndexBot[];
   servers?: IndexServer[];
+  teams?: Team[];
+  packs?: BotPack[];
 }
 
 // ---------------------------------------------------------------------------

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-08-30
+
+### Added
+
+- Search now covers teams and packs, not just bots and servers -- the
+  `/search` page's results grid gets a "Teams" and "Packs" section
+  alongside Bots and Servers, using the same query/tag filters. The
+  backend index only ever covered bots/servers before; that's what the
+  page's own comment used to say, until today.
+- A coupon-code field on the shop page -- Popplio's checkout now actually
+  accepts one. The admin coupon catalog has existed for a while with
+  nowhere to redeem a code; there is now.
+
 ## [0.4.1] - 2026-08-29
 
 ### Added
@@ -17,10 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   these was already fully supported by the API; the buttons just weren't
   built yet.
 - Team pages can now be reported and reviewed, the same as bots, servers
-  (and, for reporting, packs) already could both were already fully
+  (and, for reporting, packs) already could -- both were already fully
   supported by the API with no frontend caller.
 - A "Webhooks" tab on team settings, so a team can receive the same
-  webhook events a bot or server can Popplio already had a working
+  webhook events a bot or server can opplio already had a working
   team webhook driver with no way to configure one from the site.
 
 ## [0.4.0] - 2026-08-27

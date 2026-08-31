@@ -6,7 +6,9 @@ import { search } from "@/lib/api";
 import type { SearchQuery, SearchResponse } from "@/lib/api/types";
 
 export function useSearch() {
-  const [query, setQuery] = useState<SearchQuery>({ target_types: ["bot", "server"] });
+  const [query, setQuery] = useState<SearchQuery>({
+    target_types: ["bot", "server", "team", "pack"],
+  });
   const [committed, setCommitted] = useState<SearchQuery | null>(null);
 
   const { data, error, isLoading } = useSWR<SearchResponse>(
@@ -20,7 +22,7 @@ export function useSearch() {
   };
 
   const reset = () => {
-    setQuery({ target_types: ["bot", "server"] });
+    setQuery({ target_types: ["bot", "server", "team", "pack"] });
     setCommitted(null);
   };
 
