@@ -18,6 +18,7 @@ export { reportsResource as reports } from "./resources/reports";
 export { reviewsResource as reviews } from "./resources/reviews";
 export { searchResource as search } from "./resources/search";
 export { serversResource as servers } from "./resources/servers";
+export { serverTemplatesResource as serverTemplates } from "./resources/serverTemplates";
 export { sessionsResource as sessions } from "./resources/sessions";
 export { shopResource as shop } from "./resources/shop";
 export { staffResource as staff } from "./resources/staff";

@@ -50,6 +50,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/servers", label: "Servers" },
       { href: "/packs", label: "Packs" },
       { href: "/emojis", label: "Emojis" },
+      { href: "/templates", label: "Templates" },
     ],
   },
   {
@@ -131,11 +132,6 @@ export function Header() {
   const { me } = useMe(session);
   const isStaff = me?.staff ?? false;
 
-  // Catches a session that was already active when the ban was applied —
-  // the fresh-login path (auth/sauron) already sends a new ban straight to
-  // /banned, but an existing session's next page navigation is the only
-  // chance to catch one that happened mid-session, since GET /users/{id}
-  // is a public, unauthenticated endpoint and never itself rejects them.
   useEffect(() => {
     if (
       me?.banned &&
