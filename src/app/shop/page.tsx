@@ -16,6 +16,7 @@ import { Container } from "@/components/layout/Container";
 import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
@@ -69,6 +70,7 @@ function ShopPageInner() {
     useState<VoteCreditTierRedeemSummary | null>(null);
   const [purchases, setPurchases] = useState<ShopPurchase[] | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
   const [redeeming, setRedeeming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -173,8 +175,18 @@ function ShopPageInner() {
     setError(null);
     setNotice(null);
     try {
-      await shop.purchase(entity, targetId, item.id, session.token);
-      setNotice(`Purchased ${item.name}.`);
+      await shop.purchase(
+        entity,
+        targetId,
+        item.id,
+        session.token,
+        couponCode.trim(),
+      );
+      setNotice(
+        couponCode.trim()
+          ? `Purchased ${item.name} with your coupon.`
+          : `Purchased ${item.name}.`,
+      );
       refreshBalances();
     } catch (err) {
       setError(
@@ -343,6 +355,17 @@ function ShopPageInner() {
                   {(voteSummary.total_credits / 100).toFixed(2)})
                 </Button>
               )}
+            </div>
+          )}
+
+          {targetId && (
+            <div className="mt-3">
+              <Input
+                placeholder="Have a coupon? Enter its code"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                className="text-sm"
+              />
             </div>
           )}
 

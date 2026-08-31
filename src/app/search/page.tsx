@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { BotCard } from "@/components/cards/BotCard";
+import { PackCard } from "@/components/cards/PackCard";
 import { ServerCard } from "@/components/cards/ServerCard";
+import { TeamCard } from "@/components/cards/TeamCard";
 import { Container } from "@/components/layout/Container";
 import { Pagination } from "@/components/search/Pagination";
 import { Badge } from "@/components/ui/Badge";
@@ -17,12 +19,10 @@ import { bots, servers } from "@/lib/api";
 import type { IndexBot, IndexServer, PagedResult } from "@/lib/api/types";
 
 /**
- * Popplio's search index only ever covers bots/servers (types/search.go's
- * TargetTypes is hardcoded to those two) — there's no backend support for
- * indexing Apps/Premium/Shop/Tickets content. Rather than fake a "search"
- * that doesn't exist, a query that looks like it's after one of those
- * surfaces just gets a one-line nudge toward the real page alongside
- * whatever bot/server results did come back.
+ * Search covers bots, servers, teams, and packs. Apps/Premium/Shop/Tickets
+ * content still isn't indexed (there's no backend index for it), so a query
+ * that looks like it's after one of those surfaces still gets a one-line
+ * nudge toward the real page alongside whatever results did come back.
  */
 const QUICK_LINKS: {
   keywords: string[];
@@ -31,28 +31,46 @@ const QUICK_LINKS: {
   description: string;
 }[] = [
   {
-    keywords: ["premium", "upgrade", "subscription", "plan", "paypal", "stripe"],
+    keywords: [
+      "premium",
+      "upgrade",
+      "subscription",
+      "plan",
+      "paypal",
+      "stripe",
+    ],
     href: "/premium",
     label: "Premium",
-    description: "Buy premium for one of your bots — card, PayPal, or vote credits.",
+    description:
+      "Buy premium for one of your bots — card, PayPal, or vote credits.",
   },
   {
     keywords: ["shop", "credit", "boost", "featured", "badge", "blitz"],
     href: "/shop",
     label: "Shop",
-    description: "Spend a bot's earned vote credits on boosts, badges, and more.",
+    description:
+      "Spend a bot's earned vote credits on boosts, badges, and more.",
   },
   {
-    keywords: ["apply", "application", "staff team", "dev team", "partner", "certification"],
+    keywords: [
+      "apply",
+      "application",
+      "staff team",
+      "dev team",
+      "partner",
+      "certification",
+    ],
     href: "/apps",
     label: "Apply",
-    description: "Staff, dev team, partnership, and certification applications.",
+    description:
+      "Staff, dev team, partnership, and certification applications.",
   },
   {
     keywords: ["ticket", "support", "help", "issue", "bug", "problem"],
     href: "/tickets",
     label: "Support Tickets",
-    description: "Get help from staff with your account, a payment, or a listing.",
+    description:
+      "Get help from staff with your account, a payment, or a listing.",
   },
 ];
 
@@ -90,12 +108,14 @@ function SearchPageInner() {
   const [botsPage, setBotsPage] = useState(1);
   const [serversPage, setServersPage] = useState(1);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount, run is stable in practice
   useEffect(() => {
     if (initialQuery) {
-      run({ query: initialQuery, target_types: ["bot", "server"] });
+      run({
+        query: initialQuery,
+        target_types: ["bot", "server", "team", "pack"],
+      });
     }
-    // Only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -112,6 +132,8 @@ function SearchPageInner() {
   // client-side instead — same approach the admin search page uses.
   const [resultsBotsPage, setResultsBotsPage] = useState(1);
   const [resultsServersPage, setResultsServersPage] = useState(1);
+  const [resultsTeamsPage, setResultsTeamsPage] = useState(1);
+  const [resultsPacksPage, setResultsPacksPage] = useState(1);
 
   const toggleTag = (tag: string) => {
     const tags = query.tags?.tags ?? [];
@@ -128,16 +150,20 @@ function SearchPageInner() {
     e.preventDefault();
     setResultsBotsPage(1);
     setResultsServersPage(1);
+    setResultsTeamsPage(1);
+    setResultsPacksPage(1);
     run({
       ...query,
       target_types: query.target_types?.length
         ? query.target_types
-        : ["bot", "server"],
+        : ["bot", "server", "team", "pack"],
     });
   };
 
   const resultBots = results?.bots ?? [];
   const resultServers = results?.servers ?? [];
+  const resultTeams = results?.teams ?? [];
+  const resultPacks = results?.packs ?? [];
   const pagedResultBots = resultBots.slice(
     (resultsBotsPage - 1) * PAGE_SIZE,
     resultsBotsPage * PAGE_SIZE,
@@ -146,7 +172,19 @@ function SearchPageInner() {
     (resultsServersPage - 1) * PAGE_SIZE,
     resultsServersPage * PAGE_SIZE,
   );
-  const totalResults = resultBots.length + resultServers.length;
+  const pagedResultTeams = resultTeams.slice(
+    (resultsTeamsPage - 1) * PAGE_SIZE,
+    resultsTeamsPage * PAGE_SIZE,
+  );
+  const pagedResultPacks = resultPacks.slice(
+    (resultsPacksPage - 1) * PAGE_SIZE,
+    resultsPacksPage * PAGE_SIZE,
+  );
+  const totalResults =
+    resultBots.length +
+    resultServers.length +
+    resultTeams.length +
+    resultPacks.length;
 
   const matchedQuickLinks = hasResults
     ? QUICK_LINKS.filter((link) =>
@@ -163,7 +201,7 @@ function SearchPageInner() {
           Search
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Find bots and servers by name, tags, or description.
+          Find bots, servers, teams, and packs by name, tags, or description.
         </p>
       </div>
 
@@ -172,7 +210,7 @@ function SearchPageInner() {
         <div className="flex gap-2">
           <Input
             icon={<Search size={14} />}
-            placeholder="Search bots and servers..."
+            placeholder="Search bots, servers, teams, and packs..."
             defaultValue={initialQuery}
             onChange={(e) => setQuery({ ...query, query: e.target.value })}
             className="flex-1"
@@ -287,6 +325,54 @@ function SearchPageInner() {
                     total={resultServers.length}
                     perPage={PAGE_SIZE}
                     onPageChange={setResultsServersPage}
+                  />
+                </div>
+              )}
+            </section>
+          )}
+
+          {resultTeams.length > 0 && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                Teams
+                <Badge>{resultTeams.length}</Badge>
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {pagedResultTeams.map((team) => (
+                  <TeamCard key={team.id} team={team} />
+                ))}
+              </div>
+              {resultTeams.length > PAGE_SIZE && (
+                <div className="mt-6">
+                  <Pagination
+                    page={resultsTeamsPage}
+                    total={resultTeams.length}
+                    perPage={PAGE_SIZE}
+                    onPageChange={setResultsTeamsPage}
+                  />
+                </div>
+              )}
+            </section>
+          )}
+
+          {resultPacks.length > 0 && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                Packs
+                <Badge>{resultPacks.length}</Badge>
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {pagedResultPacks.map((pack) => (
+                  <PackCard key={pack.url} pack={pack} />
+                ))}
+              </div>
+              {resultPacks.length > PAGE_SIZE && (
+                <div className="mt-6">
+                  <Pagination
+                    page={resultsPacksPage}
+                    total={resultPacks.length}
+                    perPage={PAGE_SIZE}
+                    onPageChange={setResultsPacksPage}
                   />
                 </div>
               )}

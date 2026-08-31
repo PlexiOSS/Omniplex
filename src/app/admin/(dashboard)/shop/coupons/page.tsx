@@ -81,7 +81,7 @@ export default function ShopCouponsPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Shop Coupons"
-        description="Discount codes, optionally restricted to specific items. Coupons aren't wired into checkout yet — redeeming one isn't possible on the site today, this only manages the catalogue."
+        description="Discount codes, optionally restricted to specific items, target types, or users. Redeemable on the shop page with a coupon code -- requirements isn't enforced yet, everything else is."
         action={
           hasPerm("manage_shop") && (
             <Button
