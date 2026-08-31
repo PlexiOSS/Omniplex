@@ -1234,6 +1234,30 @@ export interface PartnerList {
   partner_types: PartnerType[];
 }
 
+export interface ServerTemplate {
+  id: string;
+  /** The Discord server template code -- discord.com/template/<code> */
+  code: string;
+  /** Pulled from Discord's own template metadata at submission time. */
+  name: string;
+  /** The submitter's description. */
+  short: string;
+  tags: string[];
+  nsfw: boolean;
+  owner: PlatformUser;
+  /** Discord's own reported usage count, as of submission time. */
+  usage_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateServerTemplatePayload {
+  code: string;
+  short: string;
+  tags: string[];
+  nsfw: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Staff review templates (canned Approve/Deny reasons for the bot queue)
 // ---------------------------------------------------------------------------

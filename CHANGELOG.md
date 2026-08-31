@@ -7,20 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-08-31
+
 ### Added
 
+- A Server Templates directory (`/templates`, linked from Browse) --
+  browse/tag-filter user-submitted Discord server templates and clone one
+  straight into your own server with one click. `/templates/add` to
+  submit one: paste a template code, Discord's own metadata fills in the
+  name. No review queue, same trust model as packs -- owners can delete
+  their own submissions inline from the card.
 - The shop page now shows a list of available public coupon codes (when
   there are any that actually apply to the selected bot/server) above the
   manual code field, with a one-click "use this code" fill-in -- coupon
   redemption shipped in 0.4.2, but the only way to use one was already
   knowing the code.
 - The homepage Partners section is now an auto-scrolling marquee instead
-  of a static wrapped grid -- multiple rows, alternating scroll direction,
+  of a static wrapped grid multiple rows, alternating scroll direction,
   once there are enough partners to make that worthwhile (falls back to
   the plain grid for a short list). Pauses on hover and respects
   prefers-reduced-motion.
 - Teams and packs can now redeem their earned votes into shop credits, the
-  same as bots and servers -- a "Credits" tab on team settings, and a
+  same as bots and servers a "Credits" tab on team settings, and a
   "Credits" button on each pack in the dashboard's Packs tab. There's
   nowhere to spend credits yet outside the shop, which stays bot/server-
   only for now, so this banks them for when that changes rather than
@@ -36,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   scoped to the current voting cycle, so a consistently active voter keeps
   their standing across the monthly automated reset instead of getting
   wiped every time it runs.
+- Team settings' Overview tab is now an actual activity dashboard instead
+  of a static welcome blurb votes, members, bots, servers, reviews
+  (with average rating), and banked vote credits as stat cards, plus a
+  webhook activity summary (configured count + logged deliveries) for
+  members with webhook permissions. All data reused from existing
+  endpoints, nothing new on the backend.
 
 ### Fixed
 

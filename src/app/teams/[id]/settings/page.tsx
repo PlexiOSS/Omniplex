@@ -2,15 +2,28 @@
 
 import {
   ArrowLeft,
+  Bot,
+  Coins,
+  MessageSquare,
   Pencil,
   Plus,
+  Server,
+  Star,
   Trash2,
   Upload,
   UserMinus,
+  Users,
+  Webhook,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Container } from "@/components/layout/Container";
 import { PermSelector } from "@/components/teams/PermSelector";
 import { Avatar } from "@/components/ui/Avatar";
@@ -23,11 +36,12 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
-import { teams } from "@/lib/api";
+import { reviews, teams, votes, webhooks } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { PermissionData, Team, TeamMember } from "@/lib/api/types";
 import { hasPermString } from "@/lib/permissions";
 import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import { formatCount } from "@/lib/utils/format";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 type Tab = "overview" | "info" | "members" | "webhooks" | "credits" | "danger";
@@ -151,7 +165,9 @@ export default function TeamSettingsPage() {
         </div>
       </div>
 
-      {tab === "overview" && <OverviewTab team={team} />}
+      {tab === "overview" && session && (
+        <OverviewTab team={team} ownPerms={ownPerms} token={session.token} />
+      )}
       {tab === "info" && session && (
         <EditInfoTab
           team={team}
@@ -188,15 +204,149 @@ export default function TeamSettingsPage() {
   );
 }
 
-function OverviewTab({ team }: { team: Team }) {
+function StatCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="max-w-2xl space-y-4">
+    <div className="rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+        {icon}
+        {label}
+      </div>
+      <p className="mt-1 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function OverviewTab({
+  team,
+  ownPerms,
+  token,
+}: {
+  team: Team;
+  ownPerms: string[];
+  token: string;
+}) {
+  const [reviewStats, setReviewStats] = useState<{
+    count: number;
+    avgStars: number;
+  } | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [webhookStats, setWebhookStats] = useState<{
+    configured: number;
+    deliveries: number;
+  } | null>(null);
+
+  const canViewWebhookActivity =
+    hasPermString(ownPerms, "manage_webhooks") ||
+    hasPermString(ownPerms, "view_webhook_logs");
+
+  useEffect(() => {
+    reviews
+      .getAll("team", team.id)
+      .then((res) => {
+        const stars = res.reviews.map((r) => r.stars);
+        setReviewStats({
+          count: stars.length,
+          avgStars:
+            stars.length > 0
+              ? stars.reduce((a, b) => a + b, 0) / stars.length
+              : 0,
+        });
+      })
+      .catch(() => setReviewStats({ count: 0, avgStars: 0 }));
+
+    votes
+      .getRedeemLogs("team", team.id)
+      .then((res) => setCredits(res.available_credits))
+      .catch(() => setCredits(null));
+  }, [team.id]);
+
+  useEffect(() => {
+    if (!canViewWebhookActivity) return;
+    Promise.all([
+      webhooks.list("team", team.id, token),
+      webhooks.getLogs("team", team.id, 1, token),
+    ])
+      .then(([list, logs]) => {
+        setWebhookStats({ configured: list.length, deliveries: logs.count });
+      })
+      .catch(() => setWebhookStats(null));
+  }, [canViewWebhookActivity, team.id, token]);
+
+  const members = team.entities?.members ?? [];
+  const bots = team.entities?.bots ?? [];
+  const servers = team.entities?.servers ?? [];
+
+  return (
+    <div className="max-w-2xl space-y-6">
       <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Manage {team.name}&apos;s info, members, and permissions from here.
           Only actions you have permission for are shown.
         </p>
       </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <StatCard
+          icon={<Star size={13} />}
+          label="Votes"
+          value={formatCount(team.votes)}
+        />
+        <StatCard
+          icon={<Users size={13} />}
+          label="Members"
+          value={String(members.length)}
+        />
+        <StatCard
+          icon={<Bot size={13} />}
+          label="Bots"
+          value={String(bots.length)}
+        />
+        <StatCard
+          icon={<Server size={13} />}
+          label="Servers"
+          value={String(servers.length)}
+        />
+        <StatCard
+          icon={<MessageSquare size={13} />}
+          label="Reviews"
+          value={
+            reviewStats
+              ? reviewStats.count > 0
+                ? `${reviewStats.count} (${reviewStats.avgStars.toFixed(1)}★)`
+                : "0"
+              : "…"
+          }
+        />
+        <StatCard
+          icon={<Coins size={13} />}
+          label="Credits"
+          value={credits !== null ? (credits / 100).toFixed(2) : "…"}
+        />
+      </div>
+
+      {canViewWebhookActivity && (
+        <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <h3 className="mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            <Webhook size={14} />
+            Webhook activity
+          </h3>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {webhookStats
+              ? `${webhookStats.configured} webhook${webhookStats.configured === 1 ? "" : "s"} configured, ${formatCount(webhookStats.deliveries)} ${webhookStats.deliveries === 1 ? "delivery" : "deliveries"} logged.`
+              : "Loading…"}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
