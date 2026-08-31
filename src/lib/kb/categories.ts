@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 export interface KbCategoryMeta {
   slug: string;
   title: string;
@@ -5,11 +7,6 @@ export interface KbCategoryMeta {
   order: number;
 }
 
-/**
- * Category metadata lives here rather than in a content file since a
- * category isn't itself an article. Order controls display order both
- * on the KB landing page and in the sidebar nav.
- */
 export const KB_CATEGORIES: KbCategoryMeta[] = [
   {
     slug: "basics",

@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import { useState } from "react";
 import useSWR from "swr";
 import { search } from "@/lib/api";

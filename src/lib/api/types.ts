@@ -601,6 +601,13 @@ export interface EntityVoteRedeemLogSummary {
   redeemed_credits: number;
 }
 
+export interface VoterLeaderboardEntry {
+  user: PlatformUser;
+  /** All-time upvote count across every entity -- not scoped to the
+   * current post-reset voting cycle. */
+  votes: number;
+}
+
 export interface EntityVote {
   itag: string;
   target_type: string;
@@ -648,6 +655,28 @@ export interface ShopPurchase {
   item_id: string;
   cents: number;
   created_at: string;
+}
+
+export interface ShopCoupon {
+  id: string;
+  code: string;
+  public: boolean;
+  max_uses: number | null;
+  /** Overrides the item's cost outright when set; null means the coupon
+   * covers the full cost (the item is free). Not a discount subtracted
+   * from the price. */
+  cents: number | null;
+  requirements: string[];
+  allowed_users: string[];
+  created_at: string;
+  last_updated: string;
+  created_by: PlatformUser | null;
+  updated_by: PlatformUser | null;
+  reuse_wait_duration: number | null;
+  expiry: number | null;
+  applicable_items: string[];
+  usable: boolean;
+  target_types: string[];
 }
 
 // ---------------------------------------------------------------------------

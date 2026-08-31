@@ -1,13 +1,6 @@
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
+// Copyright (C) 2026 NodeByte LTD 
 
-/**
- * Shared building blocks for `opengraph-image.tsx` routes, rendered through
- * Satori (`next/og`'s `ImageResponse`). Satori only supports a constrained
- * subset of CSS (flexbox layout, no CSS grid/position outside absolute) and
- * a limited SVG feature set — `OmniplexLogo` (path + clipPath) is confirmed
- * to render correctly here, so it's reused as-is rather than duplicated as
- * a rasterized asset.
- */
+import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = "image/png";
@@ -24,10 +17,6 @@ export const og = {
   successBg: "#14532d",
 };
 
-/**
- * Full-bleed dark frame with the subtle dot-grid background and bottom
- * accent bar used across every generated OG image.
- */
 export function OgFrame({
   children,
   padding = "60px 72px",
@@ -72,7 +61,6 @@ export function OgFrame({
   );
 }
 
-/** Small "Omniplex" wordmark + logo, used as a corner brand stamp. */
 export function OgBrand({ size = 28 }: { size?: number }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -116,7 +104,6 @@ export function OgPill({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Truncates to a safe length for a single/double-line OG title. */
 export function ogClamp(text: string, max: number) {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }

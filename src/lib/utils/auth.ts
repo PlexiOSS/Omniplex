@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 import type { AuthSession } from "../api/types";
 
 const STORAGE_KEY = "wistala";

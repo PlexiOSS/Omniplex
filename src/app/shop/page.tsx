@@ -7,6 +7,7 @@ import {
   ShoppingBag,
   Sparkles,
   Star,
+  Ticket,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -26,6 +27,7 @@ import type {
   EntityVote,
   EntityVoteRedeemLogSummary,
   PagedResult,
+  ShopCoupon,
   ShopItem,
   ShopItemBenefit,
   ShopPurchase,
@@ -45,6 +47,37 @@ const BENEFIT_ICONS: Record<string, typeof Sparkles> = {
   supporter_badge: Award,
   vote_blitz: Sparkles,
 };
+
+type VoteHistoryEntry =
+  | { kind: "vote"; vote: EntityVote }
+  | { kind: "voided"; reason: string; voidedAt: string | null; count: number };
+
+function groupVoteHistory(votes: EntityVote[]): VoteHistoryEntry[] {
+  const groups: VoteHistoryEntry[] = [];
+
+  for (const vote of votes) {
+    if (!vote.void) {
+      groups.push({ kind: "vote", vote });
+      continue;
+    }
+
+    const reason = vote.void_reason ?? "Voided";
+    const last = groups[groups.length - 1];
+
+    if (
+      last?.kind === "voided" &&
+      last.reason === reason &&
+      last.voidedAt === vote.voided_at
+    ) {
+      last.count += 1;
+      continue;
+    }
+
+    groups.push({ kind: "voided", reason, voidedAt: vote.voided_at, count: 1 });
+  }
+
+  return groups;
+}
 
 function durationLabel(hours: number): string {
   if (hours <= 0) return "permanent";
@@ -70,6 +103,7 @@ function ShopPageInner() {
     useState<VoteCreditTierRedeemSummary | null>(null);
   const [purchases, setPurchases] = useState<ShopPurchase[] | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [publicCoupons, setPublicCoupons] = useState<ShopCoupon[]>([]);
   const [couponCode, setCouponCode] = useState("");
   const [redeeming, setRedeeming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +117,10 @@ function ShopPageInner() {
   useEffect(() => {
     shop.getItems().then((res) => setItems(res.items));
     shop.getBenefits().then((res) => setBenefits(res.items));
+    shop
+      .getPublicCoupons()
+      .then((res) => setPublicCoupons(res.items))
+      .catch(() => setPublicCoupons([]));
   }, []);
 
   useEffect(() => {
@@ -199,6 +237,10 @@ function ShopPageInner() {
 
   const availableCredits = creditSummary?.available_credits ?? 0;
   const ownedCount = entity === "bot" ? ownedBots.length : ownedServers.length;
+  const applicableCoupons = publicCoupons.filter(
+    (coupon) =>
+      coupon.target_types.length === 0 || coupon.target_types.includes(entity),
+  );
 
   return (
     <Container className="py-16">
@@ -358,6 +400,34 @@ function ShopPageInner() {
             </div>
           )}
 
+          {targetId && applicableCoupons.length > 0 && (
+            <div className="mt-3">
+              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                <Ticket size={12} />
+                Available offers
+              </p>
+              <div className="space-y-1.5">
+                {applicableCoupons.map((coupon) => (
+                  <button
+                    key={coupon.id}
+                    type="button"
+                    onClick={() => setCouponCode(coupon.code)}
+                    className="flex w-full items-center justify-between rounded-lg border border-dashed border-accent/30 bg-accent/5 px-3 py-2 text-left text-xs transition-colors hover:border-accent/60"
+                  >
+                    <span className="font-mono font-medium text-zinc-950 dark:text-zinc-50">
+                      {coupon.code}
+                    </span>
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      {coupon.cents == null
+                        ? "Covers any item"
+                        : `${(coupon.cents / 100).toFixed(2)} credit item cost`}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {targetId && (
             <div className="mt-3">
               <Input
@@ -484,25 +554,45 @@ function ShopPageInner() {
               </p>
             ) : (
               <div className="mt-3 divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-                {voteHistory.results.map((vote) => (
-                  <div
-                    key={vote.itag}
-                    className="flex items-center justify-between px-4 py-3 text-sm"
-                  >
-                    <span className="text-zinc-700 dark:text-zinc-300">
-                      Vote #{vote.vote_num}
-                      {vote.void && (
-                        <span className="ml-2 text-xs text-red-500 dark:text-red-400">
-                          Voided
-                          {vote.void_reason ? `: ${vote.void_reason}` : ""}
+                {groupVoteHistory(voteHistory.results).map((entry, i) =>
+                  entry.kind === "vote" ? (
+                    <div
+                      key={entry.vote.itag}
+                      className="flex items-center justify-between px-4 py-3 text-sm"
+                    >
+                      <span className="text-zinc-700 dark:text-zinc-300">
+                        Vote #{entry.vote.vote_num}
+                      </span>
+                      <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                        {formatRelativeTime(entry.vote.created_at)}
+                      </span>
+                    </div>
+                  ) : (
+                    <div
+                      // biome-ignore lint/suspicious/noArrayIndexKey: entries have no stable id, order is stable within a page
+                      key={`voided-${i}`}
+                      className="flex items-center justify-between px-4 py-3 text-sm"
+                    >
+                      <span
+                        className={
+                          entry.reason === "Vote credits redeemed"
+                            ? "text-xs text-emerald-600 dark:text-emerald-400"
+                            : "text-xs text-zinc-400 dark:text-zinc-600"
+                        }
+                      >
+                        {entry.count} vote{entry.count === 1 ? "" : "s"}{" "}
+                        {entry.reason === "Vote credits redeemed"
+                          ? "redeemed for credits"
+                          : `cleared — ${entry.reason.toLowerCase()}`}
+                      </span>
+                      {entry.voidedAt && (
+                        <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                          {formatRelativeTime(entry.voidedAt)}
                         </span>
                       )}
-                    </span>
-                    <span className="text-xs text-zinc-400 dark:text-zinc-600">
-                      {formatRelativeTime(vote.created_at)}
-                    </span>
-                  </div>
-                ))}
+                    </div>
+                  ),
+                )}
               </div>
             )}
             {voteHistory.count > voteHistory.per_page && (

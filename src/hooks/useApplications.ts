@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import useSWR from "swr";
 import { apps } from "@/lib/api";
 import type { AppListResponse, AppMeta, AuthSession } from "@/lib/api/types";

@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import useSWR from "swr";
 import { servers } from "@/lib/api";
 import type {

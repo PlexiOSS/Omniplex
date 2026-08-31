@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import { useCallback, useEffect, useState } from "react";
 import { notifications } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -45,14 +47,14 @@ export function usePushNotifications() {
     setError(null);
 
     try {
-      const registration = await navigator.serviceWorker.register("/sw.js");
-      await navigator.serviceWorker.ready;
-
       const perm = await Notification.requestPermission();
       setPermission(perm);
       if (perm !== "granted") {
         throw new Error("Notification permission was not granted.");
       }
+
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
 
       const { public_key } = await notifications.getInfo();
       const sub = await registration.pushManager.subscribe({
@@ -91,7 +93,8 @@ export function usePushNotifications() {
     setError(null);
 
     try {
-      const registration = await navigator.serviceWorker.getRegistration("/sw.js");
+      const registration =
+        await navigator.serviceWorker.getRegistration("/sw.js");
       const sub = await registration?.pushManager.getSubscription();
 
       if (sub) {
@@ -126,5 +129,13 @@ export function usePushNotifications() {
     }
   }, [supported, session]);
 
-  return { supported, subscribed, permission, busy, error, subscribe, unsubscribe };
+  return {
+    supported,
+    subscribed,
+    permission,
+    busy,
+    error,
+    subscribe,
+    unsubscribe,
+  };
 }

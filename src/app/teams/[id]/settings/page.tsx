@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { teams } from "@/lib/api";
@@ -29,7 +30,7 @@ import { hasPermString } from "@/lib/permissions";
 import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
-type Tab = "overview" | "info" | "members" | "webhooks" | "danger";
+type Tab = "overview" | "info" | "members" | "webhooks" | "credits" | "danger";
 
 function SettingsSkeleton() {
   return (
@@ -105,6 +106,7 @@ export default function TeamSettingsPage() {
       label: "Webhooks",
       perm: ["manage_webhooks", "view_webhook_logs"],
     },
+    { key: "credits", label: "Credits" },
     { key: "danger", label: "Danger Zone", perm: "owner" },
   ];
   const visibleTabs = TABS.filter(
@@ -170,6 +172,14 @@ export default function TeamSettingsPage() {
       )}
       {tab === "webhooks" && session && (
         <WebhooksTab team={team} ownPerms={ownPerms} token={session.token} />
+      )}
+      {tab === "credits" && session && (
+        <VoteCreditsPanel
+          targetType="team"
+          targetId={team.id}
+          token={session.token}
+          canRedeem={hasPermString(ownPerms, "redeem_vote_credits")}
+        />
       )}
       {tab === "danger" && session && (
         <DangerTab team={team} token={session.token} />

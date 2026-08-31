@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import useSWR from "swr";
 import { users } from "@/lib/api";
 import type { AuthSession } from "@/lib/api/types";

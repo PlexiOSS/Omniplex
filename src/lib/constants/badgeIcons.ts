@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 import {
   Award,
   Bug,
@@ -17,12 +19,6 @@ import {
   Zap,
 } from "lucide-react";
 
-/**
- * A curated allow-list of lucide-react icons a badge can use, matched
- * against the icon name string a badges.icon column stores — never trusted
- * as an arbitrary/dynamic import, same reasoning as KNOWN_LINK_ICONS on the
- * user profile page.
- */
 export const BADGE_ICONS = {
   Award,
   Bug,
@@ -59,7 +55,6 @@ const BADGE_COLORS = [
   "premium",
 ] as const;
 
-/** Guards an API-sourced color string down to the Badge component's variant enum. */
 export function badgeColor(color: string): (typeof BADGE_COLORS)[number] {
   return (BADGE_COLORS as readonly string[]).includes(color)
     ? (color as (typeof BADGE_COLORS)[number])
