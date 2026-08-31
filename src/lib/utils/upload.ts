@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 export type UploadKind =
   | "partner-logo"
   | "team-avatar"

@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
@@ -32,7 +34,6 @@ function readArticle(categorySlug: string, fileName: string): KbArticle {
   };
 }
 
-/** Reads and parses every KB article from disk. Content is static and small, so no caching layer is needed. */
 export function getKbCategories(): KbCategory[] {
   return [...KB_CATEGORIES]
     .sort((a, b) => a.order - b.order)

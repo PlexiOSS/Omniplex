@@ -57,6 +57,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
     items: [
       { href: "/blog", label: "Blog Posts" },
       { href: "/changelog", label: "Changelog" },
+      { href: "/leaderboard", label: "Voter Leaderboard" },
       { href: "/kb", label: "Knowledge Base" },
       { href: "https://docs.omniplex.gg", label: "Documentation" },
       { href: "https://status.omniplex.gg", label: "System Status" },

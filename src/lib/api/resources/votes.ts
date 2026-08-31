@@ -6,9 +6,18 @@ import type {
   TargetType,
   VoteCreditTier,
   VoteCreditTierRedeemSummary,
+  VoterLeaderboardEntry,
 } from "../types";
 
 export const votesResource = {
+  /** Public, no auth needed. Most active voters, all-time, by total
+   * upvotes cast. Defaults to top 10 server-side; capped at 50. */
+  getLeaderboard: (limit?: number) =>
+    client.get<VoterLeaderboardEntry[]>(
+      `/votes/leaderboard${limit ? `?limit=${limit}` : ""}`,
+      { cache: "no-store" },
+    ),
+
   getCreditSummary: (targetType: TargetType, targetId: string) =>
     client.get<VoteCreditTierRedeemSummary>(
       `/${targetType}/${targetId}/votes/credit-tiers`,
@@ -18,7 +27,7 @@ export const votesResource = {
   /** The sitewide tier catalog (not scoped to one entity) — same rows the
    * per-entity credit summary's `tiers` field is drawn from, useful for
    * showing the full ladder before a user has picked/owns an entity. */
-  getGeneralCreditTiers: (targetType?: Extract<TargetType, "bot" | "server">) =>
+  getGeneralCreditTiers: (targetType?: TargetType) =>
     client.get<VoteCreditTier[]>(
       `/votes/credit-tiers${targetType ? `?target_type=${targetType}` : ""}`,
       { cache: "no-store" },

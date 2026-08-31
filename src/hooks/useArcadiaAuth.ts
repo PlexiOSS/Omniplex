@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import { useCallback, useEffect, useState } from "react";
 import { arcadia } from "@/lib/arcadia/client";
 import {
@@ -9,7 +11,6 @@ import {
   saveArcadiaSession,
 } from "@/lib/arcadia/session";
 
-/** Separate from useAuth — Arcadia is a different backend with its own session entirely. */
 export function useArcadiaAuth() {
   const [session, setSession] = useState<ArcadiaSession | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,9 +28,7 @@ export function useArcadiaAuth() {
 
   const logout = useCallback(() => {
     if (session) {
-      arcadia.auth.logout(session.login_token).catch(() => {
-        // Best-effort — clear locally regardless of whether the server call succeeds.
-      });
+      arcadia.auth.logout(session.login_token).catch(() => {});
     }
     clearArcadiaSession();
     setSession(null);

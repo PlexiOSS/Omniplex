@@ -414,3 +414,53 @@ html {
   font-weight: 500;
   color: var(--foreground);
 }
+
+/* --------------------------------------------------------------------------
+   Marquee — a horizontally auto-scrolling row (homepage Partners strip)
+   -------------------------------------------------------------------------- */
+.marquee {
+  overflow: hidden;
+  /* Fade the row out at both edges instead of a hard clip. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 30s) linear infinite;
+}
+/* Pausing on hover (rather than just on the hovered card) keeps the whole
+   row still while reading or aiming a click at anything in it. */
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+/* Alternate-row direction (a "logo wall" of several marquee rows scrolling
+   opposite ways) is set inline per row in PartnersMarquee.tsx via
+   animationDirection, not a modifier class here -- see its comment. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* The track renders the list twice, so -50% is exactly one full copy
+       -- the loop point is visually identical to the start. */
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}

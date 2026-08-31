@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import useSWR from "swr";
 import { bots } from "@/lib/api";
 import type { Bot, IndexBot, ListIndexBot, PagedResult } from "@/lib/api/types";

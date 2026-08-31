@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import { useState } from "react";
 import { bots, captcha, packs, servers, teams } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";

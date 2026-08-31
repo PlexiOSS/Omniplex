@@ -1,11 +1,13 @@
 "use client";
 
-import { ArrowUpRight, Package, Pencil, Trash2 } from "lucide-react";
+import { ArrowUpRight, Coins, Package, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
 import { packs } from "@/lib/api";
 import type { BotPack, IndexBot } from "@/lib/api/types";
 import { formatCount } from "@/lib/utils/format";
@@ -25,6 +27,7 @@ function PackItem({
   mutate: () => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const [showCredits, setShowCredits] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -112,6 +115,15 @@ function PackItem({
             </Button>
           )}
           <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowCredits(true)}
+            className="h-7 px-2 text-xs"
+          >
+            <Coins size={12} />
+            Credits
+          </Button>
+          <Button
             variant={confirming ? "danger" : "ghost"}
             size="sm"
             loading={deleting}
@@ -133,6 +145,21 @@ function PackItem({
           onClose={() => setEditing(false)}
           onSaved={mutate}
         />
+      )}
+
+      {showCredits && (
+        <Modal
+          open
+          onClose={() => setShowCredits(false)}
+          title={`${pack.name} — Credits`}
+        >
+          <VoteCreditsPanel
+            targetType="pack"
+            targetId={pack.url}
+            token={token}
+            canRedeem
+          />
+        </Modal>
       )}
     </div>
   );

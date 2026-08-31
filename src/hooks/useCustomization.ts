@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import { createContext, useContext } from "react";
 import {
   ACCENT_COLORS,
@@ -16,13 +18,7 @@ export interface CustomizationPrefs {
   accent: AccentColor;
   font: FontOption;
   layout: LayoutOption;
-  /** Hides bots/servers flagged `nsfw` from every listing/grid (search, browse,
-   * homepage, profiles, packs, teams). Detail pages are unaffected — this hides
-   * cards from browsing surfaces, not access to a page someone linked directly. */
   hideNsfw: boolean;
-  /** Blurs the avatar/banner images (not the text) on nsfw-flagged cards.
-   * Meaningless when hideNsfw is on (nothing nsfw is ever shown to blur), so
-   * the UI disables this toggle in that case rather than letting it do nothing. */
   blurNsfw: boolean;
 }
 

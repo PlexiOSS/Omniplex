@@ -1,6 +1,7 @@
 import { client } from "../client";
 import type {
   ItemList,
+  ShopCoupon,
   ShopItem,
   ShopItemBenefit,
   ShopPurchase,
@@ -13,6 +14,13 @@ export const shopResource = {
 
   getBenefits: () =>
     client.get<ItemList<ShopItemBenefit>>("/shop/item-benefits", {
+      cache: "no-store",
+    }),
+
+  /** Public, unauthenticated -- already filtered server-side to coupons
+   * that are usable, not expired, and haven't hit their max uses. */
+  getPublicCoupons: () =>
+    client.get<ItemList<ShopCoupon>>("/shop/public-coupons", {
       cache: "no-store",
     }),
 

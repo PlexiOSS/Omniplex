@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 import { ARCADIA_URL } from "./config";
 import { touchArcadiaSession } from "./session";
 import type {
@@ -57,11 +59,6 @@ export class ArcadiaError extends Error {
   }
 }
 
-/**
- * True for the specific error strings Arcadia uses to mean "this session is
- * dead, start over" (see check_auth/check_auth_insecure in the Rust source).
- * Anything else is a normal action-level error (bad input, missing perms).
- */
 export function isSessionInvalid(err: unknown): boolean {
   if (!(err instanceof ArcadiaError)) return false;
   return (
@@ -69,14 +66,6 @@ export function isSessionInvalid(err: unknown): boolean {
   );
 }
 
-/**
- * Arcadia's single endpoint, dispatching on a tagged-union JSON body. Unlike
- * Popplio, there is no consistent response envelope: success bodies are a mix
- * of JSON, raw plain text, and empty (204) depending on the action, though
- * every *error* response is consistently `(status, "message")` plain text.
- * Each action function below knows its own success shape — don't try to force
- * a single generic parser onto this.
- */
 async function postQuery(body: unknown): Promise<Response> {
   return fetch(`${ARCADIA_URL}/`, {
     method: "POST",
@@ -91,10 +80,6 @@ async function assertOk(res: Response): Promise<Response> {
     const message = await res.text().catch(() => res.statusText);
     throw new ArcadiaError(message, res.status);
   }
-  // A successful call means the token the server just checked is still
-  // good right now — reset the local idle clock to match, so a staff
-  // member actively using the panel never gets logged out from under
-  // themselves by the client's own stale estimate.
   touchArcadiaSession();
   return res;
 }
@@ -113,7 +98,6 @@ export const arcadia = {
       return (await assertOk(res)).json();
     },
 
-    /** Returns the raw login_token (plain text body, not JSON) for a new 'pending' session. */
     createSession: async (
       code: string,
       redirectUrl: string,
@@ -210,7 +194,6 @@ export const arcadia = {
     return (await assertOk(res)).json();
   },
 
-  /** Success body varies by method: some return nothing (204), some (e.g. Approve) return a plain-text result. */
   executeRpc: async (
     loginToken: string,
     targetType: TargetType,
@@ -880,12 +863,6 @@ export const arcadia = {
     },
   },
 
-  /** Relays a request into Popplio's own /staff/* API — see PopplioStaffQuery's
-   * doc comment. Popplio's own status code and body come back verbatim, so a
-   * non-2xx here means Popplio itself rejected the request (bad input, missing
-   * permission), not a broken Arcadia session — don't treat it as ArcadiaError's
-   * usual "session dead" cases. Body is parsed as JSON when present; Popplio's
-   * 204 responses (e.g. a successful review) come back as an empty string. */
   popplioStaff: async <T>(
     loginToken: string,
     method: string,
@@ -902,16 +879,11 @@ export const arcadia = {
     });
     const text = await res.text();
     if (!res.ok) {
-      // Popplio's error bodies are consistently { message, context } JSON —
-      // same ApiErrorBody shape the normal client.ts unwraps. Fall back to
-      // the raw text if it isn't JSON (an upstream 502/proxy failure, etc).
       let message = text || res.statusText;
       try {
         const parsed = JSON.parse(text) as { message?: string };
         if (parsed.message) message = parsed.message;
-      } catch {
-        // not JSON, use the raw text as-is
-      }
+      } catch {}
       throw new ArcadiaError(message, res.status);
     }
     return { status: res.status, json: text ? (JSON.parse(text) as T) : null };

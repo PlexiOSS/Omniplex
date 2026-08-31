@@ -1,16 +1,5 @@
-// ---------------------------------------------------------------------------
-// Hand-derived from Arcadia's Rust source (d:\@plexicore\arcadia\src\panelapi\).
-// Arcadia is a *separate* backend from Popplio — its own auth, own domain,
-// own (much less consistent) response envelope. See docs/admin-panel-plan.md.
-//
-// PanelQuery and every nested action enum serialize with serde's default
-// "externally tagged" representation for struct/newtype variants:
-//   SomeEnum::Variant { a, b } -> { "Variant": { "a": ..., "b": ... } }
-// ---------------------------------------------------------------------------
-
+// Copyright (C) 2026 NodeByte LTD 
 export type TargetType = "Bot" | "Server" | "Team" | "Pack" | "User";
-
-// --- Auth -------------------------------------------------------------------
 
 export const AUTH_VERSION = 5;
 export const HELLO_VERSION = 5;
@@ -44,8 +33,6 @@ export interface AuthData {
   created_at: number;
   state: "pending" | "active" | string;
 }
-
-// --- Staff / Hello ------------------------------------------------------------
 
 export interface PlatformUser {
   id: string;

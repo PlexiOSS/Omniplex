@@ -1,14 +1,7 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 import sharp from "sharp";
 
-/**
- * Fetches a remote avatar/banner and re-encodes it as a base64 PNG data URI.
- *
- * Satori/resvg (the renderer behind `next/og`'s `ImageResponse`) doesn't
- * reliably decode `.webp` — which is exactly what Omniplex's CDN serves for
- * every bot/server/user avatar — so `<img src="https://...avatar.webp">`
- * silently renders nothing. Re-encoding through sharp sidesteps that gap
- * regardless of the source format.
- */
 export async function toOgImageSrc(
   url: string | null | undefined,
 ): Promise<string | null> {

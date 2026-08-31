@@ -1,5 +1,7 @@
 "use client";
 
+// Copyright (C) 2026 NodeByte LTD 
+
 import { useEffect } from "react";
 
 export function useHighlightScroll(elementId: string | undefined) {

@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD 
+
 import {
   GetObjectCommand,
   HeadObjectCommand,
@@ -11,10 +13,6 @@ export interface FetchedObject {
   contentType: string;
   contentLength?: number;
   lastModified?: Date;
-  /** RustFS's ETag for this object version — changes on every putObject, so
-   * it's what lets /cdn/[...path] tell a browser "your cached copy is
-   * stale" the instant someone re-uploads a banner/avatar, instead of
-   * waiting out a fixed cache lifetime. */
   etag?: string;
 }
 
@@ -23,12 +21,6 @@ export interface ObjectMeta {
   lastModified?: Date;
 }
 
-/**
- * Metadata only, no body — what a conditional request (If-None-Match)
- * should use instead of getObject. A HEAD is a fraction of the cost of a
- * GET on a multi-MB banner, and previously every single request pulled the
- * full object down from RustFS just to potentially throw it away on a 304.
- */
 export async function headObject(key: string): Promise<ObjectMeta | null> {
   try {
     const res = await getS3Client().send(
@@ -41,16 +33,6 @@ export async function headObject(key: string): Promise<ObjectMeta | null> {
   }
 }
 
-/**
- * Every one of these swallows its own errors (missing/misconfigured env
- * vars, a slow or unreachable bucket, a genuine 404 — all of it) and
- * degrades to "as if the object doesn't exist" rather than throwing. This
- * is deliberately more permissive than typical error handling: every
- * caller sits behind an image the whole site now depends on rendering
- * *something* usable (a real image, or the existing 404 → generated-avatar
- * fallback) — a bucket outage should never surface as a broken page or a
- * hung request. Genuine misconfiguration still shows up in the server log.
- */
 export async function getObject(key: string): Promise<FetchedObject | null> {
   try {
     const res = await getS3Client().send(
@@ -71,8 +53,6 @@ export async function getObject(key: string): Promise<FetchedObject | null> {
   }
 }
 
-/** Best-effort — a failed cache write should never block serving the image
- * that was already successfully fetched. */
 export async function putObject(
   key: string,
   body: Uint8Array,
