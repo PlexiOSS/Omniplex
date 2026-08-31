@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BotPageTabs } from "@/components/bots/BotPageTabs";
+import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
@@ -84,11 +85,13 @@ export default async function BotPage({ params }: Props) {
   }
   if (!bot) notFound();
 
-  const [reviewList, commandList, changelogList] = await Promise.all([
-    reviews.getAll("bot", bot.bot_id).catch(() => ({ reviews: [] })),
-    bots.getCommands(bot.bot_id).catch(() => ({ commands: [] })),
-    bots.getChangelogs(bot.bot_id).catch(() => ({ changelogs: [] })),
-  ]);
+  const [reviewList, commandList, changelogList, similarBots] =
+    await Promise.all([
+      reviews.getAll("bot", bot.bot_id).catch(() => ({ reviews: [] })),
+      bots.getCommands(bot.bot_id).catch(() => ({ commands: [] })),
+      bots.getChangelogs(bot.bot_id).catch(() => ({ changelogs: [] })),
+      bots.getSimilar(bot.bot_id).catch(() => []),
+    ]);
 
   const avatarSrc = mirroredAvatarUrl(
     "bots",
@@ -316,6 +319,19 @@ export default async function BotPage({ params }: Props) {
           />
         </aside>
       </div>
+
+      {similarBots.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-5 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+            Similar Bots
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {similarBots.map((similarBot) => (
+              <BotCard key={similarBot.bot_id} bot={similarBot} />
+            ))}
+          </div>
+        </section>
+      )}
     </Container>
   );
 }

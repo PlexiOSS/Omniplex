@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The shop page now shows a list of available public coupon codes (when
   there are any that actually apply to the selected bot/server) above the
-  manual code field, with a one-click "use this code" fill-in coupon
+  manual code field, with a one-click "use this code" fill-in -- coupon
   redemption shipped in 0.4.2, but the only way to use one was already
   knowing the code.
 - The homepage Partners section is now an auto-scrolling marquee instead
@@ -20,15 +20,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the plain grid for a short list). Pauses on hover and respects
   prefers-reduced-motion.
 - Teams and packs can now redeem their earned votes into shop credits, the
-  same as bots and servers a "Credits" tab on team settings, and a
+  same as bots and servers -- a "Credits" tab on team settings, and a
   "Credits" button on each pack in the dashboard's Packs tab. There's
   nowhere to spend credits yet outside the shop, which stays bot/server-
   only for now, so this banks them for when that changes rather than
   pretending a purchase flow exists. Backend note: this uncovered that the
-  votes-to-credits ladder had no rows configured for anything but bots fixed on the popplio side, and it silently affected the existing server
+  votes-to-credits ladder had no rows configured for anything but bots --
+  fixed on the popplio side, and it silently affected the existing server
   flow too.
+- Other bots/servers sharing tags with the one you're viewing now show up
+  in a "Similar Bots"/"Similar Servers" section at the bottom of the page
+  -- ranked by how many tags they share.
 - A Voter Leaderboard page (`/leaderboard`, linked from the Community
-  menu) the most active voters, all-time, by total upvotes cast. Not
+  menu) -- the most active voters, all-time, by total upvotes cast. Not
   scoped to the current voting cycle, so a consistently active voter keeps
   their standing across the monthly automated reset instead of getting
   wiped every time it runs.
@@ -36,15 +40,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - The shop page's bot/server picker only ever showed bots you owned
-  directly, not ones you manage through a team backend fix (popplio's
+  directly, not ones you manage through a team -- backend fix (popplio's
   `user_bots` union), see its changelog.
 - Vote history no longer repeats an identical row per vote a single reset
-  event touched votes voided by the same event (same reason, same
+  event touched -- votes voided by the same event (same reason, same
   timestamp) now collapse into one summary row instead of a wall of
   copies. "Vote credits redeemed" also gets neutral styling instead of
   alarming red, since that one's an intentional, positive outcome.
 - "Enable push notifications" failed every time on Chrome with
-  "Notification permission was not granted," no dialog ever shown `Notification.requestPermission()` was called after awaiting service
+  "Notification permission was not granted," no dialog ever shown --
+  `Notification.requestPermission()` was called after awaiting service
   worker registration, which silently burns through the user-gesture
   window the permission prompt needs. Now requested first.
 

@@ -39,6 +39,10 @@ export const botsResource = {
       cache: "no-store",
     }),
 
+  /** Other bots sharing at least one tag, ranked by how many they share. */
+  getSimilar: (id: string) =>
+    client.get<IndexBot[]>(`/bots/${id}/similar`, { cache: "no-store" }),
+
   /** Pass include=long to get the long description */
   getBot: (id: string) =>
     client.get<Bot>(`/bots/${id}?include=long`, {

@@ -11,6 +11,7 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
@@ -98,9 +99,10 @@ export default async function ServerPage({ params }: Props) {
       `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`,
   );
 
-  const reviewList = await reviews
-    .getAll("server", server.server_id)
-    .catch(() => ({ reviews: [] }));
+  const [reviewList, similarServers] = await Promise.all([
+    reviews.getAll("server", server.server_id).catch(() => ({ reviews: [] })),
+    servers.getSimilar(server.server_id).catch(() => []),
+  ]);
 
   const voteBlitzActive =
     !!server.vote_blitz_until && new Date(server.vote_blitz_until) > new Date();
@@ -314,6 +316,22 @@ export default async function ServerPage({ params }: Props) {
           />
         </aside>
       </div>
+
+      {similarServers.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-5 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+            Similar Servers
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {similarServers.map((similarServer) => (
+              <ServerCard
+                key={similarServer.server_id}
+                server={similarServer}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </Container>
   );
 }

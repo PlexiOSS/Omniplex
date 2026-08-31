@@ -36,6 +36,12 @@ export const serversResource = {
       cache: "no-store",
     }),
 
+  /** Other servers sharing at least one tag, ranked by how many they share. */
+  getSimilar: (id: string) =>
+    client.get<IndexServer[]>(`/servers/${id}/similar`, {
+      cache: "no-store",
+    }),
+
   getEmojis: (page = 1) =>
     client.get<PagedResult<ServerEmojiPreview[]>>(
       `/servers/@emojis?page=${page}`,
@@ -44,10 +50,9 @@ export const serversResource = {
 
   /** Flat, item-level-paginated emojis across every opted-in server — used by the /emojis browse page instead of getEmojis's per-server grouping. */
   getFlatEmojis: (page = 1) =>
-    client.get<PagedResult<FlatEmoji[]>>(
-      `/servers/@emojis/flat?page=${page}`,
-      { cache: "no-store" },
-    ),
+    client.get<PagedResult<FlatEmoji[]>>(`/servers/@emojis/flat?page=${page}`, {
+      cache: "no-store",
+    }),
 
   /** Sticker counterpart of getFlatEmojis. */
   getFlatStickers: (page = 1) =>
