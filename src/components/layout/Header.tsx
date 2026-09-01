@@ -49,7 +49,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/bots", label: "Bots" },
       { href: "/servers", label: "Servers" },
       { href: "/packs", label: "Packs" },
-      { href: "/emojis", label: "Emojis" },
+      { href: "/emojis", label: "Emoji Packs" },
       { href: "/templates", label: "Templates" },
     ],
   },
