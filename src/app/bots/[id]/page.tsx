@@ -19,6 +19,7 @@ import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -182,7 +183,7 @@ export default async function BotPage({ params }: Props) {
           {bot.tags.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
               {bot.tags.map((tag) => (
-                <Badge key={tag}>{tag}</Badge>
+                <TagBadgeLink key={tag} tag={tag} />
               ))}
             </div>
           )}

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Tag browse pages (`/tags/[tag]`) -- every tag on a bot or server's
+  detail page is now a clickable link to a dedicated page listing every
+  bot, server, team, and pack that shares that tag, sorted by votes.
+  Reuses the existing search endpoint, no new backend work. No `/tags`
+  index for now -- discovery is via clicking a tag on a detail page.
+
 ## [0.4.3] - 2026-08-31
 
 ### Added
