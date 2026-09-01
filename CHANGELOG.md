@@ -29,6 +29,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   source server leaves the platform. A server's own Emojis & Stickers tab
   is untouched; it never used the flat endpoints to begin with.
 
+### Fixed
+
+- The shop's vote history no longer shows a redeemed vote as a plain "Vote
+  #N" entry it's grouped as a "redeemed for credits" line the same way
+  it was before, now keyed off `credit_redeem` instead of the `void` flag
+  (backend fix: redeeming credits no longer voids the vote at all, see
+  popplio's changelog -- it was silently deflating the entity's public
+  vote count).
+- Voting on a bot, server, team, or pack updated the vote button's own
+  label immediately, but everything else on the page showing that vote
+  count (the Stats sidebar, a pack's header count) stayed on the number
+  the page was server-rendered with until a manual reload. All four vote
+  buttons now call `router.refresh()` right after a successful vote, so
+  the whole page catches up -- the backend was already updating the count
+  synchronously, this was purely the page not re-fetching it.
+- Uploading an emoji while creating a new Emoji Pack always failed with
+  "You don't have permission to do this." the upload endpoint checked
+  team-based entity permissions for the pack, but packs aren't team-owned
+  (a pack's permission is just "are you its `owner`", checked directly by
+  Popplio) and, more fundamentally, the pack doesn't exist yet at that
+  point in the create flow, so the permission lookup always failed with
+  "pack not found" no matter who was uploading. Creating a pack at any
+  free URL never required special permission to begin with, so a
+  not-yet-created pack is now allowed through; an *existing* pack (the
+  case that matters, e.g. re-uploading an emoji after edits) still checks
+  real ownership, now via the pack's own `owner` field instead of a
+  permissions lookup that pack entities were never wired into.
+
 ## [0.4.3] - 2026-08-31
 
 ### Added

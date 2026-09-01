@@ -1,6 +1,7 @@
 "use client";
 
 import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -26,6 +27,7 @@ export function VoteButton({
   premium = false,
   captchaOptOut = false,
 }: VoteButtonProps) {
+  const router = useRouter();
   const { session, isAuthenticated } = useAuth();
   const { vote, loading, verifying, error } = useVote("bot", botId);
   const [localVotes, setLocalVotes] = useState(currentVotes);
@@ -60,6 +62,11 @@ export function VoteButton({
     if (!ok) return;
     setLocalVotes((v) => v + (upvote ? 1 : -1));
     setVotedDirection(upvote ? "up" : "down");
+    // approximate_votes updates synchronously on the backend, but this page's
+    // Stats sidebar was fetched server-side before the vote -- refresh so it
+    // (and anything else on the page reading the pre-vote count) catches up
+    // instead of only this button's own optimistic label doing so.
+    router.refresh();
   };
 
   const confirmDownvote = async () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -19,6 +20,7 @@ interface TeamVoteButtonProps {
 }
 
 export function TeamVoteButton({ teamId, currentVotes }: TeamVoteButtonProps) {
+  const router = useRouter();
   const { session, isAuthenticated } = useAuth();
   const { vote, loading, error } = useVote("team", teamId);
   const [localVotes, setLocalVotes] = useState(currentVotes);
@@ -48,6 +50,11 @@ export function TeamVoteButton({ teamId, currentVotes }: TeamVoteButtonProps) {
     if (!ok) return;
     setLocalVotes((v) => v + (upvote ? 1 : -1));
     setVotedDirection(upvote ? "up" : "down");
+    // approximate_votes updates synchronously on the backend, but this page's
+    // Overview tab was fetched server-side before the vote -- refresh so it
+    // (and anything else on the page reading the pre-vote count) catches up
+    // instead of only this button's own optimistic label doing so.
+    router.refresh();
   };
 
   const confirmDownvote = async () => {
