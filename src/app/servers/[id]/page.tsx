@@ -20,6 +20,7 @@ import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -186,7 +187,7 @@ export default async function ServerPage({ params }: Props) {
           {server.tags.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
               {server.tags.map((tag) => (
-                <Badge key={tag}>{tag}</Badge>
+                <TagBadgeLink key={tag} tag={tag} />
               ))}
             </div>
           )}
