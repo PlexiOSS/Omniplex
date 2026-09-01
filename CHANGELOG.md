@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - The shop's vote history no longer shows a redeemed vote as a plain "Vote
-  #N" entry it's grouped as a "redeemed for credits" line the same way
+  #N" entry -- it's grouped as a "redeemed for credits" line the same way
   it was before, now keyed off `credit_redeem` instead of the `void` flag
   (backend fix: redeeming credits no longer voids the vote at all, see
   popplio's changelog -- it was silently deflating the entity's public
@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the whole page catches up -- the backend was already updating the count
   synchronously, this was purely the page not re-fetching it.
 - Uploading an emoji while creating a new Emoji Pack always failed with
-  "You don't have permission to do this." the upload endpoint checked
+  "You don't have permission to do this." -- the upload endpoint checked
   team-based entity permissions for the pack, but packs aren't team-owned
   (a pack's permission is just "are you its `owner`", checked directly by
   Popplio) and, more fundamentally, the pack doesn't exist yet at that
@@ -56,6 +56,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   case that matters, e.g. re-uploading an emoji after edits) still checks
   real ownership, now via the pack's own `owner` field instead of a
   permissions lookup that pack entities were never wired into.
+- The Add Bot confirmation screen crashed with a bare `TypeError` for most
+  new submissions -- `botMeta.flags` came back `null` from the backend
+  whenever the lookup resolved via Discord's own RPC endpoint (the
+  now-preferred path, only the JAPI fallback ever populated flags), and
+  the confirmation screen called `.map()` on it directly. Backend fix:
+  Popplio's changelog. Guarded here too (`botMeta.flags ?? []`) so the
+  page degrades instead of crashing if this shape gap ever recurs.
 
 ## [0.4.3] - 2026-08-31
 
