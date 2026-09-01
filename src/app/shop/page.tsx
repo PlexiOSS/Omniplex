@@ -56,12 +56,18 @@ function groupVoteHistory(votes: EntityVote[]): VoteHistoryEntry[] {
   const groups: VoteHistoryEntry[] = [];
 
   for (const vote of votes) {
-    if (!vote.void) {
+    // A vote redeemed for credits is no longer marked void (it still counts
+    // toward the entity's public vote total -- see popplio's votes.sql), but
+    // it should still show up here as its own grouped entry rather than a
+    // plain "Vote #N" row, same as a genuinely voided vote does.
+    if (!vote.void && !vote.credit_redeem) {
       groups.push({ kind: "vote", vote });
       continue;
     }
 
-    const reason = vote.void_reason ?? "Voided";
+    const reason = vote.credit_redeem
+      ? "Vote credits redeemed"
+      : (vote.void_reason ?? "Voided");
     const last = groups[groups.length - 1];
 
     if (

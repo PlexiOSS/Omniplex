@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth, teams } from "@/lib/api";
+import { ApiError, client } from "@/lib/api/client";
+import type { BotPack } from "@/lib/api/types";
 import { arcadia, ArcadiaError } from "@/lib/arcadia/client";
 import { hasPermString } from "@/lib/permissions";
 import { putObject } from "@/lib/s3/objects";
@@ -202,15 +204,42 @@ export async function POST(req: Request) {
       );
     }
 
-    const entityPerms = await teams
-      // biome-ignore lint/style/noNonNullAssertion: every non-staff Kind sets this
-      .getEntityPerms(userId, config.popplioTargetType!, targetId)
-      .catch(() => ({ perms: [] }));
-    if (!hasPermString(entityPerms.perms, config.perm)) {
-      return NextResponse.json(
-        { error: "You don't have permission to do this." },
-        { status: 403 },
-      );
+    if (kind === "pack-emoji") {
+      // Packs have no team-based permission system -- a BotPack has a
+      // single `owner` field, checked directly against the requester by
+      // Popplio's own add_pack/patch_pack handlers, not resolved through
+      // GetEntityPerms the way bot/server/team perms are. Uploading an
+      // emoji also happens *before* the pack exists (the client uploads
+      // each emoji first, then submits the pack that references them), so
+      // GetEntityPerms would always fail with "pack not found" here --
+      // creating a pack at any free URL takes no special permission to
+      // begin with (see add_pack's own ExtData), so a not-yet-created pack
+      // is allowed through; an existing pack still requires being its
+      // actual owner.
+      const existingPack = await client
+        .get<BotPack>(`/packs/${targetId}`, { cache: "no-store" })
+        .catch((err) => {
+          if (err instanceof ApiError && err.status === 404) return null;
+          throw err;
+        });
+
+      if (existingPack && existingPack.owner.id !== userId) {
+        return NextResponse.json(
+          { error: "You don't have permission to do this." },
+          { status: 403 },
+        );
+      }
+    } else {
+      const entityPerms = await teams
+        // biome-ignore lint/style/noNonNullAssertion: every non-staff, non-pack-emoji Kind sets this
+        .getEntityPerms(userId, config.popplioTargetType!, targetId)
+        .catch(() => ({ perms: [] }));
+      if (!hasPermString(entityPerms.perms, config.perm)) {
+        return NextResponse.json(
+          { error: "You don't have permission to do this." },
+          { status: 403 },
+        );
+      }
     }
   }
 
