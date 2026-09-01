@@ -6,6 +6,7 @@ import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { DownloadPackButton } from "@/components/packs/DownloadPackButton";
 import { PackTypeBadge } from "@/components/packs/PackTypeBadge";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
@@ -156,12 +157,21 @@ export default async function PackPage({ params }: Props) {
             />
           </div>
 
-          <div className="mt-4 max-w-xs">
-            <PackVoteButton
-              packUrl={pack.url}
-              currentVotes={pack.votes}
-              voteBanned={pack.vote_banned}
-            />
+          <div className="mt-4 flex flex-wrap items-start gap-3">
+            <div className="max-w-xs">
+              <PackVoteButton
+                packUrl={pack.url}
+                currentVotes={pack.votes}
+                voteBanned={pack.vote_banned}
+              />
+            </div>
+            {pack.pack_type === "emoji" && (
+              <DownloadPackButton
+                packUrl={pack.url}
+                packName={pack.name}
+                emojis={pack.emojis ?? []}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -2,8 +2,6 @@ import { client } from "../client";
 import type {
   CaptchaSolution,
   DiscordServerMeta,
-  FlatEmoji,
-  FlatSticker,
   IndexServer,
   ListIndexServer,
   PagedResult,
@@ -45,19 +43,6 @@ export const serversResource = {
   getEmojis: (page = 1) =>
     client.get<PagedResult<ServerEmojiPreview[]>>(
       `/servers/@emojis?page=${page}`,
-      { cache: "no-store" },
-    ),
-
-  /** Flat, item-level-paginated emojis across every opted-in server — used by the /emojis browse page instead of getEmojis's per-server grouping. */
-  getFlatEmojis: (page = 1) =>
-    client.get<PagedResult<FlatEmoji[]>>(`/servers/@emojis/flat?page=${page}`, {
-      cache: "no-store",
-    }),
-
-  /** Sticker counterpart of getFlatEmojis. */
-  getFlatStickers: (page = 1) =>
-    client.get<PagedResult<FlatSticker[]>>(
-      `/servers/@stickers/flat?page=${page}`,
       { cache: "no-store" },
     ),
 

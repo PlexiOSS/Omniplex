@@ -11,7 +11,7 @@ const FOOTER_LINKS = [
       { href: "/bots", label: "View Bots" },
       { href: "/servers", label: "View Servers" },
       { href: "/packs", label: "View Packs" },
-      { href: "/emojis", label: "View Emojis" },
+      { href: "/emojis", label: "Emoji Packs" },
       { href: "/search", label: "Discovery" },
     ],
   },

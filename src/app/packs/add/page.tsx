@@ -1,8 +1,8 @@
 "use client";
 
 import { Search as SearchIcon, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -39,8 +39,13 @@ const PACK_TYPES: { value: PackType; label: string; description: string }[] = [
   },
 ];
 
-export default function AddPackPage() {
+function isPackType(value: string | null): value is PackType {
+  return value === "bot" || value === "server" || value === "emoji";
+}
+
+function AddPackForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { session, isAuthenticated, loading } = useAuth();
   const { me, loading: meLoading } = useMe(session);
 
@@ -50,7 +55,10 @@ export default function AddPackPage() {
     }
   }, [loading, isAuthenticated, router]);
 
-  const [packType, setPackType] = useState<PackType>("bot");
+  const requestedType = searchParams.get("type");
+  const [packType, setPackType] = useState<PackType>(
+    isPackType(requestedType) ? requestedType : "bot",
+  );
   const [form, setForm] = useState({
     name: "",
     url: "",
@@ -420,5 +428,13 @@ export default function AddPackPage() {
         </form>
       </div>
     </Container>
+  );
+}
+
+export default function AddPackPage() {
+  return (
+    <Suspense fallback={null}>
+      <AddPackForm />
+    </Suspense>
   );
 }

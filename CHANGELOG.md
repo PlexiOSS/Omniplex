@@ -14,6 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bot, server, team, and pack that shares that tag, sorted by votes.
   Reuses the existing search endpoint, no new backend work. No `/tags`
   index for now -- discovery is via clicking a tag on a detail page.
+- `/emojis` is now a browse page for Emoji Packs instead of a live,
+  per-server emoji/sticker viewer -- the pack backend already supported
+  an `emoji` pack type (create/browse/detail all shipped previously),
+  this just gives it a proper front door. A pack's detail page now has a
+  "Download Pack (.zip)" button, entirely client-side: every emoji image
+  is fetched and bundled into a zip in the browser, no new backend
+  archive endpoint needed. `/packs/add?type=emoji` deep-links straight
+  into the emoji-pack builder from the new page's "Create a Pack" button.
+  The old live per-server emoji/sticker flat-browse UI (and its
+  now-unused `getFlatEmojis`/`getFlatStickers` API calls) is removed --
+  packs are curated and durable, which is a strictly better fit for
+  "download and reuse elsewhere" than a live copy that vanishes if the
+  source server leaves the platform. A server's own Emojis & Stickers tab
+  is untouched; it never used the flat endpoints to begin with.
 
 ## [0.4.3] - 2026-08-31
 
