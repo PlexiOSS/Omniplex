@@ -324,7 +324,7 @@ export default function AddBotPage() {
                     Limited info (fallback lookup)
                   </Badge>
                 )}
-                {botMeta.flags.map((flag) => (
+                {(botMeta.flags ?? []).map((flag) => (
                   <Badge key={flag}>{flag.replaceAll("_", " ")}</Badge>
                 ))}
               </div>
