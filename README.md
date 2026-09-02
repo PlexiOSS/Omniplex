@@ -2,9 +2,8 @@
 
 Omniplex is a Discord bot and server listing platform. This repository contains the frontend, built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the Rust-based staff panel API that powers `/admin`.
 
-See [CHANGELOG.md](CHANGELOG.md) for what's actually shipped.
-
-Production runs at [omniplex.gg](https://omniplex.gg), with [beta.omniplex.gg](https://beta.omniplex.gg) and [reedwhisker.omniplex.gg](https://reedwhisker.omniplex.gg) used for staged rollouts.
+* See [CHANGELOG.md](CHANGELOG.md) for what's actually shipped.
+* Production runs at [omniplex.gg](https://omniplex.gg).
 
 ## Tech stack
 
