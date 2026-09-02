@@ -11,6 +11,7 @@ import {
   ogClamp,
 } from "@/lib/og/shared";
 import { formatCount } from "@/lib/utils/format";
+import { getPackItemCount, getPackWidgetStats } from "@/lib/widget/shared";
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
@@ -99,12 +100,22 @@ export default async function Image({
         )}
       </div>
 
-      {pack && (
-        <div style={{ display: "flex", gap: 40 }}>
-          <OgStat label="Votes" value={formatCount(pack.votes)} />
-          <OgStat label="Bots" value={formatCount((pack.bots ?? []).length)} />
-        </div>
-      )}
+      {pack &&
+        (() => {
+          const packStats = getPackWidgetStats(pack);
+          const secondary = packStats[1];
+          return (
+            <div style={{ display: "flex", gap: 40 }}>
+              <OgStat label="Votes" value={formatCount(pack.votes)} />
+              {secondary && (
+                <OgStat
+                  label={secondary.label}
+                  value={formatCount(getPackItemCount(pack))}
+                />
+              )}
+            </div>
+          );
+        })()}
     </OgFrame>,
     { ...size },
   );

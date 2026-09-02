@@ -266,7 +266,7 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
 
   if (!data) {
     return (
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+      <div className="flex justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
     );
   }
 

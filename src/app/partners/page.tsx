@@ -1,6 +1,7 @@
 import { ExternalLink, Handshake } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BsDiscord } from "react-icons/bs";
 import { Container } from "@/components/layout/Container";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -12,6 +13,10 @@ export const metadata: Metadata = {
   title: "Partners",
   description: "Communities and services we work with.",
 };
+
+function isDiscordUrl(url: string): boolean {
+  return /discord\.(gg|com|io)|discordapp\.com/i.test(url);
+}
 
 function PartnerCard({ partner }: { partner: Partner }) {
   const primaryLink = partner.links[0];
@@ -45,18 +50,21 @@ function PartnerCard({ partner }: { partner: Partner }) {
 
       {partner.links.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-          {partner.links.map((link) => (
-            <a
-              key={link.name}
-              href={link.value}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
-            >
-              <ExternalLink size={12} />
-              {link.name}
-            </a>
-          ))}
+          {partner.links.map((link) => {
+            const discord = isDiscordUrl(link.value);
+            return (
+              <a
+                key={link.name}
+                href={link.value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
+              >
+                {discord ? <BsDiscord size={12} /> : <ExternalLink size={12} />}
+                {link.name}
+              </a>
+            );
+          })}
         </div>
       )}
 

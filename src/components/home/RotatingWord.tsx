@@ -9,45 +9,64 @@ interface RotatingWordProps {
   className?: string;
 }
 
-const FADE_MS = 300;
+const FADE_MS = 180;
 
-/** Crossfades in place as normal inline text — flows with the surrounding
- * heading exactly like a static word would, just swapped out periodically. */
+/** Crossfades + slight slide in place — inline like static text but snappier.
+ * Uses opacity + translate + blur for a crisp swap; stays inline so the hero
+ * doesn't reflow for longer words like "servers"/"packs". */
 export function RotatingWord({
   words,
-  intervalMs = 2600,
+  intervalMs = 2000,
   className,
 }: RotatingWordProps) {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [anim, setAnim] = useState<"in" | "out">("in");
 
   useEffect(() => {
     if (words.length <= 1) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const id = setInterval(() => {
-      setVisible(false);
+      setAnim("out");
       setTimeout(() => {
         setIndex((i) => (i + 1) % words.length);
-        setVisible(true);
+        setAnim("in");
       }, FADE_MS);
     }, intervalMs);
 
     return () => clearInterval(id);
   }, [words, intervalMs]);
 
+  const entering = anim === "in";
+  const longest = words.reduce((a, b) => (a.length >= b.length ? a : b), "");
+
   return (
-    <span
-      className={[
-        "inline-block transition-opacity ease-out",
-        visible ? "opacity-100" : "opacity-0",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={{ transitionDuration: `${FADE_MS}ms` }}
-    >
-      {words[index]}
+    <span className="inline-grid align-baseline">
+      {/* Sizer — invisible but reserves width of longest word so the h1 never reflows */}
+      <span
+        className={["invisible col-start-1 row-start-1", className]
+          .filter(Boolean)
+          .join(" ")}
+        aria-hidden="true"
+      >
+        {longest}
+      </span>
+      <span
+        className={[
+          "col-start-1 row-start-1 inline-block will-change-transform",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        style={{
+          opacity: entering ? 1 : 0,
+          transform: entering ? "translateY(0)" : "translateY(8px)",
+          filter: entering ? "blur(0px)" : "blur(4px)",
+          transition: `opacity ${FADE_MS}ms cubic-bezier(0.4,0,0.2,1), transform ${FADE_MS}ms cubic-bezier(0.4,0,0.2,1), filter ${FADE_MS}ms cubic-bezier(0.4,0,0.2,1)`,
+        }}
+      >
+        {words[index]}
+      </span>
     </span>
   );
 }

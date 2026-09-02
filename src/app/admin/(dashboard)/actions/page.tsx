@@ -110,7 +110,7 @@ export default function AdminGlobalActionsPage() {
       )}
 
       {!methods && !loadError && (
-        <div className="mt-6 h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+        <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
       )}
 
       {methods && methods.length === 0 && (

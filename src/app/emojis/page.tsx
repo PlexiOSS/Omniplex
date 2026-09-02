@@ -45,7 +45,7 @@ export default function EmojisPage() {
           <p className="text-sm">Failed to load emojis.</p>
         </div>
       ) : isLoading ? (
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+        <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
       ) : results.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center text-zinc-500 dark:text-zinc-400">
           <Smile size={24} className="mb-2 text-zinc-300 dark:text-zinc-700" />

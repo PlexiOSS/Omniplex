@@ -1,13 +1,24 @@
 "use client";
 
-import { Check, Copy, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Moon,
+  SlidersHorizontal,
+  Sun,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
   ACCENT_COLORS,
   ACCENT_VALUES,
+  isAccentColor,
   type AccentColor,
 } from "@/lib/constants/accent";
 import type { WidgetStatDef } from "@/lib/widget/shared";
+import { useCustomization } from "@/hooks/useCustomization";
+import { useTheme } from "next-themes";
 
 interface WidgetShareProps {
   /** Path to the widget route, e.g. "/bots/lurifix/widget" */
@@ -39,18 +50,18 @@ function CopyRow({ label, value }: { label: string; value: string }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <code className="min-w-0 flex-1 truncate rounded-lg bg-zinc-100 px-2.5 py-1.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+    <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-1 pl-3 dark:border-zinc-800 dark:bg-zinc-900">
+      <code className="min-w-0 flex-1 truncate text-xs text-zinc-600 dark:text-zinc-400">
         {value}
       </code>
       <button
         type="button"
         onClick={handleCopy}
         aria-label={`Copy ${label}`}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-colors hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100"
       >
         {copied ? (
-          <Check size={14} className="text-accent" />
+          <Check size={14} className="text-emerald-500" />
         ) : (
           <Copy size={14} />
         )}
@@ -60,12 +71,37 @@ function CopyRow({ label, value }: { label: string; value: string }) {
 }
 
 export function WidgetShare({ widgetPath, stats }: WidgetShareProps) {
+  const { resolvedTheme } = useTheme();
+  const { accent: siteAccent } = useCustomization();
   const [theme, setTheme] = useState<Theme>("dark");
   const [accent, setAccent] = useState<AccentColor>("indigo");
   const [format, setFormat] = useState<Format>("markdown");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [visibleStats, setVisibleStats] = useState(
     () => new Set(stats.map((s) => s.key)),
   );
+  const hasSyncedAccent = useRef(false);
+  const hasSyncedTheme = useRef(false);
+
+  // Match site theme — initialise from next-themes + CustomizationProvider so
+  // the widget preview mirrors the user's current site theme (accent + dark/light)
+  // Only sync once on mount so manual widget picks aren't overridden
+  useEffect(() => {
+    if (!hasSyncedAccent.current && siteAccent && isAccentColor(siteAccent)) {
+      setAccent(siteAccent);
+      hasSyncedAccent.current = true;
+    }
+  }, [siteAccent]);
+
+  useEffect(() => {
+    if (
+      !hasSyncedTheme.current &&
+      (resolvedTheme === "light" || resolvedTheme === "dark")
+    ) {
+      setTheme(resolvedTheme);
+      hasSyncedTheme.current = true;
+    }
+  }, [resolvedTheme]);
 
   function toggleStat(key: string) {
     setVisibleStats((prev) => {
@@ -106,117 +142,200 @@ export function WidgetShare({ widgetPath, stats }: WidgetShareProps) {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-      <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-        Widget
-      </h3>
+    <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+      {/* Header */}
+      <div className="px-4 pt-4">
+        <h3 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+          Widget
+        </h3>
+      </div>
 
       {/* Preview */}
-      <a
-        href={previewSrc}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group block overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={previewSrc}
-          src={previewSrc}
-          alt="Widget preview"
-          width={480}
-          height={180}
-          className="block h-auto w-full"
-        />
-        <span className="flex items-center justify-center gap-1.5 border-t border-zinc-200 py-1.5 text-xs font-medium text-zinc-500 transition-colors group-hover:text-accent dark:border-zinc-800 dark:text-zinc-400">
-          Open full size
-          <ExternalLink size={11} />
-        </span>
-      </a>
+      <div className="p-4">
+        <a
+          href={previewSrc}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group block overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={previewSrc}
+            src={previewSrc}
+            alt="Widget preview"
+            width={480}
+            height={180}
+            className="block h-auto w-full"
+          />
+          <span className="flex items-center justify-center gap-1.5 border-t border-zinc-200 bg-white py-2 text-xs font-medium text-zinc-500 transition-colors group-hover:text-accent dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+            Open full size
+            <ExternalLink size={11} />
+          </span>
+        </a>
+      </div>
 
-      {/* Theme + accent controls */}
-      <div className="mt-3 flex flex-col gap-2">
-        <div className="flex w-fit overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
-          {(["dark", "light"] as Theme[]).map((t) => (
+      {/* Controls */}
+      <div className="space-y-3 px-4 pb-4">
+        {/* Theme — always visible */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            Theme
+          </span>
+          <div className="inline-flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-800">
             <button
-              key={t}
               type="button"
-              onClick={() => setTheme(t)}
+              onClick={() => setTheme("light")}
+              aria-label="Light theme"
+              aria-pressed={theme === "light"}
               className={[
-                "px-2.5 py-1 text-xs font-medium capitalize transition-colors",
-                theme === t
-                  ? "bg-accent text-accent-fg"
-                  : "text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800",
+                "inline-flex h-7 w-7 items-center justify-center rounded-full transition-all",
+                theme === "light"
+                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                  : "text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
               ].join(" ")}
             >
-              {t}
+              <Sun size={14} />
             </button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5">
-          {ACCENT_VALUES.map((value) => (
             <button
-              key={value}
               type="button"
-              onClick={() => setAccent(value)}
-              aria-label={value}
+              onClick={() => setTheme("dark")}
+              aria-label="Dark theme"
+              aria-pressed={theme === "dark"}
               className={[
-                "h-5 w-5 shrink-0 rounded-full transition-transform hover:scale-110",
-                accent === value
-                  ? "ring-2 ring-offset-2 ring-offset-white dark:ring-offset-zinc-900"
-                  : "",
+                "inline-flex h-7 w-7 items-center justify-center rounded-full transition-all",
+                theme === "dark"
+                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                  : "text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
               ].join(" ")}
-              style={{
-                backgroundColor: ACCENT_COLORS[value],
-                ...(accent === value
-                  ? ({
-                      "--tw-ring-color": ACCENT_COLORS[value],
-                    } as React.CSSProperties)
-                  : {}),
-              }}
-            />
-          ))}
+            >
+              <Moon size={14} />
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Stat visibility */}
-      <div className="mt-3 flex flex-wrap gap-3">
-        {stats.map(({ key, label }) => (
-          <label
-            key={key}
-            className="flex cursor-pointer items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400"
-          >
-            <input
-              type="checkbox"
-              checked={visibleStats.has(key)}
-              onChange={() => toggleStat(key)}
-              className="h-3.5 w-3.5 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-            />
-            {label}
-          </label>
-        ))}
-      </div>
-
-      {/* Format tabs */}
-      <div className="mt-4 flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
-        {FORMATS.map(({ key, label }) => (
+        {/* Advanced — accent + display */}
+        <div>
           <button
-            key={key}
             type="button"
-            onClick={() => setFormat(key)}
-            className={[
-              "-mb-px border-b-2 px-2 pb-1.5 text-xs font-medium transition-colors",
-              format === key
-                ? "border-accent text-accent"
-                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
-            ].join(" ")}
+            onClick={() => setShowAdvanced((v) => !v)}
+            aria-expanded={showAdvanced}
+            className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
           >
-            {label}
+            <span className="flex items-center gap-1.5">
+              <SlidersHorizontal size={12} />
+              Advanced
+              {!showAdvanced && (accent !== "indigo" || visibleStats.size !== stats.length) && (
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              )}
+            </span>
+            <ChevronDown
+              size={14}
+              className={`transition-transform ${showAdvanced ? "rotate-180" : ""}`}
+            />
           </button>
-        ))}
-      </div>
-      <div className="mt-3">
-        <CopyRow label={format} value={snippets[format]} />
+
+          {showAdvanced && (
+            <div className="mt-2 space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-transparent">
+              <div className="space-y-2">
+                <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Accent
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {ACCENT_VALUES.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAccent(value)}
+                      aria-label={value}
+                      aria-pressed={accent === value}
+                      className={[
+                        "h-6 w-6 shrink-0 rounded-full transition-all hover:scale-105",
+                        accent === value
+                          ? "ring-2 ring-offset-2 ring-offset-zinc-50 dark:ring-offset-zinc-800"
+                          : "ring-1 ring-black/5 dark:ring-white/10",
+                      ].join(" ")}
+                      style={{
+                        backgroundColor: ACCENT_COLORS[value],
+                        ...(accent === value
+                          ? ({
+                              "--tw-ring-color": ACCENT_COLORS[value],
+                            } as React.CSSProperties)
+                          : {}),
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px bg-zinc-200 dark:bg-zinc-700/50" />
+
+              <div className="space-y-2">
+                <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Display
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {stats.map(({ key, label }) => {
+                    const active = visibleStats.has(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleStat(key)}
+                        aria-pressed={active}
+                        className={[
+                          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                          active
+                            ? "border-accent bg-accent text-accent-fg"
+                            : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-200",
+                        ].join(" ")}
+                      >
+                        <span
+                          className={[
+                            "h-1.5 w-1.5 rounded-full transition-colors",
+                            active
+                              ? "bg-accent-fg"
+                              : "bg-zinc-300 dark:bg-zinc-600",
+                          ].join(" ")}
+                        />
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="h-px bg-zinc-100 dark:bg-zinc-800" />
+
+        {/* Format + copy — always visible */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+              Embed
+            </span>
+            <div className="inline-flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-800">
+              {FORMATS.map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFormat(key)}
+                  aria-pressed={format === key}
+                  className={[
+                    "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                    format === key
+                      ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                      : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200",
+                  ].join(" ")}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <CopyRow label={format} value={snippets[format]} />
+        </div>
       </div>
     </div>
   );

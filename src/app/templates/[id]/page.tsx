@@ -47,6 +47,23 @@ export default async function TemplatePage({ params }: Props) {
     .getAll("server_template", template.id)
     .catch(() => ({ reviews: [] }));
 
+  const actionsCard = (
+    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="flex flex-col gap-2">
+        <TemplateDetailActions
+          templateId={template.id}
+          code={template.code}
+          ownerId={template.owner.id}
+        />
+        <TemplateReactionButtons
+          templateId={template.id}
+          initialLikes={template.likes}
+          initialDislikes={template.dislikes}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <Container className="py-10">
       <Link
@@ -89,22 +106,8 @@ export default async function TemplatePage({ params }: Props) {
             </div>
           )}
 
-          <div className="mt-4">
-            <TemplateReactionButtons
-              templateId={template.id}
-              initialLikes={template.likes}
-              initialDislikes={template.dislikes}
-            />
-          </div>
-
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
-          <div className="mt-5 lg:hidden">
-            <TemplateDetailActions
-              templateId={template.id}
-              code={template.code}
-              ownerId={template.owner.id}
-            />
-          </div>
+          <div className="mt-5 lg:hidden">{actionsCard}</div>
 
           <TemplateContents
             channels={template.channels}
@@ -123,13 +126,7 @@ export default async function TemplatePage({ params }: Props) {
         {/* Sidebar */}
         <aside className="space-y-4">
           {/* Actions (desktop only — mobile version renders above) */}
-          <div className="hidden lg:block">
-            <TemplateDetailActions
-              templateId={template.id}
-              code={template.code}
-              ownerId={template.owner.id}
-            />
-          </div>
+          <div className="hidden lg:block">{actionsCard}</div>
 
           <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">

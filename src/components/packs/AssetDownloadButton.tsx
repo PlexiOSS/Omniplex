@@ -71,7 +71,7 @@ export function AssetDownloadButton({
         onClick={handleDownload}
       >
         <Download size={14} />
-        Download ({formatCount(downloads)})
+        Download{downloads > 0 ? ` (${formatCount(downloads)})` : ""}
       </Button>
       {error && (
         <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
