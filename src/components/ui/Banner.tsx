@@ -5,19 +5,11 @@ import { useState } from "react";
 import { OmniplexLogo } from "./OmniplexLogo";
 
 interface BannerProps {
-  /** Null/omitted skips straight to the fallback — no request is made. */
   src?: string | null;
   alt: string;
   className?: string;
 }
 
-/**
- * Full-bleed hero banner for bot/server/team pages. Popplio no longer serves
- * banner URLs at all (the CDN upload pipeline they came from was removed),
- * so `src` is always a guess at a legacy CDN path that may 404 — this falls
- * back to a themed gradient (using the viewer's own accent color, so it
- * tracks Customize) instead of a broken image or empty space either way.
- */
 export function Banner({ src, alt, className = "" }: BannerProps) {
   const [errored, setErrored] = useState(false);
   const showImage = !!src && !errored;
@@ -36,9 +28,6 @@ export function Banner({ src, alt, className = "" }: BannerProps) {
           fill
           sizes="100vw"
           className="object-cover"
-          // Always our own /cdn/... proxy — see Avatar.tsx's identical note
-          // on why bypassing Next's optimizer cache is the actual fix for
-          // uploads not showing up instantly.
           unoptimized
           onError={() => setErrored(true)}
         />

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2026-09-01
 
 ### Added
 
@@ -28,6 +28,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "download and reuse elsewhere" than a live copy that vanishes if the
   source server leaves the platform. A server's own Emojis & Stickers tab
   is untouched; it never used the flat endpoints to begin with.
+- A Server Template's detail page now shows what's actually in it -- a
+  channel list (grouped by category, with type icons) and a role list
+  (with real colors), pulled from Discord's own template data at
+  submission time. It was already there, just never surfaced.
+- Server templates can now be liked/disliked (a single persistent choice
+  per user -- disliking something you'd liked switches it, clicking the
+  same reaction again clears it, no cooldowns or credits involved) and
+  reviewed, reusing the same `ReviewsSection` bot/server/team pages
+  already use, unmodified.
+- Sticker Packs -- a fourth pack type alongside Bot/Server/Emoji, built
+  the same way (bundle up to 50 stickers you upload, `.zip` download,
+  `/packs?pack_type=sticker` to browse). `/packs/add` gained a "Sticker
+  Pack" option; `StickerPackBuilder` is `EmojiPackBuilder`'s counterpart,
+  with the multi-file upload fix already baked in from the start.
+- Every emoji and sticker now has its own page (`/emojis/{id}`,
+  `/stickers/{id}`): full-size preview, animated badge, download count,
+  a real Download button (separate from a whole-pack `.zip`, and
+  actually increments that item's own count), who uploaded it, and which
+  pack it's from.
+- `/emojis` and `/stickers` are flat, sitewide browse pages for
+  individual emojis/stickers -- closer to the old live-sync browse page's
+  feel, but backed by durable pack uploads instead. Emoji/Sticker Packs
+  themselves are still fully browsable, just at `/packs?pack_type=emoji`/
+  `sticker` now instead of at these URLs.
 
 ### Fixed
 
@@ -63,6 +87,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the confirmation screen called `.map()` on it directly. Backend fix:
   Popplio's changelog. Guarded here too (`botMeta.flags ?? []`) so the
   page degrades instead of crashing if this shape gap ever recurs.
+- A pack's detail page (`/packs/{url}`) has been reworked to match the
+  layout bot/server pages already use -- a two-column grid with Vote/
+  Download in a real actions card, a Stats card, an Owner card, and the
+  Widget share panel tucked into the sidebar instead of one giant inline
+  block shoved above the fold. Previously packs were the one entity type
+  still on an older single-column layout with no sidebar at all.
+- Pack emoji images occasionally failed to serve from cache with a `403`
+  logged server-side (`[s3] getObject(...) failed: ... httpStatusCode:
+  403`), even though the same image had just loaded fine moments earlier
+  -- traced to the AWS SDK's newer checksum-calculation default, which
+  adds checksum headers to the request signature that our S3-compatible
+  storage doesn't validate the same way real AWS S3 does. Most visible on
+  the CDN route's conditional-request (`HeadObjectCommand`) path, though
+  it could affect any operation. Set back to `WHEN_REQUIRED`, matching
+  what every non-AWS S3-compatible backend actually expects.
+- Server Templates now have a real detail page (`/templates/{id}`),
+  matching the layout every other entity type uses -- sidebar actions,
+  Stats, and a Submitted-by card, plus an owner-only delete action. The
+  browse card's title now links there (it didn't link anywhere before).
+  "Use Template" on both the card and the new page, and "Add to Server"/
+  "Join Server" on bot/server pages, all switched from a hardcoded black/
+  white pill to the accent-colored button style everything else on the
+  site already respects -- Customize's accent color didn't reach any of
+  these three before.
+- Selecting multiple files at once in the emoji pack builder uploaded all
+  of them but only kept the last one -- each file's `onChange` call was
+  computed from the same stale `emojis` prop the loop started with, so
+  every call in a batch overwrote the previous one instead of building on
+  it. Uploading one at a time happened to work fine, which is exactly why
+  this went unnoticed. Fixed by accumulating the batch locally instead of
+  re-reading a prop that was never going to update mid-loop.
 
 ## [0.4.3] - 2026-08-31
 

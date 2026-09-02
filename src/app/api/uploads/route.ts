@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth, teams } from "@/lib/api";
 import { ApiError, client } from "@/lib/api/client";
 import type { BotPack } from "@/lib/api/types";
-import { arcadia, ArcadiaError } from "@/lib/arcadia/client";
+import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import { hasPermString } from "@/lib/permissions";
 import { putObject } from "@/lib/s3/objects";
 
@@ -20,14 +20,23 @@ type Kind =
   | "team-banner"
   | "bot-banner"
   | "server-banner"
-  | "pack-emoji";
+  | "pack-emoji"
+  | "pack-sticker";
+
+/** pack-emoji and pack-sticker both skip the normal entity-permission
+ * check (see the pack-ownership branch below) and share the tighter
+ * per-item size cap -- checked in a few places below instead of listing
+ * both kinds out each time. */
+function isPackAssetKind(kind: Kind): kind is "pack-emoji" | "pack-sticker" {
+  return kind === "pack-emoji" || kind === "pack-sticker";
+}
 
 interface KindConfig {
   /**
    * Builds the storage key. `targetId` is the entity the permission check
-   * runs against (a pack's URL, for pack-emoji); `assetId` is only set for
-   * kinds where one target can hold many separate uploads (a pack's many
-   * emojis) and is otherwise unused.
+   * runs against (a pack's URL, for pack-emoji/pack-sticker); `assetId` is
+   * only set for kinds where one target can hold many separate uploads (a
+   * pack's many emojis/stickers) and is otherwise unused.
    */
   key: (targetId: string, assetId?: string) => string;
   perm: string;
@@ -81,6 +90,13 @@ const KIND_CONFIG: Record<Kind, KindConfig> = {
     popplioTargetType: "pack",
     maxBytes: EMOJI_MAX_BYTES,
   },
+  "pack-sticker": {
+    key: (packUrl, assetId) => `stickers/packs/${packUrl}/${assetId}`,
+    perm: "edit_packs",
+    requiresStaff: false,
+    popplioTargetType: "pack",
+    maxBytes: EMOJI_MAX_BYTES,
+  },
 };
 
 function isKind(value: unknown): value is Kind {
@@ -89,7 +105,8 @@ function isKind(value: unknown): value is Kind {
 
 /**
  * Single upload endpoint for every image-upload surface in the app (partner
- * logos, team avatar/banner, bot/server banner, pack emojis). Two things
+ * logos, team avatar/banner, bot/server banner, pack emojis/stickers). Two
+ * things
  * every caller must prove before a single byte reaches the bucket:
  *
  * 1. Identity either an Arcadia staff `loginToken` (verified via
@@ -137,21 +154,22 @@ export async function POST(req: Request) {
 
   let assetId: string | undefined;
 
-  if (kind === "pack-emoji") {
+  if (isPackAssetKind(kind)) {
     const rawAssetId = form.get("assetId");
     if (typeof rawAssetId !== "string" || !rawAssetId) {
       return NextResponse.json(
-        { error: "Missing assetId for pack-emoji upload" },
+        { error: `Missing assetId for ${kind} upload` },
         { status: 400 },
       );
     }
     const animated = form.get("animated") === "true";
     if (animated !== (file.type === "image/gif")) {
+      const label = kind === "pack-emoji" ? "emojis" : "stickers";
       return NextResponse.json(
         {
           error: animated
-            ? "Animated emojis must be uploaded as GIF."
-            : "Non-animated emojis can't be uploaded as GIF.",
+            ? `Animated ${label} must be uploaded as GIF.`
+            : `Non-animated ${label} can't be uploaded as GIF.`,
         },
         { status: 400 },
       );
@@ -204,18 +222,18 @@ export async function POST(req: Request) {
       );
     }
 
-    if (kind === "pack-emoji") {
+    if (isPackAssetKind(kind)) {
       // Packs have no team-based permission system -- a BotPack has a
       // single `owner` field, checked directly against the requester by
       // Popplio's own add_pack/patch_pack handlers, not resolved through
       // GetEntityPerms the way bot/server/team perms are. Uploading an
-      // emoji also happens *before* the pack exists (the client uploads
-      // each emoji first, then submits the pack that references them), so
-      // GetEntityPerms would always fail with "pack not found" here --
-      // creating a pack at any free URL takes no special permission to
-      // begin with (see add_pack's own ExtData), so a not-yet-created pack
-      // is allowed through; an existing pack still requires being its
-      // actual owner.
+      // emoji or sticker also happens *before* the pack exists (the client
+      // uploads each item first, then submits the pack that references
+      // them), so GetEntityPerms would always fail with "pack not found"
+      // here -- creating a pack at any free URL takes no special
+      // permission to begin with (see add_pack's own ExtData), so a
+      // not-yet-created pack is allowed through; an existing pack still
+      // requires being its actual owner.
       const existingPack = await client
         .get<BotPack>(`/packs/${targetId}`, { cache: "no-store" })
         .catch((err) => {

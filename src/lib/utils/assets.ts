@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 export function partnerAvatarUrl(partnerId: string): string {
   return `/cdn/avatars/partners/${encodeURIComponent(partnerId)}.webp`;
@@ -39,6 +39,14 @@ export function packEmojiUrl(
   animated: boolean,
 ): string {
   return `/cdn/emojis/packs/${encodeURIComponent(packUrl)}/${encodeURIComponent(emojiId)}.${animated ? "gif" : "webp"}`;
+}
+
+export function packStickerUrl(
+  packUrl: string,
+  stickerId: string,
+  animated: boolean,
+): string {
+  return `/cdn/stickers/packs/${encodeURIComponent(packUrl)}/${encodeURIComponent(stickerId)}.${animated ? "gif" : "webp"}`;
 }
 
 export function botPath(botId: string, vanity?: string | null): string {

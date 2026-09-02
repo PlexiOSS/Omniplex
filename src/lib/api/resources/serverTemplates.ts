@@ -3,6 +3,7 @@ import type {
   CreateServerTemplatePayload,
   PagedResult,
   ServerTemplate,
+  TemplateReactionSummary,
 } from "../types";
 
 export const serverTemplatesResource = {
@@ -32,4 +33,19 @@ export const serverTemplatesResource = {
     client.delete<void>(`/users/${userId}/server-templates/${id}`, {
       token,
     }),
+
+  getReaction: (userId: string, id: string) =>
+    client.get<TemplateReactionSummary>(
+      `/users/${userId}/server-templates/${id}/reaction`,
+      { cache: "no-store" },
+    ),
+
+  /** Sending the reaction that's already active clears it -- see the
+   * backend's own doc comment on set_template_reaction. */
+  setReaction: (userId: string, id: string, liked: boolean, token: string) =>
+    client.put<TemplateReactionSummary>(
+      `/users/${userId}/server-templates/${id}/reaction?liked=${liked}`,
+      {},
+      { token },
+    ),
 };

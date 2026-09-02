@@ -3,28 +3,43 @@
 import { Download } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import type { PackEmoji } from "@/lib/api/types";
-import { downloadEmojiPack } from "@/lib/utils/downloadPack";
+import type { PackEmoji, PackSticker } from "@/lib/api/types";
+import {
+  downloadEmojiPack,
+  downloadStickerPack,
+} from "@/lib/utils/downloadPack";
 
-interface DownloadPackButtonProps {
-  packUrl: string;
-  packName: string;
-  emojis: PackEmoji[];
-}
+type DownloadPackButtonProps =
+  | {
+      kind: "emoji";
+      packUrl: string;
+      packName: string;
+      emojis: PackEmoji[];
+    }
+  | {
+      kind: "sticker";
+      packUrl: string;
+      packName: string;
+      stickers: PackSticker[];
+    };
 
-export function DownloadPackButton({
-  packUrl,
-  packName,
-  emojis,
-}: DownloadPackButtonProps) {
+export function DownloadPackButton(props: DownloadPackButtonProps) {
+  const { kind, packUrl, packName } = props;
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState(false);
+
+  const itemCount =
+    kind === "emoji" ? props.emojis.length : props.stickers.length;
 
   async function handleDownload() {
     setDownloading(true);
     setError(false);
     try {
-      await downloadEmojiPack(packUrl, packName, emojis);
+      if (props.kind === "emoji") {
+        await downloadEmojiPack(packUrl, packName, props.emojis);
+      } else {
+        await downloadStickerPack(packUrl, packName, props.stickers);
+      }
     } catch {
       setError(true);
     } finally {
@@ -39,7 +54,7 @@ export function DownloadPackButton({
         variant="secondary"
         loading={downloading}
         onClick={handleDownload}
-        disabled={emojis.length === 0}
+        disabled={itemCount === 0}
       >
         <Download size={14} />
         Download Pack (.zip)

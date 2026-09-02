@@ -22,8 +22,6 @@ export default async function HomePage() {
   let blogData: Blog | null = null;
 
   try {
-    // getIndex() calls are critical — any failure means the page can't render.
-    // Secondary calls (stats, partners, blogs) are non-critical; swallow their errors.
     [botIndex, serverIndex] = await Promise.all([
       bots.getIndex(),
       servers.getIndex(),

@@ -11,7 +11,9 @@ const FOOTER_LINKS = [
       { href: "/bots", label: "View Bots" },
       { href: "/servers", label: "View Servers" },
       { href: "/packs", label: "View Packs" },
-      { href: "/emojis", label: "Emoji Packs" },
+      { href: "/emojis", label: "Emojis" },
+      { href: "/stickers", label: "Stickers" },
+      { href: "/templates", label: "Templates" },
       { href: "/search", label: "Discovery" },
     ],
   },
@@ -30,8 +32,8 @@ const FOOTER_LINKS = [
       },
       {
         href: "https://docs.omniplex.gg/docs/api-reference/webhooks",
-        label: "Webhooks"
-      }
+        label: "Webhooks",
+      },
     ],
   },
   {

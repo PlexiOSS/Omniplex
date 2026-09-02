@@ -33,6 +33,8 @@ export function getS3Client(): S3Client {
         requestTimeout: REQUEST_TIMEOUT_MS,
       }),
       maxAttempts: 1,
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
   }
   return client;

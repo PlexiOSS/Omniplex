@@ -126,7 +126,7 @@ export default async function ServerPage({ params }: Props) {
               href={inviteLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-muted"
             >
               <ExternalLink size={14} />
               Join Server

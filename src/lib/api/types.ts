@@ -450,7 +450,7 @@ export interface UserEntityPerms {
 // Packs
 // ---------------------------------------------------------------------------
 
-export type PackType = "bot" | "server" | "emoji";
+export type PackType = "bot" | "server" | "emoji" | "sticker";
 
 /** A single emoji in an emoji pack. No asset URL field — build it with
  * packEmojiUrl(pack.url, id, animated), same convention as bannerUrl(). */
@@ -459,6 +459,19 @@ export interface PackEmoji {
   name: string;
   animated: boolean;
   position: number;
+  /** Individual downloads from this emoji's own /emojis/{id} page --
+   * separate from a whole-pack .zip download, which doesn't count here. */
+  downloads: number;
+}
+
+/** A single sticker in a sticker pack. PackEmoji's counterpart -- same
+ * shape, same asset-URL convention (packStickerUrl instead). */
+export interface PackSticker {
+  id: string;
+  name: string;
+  animated: boolean;
+  position: number;
+  downloads: number;
 }
 
 export interface BotPack {
@@ -480,7 +493,59 @@ export interface BotPack {
   servers: IndexServer[];
   /** Only populated for pack_type "emoji" */
   emojis: PackEmoji[];
+  /** Only populated for pack_type "sticker" */
+  stickers: PackSticker[];
   vote_banned: boolean;
+}
+
+/** One row of the flat, sitewide /emojis browse feed -- a GET
+ * /emojis/@all result. PackEmoji plus enough of its owning pack to link
+ * back to it. */
+export interface FlatPackEmoji {
+  id: string;
+  name: string;
+  animated: boolean;
+  downloads: number;
+  created_at: string;
+  pack_url: string;
+  pack_name: string;
+}
+
+/** FlatPackEmoji's counterpart for the /stickers browse feed. */
+export interface FlatPackSticker {
+  id: string;
+  name: string;
+  animated: boolean;
+  downloads: number;
+  created_at: string;
+  pack_url: string;
+  pack_name: string;
+}
+
+/** GET /emojis/{id} -- a single emoji's standalone detail page. */
+export interface PackEmojiDetail {
+  id: string;
+  name: string;
+  animated: boolean;
+  position: number;
+  downloads: number;
+  created_at: string;
+  pack_url: string;
+  pack_name: string;
+  owner: PlatformUser;
+}
+
+/** PackEmojiDetail's counterpart for GET /stickers/{id}. */
+export interface PackStickerDetail {
+  id: string;
+  name: string;
+  animated: boolean;
+  position: number;
+  downloads: number;
+  created_at: string;
+  pack_url: string;
+  pack_name: string;
+  owner: PlatformUser;
 }
 
 // ---------------------------------------------------------------------------
@@ -1149,7 +1214,7 @@ export interface EntityBadgeList {
 // Reviews
 // ---------------------------------------------------------------------------
 
-export type ReviewTargetType = "bot" | "server" | "team";
+export type ReviewTargetType = "bot" | "server" | "team" | "server_template";
 
 export interface Review {
   id: string;
@@ -1225,6 +1290,42 @@ export interface ServerTemplate {
   usage_count: number;
   created_at: string;
   updated_at: string;
+  /** Only populated on a single-template fetch, not the browse list. */
+  channels: TemplateChannel[];
+  /** Only populated on a single-template fetch, not the browse list. */
+  roles: TemplateRole[];
+  /** Computed live, not cached. Only populated on a single-template fetch. */
+  likes: number;
+  /** Computed live, not cached. Only populated on a single-template fetch. */
+  dislikes: number;
+}
+
+/** A preview of one of a template's channels, captured from Discord at
+ * submission time -- not a live mirror of the source guild. */
+export interface TemplateChannel {
+  id: number;
+  /** Discord's channel type enum: 0=text, 2=voice, 4=category,
+   * 5=announcement, 13=stage, 15=forum, 16=media. */
+  type: number;
+  name: string;
+  /** The category channel's id this sits under, if any. */
+  parent_id: number | null;
+  position: number;
+}
+
+/** A preview of one of a template's roles (excluding @everyone). */
+export interface TemplateRole {
+  id: number;
+  name: string;
+  /** Decimal RGB integer, 0 if the role has no color. */
+  color: number;
+}
+
+export interface TemplateReactionSummary {
+  likes: number;
+  dislikes: number;
+  /** true = liked, false = disliked, null = no reaction from this user. */
+  user_liked: boolean | null;
 }
 
 export interface CreateServerTemplatePayload {
@@ -1414,6 +1515,13 @@ export interface PackEmojiInput {
   animated: boolean;
 }
 
+/** PackEmojiInput's counterpart for sticker packs (kind "pack-sticker"). */
+export interface PackStickerInput {
+  id: string;
+  name: string;
+  animated: boolean;
+}
+
 export interface CreatePackPayload {
   name: string;
   url: string;
@@ -1426,6 +1534,8 @@ export interface CreatePackPayload {
   servers: string[];
   /** Required for pack_type "emoji" */
   emojis: PackEmojiInput[];
+  /** Required for pack_type "sticker" */
+  stickers: PackStickerInput[];
 }
 
 export interface PackSettingsUpdate {
@@ -1437,6 +1547,7 @@ export interface PackSettingsUpdate {
   bots: string[];
   servers: string[];
   emojis: PackEmojiInput[];
+  stickers: PackStickerInput[];
 }
 
 // ---------------------------------------------------------------------------

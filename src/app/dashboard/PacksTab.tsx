@@ -103,7 +103,7 @@ function PackItem({
             View
             <ArrowUpRight size={11} />
           </Link>
-          {pack.pack_type !== "emoji" && (
+          {pack.pack_type !== "emoji" && pack.pack_type !== "sticker" && (
             <Button
               variant="ghost"
               size="sm"

@@ -12,9 +12,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { packs, search } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import type { PackEmojiInput, PackType } from "@/lib/api/types";
+import type {
+  PackEmojiInput,
+  PackStickerInput,
+  PackType,
+} from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
 import { EmojiPackBuilder } from "./EmojiPackBuilder";
+import { StickerPackBuilder } from "./StickerPackBuilder";
 
 type PickedEntity = {
   type: "bot" | "server";
@@ -37,10 +42,20 @@ const PACK_TYPES: { value: PackType; label: string; description: string }[] = [
     label: "Emoji Pack",
     description: "Bundle up to 50 emojis you upload",
   },
+  {
+    value: "sticker",
+    label: "Sticker Pack",
+    description: "Bundle up to 50 stickers you upload",
+  },
 ];
 
 function isPackType(value: string | null): value is PackType {
-  return value === "bot" || value === "server" || value === "emoji";
+  return (
+    value === "bot" ||
+    value === "server" ||
+    value === "emoji" ||
+    value === "sticker"
+  );
 }
 
 function AddPackForm() {
@@ -67,6 +82,7 @@ function AddPackForm() {
   });
   const [entities, setEntities] = useState<PickedEntity[]>([]);
   const [emojis, setEmojis] = useState<PackEmojiInput[]>([]);
+  const [stickers, setStickers] = useState<PackStickerInput[]>([]);
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<PickedEntity[]>([]);
@@ -98,7 +114,7 @@ function AddPackForm() {
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    if (!query.trim() || packType === "emoji") return;
+    if (!query.trim() || packType === "emoji" || packType === "sticker") return;
     setSearching(true);
     try {
       const res = await search.search({
@@ -138,6 +154,8 @@ function AddPackForm() {
       return setError("Add at least one server.");
     if (packType === "emoji" && emojis.length === 0)
       return setError("Add at least one emoji.");
+    if (packType === "sticker" && stickers.length === 0)
+      return setError("Add at least one sticker.");
 
     if (!session) return;
     setSubmitting(true);
@@ -152,15 +170,10 @@ function AddPackForm() {
           short: form.short.trim(),
           tags: form.tags,
           pack_type: packType,
-          bots:
-            packType === "bot"
-              ? activeEntities.map((e) => e.id)
-              : [],
-          servers:
-            packType === "server"
-              ? activeEntities.map((e) => e.id)
-              : [],
+          bots: packType === "bot" ? activeEntities.map((e) => e.id) : [],
+          servers: packType === "server" ? activeEntities.map((e) => e.id) : [],
           emojis: packType === "emoji" ? emojis : [],
+          stickers: packType === "sticker" ? stickers : [],
         },
         session.token,
       );
@@ -184,8 +197,8 @@ function AddPackForm() {
             Add a Pack
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Group bots, servers, or emojis into a themed collection they
-            don't have to be yours.
+            Group bots, servers, emojis, or stickers into a themed collection
+            they don't have to be yours.
           </p>
         </div>
 
@@ -194,7 +207,7 @@ function AddPackForm() {
             <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Pack Type
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {PACK_TYPES.map((pt) => (
                 <button
                   key={pt.value}
@@ -207,9 +220,7 @@ function AddPackForm() {
                       : "border-zinc-200 text-zinc-600 hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:text-zinc-400",
                   ].join(" ")}
                 >
-                  <span className="block text-sm font-medium">
-                    {pt.label}
-                  </span>
+                  <span className="block text-sm font-medium">{pt.label}</span>
                   <span className="mt-0.5 block text-xs text-zinc-400 dark:text-zinc-600">
                     {pt.description}
                   </span>
@@ -281,6 +292,14 @@ function AddPackForm() {
               emojis={emojis}
               onChange={setEmojis}
             />
+          ) : packType === "sticker" ? (
+            <StickerPackBuilder
+              packUrl={form.url}
+              userId={session.user_id}
+              token={session.token}
+              stickers={stickers}
+              onChange={setStickers}
+            />
           ) : (
             <div>
               <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -298,7 +317,11 @@ function AddPackForm() {
                       key={`${entity.type}-${entity.id}`}
                       className="flex items-center gap-1.5 rounded-full border border-zinc-200 py-1 pr-1.5 pl-2 text-xs dark:border-zinc-800"
                     >
-                      <Avatar src={entity.avatar} alt={entity.label} size={16} />
+                      <Avatar
+                        src={entity.avatar}
+                        alt={entity.label}
+                        size={16}
+                      />
                       {entity.label}
                       <button
                         type="button"

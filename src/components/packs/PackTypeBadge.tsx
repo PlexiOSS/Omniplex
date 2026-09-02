@@ -1,4 +1,4 @@
-import { Bot, Server, Smile } from "lucide-react";
+import { Bot, Server, Smile, Sticker } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import type { PackType } from "@/lib/api/types";
 
@@ -6,6 +6,7 @@ const CONFIG: Record<PackType, { label: string; icon: typeof Bot }> = {
   bot: { label: "Bot Pack", icon: Bot },
   server: { label: "Server Pack", icon: Server },
   emoji: { label: "Emoji Pack", icon: Smile },
+  sticker: { label: "Sticker Pack", icon: Sticker },
 };
 
 export function PackTypeBadge({ type }: { type: PackType }) {

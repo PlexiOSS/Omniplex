@@ -50,6 +50,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${lora.variable} ${jakarta.variable} ${inter.variable} ${grotesk.variable}`}
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <body className="flex min-h-screen flex-col bg-white text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
         {/* Prevent accent/font flash before hydration */}

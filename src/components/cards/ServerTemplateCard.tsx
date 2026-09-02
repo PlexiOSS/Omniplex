@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink, Layers, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -54,9 +55,12 @@ export function ServerTemplateCard({
           <Layers size={16} />
         </div>
         <div className="min-w-0 flex-1">
-          <span className="block truncate font-semibold text-zinc-950 dark:text-zinc-50">
+          <Link
+            href={`/templates/${template.id}`}
+            className="block truncate font-semibold text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50"
+          >
             {template.name}
-          </span>
+          </Link>
           <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
             {template.short}
           </p>
@@ -98,7 +102,7 @@ export function ServerTemplateCard({
           href={`https://discord.com/template/${template.code}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-accent-fg transition-colors hover:bg-accent-muted"
         >
           Use Template
           <ExternalLink size={12} />

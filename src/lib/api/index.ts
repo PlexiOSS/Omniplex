@@ -8,6 +8,7 @@ export { botsResource as bots } from "./resources/bots";
 export { captchaResource as captcha } from "./resources/captcha";
 export { changelogsResource as changelogs } from "./resources/changelogs";
 export { dataResource as data } from "./resources/data";
+export { emojisResource as emojis } from "./resources/emojis";
 export { listResource as list } from "./resources/list";
 export { notificationsResource as notifications } from "./resources/notifications";
 export { packsResource as packs } from "./resources/packs";
@@ -22,6 +23,7 @@ export { serverTemplatesResource as serverTemplates } from "./resources/serverTe
 export { sessionsResource as sessions } from "./resources/sessions";
 export { shopResource as shop } from "./resources/shop";
 export { staffResource as staff } from "./resources/staff";
+export { stickersResource as stickers } from "./resources/stickers";
 export { teamsResource as teams } from "./resources/teams";
 export { ticketsResource as tickets } from "./resources/tickets";
 export { usersResource as users } from "./resources/users";

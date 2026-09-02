@@ -1,4 +1,4 @@
-import { ArrowUpRight, Bot, Server, Smile, Star } from "lucide-react";
+import { ArrowUpRight, Bot, Server, Smile, Star, Sticker } from "lucide-react";
 import Link from "next/link";
 import { PackTypeBadge } from "@/components/packs/PackTypeBadge";
 import { Avatar } from "@/components/ui/Avatar";
@@ -8,6 +8,7 @@ import {
   discordDefaultAvatar,
   mirroredAvatarUrl,
   packEmojiUrl,
+  packStickerUrl,
 } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 
@@ -30,34 +31,38 @@ export function PackCard({ pack }: PackCardProps) {
       <div className="flex items-start gap-3">
         <div className="flex shrink-0 -space-x-2">
           {pack.pack_type === "bot" &&
-            (pack.bots ?? []).slice(0, 3).map((bot) => (
-              <Avatar
-                key={bot.bot_id}
-                src={mirroredAvatarUrl(
-                  "bots",
-                  bot.bot_id,
-                  bot.user.avatar || discordDefaultAvatar(),
-                )}
-                alt={bot.user.username}
-                size={32}
-                className="ring-2 ring-white dark:ring-zinc-900"
-              />
-            ))}
+            (pack.bots ?? [])
+              .slice(0, 3)
+              .map((bot) => (
+                <Avatar
+                  key={bot.bot_id}
+                  src={mirroredAvatarUrl(
+                    "bots",
+                    bot.bot_id,
+                    bot.user.avatar || discordDefaultAvatar(),
+                  )}
+                  alt={bot.user.username}
+                  size={32}
+                  className="ring-2 ring-white dark:ring-zinc-900"
+                />
+              ))}
           {pack.pack_type === "server" &&
-            (pack.servers ?? []).slice(0, 3).map((server) => (
-              <Avatar
-                key={server.server_id}
-                src={mirroredAvatarUrl(
-                  "servers",
-                  server.server_id,
-                  server.avatar ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
-                )}
-                alt={server.name}
-                size={32}
-                className="ring-2 ring-white dark:ring-zinc-900"
-              />
-            ))}
+            (pack.servers ?? [])
+              .slice(0, 3)
+              .map((server) => (
+                <Avatar
+                  key={server.server_id}
+                  src={mirroredAvatarUrl(
+                    "servers",
+                    server.server_id,
+                    server.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
+                  )}
+                  alt={server.name}
+                  size={32}
+                  className="ring-2 ring-white dark:ring-zinc-900"
+                />
+              ))}
           {pack.pack_type === "emoji" &&
             (pack.emojis ?? []).slice(0, 3).map((emoji) => (
               <div
@@ -68,6 +73,21 @@ export function PackCard({ pack }: PackCardProps) {
                 <img
                   src={packEmojiUrl(pack.url, emoji.id, emoji.animated)}
                   alt={emoji.name}
+                  width={20}
+                  height={20}
+                />
+              </div>
+            ))}
+          {pack.pack_type === "sticker" &&
+            (pack.stickers ?? []).slice(0, 3).map((sticker) => (
+              <div
+                key={sticker.id}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 ring-2 ring-white dark:bg-zinc-800 dark:ring-zinc-900"
+              >
+                {/* biome-ignore lint/performance/noImgElement: small pack card preview */}
+                <img
+                  src={packStickerUrl(pack.url, sticker.id, sticker.animated)}
+                  alt={sticker.name}
                   width={20}
                   height={20}
                 />
@@ -120,6 +140,12 @@ export function PackCard({ pack }: PackCardProps) {
           <span className="flex items-center gap-1">
             <Smile size={12} />
             {(pack.emojis ?? []).length} emojis
+          </span>
+        )}
+        {(pack.stickers ?? []).length > 0 && (
+          <span className="flex items-center gap-1">
+            <Sticker size={12} />
+            {(pack.stickers ?? []).length} stickers
           </span>
         )}
       </div>

@@ -14,10 +14,16 @@ const FILTERS: { value: PackType | undefined; label: string }[] = [
   { value: "bot", label: "Bots" },
   { value: "server", label: "Servers" },
   { value: "emoji", label: "Emojis" },
+  { value: "sticker", label: "Stickers" },
 ];
 
 function isPackType(value: string | undefined): value is PackType {
-  return value === "bot" || value === "server" || value === "emoji";
+  return (
+    value === "bot" ||
+    value === "server" ||
+    value === "emoji" ||
+    value === "sticker"
+  );
 }
 
 interface Props {
