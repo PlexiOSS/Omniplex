@@ -27,6 +27,7 @@ export function TemplateReactionButtons({
   // render time -- fetched client-side once a session exists.
   const [userLiked, setUserLiked] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pendingDir, setPendingDir] = useState<"up" | "down" | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -48,6 +49,7 @@ export function TemplateReactionButtons({
   async function react(liked: boolean) {
     if (!session || loading) return;
     setLoading(true);
+    setPendingDir(liked ? "up" : "down");
     try {
       const summary = await serverTemplates.setReaction(
         session.user_id,
@@ -62,6 +64,7 @@ export function TemplateReactionButtons({
       // Keep the last known-good counts on a transient failure.
     } finally {
       setLoading(false);
+      setPendingDir(null);
     }
   }
 
@@ -70,7 +73,7 @@ export function TemplateReactionButtons({
       <Button
         variant={userLiked === true ? "secondary" : "primary"}
         size="md"
-        loading={loading}
+        loading={loading && pendingDir === "up"}
         disabled={loading}
         onClick={() => react(true)}
         className={[
@@ -89,7 +92,7 @@ export function TemplateReactionButtons({
       <Button
         variant={userLiked === false ? "danger" : "secondary"}
         size="md"
-        loading={loading}
+        loading={loading && pendingDir === "down"}
         disabled={loading}
         onClick={() => react(false)}
         aria-label="Downvote"

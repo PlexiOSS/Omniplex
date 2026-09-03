@@ -32,6 +32,7 @@ export function PackVoteButton({
   const [votedDirection, setVotedDirection] = useState<"up" | "down" | null>(
     null,
   );
+  const [pendingDir, setPendingDir] = useState<"up" | "down" | null>(null);
   const [confirmingDownvote, setConfirmingDownvote] = useState(false);
 
   if (voteBanned) return null;
@@ -53,15 +54,20 @@ export function PackVoteButton({
 
   const handleVote = async (upvote: boolean) => {
     if (!session || voted) return;
-    const ok = await vote(session.user_id, session.token, upvote);
-    if (!ok) return;
-    setLocalVotes((v) => v + (upvote ? 1 : -1));
-    setVotedDirection(upvote ? "up" : "down");
-    // approximate_votes updates synchronously on the backend, but this page's
-    // header vote count was fetched server-side before the vote -- refresh so
-    // it (and anything else on the page reading the pre-vote count) catches
-    // up instead of only this button's own optimistic label doing so.
-    router.refresh();
+    setPendingDir(upvote ? "up" : "down");
+    try {
+      const ok = await vote(session.user_id, session.token, upvote);
+      if (!ok) return;
+      setLocalVotes((v) => v + (upvote ? 1 : -1));
+      setVotedDirection(upvote ? "up" : "down");
+      // approximate_votes updates synchronously on the backend, but this page's
+      // header vote count was fetched server-side before the vote -- refresh so
+      // it (and anything else on the page reading the pre-vote count) catches
+      // up instead of only this button's own optimistic label doing so.
+      router.refresh();
+    } finally {
+      setPendingDir(null);
+    }
   };
 
   const confirmDownvote = async () => {
@@ -80,8 +86,8 @@ export function PackVoteButton({
         <Button
           variant={votedDirection === "up" ? "secondary" : "primary"}
           onClick={() => handleVote(true)}
-          loading={loading && votedDirection === null}
-          disabled={voted}
+          loading={loading && pendingDir === "up"}
+          disabled={voted || loading}
           className="flex-1"
         >
           <ThumbsUp
@@ -95,8 +101,8 @@ export function PackVoteButton({
         <Button
           variant={votedDirection === "down" ? "danger" : "secondary"}
           onClick={() => setConfirmingDownvote(true)}
-          loading={loading && votedDirection === null}
-          disabled={voted}
+          loading={loading && pendingDir === "down"}
+          disabled={voted || loading}
           aria-label="Downvote this pack"
         >
           <ThumbsDown
@@ -127,7 +133,11 @@ export function PackVoteButton({
           >
             Cancel
           </Button>
-          <Button variant="danger" onClick={confirmDownvote} loading={loading}>
+          <Button
+            variant="danger"
+            onClick={confirmDownvote}
+            loading={loading && pendingDir === "down"}
+          >
             Downvote
           </Button>
         </div>
