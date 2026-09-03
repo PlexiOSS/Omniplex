@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { Partner, PartnerType, PlatformUser } from "@/lib/arcadia/types";
 import { Avatar } from "@/components/ui/Avatar";
+import { partnerAvatarUrl } from "@/lib/utils/assets";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
 import { PartnerEditModal } from "./PartnerEditModal";
@@ -123,9 +124,11 @@ export default function PartnersAdminPage() {
             key={partner.id}
             className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
           >
-            {owner && (
-              <Avatar src={owner.avatar} alt={owner.username} size={40} />
-            )}
+            <Avatar
+              src={partnerAvatarUrl(partner.id)}
+              alt={partner.name}
+              size={40}
+            />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="font-semibold text-zinc-950 dark:text-zinc-50">
@@ -138,7 +141,7 @@ export default function PartnersAdminPage() {
               </p>
               <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
                 {partner.links.length} link
-                {partner.links.length === 1 ? "" : "s"} · owner{" "}
+                {partner.links.length === 1 ? "" : "s"} · Owner:{" "}
                 {owner?.username ?? partner.user_id}
               </p>
             </div>
