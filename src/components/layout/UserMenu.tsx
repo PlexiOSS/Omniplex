@@ -51,7 +51,7 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex items-center rounded-full ring-2 ring-transparent transition-colors hover:ring-zinc-300 dark:hover:ring-zinc-600"
+          className="flex h-9 w-9 items-center justify-center rounded-full ring-2 ring-transparent transition-colors hover:ring-zinc-300 dark:hover:ring-zinc-600"
           aria-label="Account menu"
           aria-expanded={open}
         >

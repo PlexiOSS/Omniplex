@@ -1,7 +1,8 @@
-import { ArrowLeft, GitBranch, Globe, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Globe, Link as LinkIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BsDiscord, BsGithub, BsTwitter } from "react-icons/bs";
 import { Container } from "@/components/layout/Container";
 import { UserEntityTabs } from "@/components/profile/UserEntityTabs";
 import { Avatar } from "@/components/ui/Avatar";
@@ -14,10 +15,27 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-const KNOWN_LINK_ICONS: Record<string, typeof Globe> = {
-  website: Globe,
-  github: GitBranch,
-};
+function getLinkIcon(link: ApiLink) {
+  const name = link.name.toLowerCase();
+  const url = link.value.toLowerCase();
+  if (name === "github" || url.includes("github.com")) return BsGithub;
+  if (
+    name === "twitter" ||
+    name === "x" ||
+    url.includes("twitter.com") ||
+    url.includes("x.com")
+  )
+    return BsTwitter;
+  if (
+    name === "discord" ||
+    url.includes("discord.gg") ||
+    url.includes("discord.com") ||
+    url.includes("discordapp.com")
+  )
+    return BsDiscord;
+  if (name === "website") return Globe;
+  return LinkIcon;
+}
 
 function dedupeById<T>(a: T[], b: T[], idOf: (item: T) => string): T[] {
   const seen = new Set<string>();
@@ -135,8 +153,7 @@ export default async function UserPage({ params }: Props) {
           {publicLinks.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-4">
               {publicLinks.map((link: ApiLink) => {
-                const Icon =
-                  KNOWN_LINK_ICONS[link.name.toLowerCase()] ?? LinkIcon;
+                const Icon = getLinkIcon(link);
                 return (
                   <a
                     key={link.name}

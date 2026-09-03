@@ -298,7 +298,7 @@ export default async function ServerPage({ params }: Props) {
               <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
                 Links
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {server.extra_links.map((link) => (
                   <LinkItem
                     key={link.name}
@@ -373,10 +373,18 @@ function LinkItem({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+      className="group flex items-center justify-between gap-2 rounded-lg -mx-2 px-2 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-50"
     >
-      {icon}
-      {label}
+      <span className="flex items-center gap-2 truncate">
+        <span className="shrink-0 text-zinc-400 transition-colors group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300">
+          {icon}
+        </span>
+        <span className="truncate">{label}</span>
+      </span>
+      <ExternalLink
+        size={12}
+        className="shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-accent"
+      />
     </a>
   );
 }

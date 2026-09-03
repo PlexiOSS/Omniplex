@@ -17,7 +17,7 @@ import { packs } from "@/lib/api";
 import { packEmojiUrl, packStickerUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount, formatRelativeTime } from "@/lib/utils/format";
-import { PACK_WIDGET_STATS } from "@/lib/widget/shared";
+import { getPackWidgetStats } from "@/lib/widget/shared";
 import { PackVoteButton } from "./PackVoteButton";
 
 interface Props {
@@ -26,6 +26,25 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  // Prefer full pack so we can include pack_type in the title (e.g. "Games — Emoji Pack")
+  // Falls back to /seo for pack types we don't need full fetch for (bots/servers use SEO only)
+  const pack = await packs.getPack(id).catch(() => null);
+  if (pack) {
+    const typeLabel =
+      pack.pack_type === "bot"
+        ? "Bot"
+        : pack.pack_type === "server"
+          ? "Server"
+          : pack.pack_type === "sticker"
+            ? "Sticker"
+            : pack.pack_type === "emoji"
+              ? "Emoji"
+              : "Pack";
+    return {
+      title: `${pack.name} — ${typeLabel} Pack`,
+      description: pack.short,
+    };
+  }
   const seo = await packs.getSeo(id).catch(() => null);
   if (!seo) return {};
   return {
@@ -358,7 +377,7 @@ export default async function PackPage({ params }: Props) {
 
           <WidgetShare
             widgetPath={`/packs/${pack.url}/widget`}
-            stats={PACK_WIDGET_STATS}
+            stats={getPackWidgetStats(pack)}
           />
         </aside>
       </div>

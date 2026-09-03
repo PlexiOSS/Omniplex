@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { Partner, PartnerType, PlatformUser } from "@/lib/arcadia/types";
 import { Avatar } from "@/components/ui/Avatar";
+import { partnerAvatarUrl } from "@/lib/utils/assets";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
 import { PartnerEditModal } from "./PartnerEditModal";
@@ -72,16 +73,14 @@ export default function PartnersAdminPage() {
 
   if (error && !partners) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-10">
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center"><p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
 
   if (!partners) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-10">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
       </div>
     );
   }
@@ -125,9 +124,11 @@ export default function PartnersAdminPage() {
             key={partner.id}
             className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
           >
-            {owner && (
-              <Avatar src={owner.avatar} alt={owner.username} size={40} />
-            )}
+            <Avatar
+              src={partnerAvatarUrl(partner.id)}
+              alt={partner.name}
+              size={40}
+            />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="font-semibold text-zinc-950 dark:text-zinc-50">
@@ -140,7 +141,7 @@ export default function PartnersAdminPage() {
               </p>
               <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
                 {partner.links.length} link
-                {partner.links.length === 1 ? "" : "s"} · owner{" "}
+                {partner.links.length === 1 ? "" : "s"} · Owner:{" "}
                 {owner?.username ?? partner.user_id}
               </p>
             </div>

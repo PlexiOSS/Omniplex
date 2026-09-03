@@ -66,7 +66,7 @@ export default function BannedPage() {
             </Button>
           </div>
         ) : appsLoading ? (
-          <div className="mt-8 h-8 w-8 animate-spin self-center rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50 mx-auto" />
+          <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
         ) : existingAppeal ? (
           <div className="mt-8 rounded-2xl border border-zinc-200 p-6 text-left dark:border-zinc-800">
             <div className="flex items-center justify-between gap-2">

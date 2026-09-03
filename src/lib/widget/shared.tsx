@@ -186,3 +186,47 @@ export const PACK_WIDGET_STATS: WidgetStatDef[] = [
   { key: "votes", label: "Votes" },
   { key: "bots", label: "Bots" },
 ];
+
+/** Pack widget secondary stat depends on pack_type — Bots for bot packs, etc. */
+export function getPackWidgetStats(pack: {
+  pack_type: string;
+}): WidgetStatDef[] {
+  const secondary = (() => {
+    switch (pack.pack_type) {
+      case "bot":
+        return { key: "bots", label: "Bots" } as const;
+      case "server":
+        return { key: "servers", label: "Servers" } as const;
+      case "emoji":
+        return { key: "emojis", label: "Emojis" } as const;
+      case "sticker":
+        return { key: "stickers", label: "Stickers" } as const;
+      default:
+        return { key: "items", label: "Items" } as const;
+    }
+  })();
+  return [{ key: "votes", label: "Votes" }, secondary];
+}
+
+export function getPackItemCount(pack: {
+  pack_type: string;
+  bot_ids?: string[] | null;
+  bots?: unknown[] | null;
+  server_ids?: string[] | null;
+  servers?: unknown[] | null;
+  emojis?: unknown[] | null;
+  stickers?: unknown[] | null;
+}): number {
+  switch (pack.pack_type) {
+    case "bot":
+      return (pack.bots ?? pack.bot_ids ?? []).length;
+    case "server":
+      return (pack.servers ?? pack.server_ids ?? []).length;
+    case "emoji":
+      return (pack.emojis ?? []).length;
+    case "sticker":
+      return (pack.stickers ?? []).length;
+    default:
+      return 0;
+  }
+}

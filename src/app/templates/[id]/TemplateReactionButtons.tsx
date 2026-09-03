@@ -2,6 +2,7 @@
 
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { serverTemplates } from "@/lib/api";
@@ -26,6 +27,7 @@ export function TemplateReactionButtons({
   // render time -- fetched client-side once a session exists.
   const [userLiked, setUserLiked] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pendingDir, setPendingDir] = useState<"up" | "down" | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -37,25 +39,17 @@ export function TemplateReactionButtons({
 
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-        <span className="flex items-center gap-1">
-          <ThumbsUp size={13} />
-          {formatCount(likes)}
-        </span>
-        <span className="flex items-center gap-1">
-          <ThumbsDown size={13} />
-          {formatCount(dislikes)}
-        </span>
-        <SignInLink className="text-accent underline underline-offset-2">
-          Sign in to react
-        </SignInLink>
-      </div>
+      <SignInLink className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:bg-accent/5 hover:text-accent dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-accent/40 dark:hover:bg-accent/10">
+        <ThumbsUp size={14} />
+        Sign in to react
+      </SignInLink>
     );
   }
 
   async function react(liked: boolean) {
     if (!session || loading) return;
     setLoading(true);
+    setPendingDir(liked ? "up" : "down");
     try {
       const summary = await serverTemplates.setReaction(
         session.user_id,
@@ -70,45 +64,45 @@ export function TemplateReactionButtons({
       // Keep the last known-good counts on a transient failure.
     } finally {
       setLoading(false);
+      setPendingDir(null);
     }
   }
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
+      <Button
+        variant={userLiked === true ? "secondary" : "primary"}
+        size="md"
+        loading={loading && pendingDir === "up"}
         disabled={loading}
         onClick={() => react(true)}
         className={[
-          "inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+          "flex-1",
           userLiked === true
-            ? "border-accent/40 bg-accent/10 text-accent"
-            : "border-zinc-200 text-zinc-600 hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:text-zinc-400",
+            ? "border-accent/40 bg-accent/10 text-accent hover:border-accent/40 hover:bg-accent/10 hover:text-accent"
+            : "",
         ].join(" ")}
       >
         <ThumbsUp
           size={14}
           className={userLiked === true ? "fill-current" : undefined}
         />
-        {formatCount(likes)}
-      </button>
-      <button
-        type="button"
+        {userLiked === true ? "Liked" : `Like · ${formatCount(likes)}`}
+      </Button>
+      <Button
+        variant={userLiked === false ? "danger" : "secondary"}
+        size="md"
+        loading={loading && pendingDir === "down"}
         disabled={loading}
         onClick={() => react(false)}
-        className={[
-          "inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-          userLiked === false
-            ? "border-red-400/40 bg-red-500/10 text-red-600 dark:text-red-400"
-            : "border-zinc-200 text-zinc-600 hover:border-red-400/40 hover:bg-red-500/5 dark:border-zinc-800 dark:text-zinc-400",
-        ].join(" ")}
+        aria-label="Downvote"
+        className="shrink-0"
       >
         <ThumbsDown
           size={14}
           className={userLiked === false ? "fill-current" : undefined}
         />
-        {formatCount(dislikes)}
-      </button>
+      </Button>
     </div>
   );
 }

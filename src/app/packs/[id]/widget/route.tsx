@@ -3,6 +3,8 @@ import { packs } from "@/lib/api";
 import { toOgImageSrc } from "@/lib/og/image";
 import { formatCount } from "@/lib/utils/format";
 import {
+  getPackItemCount,
+  getPackWidgetStats,
   PACK_WIDGET_STATS,
   resolveVisibleStats,
   resolveWidgetTheme,
@@ -22,12 +24,17 @@ export async function GET(
   const { id } = await params;
   const { searchParams } = new URL(request.url);
   const theme = resolveWidgetTheme(searchParams);
-  const visibleStats = resolveVisibleStats(
-    searchParams,
-    PACK_WIDGET_STATS.map((s) => s.key),
-  );
 
   const pack = await packs.getPack(id).catch(() => null);
+
+  // Secondary stat key depends on pack_type (bots vs servers vs emojis vs stickers)
+  const packStats = pack
+    ? getPackWidgetStats(pack)
+    : PACK_WIDGET_STATS;
+  const visibleStats = resolveVisibleStats(
+    searchParams,
+    packStats.map((s) => s.key),
+  );
 
   if (!pack) {
     return new ImageResponse(
@@ -51,6 +58,9 @@ export async function GET(
   }
 
   const description = widgetClamp(pack.short, 90);
+  const secondaryKey = packStats[1]?.key;
+  const secondaryLabel = packStats[1]?.label ?? "Items";
+  const secondaryValue = formatCount(getPackItemCount(pack));
   const avatars = await Promise.all(
     (pack.bots ?? []).slice(0, 5).map(async (bot) => ({
       id: bot.bot_id,
@@ -107,11 +117,11 @@ export async function GET(
               value={formatCount(pack.votes)}
             />
           )}
-          {visibleStats.has("bots") && (
+          {secondaryKey && visibleStats.has(secondaryKey) && (
             <WidgetStat
               theme={theme}
-              label="Bots"
-              value={formatCount((pack.bots ?? []).length)}
+              label={secondaryLabel}
+              value={secondaryValue}
             />
           )}
         </div>

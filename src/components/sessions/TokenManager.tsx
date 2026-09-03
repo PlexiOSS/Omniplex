@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, CircleCheck, CircleX, Copy, Trash2 } from "lucide-react";
+import { Check, ChevronDown, CircleCheck, CircleX, Copy, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { PermSelector } from "@/components/teams/PermSelector";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -65,6 +66,7 @@ export function TokenManager({
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [expiry, setExpiry] = useState(EXPIRY_OPTIONS[1].seconds);
+  const [expiryOpen, setExpiryOpen] = useState(false);
   const [restrict, setRestrict] = useState(!isOwner);
   const [permLimits, setPermLimits] = useState<string[]>([]);
   const [creatingLoading, setCreatingLoading] = useState(false);
@@ -285,24 +287,58 @@ export function TokenManager({
           />
 
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="token-expiry"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Expires in
-            </label>
-            <select
-              id="token-expiry"
-              value={expiry}
-              onChange={(e) => setExpiry(Number(e.target.value))}
-              className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+            </span>
+            <Dropdown
+              open={expiryOpen}
+              onClose={() => setExpiryOpen(false)}
+              align="left"
+              panelClassName="w-full"
+              trigger={
+                <button
+                  type="button"
+                  onClick={() => setExpiryOpen((o) => !o)}
+                  className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-left text-sm font-medium text-zinc-900 transition-colors hover:border-zinc-300 hover:bg-zinc-50 focus:border-zinc-400 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+                  aria-expanded={expiryOpen}
+                  aria-haspopup="menu"
+                >
+                  <span>
+                    {EXPIRY_OPTIONS.find((o) => o.seconds === expiry)?.label}
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    className={`shrink-0 text-zinc-400 transition-transform ${expiryOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+              }
             >
-              {EXPIRY_OPTIONS.map((o) => (
-                <option key={o.seconds} value={o.seconds}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+              {EXPIRY_OPTIONS.map((o) => {
+                const active = o.seconds === expiry;
+                return (
+                  <button
+                    key={o.seconds}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setExpiry(o.seconds);
+                      setExpiryOpen(false);
+                    }}
+                    className={[
+                      "flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors",
+                      active
+                        ? "bg-accent/10 font-medium text-accent"
+                        : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800",
+                    ].join(" ")}
+                  >
+                    {o.label}
+                    {active && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    )}
+                  </button>
+                );
+              })}
+            </Dropdown>
           </div>
 
           {isOwner && (

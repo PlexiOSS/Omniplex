@@ -1,7 +1,8 @@
 "use client";
 
-import { Search as SearchIcon, ShieldOff, Star } from "lucide-react";
+import { ChevronDown, Search as SearchIcon, ShieldOff, Star } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -111,6 +112,7 @@ function describeResult(result: Result): ResultInfo {
 export default function AdminSearchPage() {
   const { loginToken } = useAdmin();
   const [targetType, setTargetType] = useState<TargetType>("Bot");
+  const [typeOpen, setTypeOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Result[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -188,24 +190,61 @@ export default function AdminSearchPage() {
         description="Find any bot, server, pack, team, or user by ID or name to take action outside the queue. Starts pre-filled with everything narrow it down as you type."
       />
 
-      <form onSubmit={handleSearch} className="mt-6 flex flex-wrap gap-2">
-        <select
-          value={targetType}
-          onChange={(e) => setTargetType(e.target.value as TargetType)}
-          className="rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+      <form onSubmit={handleSearch} className="mt-6 flex flex-wrap items-center gap-2">
+        <Dropdown
+          open={typeOpen}
+          onClose={() => setTypeOpen(false)}
+          align="left"
+          panelClassName="w-44"
+          trigger={
+            <button
+              type="button"
+              onClick={() => setTypeOpen((o) => !o)}
+              className="inline-flex h-[42px] items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+              aria-label="Select entity type"
+              aria-expanded={typeOpen}
+            >
+              <span>
+                {SEARCHABLE_TYPES.find((t) => t.value === targetType)?.label ??
+                  targetType}
+              </span>
+              <ChevronDown
+                size={14}
+                className={`shrink-0 text-zinc-400 transition-transform ${typeOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+          }
         >
-          {SEARCHABLE_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+          {SEARCHABLE_TYPES.map((t) => {
+            const active = t.value === targetType;
+            return (
+              <button
+                key={t.value}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setTargetType(t.value);
+                  setTypeOpen(false);
+                }}
+                className={[
+                  "flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors",
+                  active
+                    ? "bg-accent/10 font-medium text-accent"
+                    : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800",
+                ].join(" ")}
+              >
+                {t.label}
+                {active && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
+              </button>
+            );
+          })}
+        </Dropdown>
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ID or name…"
-          className="min-w-0 flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+          className="h-[42px] min-w-0 flex-1 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
         />
         <Button type="submit" variant="primary" loading={loading}>
           <SearchIcon size={14} />
