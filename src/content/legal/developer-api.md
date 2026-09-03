@@ -24,7 +24,7 @@ Exceeding rate limits gets you temporarily throttled first, in most cases. Repea
 
 ## The API can change
 
-Endpoints, response shapes, and rate limits can change as Omniplex changes. We'll call out breaking changes in the [Changelog](/changelog) when we can, but -- same as the rest of the site -- the API is provided as-is, without a guarantee that any given version stays stable forever.
+Endpoints, response shapes, and rate limits can change as Omniplex changes. We'll call out breaking changes in the [Changelog](/changelog) when we can, but same as the rest of the site the API is provided as-is, without a guarantee that any given version stays stable forever.
 
 ## Changes to this policy
 
