@@ -5,9 +5,12 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { AssetDownloadButton } from "@/components/packs/AssetDownloadButton";
+import { AssetShortLink } from "@/components/packs/AssetShortLink";
+import { SimilarPackAssets } from "@/components/packs/SimilarPackAssets";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { emojis } from "@/lib/api";
+import { emojis, packs, vanity } from "@/lib/api";
+import { ApiError } from "@/lib/api/client";
 import { packEmojiUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatRelativeTime } from "@/lib/utils/format";
@@ -16,9 +19,23 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+async function fetchEmoji(id: string) {
+  try {
+    return await emojis.getById(id);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      const resolved = await vanity.resolve(id).catch(() => null);
+      if (resolved?.target_type === "pack_emoji") {
+        return emojis.getById(resolved.target_id);
+      }
+    }
+    throw err;
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const emoji = await emojis.getById(id).catch(() => null);
+  const emoji = await fetchEmoji(id).catch(() => null);
   if (!emoji) return {};
   return {
     title: `:${emoji.name}:`,
@@ -30,7 +47,7 @@ export default async function EmojiPage({ params }: Props) {
   const { id } = await params;
   let emoji = null;
   try {
-    emoji = await emojis.getById(id);
+    emoji = await fetchEmoji(id);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
     notFound();
@@ -39,6 +56,11 @@ export default async function EmojiPage({ params }: Props) {
 
   const assetUrl = packEmojiUrl(emoji.pack_url, emoji.id, emoji.animated);
   const ext = emoji.animated ? "gif" : "webp";
+
+  const pack = await packs.getPack(emoji.pack_url).catch(() => null);
+  const similar = (pack?.emojis ?? [])
+    .filter((e) => e.id !== emoji.id)
+    .slice(0, 6);
 
   return (
     <Container className="py-10">
@@ -79,6 +101,13 @@ export default async function EmojiPage({ params }: Props) {
               {emoji.pack_name}
             </Link>
           </p>
+
+          <SimilarPackAssets
+            kind="emoji"
+            packUrl={emoji.pack_url}
+            packName={emoji.pack_name}
+            items={similar}
+          />
         </div>
 
         {/* Sidebar */}
@@ -90,6 +119,8 @@ export default async function EmojiPage({ params }: Props) {
             fileName={`${emoji.name}.${ext}`}
             initialDownloads={emoji.downloads}
           />
+
+          <AssetShortLink vanity={emoji.vanity} basePath="/emojis" />
 
           <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">

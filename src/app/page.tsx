@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Handshake } from "lucide-react";
+import { ArrowRight, BookOpen, Handshake, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { PackCard } from "@/components/cards/PackCard";
 import { HomeTabs } from "@/components/home/HomeTabs";
@@ -12,6 +12,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { blogs, bots, list, servers } from "@/lib/api";
 import type { Blog, ListStats, PartnerList } from "@/lib/api/types";
+import { COLLECTIONS } from "@/lib/constants/collections";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 export default async function HomePage() {
@@ -192,6 +193,37 @@ export default async function HomePage() {
           </Container>
         </section>
       )}
+
+      {/* Collections: curated tag groupings, ranked automatically by votes */}
+      <section className="border-t border-zinc-200 py-14 dark:border-zinc-800">
+        <Container>
+          <SectionHeader
+            title="Collections"
+            subtitle="Best-of lists by tag, auto-ranked by votes"
+            href="/collections"
+          />
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {COLLECTIONS.slice(0, 4).map((collection) => (
+              <Link
+                key={collection.slug}
+                href={`/tags/${encodeURIComponent(collection.tag)}`}
+                className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
+              >
+                <Sparkles
+                  size={16}
+                  className="text-accent transition-transform group-hover:scale-110"
+                />
+                <h3 className="mt-3 font-semibold text-zinc-950 dark:text-zinc-50">
+                  {collection.title}
+                </h3>
+                <p className="mt-1 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+                  {collection.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </Container>
+      </section>
 
       {/* Packs (bot, server, or emoji) */}
       {packs.length > 0 && (

@@ -1,13 +1,19 @@
 "use client";
 
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { teams as teamsApi } from "@/lib/api";
 import { hasPermString } from "@/lib/permissions";
 
-export type PermissionTargetType = "team" | "bot" | "server" | "pack";
+export type PermissionTargetType =
+  | "team"
+  | "bot"
+  | "server"
+  | "pack"
+  | "pack_emoji"
+  | "pack_sticker";
 
 export function useEntityPermission(
   targetType: PermissionTargetType,

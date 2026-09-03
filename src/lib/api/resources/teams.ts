@@ -1,3 +1,5 @@
+// Copyright (C) 2026 NodeByte LTD
+
 import { client } from "../client";
 import type {
   AddTeamMemberPayload,
@@ -17,7 +19,6 @@ export const teamsResource = {
       next: { revalidate: 30 },
     }),
 
-  /** Minimal metadata for generateMetadata() — avoids a full getTeam() fetch. */
   getSeo: (id: string) =>
     client.get<SEO>(`/teams/${id}/seo`, { next: { revalidate: 30 } }),
 
@@ -46,16 +47,20 @@ export const teamsResource = {
   removeMember: (teamId: string, userId: string, token: string) =>
     client.delete<void>(`/teams/${teamId}/members/${userId}`, { token }),
 
-  /** Every flat permission a team member can hold, grouped by category */
   getPermissionCatalog: () =>
     client.get<{ perms: PermissionData[] }>("/teams/meta/permissions", {
       next: { revalidate: 3600 },
     }),
 
-  /** A user's flattened, resolved permissions on a specific entity (public endpoint) */
   getEntityPerms: (
     userId: string,
-    targetType: "team" | "bot" | "server" | "pack",
+    targetType:
+      | "team"
+      | "bot"
+      | "server"
+      | "pack"
+      | "pack_emoji"
+      | "pack_sticker",
     targetId: string,
   ) =>
     client.get<UserEntityPerms>(
@@ -69,8 +74,6 @@ export const teamsResource = {
       cache: "no-store",
     }),
 
-  /** Unlike bots/servers, teams never require a solved captcha — see
-   * create_user_entity_vote's own docs on the backend. */
   vote: (teamId: string, userId: string, upvote: boolean, token: string) =>
     client.put<void>(
       `/users/${userId}/teams/${teamId}/votes?upvote=${upvote}`,

@@ -11,6 +11,7 @@ import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
 import { packs } from "@/lib/api";
 import type { BotPack, IndexBot } from "@/lib/api/types";
 import { formatCount } from "@/lib/utils/format";
+import { EmojiStickerPackEditModal } from "./EmojiStickerPackEditModal";
 import { PackEditModal } from "./PackEditModal";
 
 function PackItem({
@@ -103,17 +104,15 @@ function PackItem({
             View
             <ArrowUpRight size={11} />
           </Link>
-          {pack.pack_type !== "emoji" && pack.pack_type !== "sticker" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditing(true)}
-              className="h-7 px-2 text-xs"
-            >
-              <Pencil size={12} />
-              Edit
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditing(true)}
+            className="h-7 px-2 text-xs"
+          >
+            <Pencil size={12} />
+            Edit
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -136,16 +135,25 @@ function PackItem({
         </div>
       </div>
 
-      {editing && (
-        <PackEditModal
-          pack={pack}
-          userId={userId}
-          userBots={userBots}
-          token={token}
-          onClose={() => setEditing(false)}
-          onSaved={mutate}
-        />
-      )}
+      {editing &&
+        (pack.pack_type === "emoji" || pack.pack_type === "sticker" ? (
+          <EmojiStickerPackEditModal
+            pack={pack}
+            userId={userId}
+            token={token}
+            onClose={() => setEditing(false)}
+            onSaved={mutate}
+          />
+        ) : (
+          <PackEditModal
+            pack={pack}
+            userId={userId}
+            userBots={userBots}
+            token={token}
+            onClose={() => setEditing(false)}
+            onSaved={mutate}
+          />
+        ))}
 
       {showCredits && (
         <Modal

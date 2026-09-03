@@ -11,10 +11,26 @@ const FOOTER_LINKS = [
       { href: "/bots", label: "View Bots" },
       { href: "/servers", label: "View Servers" },
       { href: "/packs", label: "View Packs" },
+      { href: "/search", label: "Search" },
+    ],
+  },
+  {
+    heading: "Content",
+    links: [
       { href: "/emojis", label: "Emojis" },
       { href: "/stickers", label: "Stickers" },
       { href: "/templates", label: "Templates" },
-      { href: "/search", label: "Discovery" },
+      { href: "/themes", label: "Themes" },
+      { href: "/collections", label: "Collections" },
+    ],
+  },
+  {
+    heading: "Community",
+    links: [
+      { href: "/blog", label: "Blog Posts" },
+      { href: "/changelog", label: "Changelog" },
+      { href: "/leaderboard", label: "Voter Leaderboard" },
+      { href: "/kb", label: "Knowledge Base" },
     ],
   },
   {
@@ -50,10 +66,10 @@ const FOOTER_LINKS = [
     heading: "Legal",
     links: [
       { href: "/legal", label: "All Policies" },
-      { href: "/legal/acceptable-use", label: "Acceptable Usage" },
-      { href: "/legal/service-agreement", label: "Service Agreement" },
       { href: "/legal/terms", label: "Terms of Service" },
       { href: "/legal/privacy", label: "Privacy Policy" },
+      { href: "/legal/acceptable-use", label: "Acceptable Usage" },
+      { href: "/legal/dmca", label: "DMCA Policy" },
     ],
   },
 ];
@@ -74,7 +90,7 @@ export function Footer() {
           The best place to find Discord bots and servers.
         </p>
 
-        <div className="grid grid-cols-2 gap-8 mt-10 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 mt-10 sm:grid-cols-3">
           {FOOTER_LINKS.map(({ heading, links }) => (
             <div key={heading}>
               <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">

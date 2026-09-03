@@ -462,6 +462,8 @@ export interface PackEmoji {
   /** Individual downloads from this emoji's own /emojis/{id} page --
    * separate from a whole-pack .zip download, which doesn't count here. */
   downloads: number;
+  /** The emoji's own short vanity code, if the owner has set one. Empty when unset. */
+  vanity: string;
 }
 
 /** A single sticker in a sticker pack. PackEmoji's counterpart -- same
@@ -472,6 +474,7 @@ export interface PackSticker {
   animated: boolean;
   position: number;
   downloads: number;
+  vanity: string;
 }
 
 export interface BotPack {
@@ -533,6 +536,8 @@ export interface PackEmojiDetail {
   pack_url: string;
   pack_name: string;
   owner: PlatformUser;
+  /** The emoji's own short vanity code, if the owner has set one. Empty when unset. */
+  vanity: string;
 }
 
 /** PackEmojiDetail's counterpart for GET /stickers/{id}. */
@@ -546,6 +551,28 @@ export interface PackStickerDetail {
   pack_url: string;
   pack_name: string;
   owner: PlatformUser;
+  vanity: string;
+}
+
+// ---------------------------------------------------------------------------
+// Themes
+// ---------------------------------------------------------------------------
+
+export interface Theme {
+  id: string;
+  owner: PlatformUser;
+  name: string;
+  primary_color: string;
+  secondary_color: string;
+  tags: string[];
+  created_at: string;
+}
+
+export interface CreateThemePayload {
+  name: string;
+  primary_color: string;
+  secondary_color: string;
+  tags: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -1330,6 +1357,15 @@ export interface TemplateReactionSummary {
 
 export interface CreateServerTemplatePayload {
   code: string;
+  short: string;
+  tags: string[];
+  nsfw: boolean;
+}
+
+/** Deliberately excludes code/name (pulled from Discord's own template
+ * metadata, not independently settable) and channels/roles (re-syncing
+ * those from Discord is a separate, larger feature). */
+export interface UpdateServerTemplatePayload {
   short: string;
   tags: string[];
   nsfw: boolean;

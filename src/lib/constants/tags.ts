@@ -27,3 +27,21 @@ export const SERVER_TAGS = [
   "Roleplay",
   "Social",
 ];
+
+/** A closed vocabulary, unlike BOT_TAGS/SERVER_TAGS -- the backend
+ * enforces this exact list too (add_theme's `oneof` validation), so
+ * changing this without changing that leaves the two out of sync. */
+export const THEME_CATEGORIES = [
+  "Green",
+  "Blue",
+  "Purple",
+  "Pink",
+  "Red",
+  "Orange",
+  "Dark",
+  "Light",
+  "Gradient",
+  "Aesthetic",
+  "Minimal",
+  "Vibrant",
+];

@@ -15,7 +15,7 @@ export const vanityResource = {
    * (ASCII-only, no `@`, lowercased, space→dash, uniqueness, blacklist) — surface
    * whatever error message comes back rather than re-implementing those rules here. */
   update: (
-    targetType: "bot" | "server" | "team",
+    targetType: "bot" | "server" | "team" | "pack_emoji" | "pack_sticker",
     targetId: string,
     code: string,
     token: string,

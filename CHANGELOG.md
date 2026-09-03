@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Emoji and sticker detail pages (`/emojis/[id]`, `/stickers/[id]`) now
+  show a vanity short URL when one is set -- the same vanity system
+  bots/servers/teams already use, resolved the same way (visiting by
+  either the raw ID or the vanity code both work). Every emoji/sticker
+  gets one automatically the moment it's uploaded; nothing is shown at
+  all if it somehow doesn't have one.
+- "More from {pack}" on emoji and sticker detail pages -- up to 6 other
+  items from the same pack, since individual emojis/stickers have no
+  tags of their own to match "similar" against.
+- Dashboard → Packs can now edit emoji and sticker packs, not just
+  bot/server ones -- rename, retag, add/remove/rename individual
+  emojis/stickers (reusing the exact upload builder `/packs/add` already
+  has), and set each item's short link, all from one place. This closes
+  the one gap where editing lived on a public page instead of the
+  dashboard like everything else on the site.
+- Dashboard → Templates -- a server template's owner can now edit its
+  description, tags, and NSFW flag, and delete it, from the same place
+  every other listing is managed. Submission was always there; editing
+  wasn't.
+- `/collections` -- a page of hand-picked, named tag collections ("Best
+  Music Bots," "Best Moderation Bots," "Best Gaming Servers," and more),
+  each ranked automatically by votes rather than manually ordered. A
+  4-tile teaser now also headlines the homepage, linking through to the
+  full page.
+- Themes -- `/themes` (browse), `/themes/{id}` (detail, with copy buttons
+  for both colors), and `/themes/add` (submission: a name, two colors via
+  a new color-swatch-plus-hex-text input, and up to 3 categories from a
+  fixed list). A submitted theme shows as a small Discord-profile-card
+  mockup colored by its two hex values. Managed from Dashboard → Themes
+  like everything else -- list and delete, no separate edit (nothing
+  about a theme is worth revising short of resubmitting it).
+- Two new policies: a Developer & API Policy (acceptable use, key
+  security, and rate-limit rules for anyone calling the API directly, not
+  just the website) and a DMCA / Copyright Policy (how to file a
+  takedown or counter-notice, sent to dmca@nodebyte.co.uk). The Service
+  Agreement also now covers chargebacks and payment disputes, not just
+  refunds, and the Privacy Policy discloses two third-party services it
+  previously didn't: OpenAI (submitted bot/server descriptions, for
+  moderation) and japi.rest (a bot's public Discord application data).
+
+### Changed
+
+- Footer reorganized -- Discover had grown to eight links while every
+  other column sat at four or five, so Emojis/Stickers/Templates/
+  Collections split out into their own "Content" column, and a
+  "Community" column (Blog, Changelog, Leaderboard, Knowledge Base) was
+  added since none of those pages had any footer visibility at all
+  before now. Six balanced columns instead of one lopsided one.
+
 ## [1.0.0] - 2026-09-01
 
 ### Added

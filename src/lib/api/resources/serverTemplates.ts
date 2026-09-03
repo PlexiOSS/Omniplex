@@ -4,6 +4,7 @@ import type {
   PagedResult,
   ServerTemplate,
   TemplateReactionSummary,
+  UpdateServerTemplatePayload,
 } from "../types";
 
 export const serverTemplatesResource = {
@@ -26,6 +27,16 @@ export const serverTemplatesResource = {
     token: string,
   ) =>
     client.put<{ id: string }>(`/users/${userId}/server-templates`, payload, {
+      token,
+    }),
+
+  update: (
+    userId: string,
+    id: string,
+    payload: UpdateServerTemplatePayload,
+    token: string,
+  ) =>
+    client.patch<void>(`/users/${userId}/server-templates/${id}`, payload, {
       token,
     }),
 

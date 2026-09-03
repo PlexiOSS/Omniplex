@@ -52,6 +52,8 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/emojis", label: "Emojis" },
       { href: "/stickers", label: "Stickers" },
       { href: "/templates", label: "Templates" },
+      { href: "/themes", label: "Themes" },
+      { href: "/collections", label: "Collections" },
     ],
   },
   {
@@ -72,6 +74,7 @@ const CREATE_LINKS = [
   { href: "/bots/add", label: "Add a Bot" },
   { href: "/servers/add", label: "Add a Server" },
   { href: "/packs/add", label: "Add a Pack" },
+  { href: "/themes/add", label: "Submit a Theme" },
   { href: "/teams/add", label: "Create a Team" },
 ];
 

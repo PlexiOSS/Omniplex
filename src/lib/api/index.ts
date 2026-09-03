@@ -25,6 +25,7 @@ export { shopResource as shop } from "./resources/shop";
 export { staffResource as staff } from "./resources/staff";
 export { stickersResource as stickers } from "./resources/stickers";
 export { teamsResource as teams } from "./resources/teams";
+export { themesResource as themes } from "./resources/themes";
 export { ticketsResource as tickets } from "./resources/tickets";
 export { usersResource as users } from "./resources/users";
 export { vanityResource as vanity } from "./resources/vanity";

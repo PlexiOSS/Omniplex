@@ -5,9 +5,12 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { AssetDownloadButton } from "@/components/packs/AssetDownloadButton";
+import { AssetShortLink } from "@/components/packs/AssetShortLink";
+import { SimilarPackAssets } from "@/components/packs/SimilarPackAssets";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { stickers } from "@/lib/api";
+import { packs, stickers, vanity } from "@/lib/api";
+import { ApiError } from "@/lib/api/client";
 import { packStickerUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatRelativeTime } from "@/lib/utils/format";
@@ -16,9 +19,23 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+async function fetchSticker(id: string) {
+  try {
+    return await stickers.getById(id);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      const resolved = await vanity.resolve(id).catch(() => null);
+      if (resolved?.target_type === "pack_sticker") {
+        return stickers.getById(resolved.target_id);
+      }
+    }
+    throw err;
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const sticker = await stickers.getById(id).catch(() => null);
+  const sticker = await fetchSticker(id).catch(() => null);
   if (!sticker) return {};
   return {
     title: sticker.name,
@@ -30,7 +47,7 @@ export default async function StickerPage({ params }: Props) {
   const { id } = await params;
   let sticker = null;
   try {
-    sticker = await stickers.getById(id);
+    sticker = await fetchSticker(id);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
     notFound();
@@ -43,6 +60,11 @@ export default async function StickerPage({ params }: Props) {
     sticker.animated,
   );
   const ext = sticker.animated ? "gif" : "webp";
+
+  const pack = await packs.getPack(sticker.pack_url).catch(() => null);
+  const similar = (pack?.stickers ?? [])
+    .filter((s) => s.id !== sticker.id)
+    .slice(0, 6);
 
   return (
     <Container className="py-10">
@@ -83,6 +105,13 @@ export default async function StickerPage({ params }: Props) {
               {sticker.pack_name}
             </Link>
           </p>
+
+          <SimilarPackAssets
+            kind="sticker"
+            packUrl={sticker.pack_url}
+            packName={sticker.pack_name}
+            items={similar}
+          />
         </div>
 
         {/* Sidebar */}
@@ -94,6 +123,8 @@ export default async function StickerPage({ params }: Props) {
             fileName={`${sticker.name}.${ext}`}
             initialDownloads={sticker.downloads}
           />
+
+          <AssetShortLink vanity={sticker.vanity} basePath="/stickers" />
 
           <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">

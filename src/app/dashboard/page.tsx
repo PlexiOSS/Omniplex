@@ -10,9 +10,11 @@ import {
   Globe,
   KeyRound,
   LayoutDashboard,
+  LayoutTemplate,
   Megaphone,
   MoreHorizontal,
   Package,
+  Palette,
   Pencil,
   Server as ServerIcon,
   ShieldCheck,
@@ -39,6 +41,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
+import { useMyTemplates } from "@/hooks/useTemplates";
+import { useMyThemes } from "@/hooks/useThemes";
 import { bots, platform, users } from "@/lib/api";
 import type {
   Link as ApiLink,
@@ -58,6 +62,8 @@ import { PacksTab } from "./PacksTab";
 import { SecurityTab } from "./SecurityTab";
 import { ServerEditModal } from "./ServerEditModal";
 import { BotStatsModal, ServerStatsModal } from "./StatsModal";
+import { TemplatesTab } from "./TemplatesTab";
+import { ThemesTab } from "./ThemesTab";
 import { TokenModal } from "./TokenModal";
 import { TransferTeamModal } from "./TransferTeamModal";
 import { WebhookModal } from "./WebhookModal";
@@ -68,6 +74,8 @@ type Tab =
   | "bots"
   | "servers"
   | "packs"
+  | "templates"
+  | "themes"
   | "applications"
   | "teams"
   | "tokens"
@@ -1064,6 +1072,8 @@ const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "bots", label: "Bots", icon: Bot },
   { key: "servers", label: "Servers", icon: ServerIcon },
   { key: "packs", label: "Packs", icon: Package },
+  { key: "templates", label: "Templates", icon: LayoutTemplate },
+  { key: "themes", label: "Themes", icon: Palette },
   { key: "applications", label: "Applications", icon: ClipboardList },
   { key: "teams", label: "Teams", icon: Users },
   { key: "tokens", label: "API Tokens", icon: KeyRound },
@@ -1100,6 +1110,9 @@ function DashboardPageInner() {
 
   const { me, loading: meLoading, mutate } = useMe(session);
   const { apps: myApplications } = useMyApplications(session);
+  const { templates: myTemplates, mutate: mutateTemplates } =
+    useMyTemplates(session);
+  const { themes: myThemes, mutate: mutateThemes } = useMyThemes(session);
 
   if (authLoading || meLoading || !session) {
     return <DashboardSkeleton />;
@@ -1209,11 +1222,15 @@ function DashboardPageInner() {
                   ? teamServers.length
                   : key === "packs"
                     ? normalizedMe.user_packs.length
-                    : key === "applications"
-                      ? myApplications.length
-                      : key === "teams"
-                        ? normalizedMe.user_teams.length
-                        : null;
+                    : key === "templates"
+                      ? myTemplates.length
+                      : key === "themes"
+                        ? myThemes.length
+                        : key === "applications"
+                          ? myApplications.length
+                          : key === "teams"
+                            ? normalizedMe.user_teams.length
+                            : null;
             return (
               <button
                 key={key}
@@ -1273,6 +1290,22 @@ function DashboardPageInner() {
           userBots={normalizedMe.user_bots}
           token={session.token}
           mutate={mutate}
+        />
+      )}
+      {tab === "templates" && (
+        <TemplatesTab
+          templates={myTemplates}
+          userId={session.user_id}
+          token={session.token}
+          mutate={mutateTemplates}
+        />
+      )}
+      {tab === "themes" && (
+        <ThemesTab
+          themes={myThemes}
+          userId={session.user_id}
+          token={session.token}
+          mutate={mutateThemes}
         />
       )}
       {tab === "applications" && <ApplicationsTab apps={myApplications} />}
