@@ -4,7 +4,6 @@ import { ArrowUpRight, Palette, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { themes } from "@/lib/api";
 import type { Theme } from "@/lib/api/types";
@@ -40,26 +39,17 @@ function ThemeItem({
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col rounded-2xl">
       <ThemePreviewCard
+        themeName={theme.name}
+        tags={theme.tags}
         primaryColor={theme.primary_color}
         secondaryColor={theme.secondary_color}
+        owner={theme.owner}
         compact
       />
-      <div className="flex flex-1 flex-col p-4">
-        <p className="truncate font-semibold text-zinc-950 dark:text-zinc-50">
-          {theme.name}
-        </p>
-
-        {theme.tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {theme.tags.slice(0, 4).map((tag) => (
-              <Badge key={tag}>{tag}</Badge>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-auto flex items-center justify-between pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="flex flex-1 flex-col rounded-b-2xl border border-t-0 border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
           <Link
             href={`/themes/${theme.id}`}
             className="inline-flex items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"

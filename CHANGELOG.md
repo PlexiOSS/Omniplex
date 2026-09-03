@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2026-09-02
 
 ### Added
 
@@ -36,10 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Themes -- `/themes` (browse), `/themes/{id}` (detail, with copy buttons
   for both colors), and `/themes/add` (submission: a name, two colors via
   a new color-swatch-plus-hex-text input, and up to 3 categories from a
-  fixed list). A submitted theme shows as a small Discord-profile-card
-  mockup colored by its two hex values. Managed from Dashboard → Themes
-  like everything else -- list and delete, no separate edit (nothing
-  about a theme is worth revising short of resubmitting it).
+  fixed list). A submitted theme renders as a profile-card mockup colored
+  by its two hex values -- a matching border frame, a flat badge row, and
+  a message-input strip, in the same spirit as discord.place's own theme
+  gallery without copying its exact look -- built around the actual
+  submitter's own avatar and username, not a generic "Discord"
+  placeholder. Managed from Dashboard → Themes like everything else --
+  list and delete, no separate edit (nothing about a theme is worth
+  revising short of resubmitting it).
 - Two new policies: a Developer & API Policy (acceptable use, key
   security, and rate-limit rules for anyone calling the API directly, not
   just the website) and a DMCA / Copyright Policy (how to file a

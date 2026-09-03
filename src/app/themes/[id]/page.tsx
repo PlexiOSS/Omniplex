@@ -7,7 +7,6 @@ import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { CopyColorButton } from "@/components/themes/CopyColorButton";
 import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { themes } from "@/lib/api";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatRelativeTime } from "@/lib/utils/format";
@@ -50,26 +49,19 @@ export default async function ThemePage({ params }: Props) {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main */}
         <div className="min-w-0">
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
-            <ThemePreviewCard
-              primaryColor={theme.primary_color}
-              secondaryColor={theme.secondary_color}
-            />
-          </div>
+          {/* The theme's name/categories render as badges inside the card
+           * itself now, not as a separate heading below it -- this h1
+           * stays for page semantics/SEO without visually repeating what
+           * the card already shows. */}
+          <h1 className="sr-only">{theme.name}</h1>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-              {theme.name}
-            </h1>
-          </div>
-
-          {theme.tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {theme.tags.map((tag) => (
-                <Badge key={tag}>{tag}</Badge>
-              ))}
-            </div>
-          )}
+          <ThemePreviewCard
+            themeName={theme.name}
+            tags={theme.tags}
+            primaryColor={theme.primary_color}
+            secondaryColor={theme.secondary_color}
+            owner={theme.owner}
+          />
 
           <div className="mt-6 space-y-2">
             <CopyColorButton

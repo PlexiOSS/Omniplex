@@ -91,7 +91,7 @@ export default function AddThemePage() {
           Submit a Theme
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          A name plus two hex colors -- no file upload needed.
+          A name plus two hex colors no file upload needed.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">

@@ -60,23 +60,16 @@ export default function ThemesPage() {
                 key={theme.id}
                 href={`/themes/${theme.id}`}
                 title={theme.name}
-                className="group overflow-hidden rounded-2xl border border-zinc-200 transition-colors hover:border-accent/40 dark:border-zinc-800"
+                className="block rounded-2xl transition-transform hover:scale-[1.02]"
               >
                 <ThemePreviewCard
+                  themeName={theme.name}
+                  tags={theme.tags}
                   primaryColor={theme.primary_color}
                   secondaryColor={theme.secondary_color}
+                  owner={theme.owner}
                   compact
                 />
-                <div className="bg-white p-3 dark:bg-zinc-900">
-                  <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                    {theme.name}
-                  </p>
-                  {theme.tags.length > 0 && (
-                    <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
-                      {theme.tags.join(" · ")}
-                    </p>
-                  )}
-                </div>
               </Link>
             ))}
           </div>
