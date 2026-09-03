@@ -2,9 +2,10 @@
 
 Omniplex is a Discord bot and server listing platform. This repository contains the frontend, built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the Rust-based staff panel API that powers `/admin`.
 
-See [CHANGELOG.md](CHANGELOG.md) for what's actually shipped.
+* See [CHANGELOG.md](CHANGELOG.md) for what's actually shipped.
+* Production runs at [omniplex.gg](https://omniplex.gg).
 
-Production runs at [omniplex.gg](https://omniplex.gg), with [beta.omniplex.gg](https://beta.omniplex.gg) and [reedwhisker.omniplex.gg](https://reedwhisker.omniplex.gg) used for staged rollouts.
+---
 
 ## Tech stack
 
@@ -16,6 +17,8 @@ Production runs at [omniplex.gg](https://omniplex.gg), with [beta.omniplex.gg](h
 | Data fetching | SWR (client), native `fetch` (server components) |
 | Linting and formatting | Biome |
 | Package manager | Bun |
+
+---
 
 ## Getting started
 
@@ -37,6 +40,8 @@ bun run lint    # Biome lint and format check
 bun run format  # Biome format, writes changes
 ```
 
+---
+
 ## Configuration
 
 The frontend is decoupled from both backends it talks to Popplio (`src/lib/api/`) and Arcadia, the staff panel API (`src/lib/arcadia/`). These environment variables control them:
@@ -51,31 +56,7 @@ The frontend is decoupled from both backends it talks to Popplio (`src/lib/api/`
 
 Copy `.env.template` to `.env.local` to override any of these for local development. None are required to run the app against staging the defaults point there already.
 
-## Deployment
-
-The app deploys via [Railpack](https://railpack.com) (config in `railpack.json`), which detects Bun from `bun.lock` and runs `bun run build` followed by `bun run start`.
-
-Because the `NEXT_PUBLIC_*` variables above are inlined into the client bundle at build time, they must be set on the hosting platform *before* the build runs, not just at runtime. Setting them as runtime-only environment variables will silently bake in the defaults instead. This applies regardless of which deployment path below is used — Next.js loads `.env` itself during `next build`, so the file just needs to exist in the project directory before `bun run build` runs.
-
-### Self-hosted (systemd + nginx)
-
-`omniplex.gg` (prod) and `beta.omniplex.gg` run this way, each as its own dedicated low-privilege systemd service account (`omniplex` / `omniplexbeta`) with a `nologin` shell — every command against them goes through `sudo -u <account> ...`, not `-i` (which tries to invoke the account's shell and fails against `nologin`).
-
-Beta tracks the `staging` branch specifically, not the default branch — it was cloned with `git clone -b staging`, and `scripts/deploy.sh` just runs `git pull` on whatever branch is currently checked out, so that stays correct as long as the clone itself is on the right branch.
-
-```bash
-sudo -u omniplex scripts/deploy.sh        # prod
-sudo -u omniplexbeta scripts/deploy.sh    # beta
-```
-
-Neither service account has `sudo` rights, so the script deliberately doesn't restart anything itself — that's a manual (or CI-triggered) last step:
-
-```bash
-sudo systemctl restart omniplex        # prod
-sudo systemctl restart omniplex-beta   # beta
-```
-
-Both sit behind nginx with a Cloudflare Origin CA certificate (`ssl_verify_client on` against Cloudflare's origin-pull CA, so only Cloudflare can reach the origin directly — Cloudflare's SSL/TLS mode must be **Full (strict)** for this to work at all). Repo access on the server is via a read-only SSH deploy key per account, not a personal GitHub credential.
+---
 
 ## Project structure
 
@@ -89,13 +70,19 @@ src/
 └── lib/          API client, types, and shared utilities
 ```
 
+---
+
 ## Contributing
 
 Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and note that participation in this project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
+---
+
 ## Security
 
 If you find a security vulnerability, please do not open a public issue. See [SECURITY.md](SECURITY.md) for how to report it.
+
+---
 
 ## License
 
