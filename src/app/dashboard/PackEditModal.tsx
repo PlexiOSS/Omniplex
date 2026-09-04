@@ -133,10 +133,10 @@ export function PackEditModal({
           bots: entities.filter((e) => e.type === "bot").map((e) => e.id),
           servers: entities.filter((e) => e.type === "server").map((e) => e.id),
           // This modal only ever edits bot/server packs (PacksTab hides the
-          // Edit button for emoji/sticker packs) — pass the existing
-          // emoji/sticker lists through unchanged as a defensive default
-          // rather than sending an empty array, so a future caller can't
-          // accidentally wipe an emoji/sticker pack's contents via this
+          // Edit button for emoji/sticker/sound packs) — pass the existing
+          // emoji/sticker/sound lists through unchanged as a defensive
+          // default rather than sending an empty array, so a future caller
+          // can't accidentally wipe one of those packs' contents via this
           // form.
           emojis: (pack.emojis ?? []).map((e) => ({
             id: e.id,
@@ -147,6 +147,11 @@ export function PackEditModal({
             id: s.id,
             name: s.name,
             animated: s.animated,
+          })),
+          sounds: (pack.sounds ?? []).map((s) => ({
+            id: s.id,
+            name: s.name,
+            duration_ms: s.duration_ms,
           })),
         },
         token,

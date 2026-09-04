@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { EmojiPackBuilder } from "@/app/packs/add/EmojiPackBuilder";
+import { SoundPackBuilder } from "@/app/packs/add/SoundPackBuilder";
 import { StickerPackBuilder } from "@/app/packs/add/StickerPackBuilder";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -12,6 +13,7 @@ import { ApiError } from "@/lib/api/client";
 import type {
   BotPack,
   PackEmojiInput,
+  PackSoundInput,
   PackStickerInput,
 } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
@@ -38,6 +40,8 @@ export function EmojiStickerPackEditModal({
   onSaved,
 }: EmojiStickerPackEditModalProps) {
   const isEmoji = pack.pack_type === "emoji";
+  const isSticker = pack.pack_type === "sticker";
+  const isSound = pack.pack_type === "sound";
 
   const [form, setForm] = useState({
     name: pack.name,
@@ -58,12 +62,20 @@ export function EmojiStickerPackEditModal({
       animated: s.animated,
     })),
   );
+  const [sounds, setSounds] = useState<PackSoundInput[]>(
+    (pack.sounds ?? []).map((s) => ({
+      id: s.id,
+      name: s.name,
+      duration_ms: s.duration_ms,
+    })),
+  );
 
   const initialVanities: Record<string, string> = Object.fromEntries(
-    [...(pack.emojis ?? []), ...(pack.stickers ?? [])].map((item) => [
-      item.id,
-      item.vanity,
-    ]),
+    [
+      ...(pack.emojis ?? []),
+      ...(pack.stickers ?? []),
+      ...(pack.sounds ?? []),
+    ].map((item) => [item.id, item.vanity]),
   );
   const [vanities, setVanities] =
     useState<Record<string, string>>(initialVanities);
@@ -71,7 +83,7 @@ export function EmojiStickerPackEditModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const items = isEmoji ? emojis : stickers;
+  const items = isEmoji ? emojis : isSticker ? stickers : sounds;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -95,19 +107,31 @@ export function EmojiStickerPackEditModal({
                 name: e.name,
                 animated: e.animated,
               })),
-          stickers: isEmoji
-            ? (pack.stickers ?? []).map((s) => ({
+          stickers: isSticker
+            ? stickers
+            : (pack.stickers ?? []).map((s) => ({
                 id: s.id,
                 name: s.name,
                 animated: s.animated,
-              }))
-            : stickers,
+              })),
+          sounds: isSound
+            ? sounds
+            : (pack.sounds ?? []).map((s) => ({
+                id: s.id,
+                name: s.name,
+                duration_ms: s.duration_ms,
+              })),
         },
         token,
       );
 
       const currentIds = new Set(items.map((i) => i.id));
       let vanityFailure: string | null = null;
+      const vanityTargetType = isEmoji
+        ? "pack_emoji"
+        : isSticker
+          ? "pack_sticker"
+          : "pack_sound";
 
       for (const [id, code] of Object.entries(vanities)) {
         const trimmed = code.trim();
@@ -115,12 +139,7 @@ export function EmojiStickerPackEditModal({
         if (!currentIds.has(id) || !trimmed || trimmed === original) continue;
 
         try {
-          await vanityApi.update(
-            isEmoji ? "pack_emoji" : "pack_sticker",
-            id,
-            trimmed,
-            token,
-          );
+          await vanityApi.update(vanityTargetType, id, trimmed, token);
         } catch (err) {
           vanityFailure =
             err instanceof ApiError
@@ -151,7 +170,7 @@ export function EmojiStickerPackEditModal({
     <Modal
       open
       onClose={onClose}
-      title={`Edit ${isEmoji ? "Emoji" : "Sticker"} Pack`}
+      title={`Edit ${isEmoji ? "Emoji" : isSticker ? "Sticker" : "Sound"} Pack`}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
@@ -199,13 +218,21 @@ export function EmojiStickerPackEditModal({
             emojis={emojis}
             onChange={setEmojis}
           />
-        ) : (
+        ) : isSticker ? (
           <StickerPackBuilder
             packUrl={pack.url}
             userId={userId}
             token={token}
             stickers={stickers}
             onChange={setStickers}
+          />
+        ) : (
+          <SoundPackBuilder
+            packUrl={pack.url}
+            userId={userId}
+            token={token}
+            sounds={sounds}
+            onChange={setSounds}
           />
         )}
 

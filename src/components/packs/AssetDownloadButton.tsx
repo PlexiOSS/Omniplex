@@ -3,11 +3,11 @@
 import { Download } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { emojis, stickers } from "@/lib/api";
+import { emojis, sounds, stickers } from "@/lib/api";
 import { formatCount } from "@/lib/utils/format";
 
 interface AssetDownloadButtonProps {
-  kind: "emoji" | "sticker";
+  kind: "emoji" | "sticker" | "sound";
   id: string;
   assetUrl: string;
   fileName: string;
@@ -48,7 +48,11 @@ export function AssetDownloadButton({
       URL.revokeObjectURL(objectUrl);
 
       const recordDownload =
-        kind === "emoji" ? emojis.recordDownload : stickers.recordDownload;
+        kind === "emoji"
+          ? emojis.recordDownload
+          : kind === "sticker"
+            ? stickers.recordDownload
+            : sounds.recordDownload;
       recordDownload(id)
         .then((summary) => setDownloads(summary.downloads))
         .catch(() => {

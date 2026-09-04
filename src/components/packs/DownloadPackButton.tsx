@@ -3,9 +3,10 @@
 import { Download } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import type { PackEmoji, PackSticker } from "@/lib/api/types";
+import type { PackEmoji, PackSound, PackSticker } from "@/lib/api/types";
 import {
   downloadEmojiPack,
+  downloadSoundPack,
   downloadStickerPack,
 } from "@/lib/utils/downloadPack";
 
@@ -21,6 +22,12 @@ type DownloadPackButtonProps =
       packUrl: string;
       packName: string;
       stickers: PackSticker[];
+    }
+  | {
+      kind: "sound";
+      packUrl: string;
+      packName: string;
+      sounds: PackSound[];
     };
 
 export function DownloadPackButton(props: DownloadPackButtonProps) {
@@ -29,7 +36,11 @@ export function DownloadPackButton(props: DownloadPackButtonProps) {
   const [error, setError] = useState(false);
 
   const itemCount =
-    kind === "emoji" ? props.emojis.length : props.stickers.length;
+    kind === "emoji"
+      ? props.emojis.length
+      : kind === "sticker"
+        ? props.stickers.length
+        : props.sounds.length;
 
   async function handleDownload() {
     setDownloading(true);
@@ -37,8 +48,10 @@ export function DownloadPackButton(props: DownloadPackButtonProps) {
     try {
       if (props.kind === "emoji") {
         await downloadEmojiPack(packUrl, packName, props.emojis);
-      } else {
+      } else if (props.kind === "sticker") {
         await downloadStickerPack(packUrl, packName, props.stickers);
+      } else {
+        await downloadSoundPack(packUrl, packName, props.sounds);
       }
     } catch {
       setError(true);

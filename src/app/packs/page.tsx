@@ -15,6 +15,7 @@ const FILTERS: { value: PackType | undefined; label: string }[] = [
   { value: "server", label: "Servers" },
   { value: "emoji", label: "Emojis" },
   { value: "sticker", label: "Stickers" },
+  { value: "sound", label: "Sounds" },
 ];
 
 function isPackType(value: string | undefined): value is PackType {
@@ -22,7 +23,8 @@ function isPackType(value: string | undefined): value is PackType {
     value === "bot" ||
     value === "server" ||
     value === "emoji" ||
-    value === "sticker"
+    value === "sticker" ||
+    value === "sound"
   );
 }
 

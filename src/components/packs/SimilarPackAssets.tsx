@@ -1,11 +1,12 @@
+import { Music } from "lucide-react";
 import Link from "next/link";
 import { packEmojiUrl, packStickerUrl } from "@/lib/utils/assets";
 
 interface SimilarPackAssetsProps {
-  kind: "emoji" | "sticker";
+  kind: "emoji" | "sticker" | "sound";
   packUrl: string;
   packName: string;
-  items: { id: string; name: string; animated: boolean }[];
+  items: { id: string; name: string; animated?: boolean }[];
 }
 
 /** "More from this pack" -- individual emojis/stickers have no tags of
@@ -28,8 +29,10 @@ export function SimilarPackAssets({
         {items.map((item) => {
           const assetUrl =
             kind === "emoji"
-              ? packEmojiUrl(packUrl, item.id, item.animated)
-              : packStickerUrl(packUrl, item.id, item.animated);
+              ? packEmojiUrl(packUrl, item.id, item.animated ?? false)
+              : kind === "sticker"
+                ? packStickerUrl(packUrl, item.id, item.animated ?? false)
+                : null;
 
           return (
             <Link
@@ -38,14 +41,18 @@ export function SimilarPackAssets({
               title={item.name}
               className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 p-2.5 transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800"
             >
-              {/* biome-ignore lint/performance/noImgElement: small thumbnail */}
-              <img
-                src={assetUrl}
-                alt={item.name}
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
-              />
+              {assetUrl ? (
+                // biome-ignore lint/performance/noImgElement: small thumbnail
+                <img
+                  src={assetUrl}
+                  alt={item.name}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 object-contain"
+                />
+              ) : (
+                <Music size={20} className="text-zinc-400 dark:text-zinc-600" />
+              )}
               <span className="w-full truncate text-center text-xs text-zinc-500 dark:text-zinc-400">
                 {item.name}
               </span>

@@ -136,7 +136,9 @@ function PackItem({
       </div>
 
       {editing &&
-        (pack.pack_type === "emoji" || pack.pack_type === "sticker" ? (
+        (pack.pack_type === "emoji" ||
+        pack.pack_type === "sticker" ||
+        pack.pack_type === "sound" ? (
           <EmojiStickerPackEditModal
             pack={pack}
             userId={userId}

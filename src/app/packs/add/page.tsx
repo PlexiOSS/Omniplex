@@ -14,11 +14,13 @@ import { packs, search } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type {
   PackEmojiInput,
+  PackSoundInput,
   PackStickerInput,
   PackType,
 } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
 import { EmojiPackBuilder } from "./EmojiPackBuilder";
+import { SoundPackBuilder } from "./SoundPackBuilder";
 import { StickerPackBuilder } from "./StickerPackBuilder";
 
 type PickedEntity = {
@@ -47,6 +49,11 @@ const PACK_TYPES: { value: PackType; label: string; description: string }[] = [
     label: "Sticker Pack",
     description: "Bundle up to 50 stickers you upload",
   },
+  {
+    value: "sound",
+    label: "Sound Pack",
+    description: "Bundle up to 50 sound clips you upload",
+  },
 ];
 
 function isPackType(value: string | null): value is PackType {
@@ -54,7 +61,8 @@ function isPackType(value: string | null): value is PackType {
     value === "bot" ||
     value === "server" ||
     value === "emoji" ||
-    value === "sticker"
+    value === "sticker" ||
+    value === "sound"
   );
 }
 
@@ -83,6 +91,7 @@ function AddPackForm() {
   const [entities, setEntities] = useState<PickedEntity[]>([]);
   const [emojis, setEmojis] = useState<PackEmojiInput[]>([]);
   const [stickers, setStickers] = useState<PackStickerInput[]>([]);
+  const [sounds, setSounds] = useState<PackSoundInput[]>([]);
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<PickedEntity[]>([]);
@@ -114,7 +123,13 @@ function AddPackForm() {
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    if (!query.trim() || packType === "emoji" || packType === "sticker") return;
+    if (
+      !query.trim() ||
+      packType === "emoji" ||
+      packType === "sticker" ||
+      packType === "sound"
+    )
+      return;
     setSearching(true);
     try {
       const res = await search.search({
@@ -156,6 +171,8 @@ function AddPackForm() {
       return setError("Add at least one emoji.");
     if (packType === "sticker" && stickers.length === 0)
       return setError("Add at least one sticker.");
+    if (packType === "sound" && sounds.length === 0)
+      return setError("Add at least one sound.");
 
     if (!session) return;
     setSubmitting(true);
@@ -174,6 +191,7 @@ function AddPackForm() {
           servers: packType === "server" ? activeEntities.map((e) => e.id) : [],
           emojis: packType === "emoji" ? emojis : [],
           stickers: packType === "sticker" ? stickers : [],
+          sounds: packType === "sound" ? sounds : [],
         },
         session.token,
       );
@@ -197,8 +215,8 @@ function AddPackForm() {
             Add a Pack
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Group bots, servers, emojis, or stickers into a themed collection
-            they don't have to be yours.
+            Group bots, servers, emojis, stickers, or sounds into a themed
+            collection — they don't have to be yours.
           </p>
         </div>
 
@@ -207,7 +225,7 @@ function AddPackForm() {
             <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Pack Type
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
               {PACK_TYPES.map((pt) => (
                 <button
                   key={pt.value}
@@ -299,6 +317,14 @@ function AddPackForm() {
               token={session.token}
               stickers={stickers}
               onChange={setStickers}
+            />
+          ) : packType === "sound" ? (
+            <SoundPackBuilder
+              packUrl={form.url}
+              userId={session.user_id}
+              token={session.token}
+              sounds={sounds}
+              onChange={setSounds}
             />
           ) : (
             <div>

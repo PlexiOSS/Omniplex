@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  ArrowRightLeft,
   ExternalLink,
   Eye,
   Globe,
@@ -20,6 +21,7 @@ import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { StatRow } from "@/components/ui/StatRow";
 import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity } from "@/lib/api";
@@ -202,6 +204,13 @@ export default async function ServerPage({ params }: Props) {
               targetLabel="server"
             />
             <ReminderToggle targetType="server" targetId={server.server_id} />
+            <Link
+              href={`/servers/compare?a=${encodeURIComponent(server.server_id)}`}
+              className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+            >
+              <ArrowRightLeft size={14} />
+              Compare
+            </Link>
           </div>
 
           <ServerPageTabs
@@ -334,28 +343,6 @@ export default async function ServerPage({ params }: Props) {
         </section>
       )}
     </Container>
-  );
-}
-
-function StatRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2 text-sm">
-      <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-        {icon}
-        {label}
-      </span>
-      <span className="font-medium text-zinc-950 dark:text-zinc-50">
-        {value}
-      </span>
-    </div>
   );
 }
 

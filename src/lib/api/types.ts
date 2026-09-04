@@ -171,6 +171,19 @@ export interface CreateBotChangelogPayload {
   version: string;
 }
 
+/** One entry in the sitewide changelog feed (GET /bots/@changelogs) --
+ * a `BotChangelog` plus just enough of the owning bot's identity to
+ * display and link back to it. */
+export interface BotChangelogFeedEntry {
+  id: string;
+  bot_id: string;
+  title: string;
+  content: string;
+  version: string;
+  created_at: string;
+  user: PlatformUser;
+}
+
 // ---------------------------------------------------------------------------
 // Servers — note: servers have `name` directly (not via user)
 // ---------------------------------------------------------------------------
@@ -450,7 +463,7 @@ export interface UserEntityPerms {
 // Packs
 // ---------------------------------------------------------------------------
 
-export type PackType = "bot" | "server" | "emoji" | "sticker";
+export type PackType = "bot" | "server" | "emoji" | "sticker" | "sound";
 
 /** A single emoji in an emoji pack. No asset URL field — build it with
  * packEmojiUrl(pack.url, id, animated), same convention as bannerUrl(). */
@@ -477,6 +490,18 @@ export interface PackSticker {
   vanity: string;
 }
 
+/** A single sound clip in a sound pack. PackEmoji's counterpart -- same
+ * shape, `duration_ms` standing in for `animated` since that's the
+ * audio-specific field that matters here. */
+export interface PackSound {
+  id: string;
+  name: string;
+  duration_ms: number;
+  position: number;
+  downloads: number;
+  vanity: string;
+}
+
 export interface BotPack {
   owner: PlatformUser;
   name: string;
@@ -498,6 +523,8 @@ export interface BotPack {
   emojis: PackEmoji[];
   /** Only populated for pack_type "sticker" */
   stickers: PackSticker[];
+  /** Only populated for pack_type "sound" */
+  sounds: PackSound[];
   vote_banned: boolean;
 }
 
@@ -545,6 +572,31 @@ export interface PackStickerDetail {
   id: string;
   name: string;
   animated: boolean;
+  position: number;
+  downloads: number;
+  created_at: string;
+  pack_url: string;
+  pack_name: string;
+  owner: PlatformUser;
+  vanity: string;
+}
+
+/** FlatPackEmoji's counterpart for the /sounds browse feed. */
+export interface FlatPackSound {
+  id: string;
+  name: string;
+  duration_ms: number;
+  downloads: number;
+  created_at: string;
+  pack_url: string;
+  pack_name: string;
+}
+
+/** PackEmojiDetail's counterpart for GET /sounds/{id}. */
+export interface PackSoundDetail {
+  id: string;
+  name: string;
+  duration_ms: number;
   position: number;
   downloads: number;
   created_at: string;
@@ -1558,6 +1610,14 @@ export interface PackStickerInput {
   animated: boolean;
 }
 
+/** PackEmojiInput's counterpart for sound packs (kind "pack-sound") --
+ * `duration_ms` stands in for `animated`. */
+export interface PackSoundInput {
+  id: string;
+  name: string;
+  duration_ms: number;
+}
+
 export interface CreatePackPayload {
   name: string;
   url: string;
@@ -1572,6 +1632,8 @@ export interface CreatePackPayload {
   emojis: PackEmojiInput[];
   /** Required for pack_type "sticker" */
   stickers: PackStickerInput[];
+  /** Required for pack_type "sound" */
+  sounds: PackSoundInput[];
 }
 
 export interface PackSettingsUpdate {
@@ -1584,6 +1646,7 @@ export interface PackSettingsUpdate {
   servers: string[];
   emojis: PackEmojiInput[];
   stickers: PackStickerInput[];
+  sounds: PackSoundInput[];
 }
 
 // ---------------------------------------------------------------------------

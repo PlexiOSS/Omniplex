@@ -19,6 +19,7 @@ const FOOTER_LINKS = [
     links: [
       { href: "/emojis", label: "Emojis" },
       { href: "/stickers", label: "Stickers" },
+      { href: "/sounds", label: "Sounds" },
       { href: "/templates", label: "Templates" },
       { href: "/themes", label: "Themes" },
       { href: "/collections", label: "Collections" },

@@ -2,6 +2,7 @@ import { client } from "../client";
 import type {
   Bot,
   BotChangelog,
+  BotChangelogFeedEntry,
   BotChangelogList,
   BotCommandInput,
   BotCommandList,
@@ -111,6 +112,13 @@ export const botsResource = {
     client.get<BotChangelogList>(`/bots/${botId}/changelogs`, {
       cache: "no-store",
     }),
+
+  /** Sitewide feed across every bot's changelog entries, newest first. */
+  getChangelogFeed: (page = 1) =>
+    client.get<PagedResult<BotChangelogFeedEntry[]>>(
+      `/bots/@changelogs?page=${page}`,
+      { cache: "no-store" },
+    ),
 
   createChangelog: (
     botId: string,

@@ -14,6 +14,14 @@ const ALLOWED_TYPES = new Set([
   "image/gif",
 ]);
 
+// Sound packs bundle short audio clips instead of images. Unlike
+// emoji/sticker (which infer their extension from the `animated` flag),
+// pack_sounds stores no format column at all -- so uploads are restricted
+// to a single fixed format (MP3) rather than adding one, the same way this
+// endpoint keeps every other kind's extension a small fixed set.
+const ALLOWED_AUDIO_TYPE = "audio/mpeg";
+const AUDIO_EXTENSION = "mp3";
+
 type Kind =
   | "partner-logo"
   | "team-avatar"
@@ -21,14 +29,19 @@ type Kind =
   | "bot-banner"
   | "server-banner"
   | "pack-emoji"
-  | "pack-sticker";
+  | "pack-sticker"
+  | "pack-sound";
 
-/** pack-emoji and pack-sticker both skip the normal entity-permission
- * check (see the pack-ownership branch below) and share the tighter
- * per-item size cap -- checked in a few places below instead of listing
- * both kinds out each time. */
-function isPackAssetKind(kind: Kind): kind is "pack-emoji" | "pack-sticker" {
-  return kind === "pack-emoji" || kind === "pack-sticker";
+/** pack-emoji, pack-sticker, and pack-sound all skip the normal
+ * entity-permission check (see the pack-ownership branch below) and share
+ * the tighter per-item size cap -- checked in a few places below instead
+ * of listing every kind out each time. */
+function isPackAssetKind(
+  kind: Kind,
+): kind is "pack-emoji" | "pack-sticker" | "pack-sound" {
+  return (
+    kind === "pack-emoji" || kind === "pack-sticker" || kind === "pack-sound"
+  );
 }
 
 interface KindConfig {
@@ -50,6 +63,11 @@ interface KindConfig {
 // emojis follow the same limit rather than the much looser 5MB used for
 // banners, since these are meant to actually behave like real emojis.
 const EMOJI_MAX_BYTES = 256 * 1024;
+
+// Sound clips are meant to be short soundboard-style effects, not music
+// tracks -- generous enough for a few seconds of audio at a reasonable
+// bitrate without approaching the general 5MB banner cap.
+const SOUND_MAX_BYTES = 2 * 1024 * 1024;
 
 const KIND_CONFIG: Record<Kind, KindConfig> = {
   "partner-logo": {
@@ -97,6 +115,15 @@ const KIND_CONFIG: Record<Kind, KindConfig> = {
     popplioTargetType: "pack",
     maxBytes: EMOJI_MAX_BYTES,
   },
+  "pack-sound": {
+    // Extension is appended separately (see assetId handling below) since
+    // it depends on the uploaded audio's mime type.
+    key: (packUrl, assetId) => `sounds/packs/${packUrl}/${assetId}`,
+    perm: "edit_packs",
+    requiresStaff: false,
+    popplioTargetType: "pack",
+    maxBytes: SOUND_MAX_BYTES,
+  },
 };
 
 function isKind(value: unknown): value is Kind {
@@ -135,9 +162,15 @@ export async function POST(req: Request) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
-  if (!ALLOWED_TYPES.has(file.type)) {
+  if (kind !== "pack-sound" && !ALLOWED_TYPES.has(file.type)) {
     return NextResponse.json(
       { error: "Unsupported image type — use WebP, PNG, JPEG, or GIF." },
+      { status: 400 },
+    );
+  }
+  if (kind === "pack-sound" && file.type !== ALLOWED_AUDIO_TYPE) {
+    return NextResponse.json(
+      { error: "Unsupported audio type — use MP3." },
       { status: 400 },
     );
   }
@@ -154,7 +187,16 @@ export async function POST(req: Request) {
 
   let assetId: string | undefined;
 
-  if (isPackAssetKind(kind)) {
+  if (kind === "pack-sound") {
+    const rawAssetId = form.get("assetId");
+    if (typeof rawAssetId !== "string" || !rawAssetId) {
+      return NextResponse.json(
+        { error: "Missing assetId for pack-sound upload" },
+        { status: 400 },
+      );
+    }
+    assetId = `${rawAssetId}.${AUDIO_EXTENSION}`;
+  } else if (isPackAssetKind(kind)) {
     const rawAssetId = form.get("assetId");
     if (typeof rawAssetId !== "string" || !rawAssetId) {
       return NextResponse.json(

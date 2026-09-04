@@ -13,7 +13,8 @@ export type PermissionTargetType =
   | "server"
   | "pack"
   | "pack_emoji"
-  | "pack_sticker";
+  | "pack_sticker"
+  | "pack_sound";
 
 export function useEntityPermission(
   targetType: PermissionTargetType,

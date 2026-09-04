@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  ArrowRightLeft,
   ExternalLink,
   Eye,
   MousePointerClick,
@@ -19,6 +20,7 @@ import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { StatRow } from "@/components/ui/StatRow";
 import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity } from "@/lib/api";
@@ -198,6 +200,13 @@ export default async function BotPage({ params }: Props) {
               targetLabel="bot"
             />
             <ReminderToggle targetType="bot" targetId={bot.bot_id} />
+            <Link
+              href={`/bots/compare?a=${encodeURIComponent(bot.bot_id)}`}
+              className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+            >
+              <ArrowRightLeft size={14} />
+              Compare
+            </Link>
           </div>
 
           <BotPageTabs
@@ -336,35 +345,7 @@ export default async function BotPage({ params }: Props) {
   );
 }
 
-function StatRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2 text-sm">
-      <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-        {icon}
-        {label}
-      </span>
-      <span className="font-medium text-zinc-950 dark:text-zinc-50">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function ExternalLinkItem({
-  href,
-  label,
-}: {
-  href: string;
-  label: string;
-}) {
+function ExternalLinkItem({ href, label }: { href: string; label: string }) {
   return (
     <a
       href={href}

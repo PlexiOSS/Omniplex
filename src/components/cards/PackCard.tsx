@@ -1,4 +1,12 @@
-import { ArrowUpRight, Bot, Server, Smile, Star, Sticker } from "lucide-react";
+import {
+  ArrowUpRight,
+  Bot,
+  Music,
+  Server,
+  Smile,
+  Star,
+  Sticker,
+} from "lucide-react";
 import Link from "next/link";
 import { PackTypeBadge } from "@/components/packs/PackTypeBadge";
 import { Avatar } from "@/components/ui/Avatar";
@@ -93,6 +101,15 @@ export function PackCard({ pack }: PackCardProps) {
                 />
               </div>
             ))}
+          {pack.pack_type === "sound" &&
+            (pack.sounds ?? []).slice(0, 3).map((sound) => (
+              <div
+                key={sound.id}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 ring-2 ring-white dark:bg-zinc-800 dark:ring-zinc-900"
+              >
+                <Music size={14} className="text-zinc-400 dark:text-zinc-600" />
+              </div>
+            ))}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -146,6 +163,12 @@ export function PackCard({ pack }: PackCardProps) {
           <span className="flex items-center gap-1">
             <Sticker size={12} />
             {(pack.stickers ?? []).length} stickers
+          </span>
+        )}
+        {(pack.sounds ?? []).length > 0 && (
+          <span className="flex items-center gap-1">
+            <Music size={12} />
+            {(pack.sounds ?? []).length} sounds
           </span>
         )}
       </div>

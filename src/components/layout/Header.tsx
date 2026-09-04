@@ -51,6 +51,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/packs", label: "Packs" },
       { href: "/emojis", label: "Emojis" },
       { href: "/stickers", label: "Stickers" },
+      { href: "/sounds", label: "Sounds" },
       { href: "/templates", label: "Templates" },
       { href: "/themes", label: "Themes" },
       { href: "/collections", label: "Collections" },
@@ -61,6 +62,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
     items: [
       { href: "/blog", label: "Blog Posts" },
       { href: "/changelog", label: "Changelog" },
+      { href: "/feed", label: "Bot Updates" },
       { href: "/leaderboard", label: "Voter Leaderboard" },
       { href: "/kb", label: "Knowledge Base" },
       { href: "https://docs.omniplex.gg", label: "Documentation" },

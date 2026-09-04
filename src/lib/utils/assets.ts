@@ -49,6 +49,13 @@ export function packStickerUrl(
   return `/cdn/stickers/packs/${encodeURIComponent(packUrl)}/${encodeURIComponent(stickerId)}.${animated ? "gif" : "webp"}`;
 }
 
+/** Sound packs only ever store MP3 (see app/api/uploads' AUDIO_EXTENSION),
+ * so unlike packEmojiUrl/packStickerUrl there's no format flag to branch
+ * on. */
+export function packSoundUrl(packUrl: string, soundId: string): string {
+  return `/cdn/sounds/packs/${encodeURIComponent(packUrl)}/${encodeURIComponent(soundId)}.mp3`;
+}
+
 export function botPath(botId: string, vanity?: string | null): string {
   return `/bots/${vanity || botId}`;
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { ACCENT_COLORS, isAccentColor } from "@/lib/constants/accent";
@@ -201,6 +201,8 @@ export function getPackWidgetStats(pack: {
         return { key: "emojis", label: "Emojis" } as const;
       case "sticker":
         return { key: "stickers", label: "Stickers" } as const;
+      case "sound":
+        return { key: "sounds", label: "Sounds" } as const;
       default:
         return { key: "items", label: "Items" } as const;
     }
@@ -216,6 +218,7 @@ export function getPackItemCount(pack: {
   servers?: unknown[] | null;
   emojis?: unknown[] | null;
   stickers?: unknown[] | null;
+  sounds?: unknown[] | null;
 }): number {
   switch (pack.pack_type) {
     case "bot":
@@ -226,6 +229,8 @@ export function getPackItemCount(pack: {
       return (pack.emojis ?? []).length;
     case "sticker":
       return (pack.stickers ?? []).length;
+    case "sound":
+      return (pack.sounds ?? []).length;
     default:
       return 0;
   }

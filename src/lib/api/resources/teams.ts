@@ -60,7 +60,8 @@ export const teamsResource = {
       | "server"
       | "pack"
       | "pack_emoji"
-      | "pack_sticker",
+      | "pack_sticker"
+      | "pack_sound",
     targetId: string,
   ) =>
     client.get<UserEntityPerms>(

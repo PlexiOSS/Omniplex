@@ -1,4 +1,12 @@
-import { ArrowLeft, Bot, Server, Smile, Star, Sticker } from "lucide-react";
+import {
+  ArrowLeft,
+  Bot,
+  Music,
+  Server,
+  Smile,
+  Star,
+  Sticker,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +15,7 @@ import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { DownloadPackButton } from "@/components/packs/DownloadPackButton";
+import { PackSoundGrid } from "@/components/packs/PackSoundGrid";
 import { PackTypeBadge } from "@/components/packs/PackTypeBadge";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
@@ -39,7 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             ? "Sticker"
             : pack.pack_type === "emoji"
               ? "Emoji"
-              : "Pack";
+              : pack.pack_type === "sound"
+                ? "Sound"
+                : "Pack";
     return {
       title: `${pack.name} — ${typeLabel} Pack`,
       description: pack.short,
@@ -71,7 +82,9 @@ export default async function PackPage({ params }: Props) {
         ? (pack.server_ids ?? []).length
         : pack.pack_type === "sticker"
           ? (pack.stickers ?? []).length
-          : (pack.emojis ?? []).length;
+          : pack.pack_type === "sound"
+            ? (pack.sounds ?? []).length
+            : (pack.emojis ?? []).length;
 
   const itemIcon =
     pack.pack_type === "bot" ? (
@@ -80,6 +93,8 @@ export default async function PackPage({ params }: Props) {
       <Server size={14} />
     ) : pack.pack_type === "sticker" ? (
       <Sticker size={14} />
+    ) : pack.pack_type === "sound" ? (
+      <Music size={14} />
     ) : (
       <Smile size={14} />
     );
@@ -91,7 +106,9 @@ export default async function PackPage({ params }: Props) {
         ? "Servers"
         : pack.pack_type === "sticker"
           ? "Stickers"
-          : "Emojis";
+          : pack.pack_type === "sound"
+            ? "Sounds"
+            : "Emojis";
 
   const actionsCard = (
     <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
@@ -114,6 +131,14 @@ export default async function PackPage({ params }: Props) {
           packUrl={pack.url}
           packName={pack.name}
           stickers={pack.stickers ?? []}
+        />
+      )}
+      {pack.pack_type === "sound" && (
+        <DownloadPackButton
+          kind="sound"
+          packUrl={pack.url}
+          packName={pack.name}
+          sounds={pack.sounds ?? []}
         />
       )}
     </div>
@@ -198,6 +223,18 @@ export default async function PackPage({ params }: Props) {
                       alt={sticker.name}
                       width={36}
                       height={36}
+                    />
+                  </div>
+                ))}
+              {pack.pack_type === "sound" &&
+                (pack.sounds ?? []).slice(0, 4).map((sound) => (
+                  <div
+                    key={sound.id}
+                    className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 ring-2 ring-white dark:bg-zinc-800 dark:ring-zinc-950"
+                  >
+                    <Music
+                      size={24}
+                      className="text-zinc-400 dark:text-zinc-600"
                     />
                   </div>
                 ))}
@@ -324,6 +361,16 @@ export default async function PackPage({ params }: Props) {
                   </Link>
                 ))}
               </div>
+            </section>
+          )}
+
+          {/* Sounds in this pack */}
+          {(pack.sounds ?? []).length > 0 && (
+            <section className="mt-10">
+              <h2 className="mb-5 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                Sounds in this pack
+              </h2>
+              <PackSoundGrid packUrl={pack.url} sounds={pack.sounds ?? []} />
             </section>
           )}
         </div>

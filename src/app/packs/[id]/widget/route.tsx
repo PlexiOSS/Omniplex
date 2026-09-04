@@ -28,9 +28,7 @@ export async function GET(
   const pack = await packs.getPack(id).catch(() => null);
 
   // Secondary stat key depends on pack_type (bots vs servers vs emojis vs stickers)
-  const packStats = pack
-    ? getPackWidgetStats(pack)
-    : PACK_WIDGET_STATS;
+  const packStats = pack ? getPackWidgetStats(pack) : PACK_WIDGET_STATS;
   const visibleStats = resolveVisibleStats(
     searchParams,
     packStats.map((s) => s.key),

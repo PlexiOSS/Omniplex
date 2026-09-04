@@ -22,6 +22,7 @@ export { serversResource as servers } from "./resources/servers";
 export { serverTemplatesResource as serverTemplates } from "./resources/serverTemplates";
 export { sessionsResource as sessions } from "./resources/sessions";
 export { shopResource as shop } from "./resources/shop";
+export { soundsResource as sounds } from "./resources/sounds";
 export { staffResource as staff } from "./resources/staff";
 export { stickersResource as stickers } from "./resources/stickers";
 export { teamsResource as teams } from "./resources/teams";
