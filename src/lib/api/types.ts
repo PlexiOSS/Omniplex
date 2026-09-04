@@ -171,6 +171,18 @@ export interface CreateBotChangelogPayload {
   version: string;
 }
 
+/** One result row of the cross-bot command search (GET /bots/@commands) --
+ * just enough of the owning bot's identity to display and link back to it. */
+export interface BotCommandSearchResult {
+  id: string;
+  bot_id: string;
+  name: string;
+  description: string;
+  usage: string;
+  category: string;
+  bot: PlatformUser;
+}
+
 /** One entry in the sitewide changelog feed (GET /bots/@changelogs) --
  * a `BotChangelog` plus just enough of the owning bot's identity to
  * display and link back to it. */

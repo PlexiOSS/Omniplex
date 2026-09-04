@@ -30,6 +30,8 @@ const FOOTER_LINKS = [
     links: [
       { href: "/blog", label: "Blog Posts" },
       { href: "/changelog", label: "Changelog" },
+      { href: "/feed", label: "Bot Updates" },
+      { href: "/commands", label: "Command Directory" },
       { href: "/leaderboard", label: "Voter Leaderboard" },
       { href: "/kb", label: "Knowledge Base" },
     ],

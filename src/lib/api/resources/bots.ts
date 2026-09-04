@@ -6,6 +6,7 @@ import type {
   BotChangelogList,
   BotCommandInput,
   BotCommandList,
+  BotCommandSearchResult,
   BotSettingsUpdate,
   CaptchaSolution,
   CreateBotChangelogPayload,
@@ -117,6 +118,13 @@ export const botsResource = {
   getChangelogFeed: (page = 1) =>
     client.get<PagedResult<BotChangelogFeedEntry[]>>(
       `/bots/@changelogs?page=${page}`,
+      { cache: "no-store" },
+    ),
+
+  /** Cross-bot command search -- "who has a /giveaway command." */
+  searchCommands: (query: string, page = 1) =>
+    client.get<PagedResult<BotCommandSearchResult[]>>(
+      `/bots/@commands?query=${encodeURIComponent(query)}&page=${page}`,
       { cache: "no-store" },
     ),
 
