@@ -370,7 +370,11 @@ export default async function PackPage({ params }: Props) {
               <h2 className="mb-5 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
                 Sounds in this pack
               </h2>
-              <PackSoundGrid packUrl={pack.url} sounds={pack.sounds ?? []} />
+              <PackSoundGrid
+                packUrl={pack.url}
+                packName={pack.name}
+                sounds={pack.sounds ?? []}
+              />
             </section>
           )}
         </div>

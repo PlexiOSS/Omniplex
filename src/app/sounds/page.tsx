@@ -1,11 +1,12 @@
 "use client";
 
-import { Layers, Music, Play, Square } from "lucide-react";
+import { Layers, Music, Pause, Play } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import { Container } from "@/components/layout/Container";
 import { Pagination } from "@/components/search/Pagination";
+import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 import { sounds } from "@/lib/api";
 import type { FlatPackSound } from "@/lib/api/types";
 import { packSoundUrl } from "@/lib/utils/assets";
@@ -15,23 +16,22 @@ export default function SoundsPage() {
   const { data, isLoading, error } = useSWR(`sounds/all/${page}`, () =>
     sounds.getAll(page),
   );
-  const [playingId, setPlayingId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { track, isPlaying, play, togglePlayPause } = useSoundPlayer();
 
   const results = data?.results ?? [];
 
-  function togglePlay(sound: FlatPackSound) {
-    if (playingId === sound.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
+  function handleClick(sound: FlatPackSound) {
+    if (track?.id === sound.id) {
+      togglePlayPause();
       return;
     }
-    audioRef.current?.pause();
-    const audio = new Audio(packSoundUrl(sound.pack_url, sound.id));
-    audio.addEventListener("ended", () => setPlayingId(null));
-    audioRef.current = audio;
-    audio.play().catch(() => setPlayingId(null));
-    setPlayingId(sound.id);
+    play({
+      id: sound.id,
+      name: sound.name,
+      url: packSoundUrl(sound.pack_url, sound.id),
+      packUrl: sound.pack_url,
+      packName: sound.pack_name,
+    });
   }
 
   return (
@@ -72,32 +72,31 @@ export default function SoundsPage() {
       ) : (
         <>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3">
-            {results.map((sound) => (
-              <div
-                key={sound.id}
-                title={`${sound.name} from ${sound.pack_name}`}
-                className="group flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-center transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
-              >
-                <button
-                  type="button"
-                  onClick={() => togglePlay(sound)}
-                  aria-label={playingId === sound.id ? "Stop" : "Play"}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-accent/10 hover:text-accent dark:bg-zinc-800 dark:text-zinc-300"
+            {results.map((sound) => {
+              const active = track?.id === sound.id && isPlaying;
+              return (
+                <div
+                  key={sound.id}
+                  title={`${sound.name} from ${sound.pack_name}`}
+                  className="group flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-center transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
                 >
-                  {playingId === sound.id ? (
-                    <Square size={14} />
-                  ) : (
-                    <Play size={14} />
-                  )}
-                </button>
-                <Link
-                  href={`/sounds/${sound.id}`}
-                  className="w-full truncate text-[11px] text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
-                >
-                  {sound.name}
-                </Link>
-              </div>
-            ))}
+                  <button
+                    type="button"
+                    onClick={() => handleClick(sound)}
+                    aria-label={active ? "Pause" : "Play"}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-accent/10 hover:text-accent dark:bg-zinc-800 dark:text-zinc-300"
+                  >
+                    {active ? <Pause size={14} /> : <Play size={14} />}
+                  </button>
+                  <Link
+                    href={`/sounds/${sound.id}`}
+                    className="w-full truncate text-[11px] text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
+                  >
+                    {sound.name}
+                  </Link>
+                </div>
+              );
+            })}
           </div>
 
           {data && data.count > data.per_page && (

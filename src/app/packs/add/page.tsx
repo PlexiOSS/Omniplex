@@ -92,6 +92,12 @@ function AddPackForm() {
   const [emojis, setEmojis] = useState<PackEmojiInput[]>([]);
   const [stickers, setStickers] = useState<PackStickerInput[]>([]);
   const [sounds, setSounds] = useState<PackSoundInput[]>([]);
+  // Each item is uploaded to S3 keyed by the pack URL field's value *at that
+  // moment* (see uploads/route.ts's key() functions) -- editing the URL
+  // afterward doesn't move or re-upload anything already stored, so once an
+  // item exists the field is locked to prevent silently orphaning it.
+  const hasUploadedItems =
+    emojis.length > 0 || stickers.length > 0 || sounds.length > 0;
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<PickedEntity[]>([]);
@@ -264,8 +270,17 @@ function AddPackForm() {
             onChange={(e) =>
               setForm((f) => ({ ...f, url: e.target.value.trim() }))
             }
+            disabled={hasUploadedItems}
             required
           />
+          {hasUploadedItems ? (
+            <p className="-mt-3 text-xs text-zinc-400 dark:text-zinc-600">
+              Can't be changed once you've uploaded an item -- each upload is
+              stored under this URL, so editing it afterward would leave those
+              files unreachable. Remove all items first if you need a different
+              URL.
+            </p>
+          ) : null}
 
           <div className="flex flex-col gap-1.5">
             <label

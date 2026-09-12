@@ -28,7 +28,7 @@ export async function headObject(key: string): Promise<ObjectMeta | null> {
     );
     return { etag: res.ETag, lastModified: res.LastModified };
   } catch (err) {
-    logUnlessNotFound(key, err);
+    logUnlessNotFound("headObject", key, err);
     return null;
   }
 }
@@ -48,7 +48,7 @@ export async function getObject(key: string): Promise<FetchedObject | null> {
       etag: res.ETag,
     };
   } catch (err) {
-    logUnlessNotFound(key, err);
+    logUnlessNotFound("getObject", key, err);
     return null;
   }
 }
@@ -74,11 +74,11 @@ export async function putObject(
   }
 }
 
-function logUnlessNotFound(key: string, err: unknown): void {
+function logUnlessNotFound(op: string, key: string, err: unknown): void {
   const name =
     err && typeof err === "object"
       ? (err as { name?: string }).name
       : undefined;
   if (name === "NoSuchKey" || name === "NotFound") return;
-  console.error(`[s3] getObject(${key}) failed:`, err);
+  console.error(`[s3] ${op}(${key}) failed:`, err);
 }

@@ -75,7 +75,13 @@ export default async function SoundPage({ params }: Props) {
         {/* Main */}
         <div className="min-w-0">
           <div className="flex items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 py-16 dark:border-zinc-800 dark:bg-zinc-900">
-            <PlaySoundButton assetUrl={assetUrl} />
+            <PlaySoundButton
+              id={sound.id}
+              name={sound.name}
+              assetUrl={assetUrl}
+              packUrl={sound.pack_url}
+              packName={sound.pack_name}
+            />
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">

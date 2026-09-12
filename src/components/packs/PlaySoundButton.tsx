@@ -1,40 +1,48 @@
 "use client";
 
-import { Play, Square } from "lucide-react";
-import { useRef, useState } from "react";
+import { Pause, Play } from "lucide-react";
+import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 
 interface PlaySoundButtonProps {
+  id: string;
+  name: string;
   assetUrl: string;
+  packUrl?: string;
+  packName?: string;
 }
 
-/** Large centered play/stop control -- StickerPage's counterpart to a
- * full-size image preview, since there's nothing to show a sound clip as a
- * picture of. */
-export function PlaySoundButton({ assetUrl }: PlaySoundButtonProps) {
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+/** Large centered play/pause control -- the sound detail page's counterpart
+ * to a full-size image preview, since there's nothing to show a sound clip
+ * as a picture of. Goes through the shared SoundPlayerProvider so playing
+ * from here and playing from a pack grid or the /sounds browse page all
+ * share one player (and one "what's currently loaded" state) instead of
+ * fighting over separate `Audio()` instances. */
+export function PlaySoundButton({
+  id,
+  name,
+  assetUrl,
+  packUrl,
+  packName,
+}: PlaySoundButtonProps) {
+  const { track, isPlaying, play, togglePlayPause } = useSoundPlayer();
+  const active = track?.id === id && isPlaying;
 
-  function toggle() {
-    if (playing) {
-      audioRef.current?.pause();
-      setPlaying(false);
+  function handleClick() {
+    if (track?.id === id) {
+      togglePlayPause();
       return;
     }
-    const audio = new Audio(assetUrl);
-    audio.addEventListener("ended", () => setPlaying(false));
-    audioRef.current = audio;
-    audio.play().catch(() => setPlaying(false));
-    setPlaying(true);
+    play({ id, name, url: assetUrl, packUrl, packName });
   }
 
   return (
     <button
       type="button"
-      onClick={toggle}
-      aria-label={playing ? "Stop" : "Play"}
+      onClick={handleClick}
+      aria-label={active ? "Pause" : "Play"}
       className="flex h-24 w-24 items-center justify-center rounded-full bg-accent/10 text-accent transition-colors hover:bg-accent/20"
     >
-      {playing ? <Square size={32} /> : <Play size={32} className="ml-1" />}
+      {active ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
     </button>
   );
 }
