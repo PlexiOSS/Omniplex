@@ -14,11 +14,6 @@ const ALLOWED_TYPES = new Set([
   "image/gif",
 ]);
 
-// Sound packs bundle short audio clips instead of images. Unlike
-// emoji/sticker (which infer their extension from the `animated` flag),
-// pack_sounds stores no format column at all -- so uploads are restricted
-// to a single fixed format (MP3) rather than adding one, the same way this
-// endpoint keeps every other kind's extension a small fixed set.
 const ALLOWED_AUDIO_TYPE = "audio/mpeg";
 const AUDIO_EXTENSION = "mp3";
 
@@ -32,10 +27,6 @@ type Kind =
   | "pack-sticker"
   | "pack-sound";
 
-/** pack-emoji, pack-sticker, and pack-sound all skip the normal
- * entity-permission check (see the pack-ownership branch below) and share
- * the tighter per-item size cap -- checked in a few places below instead
- * of listing every kind out each time. */
 function isPackAssetKind(
   kind: Kind,
 ): kind is "pack-emoji" | "pack-sticker" | "pack-sound" {
@@ -45,28 +36,15 @@ function isPackAssetKind(
 }
 
 interface KindConfig {
-  /**
-   * Builds the storage key. `targetId` is the entity the permission check
-   * runs against (a pack's URL, for pack-emoji/pack-sticker); `assetId` is
-   * only set for kinds where one target can hold many separate uploads (a
-   * pack's many emojis/stickers) and is otherwise unused.
-   */
   key: (targetId: string, assetId?: string) => string;
   perm: string;
   requiresStaff: boolean;
   popplioTargetType?: "team" | "bot" | "server" | "pack";
-  /** Overrides the global 5MB cap for kinds that need a tighter one. */
   maxBytes?: number;
 }
 
-// Discord's own per-emoji cap (applies to static and animated alike) — pack
-// emojis follow the same limit rather than the much looser 5MB used for
-// banners, since these are meant to actually behave like real emojis.
 const EMOJI_MAX_BYTES = 256 * 1024;
 
-// Sound clips are meant to be short soundboard-style effects, not music
-// tracks -- generous enough for a few seconds of audio at a reasonable
-// bitrate without approaching the general 5MB banner cap.
 const SOUND_MAX_BYTES = 2 * 1024 * 1024;
 
 const KIND_CONFIG: Record<Kind, KindConfig> = {
@@ -100,8 +78,6 @@ const KIND_CONFIG: Record<Kind, KindConfig> = {
     popplioTargetType: "server",
   },
   "pack-emoji": {
-    // Extension is appended separately (see assetId handling below) since
-    // it depends on whether the emoji is animated, not just its ID.
     key: (packUrl, assetId) => `emojis/packs/${packUrl}/${assetId}`,
     perm: "edit_packs",
     requiresStaff: false,
@@ -116,8 +92,6 @@ const KIND_CONFIG: Record<Kind, KindConfig> = {
     maxBytes: EMOJI_MAX_BYTES,
   },
   "pack-sound": {
-    // Extension is appended separately (see assetId handling below) since
-    // it depends on the uploaded audio's mime type.
     key: (packUrl, assetId) => `sounds/packs/${packUrl}/${assetId}`,
     perm: "edit_packs",
     requiresStaff: false,
@@ -130,22 +104,6 @@ function isKind(value: unknown): value is Kind {
   return typeof value === "string" && value in KIND_CONFIG;
 }
 
-/**
- * Single upload endpoint for every image-upload surface in the app (partner
- * logos, team avatar/banner, bot/server banner, pack emojis/stickers). Two
- * things
- * every caller must prove before a single byte reaches the bucket:
- *
- * 1. Identity either an Arcadia staff `loginToken` (verified via
- *    `arcadia.hello`, same call the admin panel already makes on every
- *    page load) or a Popplio user session token (verified via
- *    `POST /auth/test` against targetType "user", the same primitive the
- *    token-test button uses elsewhere in the app).
- * 2. Permission on *that specific target* re-checked here server-side via
- *    Popplio's public `GET /users/{id}/{type}/{id}/perms` (staff perms come
- *    back directly from `hello`). Client-side `hasPermString` checks only
- *    ever gated the UI, never the actual write this is the real boundary.
- */
 export async function POST(req: Request) {
   const form = await req.formData();
 
@@ -265,17 +223,6 @@ export async function POST(req: Request) {
     }
 
     if (isPackAssetKind(kind)) {
-      // Packs have no team-based permission system -- a BotPack has a
-      // single `owner` field, checked directly against the requester by
-      // Popplio's own add_pack/patch_pack handlers, not resolved through
-      // GetEntityPerms the way bot/server/team perms are. Uploading an
-      // emoji or sticker also happens *before* the pack exists (the client
-      // uploads each item first, then submits the pack that references
-      // them), so GetEntityPerms would always fail with "pack not found"
-      // here -- creating a pack at any free URL takes no special
-      // permission to begin with (see add_pack's own ExtData), so a
-      // not-yet-created pack is allowed through; an existing pack still
-      // requires being its actual owner.
       const existingPack = await client
         .get<BotPack>(`/packs/${targetId}`, { cache: "no-store" })
         .catch((err) => {
@@ -304,7 +251,18 @@ export async function POST(req: Request) {
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  await putObject(config.key(targetId, assetId), bytes, file.type);
+  const wrote = await putObject(
+    config.key(targetId, assetId),
+    bytes,
+    file.type,
+  );
+
+  if (!wrote) {
+    return NextResponse.json(
+      { error: "Failed to store the uploaded file. Please try again." },
+      { status: 502 },
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

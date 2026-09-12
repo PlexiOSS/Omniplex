@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import {
   GetObjectCommand,
@@ -57,7 +57,7 @@ export async function putObject(
   key: string,
   body: Uint8Array,
   contentType: string,
-): Promise<void> {
+): Promise<boolean> {
   try {
     await getS3Client().send(
       new PutObjectCommand({
@@ -67,8 +67,10 @@ export async function putObject(
         ContentType: contentType,
       }),
     );
+    return true;
   } catch (err) {
     console.error(`[s3] putObject(${key}) failed:`, err);
+    return false;
   }
 }
 

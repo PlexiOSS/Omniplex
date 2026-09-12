@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import { S3Client } from "@aws-sdk/client-s3";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
@@ -11,7 +11,15 @@ import {
 
 let client: S3Client | null = null;
 
-const REQUEST_TIMEOUT_MS = 2500;
+// Uploads (banners, avatars, pack emojis/stickers/sounds) go up to 5MB
+// (MAX_BYTES in app/api/uploads/route.ts). A 2500ms request timeout with
+// zero retries left almost no margin for a brief hiccup on either end of a
+// PUT that size, and every such hiccup used to silently drop the write
+// (putObject swallowed the error instead of surfacing it). Reads are much
+// smaller, so the larger timeout costs nothing there; maxAttempts retries a
+// transient failure instead of failing outright on the first blip.
+const CONNECTION_TIMEOUT_MS = 2500;
+const REQUEST_TIMEOUT_MS = 15000;
 
 export function getS3Client(): S3Client {
   if (!client) {
@@ -29,10 +37,10 @@ export function getS3Client(): S3Client {
       },
       forcePathStyle: true,
       requestHandler: new NodeHttpHandler({
-        connectionTimeout: REQUEST_TIMEOUT_MS,
+        connectionTimeout: CONNECTION_TIMEOUT_MS,
         requestTimeout: REQUEST_TIMEOUT_MS,
       }),
-      maxAttempts: 1,
+      maxAttempts: 3,
       requestChecksumCalculation: "WHEN_REQUIRED",
       responseChecksumValidation: "WHEN_REQUIRED",
     });
