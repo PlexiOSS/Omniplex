@@ -272,7 +272,10 @@ export default async function ServerPage({ params }: Props) {
                 {server.team_owner ? "Team" : "Owner"}
               </h3>
               {server.team_owner ? (
-                <div className="flex items-center gap-2.5">
+                <Link 
+                  href={`/teams/${server.team_owner.id}`}
+                  className="flex items-center gap-2.5"
+                >
                   <Avatar
                     src={teamAvatarUrl(server.team_owner.id)}
                     alt={server.team_owner.name}
@@ -281,7 +284,7 @@ export default async function ServerPage({ params }: Props) {
                   <span className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
                     {server.team_owner.name}
                   </span>
-                </div>
+                </Link>
               ) : (
                 owner?.user && (
                   <Link
