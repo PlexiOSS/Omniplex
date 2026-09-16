@@ -1,9 +1,10 @@
 // Copyright (C) 2026 NodeByte LTD
 
+import http from "node:http";
+import https from "node:https";
 import { S3Client } from "@aws-sdk/client-s3";
+import { ConfiguredRetryStrategy } from "@aws-sdk/util-retry";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
-import { StandardRetryStrategy } from "@aws-sdk/middleware-retry";
-import Agent, { HttpsAgent } from "agentkeepalive";
 import {
   S3_ACCESS_KEY_ID,
   S3_ENDPOINT,
@@ -16,18 +17,18 @@ let client: S3Client | null = null;
 const CONNECTION_TIMEOUT_MS = 5000;
 const REQUEST_TIMEOUT_MS = 30000;
 
-const httpAgent = new Agent({
+const httpAgent = new http.Agent({
+  keepAlive: true,
   maxSockets: 50,
   maxFreeSockets: 10,
   timeout: 60000,
-  freeSocketTimeout: 30000,
 });
 
-const httpsAgent = new HttpsAgent({
+const httpsAgent = new https.Agent({
+  keepAlive: true,
   maxSockets: 50,
   maxFreeSockets: 10,
   timeout: 60000,
-  freeSocketTimeout: 30000,
 });
 
 export function getS3Client(): S3Client {
@@ -51,7 +52,7 @@ export function getS3Client(): S3Client {
         httpAgent,
         httpsAgent,
       }),
-      retryStrategy: new StandardRetryStrategy(async () => 3),
+      retryStrategy: new ConfiguredRetryStrategy(3),
       requestChecksumCalculation: "WHEN_REQUIRED",
       responseChecksumValidation: "WHEN_REQUIRED",
     });
