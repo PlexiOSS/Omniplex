@@ -26,7 +26,6 @@ export const botsResource = {
       cache: "no-store",
     }),
 
-  /** Minimal metadata for generateMetadata() — avoids a full getBot() fetch. */
   getSeo: (id: string) =>
     client.get<SEO>(`/bots/${id}/seo`, { cache: "no-store" }),
 
@@ -41,11 +40,9 @@ export const botsResource = {
       cache: "no-store",
     }),
 
-  /** Other bots sharing at least one tag, ranked by how many they share. */
   getSimilar: (id: string) =>
     client.get<IndexBot[]>(`/bots/${id}/similar`, { cache: "no-store" }),
 
-  /** Pass include=long to get the long description */
   getBot: (id: string) =>
     client.get<Bot>(`/bots/${id}?include=long`, {
       cache: "no-store",
@@ -73,11 +70,9 @@ export const botsResource = {
   deleteBot: (botId: string, token: string) =>
     client.delete<void>(`/bots/${botId}`, { token }),
 
-  // Note: the backend returns 204 No Content on success, not the created bot.
   createBot: (payload: import("../types").CreateBotPayload, token: string) =>
     client.put<void>("/bots", payload, { token }),
 
-  /** Resolves a client ID to the bot's real Discord name/avatar/status, ahead of submitting Add Bot. */
   getBotMeta: (clientId: string, token: string, fallbackBotId?: string) =>
     client.get<DiscordBotMeta>(
       `/bots/${clientId}/meta${fallbackBotId ? `?fallback_bot_id=${fallbackBotId}` : ""}`,
@@ -87,9 +82,6 @@ export const botsResource = {
   updateBot: (botId: string, payload: BotSettingsUpdate, token: string) =>
     client.patch<void>(`/bots/${botId}/settings`, payload, { token }),
 
-  /** Transfers a bot to a different team. Requires "Delete Bots" on the bot's
-   * current team and "Add Bots" on the destination team — servers have no
-   * equivalent endpoint. */
   transferTeam: (
     userId: string,
     botId: string,
@@ -105,7 +97,6 @@ export const botsResource = {
       cache: "no-store",
     }),
 
-  /** Replaces the whole command list — same "PUT the full array" convention as extra_links. */
   updateCommands: (botId: string, commands: BotCommandInput[], token: string) =>
     client.put<void>(`/bots/${botId}/commands`, { commands }, { token }),
 
@@ -114,14 +105,12 @@ export const botsResource = {
       cache: "no-store",
     }),
 
-  /** Sitewide feed across every bot's changelog entries, newest first. */
   getChangelogFeed: (page = 1) =>
     client.get<PagedResult<BotChangelogFeedEntry[]>>(
       `/bots/@changelogs?page=${page}`,
       { cache: "no-store" },
     ),
 
-  /** Cross-bot command search -- "who has a /giveaway command." */
   searchCommands: (query: string, page = 1) =>
     client.get<PagedResult<BotCommandSearchResult[]>>(
       `/bots/@commands?query=${encodeURIComponent(query)}&page=${page}`,

@@ -5,6 +5,7 @@ import {
   HeadObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import type { Readable } from "node:stream";
 import { getS3Client } from "./client";
 import { S3_BUCKET } from "./config";
 
@@ -39,9 +40,14 @@ export async function getObject(key: string): Promise<FetchedObject | null> {
       new GetObjectCommand({ Bucket: S3_BUCKET, Key: key }),
     );
     if (!res.Body) return null;
+
+    const sdkStream = res.Body as Readable & { transformToWebStream?: () => ReadableStream };
+    const webStream = typeof sdkStream.transformToWebStream === "function"
+      ? sdkStream.transformToWebStream()
+      : (sdkStream as unknown as ReadableStream);
+
     return {
-      // biome-ignore lint/suspicious/noExplicitAny: SdkStreamMixin isn't exported as a usable type here
-      stream: (res.Body as any).transformToWebStream(),
+      stream: webStream,
       contentType: res.ContentType ?? "application/octet-stream",
       contentLength: res.ContentLength,
       lastModified: res.LastModified,
@@ -55,16 +61,19 @@ export async function getObject(key: string): Promise<FetchedObject | null> {
 
 export async function putObject(
   key: string,
-  body: Uint8Array,
+  body: Buffer | Uint8Array,
   contentType: string,
 ): Promise<boolean> {
   try {
+    const payload = Buffer.isBuffer(body) ? body : Buffer.from(body.buffer, body.byteOffset, body.byteLength);
+
     await getS3Client().send(
       new PutObjectCommand({
         Bucket: S3_BUCKET,
         Key: key,
-        Body: body,
+        Body: payload,
         ContentType: contentType,
+        ContentLength: payload.length,
       }),
     );
     return true;
@@ -75,10 +84,16 @@ export async function putObject(
 }
 
 function logUnlessNotFound(op: string, key: string, err: unknown): void {
-  const name =
-    err && typeof err === "object"
-      ? (err as { name?: string }).name
-      : undefined;
-  if (name === "NoSuchKey" || name === "NotFound") return;
+  if (err && typeof err === "object") {
+    const e = err as { name?: string; $metadata?: { httpStatusCode?: number } };
+    
+    if (
+      e.name === "NoSuchKey" ||
+      e.name === "NotFound" ||
+      e.$metadata?.httpStatusCode === 404
+    ) {
+      return;
+    }
+  }
   console.error(`[s3] ${op}(${key}) failed:`, err);
 }

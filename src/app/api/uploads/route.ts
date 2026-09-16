@@ -44,7 +44,6 @@ interface KindConfig {
 }
 
 const EMOJI_MAX_BYTES = 256 * 1024;
-
 const SOUND_MAX_BYTES = 2 * 1024 * 1024;
 
 const KIND_CONFIG: Record<Kind, KindConfig> = {
@@ -105,7 +104,15 @@ function isKind(value: unknown): value is Kind {
 }
 
 export async function POST(req: Request) {
-  const form = await req.formData();
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid form data or upload body interrupted." },
+      { status: 400 },
+    );
+  }
 
   const kind = form.get("kind");
   const targetId = form.get("targetId");
@@ -215,6 +222,7 @@ export async function POST(req: Request) {
     const testResult = await auth
       .testAuth("user", userId, token)
       .catch(() => null);
+
     if (!testResult?.authorized) {
       return NextResponse.json(
         { error: "Invalid or expired session." },
@@ -238,7 +246,7 @@ export async function POST(req: Request) {
       }
     } else {
       const entityPerms = await teams
-        // biome-ignore lint/style/noNonNullAssertion: every non-staff, non-pack-emoji Kind sets this
+        // biome-ignore lint/style/noNonNullAssertion: guaranteed non-null
         .getEntityPerms(userId, config.popplioTargetType!, targetId)
         .catch(() => ({ perms: [] }));
       if (!hasPermString(entityPerms.perms, config.perm)) {
@@ -250,10 +258,11 @@ export async function POST(req: Request) {
     }
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
+  const buffer = Buffer.from(await file.arrayBuffer());
+  
   const wrote = await putObject(
     config.key(targetId, assetId),
-    bytes,
+    buffer,
     file.type,
   );
 

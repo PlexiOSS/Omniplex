@@ -54,14 +54,8 @@ async function request<T>(
     let body: ApiErrorBody = { message: res.statusText };
     try {
       body = (await res.json()) as ApiErrorBody;
-    } catch {
-      // keep default
-    }
+    } catch {}
 
-    // Popplio sets this header specifically when the session token itself is
-    // dead (expired/revoked), as opposed to a generic 401/403 for some other
-    // reason. Bounce the user back through login instead of leaving them in
-    // a state where the app thinks they're signed in but every request 401s.
     if (token && res.headers.get("X-Session-Invalid") === "true") {
       handleInvalidSession();
     }
@@ -73,7 +67,6 @@ async function request<T>(
     );
   }
 
-  // 204 No Content
   if (res.status === 204) return undefined as T;
 
   return res.json() as Promise<T>;
