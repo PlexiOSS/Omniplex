@@ -3,7 +3,6 @@
 import http from "node:http";
 import https from "node:https";
 import { S3Client } from "@aws-sdk/client-s3";
-import { ConfiguredRetryStrategy } from "@aws-sdk/util-retry";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import {
   S3_ACCESS_KEY_ID,
@@ -52,7 +51,7 @@ export function getS3Client(): S3Client {
         httpAgent,
         httpsAgent,
       }),
-      retryStrategy: new ConfiguredRetryStrategy(3),
+      maxAttempts: 3,
       requestChecksumCalculation: "WHEN_REQUIRED",
       responseChecksumValidation: "WHEN_REQUIRED",
     });
