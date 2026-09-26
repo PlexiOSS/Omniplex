@@ -12,6 +12,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BotPageTabs } from "@/components/bots/BotPageTabs";
+import { InvitePermissionNote } from "@/components/bots/InvitePermissionNote";
 import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
@@ -129,6 +130,7 @@ export default async function BotPage({ params }: Props) {
             Add to Server
           </a>
         )}
+        {bot.invite && <InvitePermissionNote invite={bot.invite} />}
         <VoteButton
           botId={bot.bot_id}
           currentVotes={bot.approximate_votes}

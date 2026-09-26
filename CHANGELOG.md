@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Bot pages now show whether a bot's invite requests Administrator, right
+  under "Add to Server". The permissions are read from the bot's existing
+  invite URL, so no API change was needed. Bots that don't request it show
+  a quiet "Doesn't request Administrator" line with the permission count.
+  Bots that do get a warning explaining it can be unticked on Discord's
+  invite screen. Both link to the full report on noadmin.info. Invites
+  without a `permissions` value show nothing.
+
 ### Fixed
 
 - Pending and denied bot and server pages are no longer public. Owners,
