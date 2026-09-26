@@ -15,6 +15,7 @@ import { BotPageTabs } from "@/components/bots/BotPageTabs";
 import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
@@ -33,6 +34,7 @@ import {
 } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
+import { getServerToken } from "@/lib/utils/serverSession";
 import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
 import { VoteButton } from "./VoteButton";
 
@@ -40,14 +42,14 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-async function fetchBot(id: string) {
+async function fetchBot(id: string, token?: string) {
   try {
-    return await bots.getBot(id);
+    return await bots.getBot(id, token);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       const resolved = await vanity.resolve(id).catch(() => null);
       if (resolved?.target_type === "bot") {
-        return bots.getBot(resolved.target_id);
+        return bots.getBot(resolved.target_id, token);
       }
     }
     throw err;
@@ -82,7 +84,7 @@ export default async function BotPage({ params }: Props) {
   const { id } = await params;
   let bot = null;
   try {
-    bot = await fetchBot(id);
+    bot = await fetchBot(id, await getServerToken());
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
     notFound();
@@ -146,6 +148,8 @@ export default async function BotPage({ params }: Props) {
         <ArrowLeft size={14} />
         Back to bots
       </Link>
+
+      <UnlistedNotice type={bot.type} entityLabel="bot" />
 
       <Banner
         src={bannerUrl("bots", bot.bot_id, bot.asset_versions?.banner)}

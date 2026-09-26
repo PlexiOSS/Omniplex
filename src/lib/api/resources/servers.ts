@@ -46,8 +46,9 @@ export const serversResource = {
       { cache: "no-store" },
     ),
 
-  getServer: (id: string) =>
+  getServer: (id: string, token?: string) =>
     client.get<Server>(`/servers/${id}?include=long`, {
+      token,
       cache: "no-store",
     }),
 

@@ -49,6 +49,7 @@ export type BotType =
   | "denied"
   | "banned"
   | "under_review"
+  | "claimed"
   | "pending";
 
 export interface AssetVersions {
@@ -220,7 +221,7 @@ export interface IndexServer {
   total_members: number;
   online_members: number;
   short: string;
-  type: "approved" | "certified" | "pending";
+  type: BotType;
   state: ServerState;
   vanity_ref: string;
   vanity: string;

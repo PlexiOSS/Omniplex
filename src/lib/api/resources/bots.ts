@@ -43,8 +43,9 @@ export const botsResource = {
   getSimilar: (id: string) =>
     client.get<IndexBot[]>(`/bots/${id}/similar`, { cache: "no-store" }),
 
-  getBot: (id: string) =>
+  getBot: (id: string, token?: string) =>
     client.get<Bot>(`/bots/${id}?include=long`, {
+      token,
       cache: "no-store",
     }),
 

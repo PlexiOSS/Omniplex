@@ -14,10 +14,11 @@ import type {
 } from "../types";
 
 export const teamsResource = {
-  getTeam: (id: string) =>
-    client.get<Team>(`/teams/${id}?targets=team_member,bot,server`, {
-      next: { revalidate: 30 },
-    }),
+  getTeam: (id: string, token?: string) =>
+    client.get<Team>(
+      `/teams/${id}?targets=team_member,bot,server`,
+      token ? { token, cache: "no-store" } : { next: { revalidate: 30 } },
+    ),
 
   getSeo: (id: string) =>
     client.get<SEO>(`/teams/${id}/seo`, { next: { revalidate: 30 } }),

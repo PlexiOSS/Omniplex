@@ -74,7 +74,7 @@ export default function TeamSettingsPage() {
     if (!session) return;
     try {
       const [teamRes, catalogRes, permsRes] = await Promise.all([
-        teams.getTeam(teamId),
+        teams.getTeam(teamId, session.token),
         teams.getPermissionCatalog(),
         teams.getEntityPerms(session.user_id, "team", teamId),
       ]);

@@ -23,7 +23,7 @@ We don't run third-party ad trackers or sell your data. We don't collect anythin
 
 ## How your session works
 
-Signing in stores a session token in your browser's local storage, not a tracking cookie. It's what keeps you signed in between visits, and it's specific to your device. Signing out or clearing site data on one device doesn't affect any other. We also store a few local preferences this way, like your theme and accent color, which never leave your browser.
+Signing in stores a session token in your browser's local storage and in a first-party cookie. The cookie is only ever sent back to Omniplex itself, so our pages can show you things only you're allowed to see, like your own listings that are still awaiting review. Neither is used for tracking or advertising. The token is what keeps you signed in between visits, and it's specific to your device. Signing out or clearing site data on one device doesn't affect any other. We also store a few local preferences this way, like your theme and accent color, which never leave your browser.
 
 ## Why we collect it
 

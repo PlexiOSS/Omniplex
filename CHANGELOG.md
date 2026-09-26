@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Pending and denied bot and server pages are no longer public. Owners,
+  team members and staff still see them, with a notice explaining the
+  listing is hidden and can't receive votes, reviews or shop perks yet.
+  To make that work on server-rendered pages, signing in now also stores
+  the session token in a first-party `omniplex_session` cookie (existing
+  sessions get it automatically on the next visit). Bot, server, team and
+  user pages forward it to Popplio. Token-bearing requests are never
+  cached, and embeds, OG images and widgets stay anonymous.
+- Claimed bots now show an "In Review" badge on the dashboard.
+
 - When japi.rest is unreachable (for example Cloudflare 522s from the
   region our servers route through), the avatar fallback and Discord
   banner lookups now skip japi for 60s after the first failure instead of

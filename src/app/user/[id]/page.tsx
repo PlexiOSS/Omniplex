@@ -12,6 +12,7 @@ import { badges as badgesApi, users } from "@/lib/api";
 import type { Link as ApiLink } from "@/lib/api/types";
 import { badgeColor, badgeIcon } from "@/lib/constants/badgeIcons";
 import { discordBannerUrl, mirroredAvatarUrl } from "@/lib/utils/assets";
+import { getServerToken } from "@/lib/utils/serverSession";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -64,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function UserPage({ params }: Props) {
   const { id } = await params;
   const [user, badgeData] = await Promise.all([
-    users.getUser(id).catch(() => null),
+    users.getUser(id, await getServerToken()).catch(() => null),
     badgesApi.getForEntity("user", id).catch(() => null),
   ]);
   if (!user) notFound();

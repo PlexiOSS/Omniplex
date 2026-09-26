@@ -17,6 +17,7 @@ import { hasPermString } from "@/lib/permissions";
 import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
+import { getServerToken } from "@/lib/utils/serverSession";
 import { TeamVoteButton } from "./TeamVoteButton";
 
 interface Props {
@@ -37,7 +38,7 @@ export default async function TeamPage({ params }: Props) {
   const { id } = await params;
   let team = null;
   try {
-    team = await teams.getTeam(id);
+    team = await teams.getTeam(id, await getServerToken());
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
     notFound();

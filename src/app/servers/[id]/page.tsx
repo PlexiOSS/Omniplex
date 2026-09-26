@@ -15,6 +15,7 @@ import { notFound } from "next/navigation";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
@@ -33,6 +34,7 @@ import {
 } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
+import { getServerToken } from "@/lib/utils/serverSession";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
 import { ServerVoteButton } from "./ServerVoteButton";
 
@@ -40,14 +42,14 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-async function fetchServer(id: string) {
+async function fetchServer(id: string, token?: string) {
   try {
-    return await servers.getServer(id);
+    return await servers.getServer(id, token);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       const resolved = await vanity.resolve(id).catch(() => null);
       if (resolved?.target_type === "server") {
-        return servers.getServer(resolved.target_id);
+        return servers.getServer(resolved.target_id, token);
       }
     }
     throw err;
@@ -82,7 +84,7 @@ export default async function ServerPage({ params }: Props) {
   const { id } = await params;
   let server = null;
   try {
-    server = await fetchServer(id);
+    server = await fetchServer(id, await getServerToken());
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
     notFound();
@@ -154,6 +156,8 @@ export default async function ServerPage({ params }: Props) {
         <ArrowLeft size={14} />
         Back to servers
       </Link>
+
+      <UnlistedNotice type={server.type} entityLabel="server" />
 
       <Banner
         src={bannerUrl(

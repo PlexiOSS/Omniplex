@@ -93,6 +93,7 @@ const BOT_STATUS: Record<
   certified: null,
   pending: { label: "Pending", variant: "warning" },
   under_review: { label: "Under Review", variant: "warning" },
+  claimed: { label: "In Review", variant: "warning" },
   denied: { label: "Denied", variant: "danger" },
   banned: { label: "Banned", variant: "danger" },
 };
@@ -541,7 +542,9 @@ function BotItem({
                 icon={<Megaphone size={14} />}
                 onClick={() => {
                   setMenuOpen(false);
-                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=changelog`);
+                  router.push(
+                    `/bots/${bot.vanity || bot.bot_id}?tab=changelog`,
+                  );
                 }}
               >
                 Changelog
