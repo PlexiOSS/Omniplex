@@ -1,6 +1,7 @@
 export { ApiError, client } from "./client";
 export { alertsResource as alerts } from "./resources/alerts";
 export { appsResource as apps } from "./resources/apps";
+export { assetsResource as assets } from "./resources/assets";
 export { authResource as auth } from "./resources/auth";
 export { badgesResource as badges } from "./resources/badges";
 export { blogsResource as blogs } from "./resources/blogs";

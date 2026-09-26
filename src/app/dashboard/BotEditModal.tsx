@@ -104,7 +104,9 @@ function BotEditForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [bannerVersion, setBannerVersion] = useState(0);
+  const [bannerVersion, setBannerVersion] = useState<string | null>(
+    bot.asset_versions?.banner ?? null,
+  );
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [bannerError, setBannerError] = useState<string | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -116,8 +118,9 @@ function BotEditForm({
     setUploadingBanner(true);
     setBannerError(null);
     try {
-      await uploadAsset("bot-banner", bot.bot_id, file, { userId, token });
-      setBannerVersion((v) => v + 1);
+      setBannerVersion(
+        await uploadAsset("bot-banner", bot.bot_id, file, { userId, token }),
+      );
     } catch (err) {
       setBannerError(
         err instanceof UploadError ? err.message : "Upload failed.",
@@ -189,7 +192,7 @@ function BotEditForm({
           Banner
         </p>
         <Banner
-          src={`${bannerUrl("bots", bot.bot_id)}${bannerVersion ? `?v=${bannerVersion}` : ""}`}
+          src={bannerUrl("bots", bot.bot_id, bannerVersion)}
           alt={bot.user.username}
           className="h-28 rounded-xl sm:h-36"
         />

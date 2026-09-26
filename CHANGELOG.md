@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-09-26
+
+### Added
+
+
+- Discord profile banners, via japi.rest. User profiles (`/user/[id]`)
+  show the user's Discord banner, and render nothing if they don't have
+  one. Bot pages fall back to the bot's Discord banner when no custom
+  banner has been uploaded. Served by `/cdn/discord-banner/{users,bots}/{id}`,
+  which mirrors into S3 and rechecks japi at most every 12h per
+  user/bot, including caching "has no banner". Bot cards use the same
+  fallback as the bot page, so the two always show the same banner.
+  `Banner` gained `fallbackSrc` and `hideWhenMissing` props for this.
+
+- Uploaded assets (team avatars; bot, server and team banners) now get
+  content-versioned URLs. The upload gateway hashes each file, stores
+  the hash as the S3 object's `asset-version` metadata, records it in
+  Popplio, and returns it to the uploader. Pages render
+  `/cdn/...?v=<hash>` from the entity's new `asset_versions` field, and
+  `/cdn` serves a matching `?v=` as immutable. A re-upload is a new URL,
+  so it shows up everywhere immediately. Partner logos are versioned in
+  S3 metadata only (partners are Arcadia-managed, not Popplio).
+
+### Fixed
+
+- The homepage waited for the bot/server indexes to finish before even
+  starting its stats, partners and blog requests. All five now start
+  together.
+
+
+- When the Discord avatar URL Popplio hands the mirror has gone stale (the
+  hash 404s after an avatar change), the mirror now fetches the current
+  avatar through japi.rest's avatar redirect instead of serving an old
+  copy or the placeholder. This covers users and bots; guild icons can't
+  be looked up this way.
+- The user profile page used the raw Discord avatar URL instead of the
+  avatar mirror, bypassing every fallback above.
+
+- Discord avatars and server icons could keep showing the old image for
+  up to 24h after a change. The avatar mirror only refetched once its
+  copy was a day old, even when Popplio was already returning the new
+  URL. The mirror now stores the Discord URL each copy came from and
+  refetches as soon as the requested `src` differs. It proxies Discord
+  directly when S3 is down, and falls back to the older copy (briefly
+  cached) when Discord can't serve the new one.
+- `/cdn` routes leaked pooled S3 connections. 304s and "refetch from
+  Discord" responses opened an S3 body stream and never read or closed
+  it, so under load the 50-socket pool filled up and images hung or
+  failed at random. Conditional requests are now answered by S3 itself
+  (`If-None-Match`, no body), and any unsent stream is cancelled.
+- A transient S3 error (timeout, 5xx) was reported as a 404, so browsers
+  cached a fallback image for an asset that was actually fine. S3 errors
+  now return a `no-store` 503; only a genuinely missing key is a 404.
+- Unversioned `/cdn` URLs were cached for 60s plus 300s of
+  `stale-while-revalidate`, so a re-upload looked like it hadn't
+  worked. They now revalidate on every use (a cheap 304).
+- Pack emoji/sticker/sound keys are now write-once (the upload gateway
+  rejects reusing an asset id), which lets `/cdn` serve them as
+  immutable.
+
 ## [1.1.0] - 2026-09-02
 
 ### Added

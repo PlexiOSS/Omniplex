@@ -23,11 +23,13 @@ interface TeamPickerProps {
 function teamMeta(team: Team): string {
   const parts: string[] = [];
   const memberCount = team.entities?.members?.length;
-  if (memberCount) parts.push(`${memberCount} member${memberCount === 1 ? "" : "s"}`);
+  if (memberCount)
+    parts.push(`${memberCount} member${memberCount === 1 ? "" : "s"}`);
   const botCount = team.entities?.bots?.length;
   if (botCount) parts.push(`${botCount} bot${botCount === 1 ? "" : "s"}`);
   const serverCount = team.entities?.servers?.length;
-  if (serverCount) parts.push(`${serverCount} server${serverCount === 1 ? "" : "s"}`);
+  if (serverCount)
+    parts.push(`${serverCount} server${serverCount === 1 ? "" : "s"}`);
   return parts.join(" · ");
 }
 
@@ -101,7 +103,10 @@ export function TeamPicker({
         <div className="max-h-80 space-y-2 overflow-y-auto">
           {filtered.map((team) => {
             const meta = teamMeta(team);
-            const avatarSrc = teamAvatarUrl(team.id);
+            const avatarSrc = teamAvatarUrl(
+              team.id,
+              team.asset_versions?.avatar,
+            );
             return (
               <label
                 key={team.id}
@@ -133,8 +138,8 @@ export function TeamPicker({
 
       {eligible.length === 0 && (
         <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">
-          None of your existing teams let you add {entityLabel} — you can
-          still create a new team above, or{" "}
+          None of your existing teams let you add {entityLabel} — you can still
+          create a new team above, or{" "}
           <Link
             href="/dashboard?tab=teams"
             className="text-accent underline underline-offset-2"

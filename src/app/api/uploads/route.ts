@@ -1,10 +1,16 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
-import { auth, teams } from "@/lib/api";
+import { assets, auth, teams } from "@/lib/api";
 import { ApiError, client } from "@/lib/api/client";
+import type {
+  VersionedAssetKind,
+  VersionedAssetTarget,
+} from "@/lib/api/resources/assets";
 import type { BotPack } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import { hasPermString } from "@/lib/permissions";
-import { putObject } from "@/lib/s3/objects";
+import { ASSET_VERSION_METADATA_KEY } from "@/lib/s3/config";
+import { headObject, putObject, S3UnavailableError } from "@/lib/s3/objects";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = new Set([
@@ -41,6 +47,7 @@ interface KindConfig {
   requiresStaff: boolean;
   popplioTargetType?: "team" | "bot" | "server" | "pack";
   maxBytes?: number;
+  versioned?: { target: VersionedAssetTarget; kind: VersionedAssetKind };
 }
 
 const EMOJI_MAX_BYTES = 256 * 1024;
@@ -57,24 +64,28 @@ const KIND_CONFIG: Record<Kind, KindConfig> = {
     perm: "edit_team",
     requiresStaff: false,
     popplioTargetType: "team",
+    versioned: { target: "team", kind: "avatar" },
   },
   "team-banner": {
     key: (id) => `banners/teams/${id}.webp`,
     perm: "edit_team",
     requiresStaff: false,
     popplioTargetType: "team",
+    versioned: { target: "team", kind: "banner" },
   },
   "bot-banner": {
     key: (id) => `banners/bots/${id}.webp`,
     perm: "edit_bots",
     requiresStaff: false,
     popplioTargetType: "bot",
+    versioned: { target: "bot", kind: "banner" },
   },
   "server-banner": {
     key: (id) => `banners/servers/${id}.webp`,
     perm: "edit_servers",
     requiresStaff: false,
     popplioTargetType: "server",
+    versioned: { target: "server", kind: "banner" },
   },
   "pack-emoji": {
     key: (packUrl, assetId) => `emojis/packs/${packUrl}/${assetId}`,
@@ -184,6 +195,8 @@ export async function POST(req: Request) {
     assetId = `${rawAssetId}.${animated ? "gif" : "webp"}`;
   }
 
+  let userToken: string | null = null;
+
   if (config.requiresStaff) {
     const loginToken = form.get("loginToken");
     if (typeof loginToken !== "string" || !loginToken) {
@@ -229,6 +242,7 @@ export async function POST(req: Request) {
         { status: 401 },
       );
     }
+    userToken = token;
 
     if (isPackAssetKind(kind)) {
       const existingPack = await client
@@ -259,12 +273,32 @@ export async function POST(req: Request) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  
-  const wrote = await putObject(
-    config.key(targetId, assetId),
-    buffer,
-    file.type,
-  );
+  const key = config.key(targetId, assetId);
+  const version = createHash("sha256")
+    .update(buffer)
+    .digest("hex")
+    .slice(0, 16);
+
+  if (isPackAssetKind(kind)) {
+    try {
+      if (await headObject(key)) {
+        return NextResponse.json(
+          { error: "That asset id is already in use. Upload it again." },
+          { status: 409 },
+        );
+      }
+    } catch (err) {
+      if (!(err instanceof S3UnavailableError)) throw err;
+      return NextResponse.json(
+        { error: "Storage is temporarily unavailable. Please try again." },
+        { status: 503 },
+      );
+    }
+  }
+
+  const wrote = await putObject(key, buffer, file.type, {
+    [ASSET_VERSION_METADATA_KEY]: version,
+  });
 
   if (!wrote) {
     return NextResponse.json(
@@ -273,5 +307,22 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json({ ok: true });
+  if (config.versioned && userToken) {
+    await assets
+      .putVersion(
+        config.versioned.target,
+        targetId,
+        config.versioned.kind,
+        version,
+        userToken,
+      )
+      .catch((err) => {
+        console.error(
+          `[uploads] recording ${kind} version for ${targetId} failed:`,
+          err,
+        );
+      });
+  }
+
+  return NextResponse.json({ ok: true, version });
 }

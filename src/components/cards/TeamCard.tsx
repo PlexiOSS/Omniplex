@@ -8,7 +8,7 @@ interface TeamCardProps {
 }
 
 export function TeamCard({ team }: TeamCardProps) {
-  const avatarSrc = teamAvatarUrl(team.id);
+  const avatarSrc = teamAvatarUrl(team.id, team.asset_versions?.avatar);
   return (
     <Link
       href={`/teams/${team.id}`}

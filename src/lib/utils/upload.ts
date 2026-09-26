@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 export type UploadKind =
   | "partner-logo"
@@ -18,7 +18,7 @@ export async function uploadAsset(
   targetId: string,
   file: File,
   auth: UploadAuth,
-): Promise<void> {
+): Promise<string> {
   const form = new FormData();
   form.set("kind", kind);
   form.set("targetId", targetId);
@@ -35,4 +35,9 @@ export async function uploadAsset(
     const body = await res.json().catch(() => null);
     throw new UploadError(body?.error ?? "Upload failed.");
   }
+
+  const body = (await res.json().catch(() => null)) as {
+    version?: string;
+  } | null;
+  return body?.version ?? String(Date.now());
 }

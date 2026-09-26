@@ -27,6 +27,7 @@ import { bots, reviews, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import {
   bannerUrl,
+  discordBannerUrl,
   mirroredAvatarUrl,
   teamAvatarUrl,
 } from "@/lib/utils/assets";
@@ -147,7 +148,8 @@ export default async function BotPage({ params }: Props) {
       </Link>
 
       <Banner
-        src={bannerUrl("bots", bot.bot_id)}
+        src={bannerUrl("bots", bot.bot_id, bot.asset_versions?.banner)}
+        fallbackSrc={discordBannerUrl("bots", bot.bot_id)}
         alt={bot.user.username}
         className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
       />
@@ -276,7 +278,10 @@ export default async function BotPage({ params }: Props) {
                   className="flex items-center gap-2.5"
                 >
                   <Avatar
-                    src={teamAvatarUrl(bot.team_owner.id)}
+                    src={teamAvatarUrl(
+                      bot.team_owner.id,
+                      bot.team_owner.asset_versions?.avatar,
+                    )}
                     alt={bot.team_owner.name}
                     size={32}
                   />

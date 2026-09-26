@@ -1,14 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { Upload } from "lucide-react";
+import { useRef, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
-import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { Link } from "@/lib/api/types";
+import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { Partner, PartnerType } from "@/lib/arcadia/types";
 import { partnerAvatarUrl } from "@/lib/utils/assets";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
@@ -41,7 +41,7 @@ export function PartnerEditModal({
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [logoVersion, setLogoVersion] = useState(0);
+  const [logoVersion, setLogoVersion] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -51,8 +51,9 @@ export function PartnerEditModal({
     setUploading(true);
     setUploadError(null);
     try {
-      await uploadAsset("partner-logo", id.trim(), file, { loginToken });
-      setLogoVersion((v) => v + 1);
+      setLogoVersion(
+        await uploadAsset("partner-logo", id.trim(), file, { loginToken }),
+      );
     } catch (err) {
       setUploadError(
         err instanceof UploadError ? err.message : "Upload failed.",
@@ -106,7 +107,7 @@ export function PartnerEditModal({
         {id.trim() && (
           <div className="flex items-center gap-3">
             <Avatar
-              src={`${partnerAvatarUrl(id.trim())}${logoVersion ? `?v=${logoVersion}` : ""}`}
+              src={partnerAvatarUrl(id.trim(), logoVersion)}
               alt={name || id}
               size={44}
             />

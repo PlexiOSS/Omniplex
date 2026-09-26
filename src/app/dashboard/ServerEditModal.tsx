@@ -110,7 +110,9 @@ function ServerEditForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [bannerVersion, setBannerVersion] = useState(0);
+  const [bannerVersion, setBannerVersion] = useState<string | null>(
+    server.asset_versions?.banner ?? null,
+  );
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [bannerError, setBannerError] = useState<string | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -122,11 +124,12 @@ function ServerEditForm({
     setUploadingBanner(true);
     setBannerError(null);
     try {
-      await uploadAsset("server-banner", server.server_id, file, {
-        userId,
-        token,
-      });
-      setBannerVersion((v) => v + 1);
+      setBannerVersion(
+        await uploadAsset("server-banner", server.server_id, file, {
+          userId,
+          token,
+        }),
+      );
     } catch (err) {
       setBannerError(
         err instanceof UploadError ? err.message : "Upload failed.",
@@ -191,7 +194,7 @@ function ServerEditForm({
           Banner
         </p>
         <Banner
-          src={`${bannerUrl("servers", server.server_id)}${bannerVersion ? `?v=${bannerVersion}` : ""}`}
+          src={bannerUrl("servers", server.server_id, bannerVersion)}
           alt={server.name}
           className="h-28 rounded-xl sm:h-36"
         />

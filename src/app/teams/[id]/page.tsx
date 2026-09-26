@@ -48,7 +48,7 @@ export default async function TeamPage({ params }: Props) {
     .getAll("team", team.id)
     .catch(() => ({ reviews: [] }));
 
-  const avatarSrc = teamAvatarUrl(team.id);
+  const avatarSrc = teamAvatarUrl(team.id, team.asset_versions?.avatar);
   const members = team.entities?.members ?? [];
   const bots = team.entities?.bots ?? [];
   const servers = team.entities?.servers ?? [];
@@ -65,7 +65,7 @@ export default async function TeamPage({ params }: Props) {
       </Link>
 
       <Banner
-        src={bannerUrl("teams", team.id)}
+        src={bannerUrl("teams", team.id, team.asset_versions?.banner)}
         alt={team.name}
         className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
       />

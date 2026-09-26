@@ -1,18 +1,42 @@
 // Copyright (C) 2026 NodeByte LTD
 
-export function partnerAvatarUrl(partnerId: string): string {
-  return `/cdn/avatars/partners/${encodeURIComponent(partnerId)}.webp`;
+function withVersion(path: string, version?: string | null): string {
+  return version ? `${path}?v=${encodeURIComponent(version)}` : path;
 }
 
-export function teamAvatarUrl(teamId: string): string {
-  return `/cdn/avatars/teams/${encodeURIComponent(teamId)}.webp`;
+export function partnerAvatarUrl(
+  partnerId: string,
+  version?: string | null,
+): string {
+  return withVersion(
+    `/cdn/avatars/partners/${encodeURIComponent(partnerId)}.webp`,
+    version,
+  );
+}
+
+export function teamAvatarUrl(teamId: string, version?: string | null): string {
+  return withVersion(
+    `/cdn/avatars/teams/${encodeURIComponent(teamId)}.webp`,
+    version,
+  );
 }
 
 export function bannerUrl(
   targetType: "bots" | "servers" | "teams",
   id: string,
+  version?: string | null,
 ): string {
-  return `/cdn/banners/${targetType}/${encodeURIComponent(id)}.webp`;
+  return withVersion(
+    `/cdn/banners/${targetType}/${encodeURIComponent(id)}.webp`,
+    version,
+  );
+}
+
+export function discordBannerUrl(
+  targetType: "bots" | "users",
+  id: string,
+): string {
+  return `/cdn/discord-banner/${targetType}/${encodeURIComponent(id)}`;
 }
 
 export function mirroredAvatarUrl(

@@ -34,7 +34,7 @@ To run the site: show your listings, let you vote, process payments, respond to 
 - **Discord**, for the OAuth login itself.
 - **Stripe and PayPal**, for payments you make.
 - **OpenAI**, which scans submitted bot and server descriptions for policy violations at submission time. It sees the description text itself, not your account details.
-- **japi.rest**, a third-party lookup service we query for a bot's public Discord application data (guild count, description, avatar) using its client ID -- information Discord already makes public, not anything from your account.
+- **japi.rest**, a third-party lookup service we query by Discord ID for public Discord data: a bot's application data (guild count, description, avatar), a user's or bot's profile banner (shown on their Omniplex page), and their current avatar or profile when Discord's own API is unavailable. This is information Discord already makes public, not anything from your account.
 - **Our hosting provider**, which stores the data our servers run on.
 
 We don't sell or rent your data to anyone else.

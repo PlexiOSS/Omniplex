@@ -156,7 +156,11 @@ export default async function ServerPage({ params }: Props) {
       </Link>
 
       <Banner
-        src={bannerUrl("servers", server.server_id)}
+        src={bannerUrl(
+          "servers",
+          server.server_id,
+          server.asset_versions?.banner,
+        )}
         alt={server.name}
         className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
       />
@@ -272,12 +276,15 @@ export default async function ServerPage({ params }: Props) {
                 {server.team_owner ? "Team" : "Owner"}
               </h3>
               {server.team_owner ? (
-                <Link 
+                <Link
                   href={`/teams/${server.team_owner.id}`}
                   className="flex items-center gap-2.5"
                 >
                   <Avatar
-                    src={teamAvatarUrl(server.team_owner.id)}
+                    src={teamAvatarUrl(
+                      server.team_owner.id,
+                      server.team_owner.asset_versions?.avatar,
+                    )}
                     alt={server.team_owner.name}
                     size={32}
                   />

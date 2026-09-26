@@ -7,9 +7,11 @@ import { Container } from "@/components/layout/Container";
 import { UserEntityTabs } from "@/components/profile/UserEntityTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
 import { badges as badgesApi, users } from "@/lib/api";
 import type { Link as ApiLink } from "@/lib/api/types";
 import { badgeColor, badgeIcon } from "@/lib/constants/badgeIcons";
+import { discordBannerUrl, mirroredAvatarUrl } from "@/lib/utils/assets";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -71,8 +73,7 @@ export default async function UserPage({ params }: Props) {
 
   const username = user.user?.username ?? "Unknown";
   const displayName = user.user?.display_name ?? username;
-  const avatarSrc =
-    user.user?.avatar || `https://cdn.discordapp.com/embed/avatars/0.png`;
+  const avatarSrc = mirroredAvatarUrl("users", id, user.user?.avatar);
 
   // Links starting with "_" are private/system-managed (same convention as
   // the dashboard's profile editor) never shown on the public profile.
@@ -85,9 +86,7 @@ export default async function UserPage({ params }: Props) {
   // user_teams[].entities instead (same aggregation the dashboard does for
   // "my bots/servers") — merge them in so the profile isn't missing
   // anything the user can actually see on their own dashboard.
-  const teamBots = user.user_teams.flatMap(
-    (team) => team.entities?.bots ?? [],
-  );
+  const teamBots = user.user_teams.flatMap((team) => team.entities?.bots ?? []);
   const teamServers = user.user_teams.flatMap(
     (team) => team.entities?.servers ?? [],
   );
@@ -113,6 +112,13 @@ export default async function UserPage({ params }: Props) {
         <ArrowLeft size={14} />
         Home
       </Link>
+
+      <Banner
+        src={discordBannerUrl("users", id)}
+        alt={displayName}
+        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+        hideWhenMissing
+      />
 
       {/* Profile header */}
       <div className="flex items-start gap-5">

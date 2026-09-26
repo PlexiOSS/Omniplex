@@ -7,6 +7,7 @@ import type { IndexBot } from "@/lib/api/types";
 import {
   bannerUrl,
   botPath,
+  discordBannerUrl,
   discordDefaultAvatar,
   mirroredAvatarUrl,
 } from "@/lib/utils/assets";
@@ -38,7 +39,8 @@ export function BotCard({ bot }: BotCardProps) {
       ].join(" ")}
     >
       <Banner
-        src={bannerUrl("bots", bot.bot_id)}
+        src={bannerUrl("bots", bot.bot_id, bot.asset_versions?.banner)}
+        fallbackSrc={discordBannerUrl("bots", bot.bot_id)}
         alt={bot.user.username}
         className="h-16"
       />

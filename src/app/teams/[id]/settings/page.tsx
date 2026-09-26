@@ -370,8 +370,12 @@ function EditInfoTab({
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [avatarVersion, setAvatarVersion] = useState(0);
-  const [bannerVersion, setBannerVersion] = useState(0);
+  const [avatarVersion, setAvatarVersion] = useState<string | null>(
+    team.asset_versions?.avatar ?? null,
+  );
+  const [bannerVersion, setBannerVersion] = useState<string | null>(
+    team.asset_versions?.banner ?? null,
+  );
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -384,13 +388,12 @@ function EditInfoTab({
   ) {
     const setUploading =
       kind === "team-avatar" ? setUploadingAvatar : setUploadingBanner;
-    const bumpVersion =
+    const setVersion =
       kind === "team-avatar" ? setAvatarVersion : setBannerVersion;
     setUploading(true);
     setImageError(null);
     try {
-      await uploadAsset(kind, team.id, file, { userId, token });
-      bumpVersion((v) => v + 1);
+      setVersion(await uploadAsset(kind, team.id, file, { userId, token }));
     } catch (err) {
       setImageError(
         err instanceof UploadError ? err.message : "Upload failed.",
@@ -435,7 +438,7 @@ function EditInfoTab({
           Banner
         </p>
         <Banner
-          src={`${bannerUrl("teams", team.id)}${bannerVersion ? `?v=${bannerVersion}` : ""}`}
+          src={bannerUrl("teams", team.id, bannerVersion)}
           alt={team.name}
           className="h-32 rounded-xl sm:h-40"
         />
@@ -465,7 +468,7 @@ function EditInfoTab({
 
       <div className="flex items-center gap-3">
         <Avatar
-          src={`${teamAvatarUrl(team.id)}${avatarVersion ? `?v=${avatarVersion}` : ""}`}
+          src={teamAvatarUrl(team.id, avatarVersion)}
           alt={team.name}
           size={56}
         />

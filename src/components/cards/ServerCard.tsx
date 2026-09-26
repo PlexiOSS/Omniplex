@@ -33,7 +33,11 @@ export function ServerCard({ server }: ServerCardProps) {
       ].join(" ")}
     >
       <Banner
-        src={bannerUrl("servers", server.server_id)}
+        src={bannerUrl(
+          "servers",
+          server.server_id,
+          server.asset_versions?.banner,
+        )}
         alt={server.name}
         className="h-16"
       />
@@ -51,7 +55,9 @@ export function ServerCard({ server }: ServerCardProps) {
               {server.type === "certified" && (
                 <Badge variant="success">Certified</Badge>
               )}
-              {server.supporter_badge && <Badge variant="info">Supporter</Badge>}
+              {server.supporter_badge && (
+                <Badge variant="info">Supporter</Badge>
+              )}
             </div>
             <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
               {server.short}
@@ -69,9 +75,7 @@ export function ServerCard({ server }: ServerCardProps) {
             {server.tags.slice(0, 4).map((tag) => (
               <Badge key={tag}>{tag}</Badge>
             ))}
-            {server.tags.length > 4 && (
-              <Badge>+{server.tags.length - 4}</Badge>
-            )}
+            {server.tags.length > 4 && <Badge>+{server.tags.length - 4}</Badge>}
           </div>
         )}
 

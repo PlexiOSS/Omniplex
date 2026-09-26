@@ -22,18 +22,25 @@ export default async function HomePage() {
   let partnerList: PartnerList | null = null;
   let blogData: Blog | null = null;
 
+  const extras = Promise.allSettled([
+    list.getStats(),
+    list.getPartners(),
+    blogs.getAll(),
+  ]).then(
+    (results) =>
+      results.map((r) => (r.status === "fulfilled" ? r.value : null)) as [
+        ListStats | null,
+        PartnerList | null,
+        Blog | null,
+      ],
+  );
+
   try {
     [botIndex, serverIndex] = await Promise.all([
       bots.getIndex(),
       servers.getIndex(),
     ]);
-    [stats, partnerList, blogData] = (await Promise.allSettled([
-      list.getStats(),
-      list.getPartners(),
-      blogs.getAll(),
-    ]).then((results) =>
-      results.map((r) => (r.status === "fulfilled" ? r.value : null)),
-    )) as [ListStats | null, PartnerList | null, Blog | null];
+    [stats, partnerList, blogData] = await extras;
   } catch (err) {
     // Any error from the index endpoints — including 500 DB failures — means
     // the service is unavailable. Show the unavailable UI regardless of status.

@@ -51,7 +51,13 @@ export type BotType =
   | "under_review"
   | "pending";
 
+export interface AssetVersions {
+  avatar?: string;
+  banner?: string;
+}
+
 export interface IndexBot {
+  asset_versions?: AssetVersions;
   bot_id: string;
   /** Full platform user resolved by dovewing — avatar is a full URL */
   user: PlatformUser;
@@ -79,6 +85,7 @@ export interface IndexBot {
 }
 
 export interface Bot {
+  asset_versions?: AssetVersions;
   itag: string;
   bot_id: string;
   client_id: string;
@@ -203,6 +210,7 @@ export interface BotChangelogFeedEntry {
 export type ServerState = "public" | "private" | "unlisted" | "defunct";
 
 export interface IndexServer {
+  asset_versions?: AssetVersions;
   server_id: string;
   name: string;
   /** Fully resolved icon URL, synced from Infernoplex's gateway cache. Empty
@@ -294,6 +302,7 @@ export interface TeamEntities {
 }
 
 export interface Team {
+  asset_versions?: AssetVersions;
   id: string;
   name: string;
   short: string;
