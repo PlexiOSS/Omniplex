@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- When japi.rest is unreachable (for example Cloudflare 522s from the
+  region our servers route through), the avatar fallback and Discord
+  banner lookups now skip japi for 60s after the first failure instead of
+  every avatar or banner request waiting 3-4s for a timeout.
+
 ## [1.2.0] - 2026-09-26
 
 ### Added

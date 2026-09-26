@@ -5,6 +5,21 @@ import { DISCORD_CDN_URL, JAPI_URL } from "@/lib/api/config";
 const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
 const USER_AGENT = "Omniplex (+https://omniplex.gg)";
 const SNOWFLAKE = /^[0-9]{16,20}$/;
+const JAPI_BACKOFF_MS = 60_000;
+
+let japiDownUntil = 0;
+
+function japiIsDown(): boolean {
+  return Date.now() < japiDownUntil;
+}
+
+function markJapiDown(): void {
+  japiDownUntil = Date.now() + JAPI_BACKOFF_MS;
+}
+
+function isUpstreamFailure(status: number): boolean {
+  return status === 429 || status >= 500;
+}
 
 export interface DiscordImage {
   body: Uint8Array;
@@ -19,12 +34,14 @@ export function isSnowflake(id: string): boolean {
 export async function fetchDiscordImage(
   url: string,
   timeoutMs = 4000,
+  viaJapi = false,
 ): Promise<DiscordImage | null> {
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": USER_AGENT },
       signal: AbortSignal.timeout(timeoutMs),
     });
+    if (viaJapi && isUpstreamFailure(res.status)) markJapiDown();
     const finalUrl = new URL(res.url || url);
     if (
       !res.ok ||
@@ -40,6 +57,7 @@ export async function fetchDiscordImage(
       sourceUrl: finalUrl.href,
     };
   } catch {
+    if (viaJapi) markJapiDown();
     return null;
   }
 }
@@ -47,8 +65,12 @@ export async function fetchDiscordImage(
 export function fetchCurrentAvatar(
   userId: string,
 ): Promise<DiscordImage | null> {
-  if (!isSnowflake(userId)) return Promise.resolve(null);
-  return fetchDiscordImage(`${JAPI_URL}/user/${userId}/avatar?size=256`);
+  if (!isSnowflake(userId) || japiIsDown()) return Promise.resolve(null);
+  return fetchDiscordImage(
+    `${JAPI_URL}/user/${userId}/avatar?size=256`,
+    4000,
+    true,
+  );
 }
 
 export type BannerLookup =
@@ -58,6 +80,7 @@ export type BannerLookup =
 
 export async function lookupBanner(userId: string): Promise<BannerLookup> {
   if (!isSnowflake(userId)) return { status: "none" };
+  if (japiIsDown()) return { status: "error" };
 
   try {
     const res = await fetch(`${JAPI_URL}/user/${userId}`, {
@@ -70,6 +93,7 @@ export async function lookupBanner(userId: string): Promise<BannerLookup> {
       return { status: "none" };
     }
     if (!res.ok) {
+      if (isUpstreamFailure(res.status)) markJapiDown();
       await res.body?.cancel();
       return { status: "error" };
     }
@@ -84,6 +108,7 @@ export async function lookupBanner(userId: string): Promise<BannerLookup> {
     url.searchParams.set("size", "1024");
     return { status: "found", url: url.href };
   } catch {
+    markJapiDown();
     return { status: "error" };
   }
 }
