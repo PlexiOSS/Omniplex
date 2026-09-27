@@ -52,6 +52,7 @@ export function ChangelogEditModal({
   const [updated, setUpdated] = useState((entry?.updated ?? []).join("\n"));
   const [fixed, setFixed] = useState((entry?.fixed ?? []).join("\n"));
   const [removed, setRemoved] = useState((entry?.removed ?? []).join("\n"));
+  const [security, setSecurity] = useState((entry?.security ?? []).join("\n"));
   const [prerelease, setPrerelease] = useState(entry?.prerelease ?? false);
   const [published, setPublished] = useState(entry?.published ?? false);
   const [saving, setSaving] = useState(false);
@@ -78,6 +79,7 @@ export function ChangelogEditModal({
       setUpdated(draft.updated.join("\n"));
       setFixed(draft.fixed.join("\n"));
       setRemoved(draft.removed.join("\n"));
+      setSecurity((draft.security ?? []).join("\n"));
       if (draft.extra_description) setExtraDescription(draft.extra_description);
     } catch (err) {
       setError(
@@ -106,6 +108,7 @@ export function ChangelogEditModal({
         updated: linesToArray(updated),
         fixed: linesToArray(fixed),
         removed: linesToArray(removed),
+        security: linesToArray(security),
         created_at: releaseDate
           ? new Date(releaseDate).toISOString()
           : undefined,
@@ -171,8 +174,7 @@ export function ChangelogEditModal({
           >
             Release date{" "}
             <span className="font-normal text-zinc-400 dark:text-zinc-600">
-              (leave blank to use now{isEdit ? " / keep the current date" : ""}
-              )
+              (leave blank to use now{isEdit ? " / keep the current date" : ""})
             </span>
           </label>
           <input
@@ -191,7 +193,8 @@ export function ChangelogEditModal({
           <p className="text-xs text-zinc-400 dark:text-zinc-600">
             Pulls the merged PRs between two refs on {project}&apos;s repo and
             drafts the fields below from them. Review before saving — this
-            overwrites whatever&apos;s currently in Added/Updated/Fixed/Removed.
+            overwrites whatever&apos;s currently in
+            Added/Updated/Fixed/Removed/Security.
           </p>
           <div className="flex flex-wrap items-end gap-2">
             <div className="min-w-32 flex-1">
@@ -246,6 +249,7 @@ export function ChangelogEditModal({
             ["updated", "Updated", updated, setUpdated],
             ["fixed", "Fixed", fixed, setFixed],
             ["removed", "Removed", removed, setRemoved],
+            ["security", "Security", security, setSecurity],
           ] as const
         ).map(([key, label, value, setValue]) => (
           <div key={key} className="flex flex-col gap-1.5">

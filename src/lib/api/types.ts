@@ -1537,6 +1537,7 @@ export interface ChangelogEntry {
   updated: string[];
   fixed: string[];
   removed: string[];
+  security?: string[];
   extra_description: string;
   prerelease: boolean;
   author: PlatformUser | null;

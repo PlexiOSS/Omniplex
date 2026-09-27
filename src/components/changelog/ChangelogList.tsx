@@ -1,6 +1,13 @@
 "use client";
 
-import { GitBranch, Minus, Pencil, Plus, Wrench } from "lucide-react";
+import {
+  GitBranch,
+  Minus,
+  Pencil,
+  Plus,
+  ShieldCheck,
+  Wrench,
+} from "lucide-react";
 import { useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { Avatar } from "@/components/ui/Avatar";
@@ -131,6 +138,12 @@ function ReleaseCard({ entry }: { entry: ChangelogEntry }) {
             label="Removed"
             items={entry.removed}
             tone="text-red-600 dark:text-red-400"
+          />
+          <ChangeGroup
+            icon={ShieldCheck}
+            label="Security"
+            items={entry.security ?? []}
+            tone="text-violet-600 dark:text-violet-400"
           />
         </div>
 

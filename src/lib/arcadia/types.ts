@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 export type TargetType = "Bot" | "Server" | "Team" | "Pack" | "User";
 
 export const AUTH_VERSION = 5;
@@ -527,6 +527,7 @@ export interface ChangelogEntry {
   updated: string[];
   fixed: string[];
   removed: string[];
+  security?: string[];
   extra_description: string;
   prerelease: boolean;
   published: boolean;
@@ -544,6 +545,7 @@ export interface ChangelogCreateEntry {
   updated: string[];
   fixed: string[];
   removed: string[];
+  security?: string[];
   /** ISO 8601 timestamp. Omit/undefined to fall back to now (create) or
    * leave the existing date untouched (update). */
   created_at?: string;
@@ -564,6 +566,7 @@ export interface ChangelogDraft {
   updated: string[];
   fixed: string[];
   removed: string[];
+  security?: string[];
   extra_description: string;
 }
 

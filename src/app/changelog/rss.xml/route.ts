@@ -33,6 +33,7 @@ export async function GET() {
         entry.updated.length ? `Updated: ${entry.updated.join("; ")}` : "",
         entry.fixed.length ? `Fixed: ${entry.fixed.join("; ")}` : "",
         entry.removed.length ? `Removed: ${entry.removed.join("; ")}` : "",
+        entry.security?.length ? `Security: ${entry.security.join("; ")}` : "",
       ]
         .filter(Boolean)
         .join(" — ");

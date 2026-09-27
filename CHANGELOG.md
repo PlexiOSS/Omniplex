@@ -33,6 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Bots that do get a warning explaining it can be unticked on Discord's
   invite screen. Both link to the full report on noadmin.info. Invites
   without a `permissions` value show nothing.
+- Changelog entries can have a Security section. It shows on the changelog
+  page and in the RSS feed, can be edited in the admin changelog editor
+  (including drafts from the generator), and is counted in the admin list.
+  The field is optional in the frontend types, so pages keep working
+  against a Popplio that hasn't run the migration yet.
 
 ### Fixed
 

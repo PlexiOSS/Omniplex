@@ -14,7 +14,7 @@ export function InvitePermissionNote({ invite }: InvitePermissionNoteProps) {
 
   if (perms.administrator) {
     return (
-      <div className="rounded-lg border border-red-500/30 bg-red-500/[0.06] px-3 py-2 text-xs">
+      <div className="rounded-lg border border-red-500/30 bg-red-500/6 px-3 py-2 text-xs">
         <p className="flex items-center gap-1.5 font-medium text-red-600 dark:text-red-400">
           <ShieldAlert size={13} />
           Requests Administrator
