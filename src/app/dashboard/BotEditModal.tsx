@@ -2,6 +2,7 @@
 
 import { Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { InviteCheck } from "@/components/bots/InviteCheck";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
@@ -14,6 +15,7 @@ import type { Bot, Link } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
 import { bannerUrl } from "@/lib/utils/assets";
 import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
+import { requestsAdministrator } from "@/lib/utils/invitePermissions";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 interface BotEditModalProps {
@@ -139,6 +141,12 @@ function BotEditForm({
       setError(markupError);
       return;
     }
+    if (requestsAdministrator(form.invite.trim())) {
+      setError(
+        "Your invite link requests Administrator, which Omniplex doesn't accept. Request only the permissions your bot uses.",
+      );
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -254,6 +262,7 @@ function BotEditForm({
         onChange={(e) => setForm((f) => ({ ...f, invite: e.target.value }))}
         required
       />
+      <InviteCheck invite={form.invite} />
 
       <Input
         id="edit-prefix"

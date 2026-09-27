@@ -8,9 +8,9 @@ export interface InvitePermissions {
   administrator: boolean;
 }
 
-export function readInvitePermissions(
+function parseDiscordAuthorizeUrl(
   invite: string | null | undefined,
-): InvitePermissions | null {
+): URL | null {
   if (!invite) return null;
   let url: URL;
   try {
@@ -25,6 +25,20 @@ export function readInvitePermissions(
   ) {
     return null;
   }
+  return url;
+}
+
+export function isDiscordAuthorizeUrl(
+  invite: string | null | undefined,
+): boolean {
+  return parseDiscordAuthorizeUrl(invite) !== null;
+}
+
+export function readInvitePermissions(
+  invite: string | null | undefined,
+): InvitePermissions | null {
+  const url = parseDiscordAuthorizeUrl(invite);
+  if (!url) return null;
   const raw = url.searchParams.get("permissions");
   if (!raw || !/^\d+$/.test(raw)) return null;
 
@@ -36,6 +50,8 @@ export function readInvitePermissions(
   return { value, count, administrator: (value & ADMINISTRATOR) !== ZERO };
 }
 
-export function noAdminReportUrl(invite: string): string {
-  return `https://noadmin.info/analyze?invite=${encodeURIComponent(invite)}`;
+export function requestsAdministrator(
+  invite: string | null | undefined,
+): boolean {
+  return readInvitePermissions(invite)?.administrator ?? false;
 }

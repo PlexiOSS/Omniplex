@@ -5,10 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2026-09-26
 
 ### Added
 
+- Notifications open the page they are about. Clicking one in the bell
+  menu marks it read and navigates to its link, such as the bot that was
+  approved or denied. The dashboard's Notifications tab has an open button
+  on each notification with a link, and shows long messages such as denial
+  reasons in full.
+- The add bot form and the bot edit modal check the invite link as you
+  type. An invite that requests Administrator shows an error, with links to
+  its noadmin.info report and permission calculator, and the form will not
+  submit. Popplio enforces the same rule on the server. Other discord.com
+  invites show their permission count, and a warning when the noadmin.info
+  API rates them broad or excessive. Custom (non-Discord) invite links get a
+  note that staff will check them during review.
+- The admin bot queue marks bots whose invite requests Administrator with a
+  "Requests Administrator" badge, and links each discord.com invite to its
+  noadmin.info permission report.
+- The Bot Rules article says admin invites are rejected automatically and
+  links to noadmin.info.
 - Bot pages now show whether a bot's invite requests Administrator, right
   under "Add to Server". The permissions are read from the bot's existing
   invite URL, so no API change was needed. Bots that don't request it show

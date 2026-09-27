@@ -4,6 +4,7 @@ import { BookOpen, Pencil, Server, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { InviteCheck } from "@/components/bots/InviteCheck";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { TeamPicker } from "@/components/teams/TeamPicker";
@@ -18,9 +19,10 @@ import { usePersistedFormDraft } from "@/hooks/usePersistedFormDraft";
 import { bots } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Link as ApiLink, DiscordBotMeta } from "@/lib/api/types";
-import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
 import { BOT_TAGS as AVAILABLE_TAGS } from "@/lib/constants/tags";
+import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
 import { formatCount } from "@/lib/utils/format";
+import { requestsAdministrator } from "@/lib/utils/invitePermissions";
 
 interface AddBotDraft {
   bot_id: string;
@@ -164,6 +166,8 @@ export default function AddBotPage() {
     if (!form.library.trim()) return "Library is required.";
     if (!form.invite.trim() || !form.invite.trim().startsWith("https://"))
       return "Invite URL is required and must be a valid HTTPS URL.";
+    if (requestsAdministrator(form.invite.trim()))
+      return "Your invite link requests Administrator, which Omniplex doesn't accept. Request only the permissions your bot uses.";
     if (form.tags.length === 0) return "Select at least one tag.";
     return null;
   }
@@ -424,6 +428,7 @@ export default function AddBotPage() {
               }
               required
             />
+            <InviteCheck invite={form.invite} />
 
             {/* Prefix */}
             <Input
@@ -509,9 +514,7 @@ export default function AddBotPage() {
               requiredPerm="add_bots"
               entityLabel="bots"
               value={form.team_owner}
-              onChange={(team_owner) =>
-                setForm((f) => ({ ...f, team_owner }))
-              }
+              onChange={(team_owner) => setForm((f) => ({ ...f, team_owner }))}
             />
 
             {/* NSFW */}

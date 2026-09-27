@@ -11,7 +11,7 @@ Keep in mind that all of the rules below are just general guidelines — we may 
 3. The main feature and majority of the commands must work.
 4. Keep NSFW content (including, but not limited to, links that source to pornographic material) inside of NSFW channels.
 5. May not include any seizure-inducing content (gifs, emojis).
-6. Commands must only require permissions that the command being run needs (e.g. the kick command can only require the kick permission, as it's required to be used). Bots cannot require the Administrator permission for it to work.
+6. Commands must only require permissions that the command being run needs (e.g. the kick command can only require the kick permission, as it's required to be used). Bots cannot require the Administrator permission for it to work, and submissions whose invite link requests Administrator are rejected automatically. You can check your invite link at [noadmin.info](https://noadmin.info/analyze) and build one with only the permissions you need using the [permission calculator](https://noadmin.info/calculator).
 7. Bots that generate accounts/gifts from other services (Uplay, Spotify, etc.) are not allowed and are also against the Discord ToS.
 8. If the bot is an instance/fork of another bot, it must not be an unmodified instance or fork and must have a considerable amount of modification/addition/changes.
 9. Must have a clear and obvious point of entry (e.g. a working help command) as well as a minimum of 7 working commands, excluding bots that serve a designated purpose.

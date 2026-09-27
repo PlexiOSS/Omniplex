@@ -2,12 +2,14 @@
 
 import { Bell, BellOff, Check, ListChecks } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { useAuth } from "@/hooks/useAuth";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { alerts as alertsApi } from "@/lib/api";
 import type { Alert, AlertType } from "@/lib/api/types";
+import { alertLink } from "@/lib/utils/alerts";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 const TRIGGER_CLASS =
@@ -46,6 +48,7 @@ function isIosNotStandalone(): boolean {
 export function NotificationBell() {
   const { session, isAuthenticated } = useAuth();
   const push = usePushNotifications();
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [unacked, setUnacked] = useState<Alert[]>([]);
@@ -89,6 +92,15 @@ export function NotificationBell() {
     } catch {
       load();
     }
+  }
+
+  function openAlert(alert: Alert) {
+    const link = alertLink(alert.url);
+    if (!alert.acked) ack(alert.itag);
+    if (!link) return;
+    setOpen(false);
+    if (link.external) window.open(link.href, "_blank", "noopener,noreferrer");
+    else router.push(link.href);
   }
 
   async function ackAll() {
@@ -164,7 +176,8 @@ export function NotificationBell() {
             <button
               key={alert.itag}
               type="button"
-              onClick={() => ack(alert.itag)}
+              onClick={() => openAlert(alert)}
+              title={alertLink(alert.url) ? "Open" : "Mark as read"}
               className={`flex w-full items-start gap-2.5 border-l-2 px-3 py-2.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60 ${
                 alert.priority >= 2
                   ? "border-red-500 bg-red-50/50 dark:bg-red-950/20"

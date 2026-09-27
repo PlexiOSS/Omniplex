@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Trash2 } from "lucide-react";
+import { Check, ExternalLink, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pagination } from "@/components/search/Pagination";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +19,7 @@ import type {
   PagedResult,
 } from "@/lib/api/types";
 import { ALERT_CATEGORY_LABELS } from "@/lib/api/types";
+import { alertLink } from "@/lib/utils/alerts";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 interface NotificationsTabProps {
@@ -65,6 +67,7 @@ function NotificationRow({
   onDelete: (itag: string) => void;
 }) {
   const del = useArmedConfirm();
+  const link = alertLink(alert.url);
 
   return (
     <div className="flex items-start gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
@@ -82,7 +85,7 @@ function NotificationRow({
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-0.5 whitespace-pre-line text-sm text-zinc-500 wrap-anywhere dark:text-zinc-400">
           {alert.message}
         </p>
         <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
@@ -90,6 +93,27 @@ function NotificationRow({
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
+        {link &&
+          (link.external ? (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+            >
+              <ExternalLink size={13} />
+            </a>
+          ) : (
+            <Link
+              href={link.href}
+              onClick={() => !alert.acked && onAck(alert.itag)}
+              title="Open"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+            >
+              <ExternalLink size={13} />
+            </Link>
+          ))}
         {!alert.acked && (
           <Button
             variant="ghost"
@@ -266,7 +290,9 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
 
   if (!data) {
     return (
-      <div className="flex justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
+      <div className="flex justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+      </div>
     );
   }
 

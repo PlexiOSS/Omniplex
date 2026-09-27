@@ -27,7 +27,12 @@ import type {
   RPCWebAction,
   TargetType,
 } from "@/lib/arcadia/types";
+import { noAdminReportUrl } from "@/lib/noadmin";
 import { formatCount } from "@/lib/utils/format";
+import {
+  isDiscordAuthorizeUrl,
+  requestsAdministrator,
+} from "@/lib/utils/invitePermissions";
 import { useAdmin } from "../../AdminContext";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { GenericRpcModal } from "../GenericRpcModal";
@@ -398,6 +403,14 @@ export default function AdminQueuePage() {
                             Moderation flagged
                           </Badge>
                         )}
+                        {requestsAdministrator(bot.invite) && (
+                          <Badge
+                            variant="danger"
+                            title="The submitted invite link requests Administrator. Use the Requires Administrator denial template."
+                          >
+                            Requests Administrator
+                          </Badge>
+                        )}
                       </div>
                       <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
                         {bot.short}
@@ -439,6 +452,17 @@ export default function AdminQueuePage() {
                           >
                             <AlertTriangle size={11} />
                             Submitted invite (unverified perms)
+                          </a>
+                        )}
+                        {bot.invite && isDiscordAuthorizeUrl(bot.invite) && (
+                          <a
+                            href={noAdminReportUrl(bot.invite)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-zinc-500 hover:underline dark:text-zinc-400"
+                          >
+                            <ShieldCheck size={11} />
+                            Permission report
                           </a>
                         )}
                       </div>

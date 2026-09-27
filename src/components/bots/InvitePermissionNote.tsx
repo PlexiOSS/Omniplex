@@ -1,8 +1,6 @@
 import { ShieldAlert, ShieldCheck } from "lucide-react";
-import {
-  noAdminReportUrl,
-  readInvitePermissions,
-} from "@/lib/utils/invitePermissions";
+import { noAdminReportUrl } from "@/lib/noadmin";
+import { readInvitePermissions } from "@/lib/utils/invitePermissions";
 
 interface InvitePermissionNoteProps {
   invite: string;
