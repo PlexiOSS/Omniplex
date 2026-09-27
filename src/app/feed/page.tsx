@@ -93,7 +93,7 @@ export default function FeedPage() {
                     <Badge variant="info">{entry.version}</Badge>
                   )}
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-zinc-600 dark:text-zinc-300">
+                <p className="mt-1 whitespace-pre-wrap wrap-anywhere text-sm text-zinc-600 dark:text-zinc-300">
                   {entry.content}
                 </p>
                 <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">

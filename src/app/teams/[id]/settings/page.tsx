@@ -145,7 +145,7 @@ export default function TeamSettingsPage() {
         Team Settings
       </h1>
 
-      <div className="mb-10 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800">
+      <div className="mb-10 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center gap-4">
           {visibleTabs.map(({ key, label }) => (
             <button

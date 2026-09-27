@@ -105,7 +105,7 @@ export default function AdminTicketsPage() {
               href={`/tickets/${ticket.id}`}
               className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:hover:border-accent/40 dark:hover:bg-accent/10"
             >
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
                   {ticket.issue}
                 </p>
@@ -118,9 +118,11 @@ export default function AdminTicketsPage() {
                   {ticket.messages.length === 1 ? "" : "s"}
                 </p>
               </div>
-              <Badge variant={ticket.open ? "success" : "default"}>
-                {ticket.open ? "Open" : "Closed"}
-              </Badge>
+              <span className="shrink-0">
+                <Badge variant={ticket.open ? "success" : "default"}>
+                  {ticket.open ? "Open" : "Closed"}
+                </Badge>
+              </span>
             </Link>
           ))}
         </div>

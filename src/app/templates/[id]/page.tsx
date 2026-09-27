@@ -88,7 +88,7 @@ export default async function TemplatePage({ params }: Props) {
               <Layers size={28} />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+              <h1 className="min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
                 {template.name}
               </h1>
               <p className="mt-1 text-zinc-500 dark:text-zinc-400">

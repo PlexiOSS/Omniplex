@@ -48,7 +48,7 @@ export function ServerTemplateCard({
   return (
     <div
       data-nsfw={template.nsfw || undefined}
-      className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+      className="flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
     >
       <div className="flex items-start gap-2">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">

@@ -173,7 +173,7 @@ export default async function BotPage({ params }: Props) {
             />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+                <h1 className="min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
                   {bot.user.username}
                 </h1>
                 {bot.premium && <Badge variant="premium">Premium</Badge>}

@@ -57,7 +57,9 @@ export function ReviewsModal({
         )}
 
         {!reviews && !error && (
-          <div className="flex justify-center py-8"><div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
+          <div className="flex justify-center py-8">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+          </div>
         )}
 
         {reviews && roots.length === 0 && (
@@ -89,7 +91,7 @@ export function ReviewsModal({
                 </span>
               </div>
               <StarRating value={review.stars} className="mt-1" />
-              <p className="mt-1.5 whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">
+              <p className="mt-1.5 whitespace-pre-wrap wrap-anywhere text-sm text-zinc-700 dark:text-zinc-300">
                 {review.content}
               </p>
             </div>

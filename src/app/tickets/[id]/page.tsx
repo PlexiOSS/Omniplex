@@ -4,10 +4,11 @@ import { ArrowLeft, Lock, Send, Unlock } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { Container } from "@/components/layout/Container";
+import { TicketMessageBody } from "@/components/tickets/TicketMessageBody";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Container } from "@/components/layout/Container";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { tickets } from "@/lib/api";
@@ -85,7 +86,9 @@ export default function TicketThreadPage() {
       await tickets.setOpen(params.id, open, session.token);
       refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to update ticket.");
+      setError(
+        err instanceof ApiError ? err.message : "Failed to update ticket.",
+      );
     } finally {
       setTogglingOpen(false);
     }
@@ -97,7 +100,8 @@ export default function TicketThreadPage() {
     return (
       <Container className="py-16 text-center">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          This ticket doesn&apos;t exist, or you don&apos;t have permission to view it.
+          This ticket doesn&apos;t exist, or you don&apos;t have permission to
+          view it.
         </p>
         <Link
           href="/tickets"
@@ -110,7 +114,29 @@ export default function TicketThreadPage() {
     );
   }
 
-  const isOwner = session?.user_id === ticket.messages[0]?.author_id;
+  const messages = [...ticket.messages].sort(
+    (a, b) =>
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime() ||
+      a.id.length - b.id.length ||
+      a.id.localeCompare(b.id),
+  );
+  const isOwner =
+    session?.user_id === (ticket.author?.id ?? messages[0]?.author_id);
+
+  const users = new Map<string, string>();
+  for (const user of [
+    ticket.author,
+    ticket.close_user,
+    ...ticket.messages.map((m) => m.author),
+    ...Object.values(ticket.mentions?.users ?? {}),
+  ]) {
+    if (user) users.set(user.id, user.display_name || user.username);
+  }
+  const lookup = {
+    users,
+    roles: ticket.mentions?.roles ?? {},
+    channels: ticket.mentions?.channels ?? {},
+  };
 
   return (
     <Container className="py-10">
@@ -124,7 +150,7 @@ export default function TicketThreadPage() {
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+          <h1 className="min-w-0 text-xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
             {ticket.issue}
           </h1>
           <Badge variant={ticket.open ? "success" : "default"}>
@@ -137,7 +163,7 @@ export default function TicketThreadPage() {
         </p>
 
         <div className="mt-6 space-y-4">
-          {ticket.messages.map((msg) => (
+          {messages.map((msg) => (
             <div key={msg.id} className="flex gap-3">
               <Avatar
                 src={msg.author?.avatar ?? ""}
@@ -145,17 +171,20 @@ export default function TicketThreadPage() {
                 size={32}
               />
               <div className="min-w-0 flex-1 rounded-xl border border-zinc-200 px-3 py-2.5 dark:border-zinc-800">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                    {msg.author?.display_name || msg.author?.username || "Unknown"}
+                <div className="flex min-w-0 items-baseline gap-2">
+                  <span className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                    {msg.author?.display_name ||
+                      msg.author?.username ||
+                      "Unknown"}
                   </span>
-                  <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                  <span
+                    className="shrink-0 text-xs text-zinc-400 dark:text-zinc-600"
+                    title={new Date(msg.timestamp).toLocaleString()}
+                  >
                     {formatRelativeTime(msg.timestamp)}
                   </span>
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">
-                  {msg.content}
-                </p>
+                <TicketMessageBody message={msg} lookup={lookup} />
               </div>
             </div>
           ))}
@@ -177,7 +206,12 @@ export default function TicketThreadPage() {
               placeholder="Write a reply…"
               className="min-w-0 flex-1 resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
             />
-            <Button type="submit" variant="primary" loading={sending} disabled={!reply.trim()}>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={sending}
+              disabled={!reply.trim()}
+            >
               <Send size={14} />
               Send
             </Button>
@@ -200,9 +234,9 @@ export default function TicketThreadPage() {
               Close ticket
             </Button>
           ) : (
-            // Only staff can reopen a ticket. Anyone who can view a closed
-            // ticket they don't own must be staff — get_ticket only ever
-            // grants access to the owner or staff with manage_tickets.
+            // Only staff can reopen a ticket. Anyone viewing a ticket they
+            // don't own is staff with view_tickets; reopening also needs
+            // manage_tickets, and Popplio's 403 surfaces in the error box.
             !isOwner && (
               <Button
                 variant="ghost"

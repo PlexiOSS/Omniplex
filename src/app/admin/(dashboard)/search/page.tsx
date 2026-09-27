@@ -1,12 +1,17 @@
 "use client";
 
-import { ChevronDown, Search as SearchIcon, ShieldOff, Star } from "lucide-react";
+import {
+  ChevronDown,
+  Search as SearchIcon,
+  ShieldOff,
+  Star,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { usePagination } from "@/hooks/usePagination";
 import type { ReviewTargetType } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
@@ -190,7 +195,10 @@ export default function AdminSearchPage() {
         description="Find any bot, server, pack, team, or user by ID or name to take action outside the queue. Starts pre-filled with everything narrow it down as you type."
       />
 
-      <form onSubmit={handleSearch} className="mt-6 flex flex-wrap items-center gap-2">
+      <form
+        onSubmit={handleSearch}
+        className="mt-6 flex flex-wrap items-center gap-2"
+      >
         <Dropdown
           open={typeOpen}
           onClose={() => setTypeOpen(false)}
@@ -234,7 +242,9 @@ export default function AdminSearchPage() {
                 ].join(" ")}
               >
                 {t.label}
-                {active && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
+                {active && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                )}
               </button>
             );
           })}
@@ -257,7 +267,7 @@ export default function AdminSearchPage() {
       )}
 
       {resultMessage && (
-        <div className="mt-4 whitespace-pre-wrap rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+        <div className="mt-4 whitespace-pre-wrap wrap-anywhere rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
           {resultMessage}
         </div>
       )}

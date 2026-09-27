@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/Badge";
 import { usePagination } from "@/hooks/usePagination";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { PlatformUser, RPCLogEntry } from "@/lib/arcadia/types";
-import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
+import { AdminPageHeader } from "../../AdminPageHeader";
 
 const LOGS_PAGE_SIZE = 20;
 
@@ -60,11 +60,13 @@ export default function AdminLogsPage() {
       )}
 
       {!entries && !error && (
-        <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
+        <div className="flex justify-center py-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+        </div>
       )}
 
       {entries && (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <div className="mt-6 overflow-x-auto overflow-y-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-zinc-200 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
               <tr>
@@ -85,7 +87,11 @@ export default function AdminLogsPage() {
                     <td className="px-4 py-2.5 text-zinc-500 dark:text-zinc-400">
                       <div className="flex items-center gap-2">
                         {user && (
-                          <Avatar src={user.avatar} alt={user.username} size={20} />
+                          <Avatar
+                            src={user.avatar}
+                            alt={user.username}
+                            size={20}
+                          />
                         )}
                         {user?.username ?? entry.user_id}
                       </div>

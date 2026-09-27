@@ -836,12 +836,42 @@ export interface TicketTopicList {
   topics: TicketTopic[];
 }
 
+export interface DiscordEmbed {
+  title?: string;
+  type?: string;
+  description?: string;
+  url?: string;
+  timestamp?: string;
+  color?: number;
+  footer?: { text: string; icon_url?: string };
+  image?: { url?: string };
+  thumbnail?: { url?: string };
+  author?: { name?: string; url?: string; icon_url?: string };
+  fields?: { name: string; value: string; inline?: boolean }[];
+}
+
+export interface TicketAttachment {
+  id: string;
+  name: string;
+  content_type: string;
+  size: number;
+  errors: string[] | null;
+}
+
 export interface TicketMessage {
   id: string;
   timestamp: string;
   content: string;
   author_id: string;
   author: PlatformUser | null;
+  embeds: DiscordEmbed[] | null;
+  attachments: TicketAttachment[] | null;
+}
+
+export interface TicketMentions {
+  users: Record<string, PlatformUser>;
+  roles: Record<string, { name: string; color: number }>;
+  channels: Record<string, string>;
 }
 
 export interface Ticket {
@@ -854,6 +884,7 @@ export interface Ticket {
   close_user: PlatformUser | null;
   open: boolean;
   created_at: string;
+  mentions?: TicketMentions;
 }
 
 export interface TicketList {

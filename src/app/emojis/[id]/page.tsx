@@ -81,7 +81,7 @@ export default async function EmojiPage({ params }: Props) {
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+            <h1 className="min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
               :{emoji.name}:
             </h1>
             {emoji.animated && (

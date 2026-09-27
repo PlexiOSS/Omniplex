@@ -49,7 +49,7 @@ export default async function TagPage({ params }: Props) {
           <TagIcon size={12} />
           Tag
         </div>
-        <h1 className="mt-1 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+        <h1 className="mt-1 min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
           {decoded}
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">

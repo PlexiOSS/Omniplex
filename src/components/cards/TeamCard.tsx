@@ -12,7 +12,7 @@ export function TeamCard({ team }: TeamCardProps) {
   return (
     <Link
       href={`/teams/${team.id}`}
-      className="group flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
+      className="group flex min-w-0 items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
     >
       <Avatar src={avatarSrc} alt={team.name} size={44} />
       <div className="min-w-0 flex-1">

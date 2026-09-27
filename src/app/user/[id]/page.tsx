@@ -126,7 +126,7 @@ export default async function UserPage({ params }: Props) {
         <Avatar src={avatarSrc} alt={username} size={72} />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+            <h1 className="min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
               {displayName}
             </h1>
             {user.staff && <Badge variant="info">Staff</Badge>}

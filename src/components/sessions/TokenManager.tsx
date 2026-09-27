@@ -1,11 +1,18 @@
 "use client";
 
-import { Check, ChevronDown, CircleCheck, CircleX, Copy, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  CircleCheck,
+  CircleX,
+  Copy,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-import { Dropdown } from "@/components/ui/Dropdown";
 import { PermSelector } from "@/components/teams/PermSelector";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { Input } from "@/components/ui/Input";
 import { auth, sessions, teams } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -194,7 +201,7 @@ export function TokenManager({
             Copy this token now — you won&apos;t be able to see it again.
           </p>
           <div className="mt-2 flex items-center gap-2">
-            <code className="flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-white px-3 py-2 text-xs text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+            <code className="flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap rounded-lg bg-white px-3 py-2 text-xs text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
               {newToken}
             </code>
             <Button

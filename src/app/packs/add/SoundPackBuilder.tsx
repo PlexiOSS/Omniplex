@@ -188,7 +188,7 @@ export function SoundPackBuilder({
                     type="button"
                     onClick={() => removeSound(sound.id)}
                     aria-label={`Remove ${sound.name}`}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-zinc-400 opacity-0 transition-opacity hover:bg-zinc-100 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-zinc-800 dark:hover:text-red-400"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-opacity hover:bg-zinc-100 hover:text-red-600 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-zinc-800 dark:hover:text-red-400"
                   >
                     <X size={12} />
                   </button>

@@ -46,7 +46,7 @@ function StatsTable({
       <h2 className="mb-3 text-center text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600">
         {title}
       </h2>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-hidden">
         <table className="w-full min-w-72 border-collapse text-sm">
           <thead>
             <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -192,7 +192,7 @@ export default async function ModerationPage() {
             No reports have been filed yet.
           </p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-hidden">
             <table className="w-full min-w-120 border-collapse text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 dark:border-zinc-800">

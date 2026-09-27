@@ -176,7 +176,7 @@ export default async function ServerPage({ params }: Props) {
             <Avatar src={avatarSrc} alt={server.name} size={64} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+                <h1 className="min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
                   {server.name}
                 </h1>
                 {server.premium && <Badge variant="premium">Premium</Badge>}

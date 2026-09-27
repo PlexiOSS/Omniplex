@@ -19,6 +19,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Ticket messages now render the way they looked in Discord. Custom emoji
+  show as images, `<@user>` mentions show the person's name when they took
+  part in the ticket, and role, channel and slash-command mentions, `<t:…>`
+  timestamps, links and inline code are formatted instead of shown as raw
+  markup. Bot messages that were only an embed used to appear as an empty
+  card because the frontend dropped `embeds` and `attachments` from Popplio's
+  response. Embeds now render with their colour, author, title, fields, image
+  and footer, and attachments are listed by name and size. A message with
+  none of these says "No text content".
+- Role and channel mentions in tickets now show the real role name (in the
+  role's colour) and channel name, and mentions of people who never posted in
+  the ticket show their name too, using the new `mentions` field on
+  `GET /tickets/{id}`. Anything Popplio can't resolve still falls back to
+  `@role`, `#channel` or `@unknown-user`.
+- Ticket attachments are marked "Archived". They came from the old Discord
+  ticket system and the files aren't stored on Omniplex, so they can't be
+  opened; hovering explains why instead of the card looking broken.
+- The remove buttons in the emoji, sticker and sound pack builders only
+  appeared on hover, so on phones there was no way to remove an item. They now
+  stay visible on touch screens and show on keyboard focus.
+- Six horizontally scrolling areas (the moderation transparency tables, admin
+  logs and shop purchases, team settings tabs, and the session token field)
+  could also scroll vertically; they now scroll sideways only.
+- Server template and team cards could be stretched wider than their grid
+  column by long content.
+- Legacy tickets stored their messages newest-first, so the conversation read
+  bottom to top. Messages are now always shown oldest-first.
+- Ticket ownership was taken from the first message's author instead of the
+  ticket's author. On legacy tickets that first message is often the bot, so
+  the ticket's real owner was offered a "Reopen ticket" button that could
+  only fail.
+- Long unbroken text (tokens, IDs, URLs) no longer runs out of its card. This
+  covered ticket messages and titles, reviews, bot changelogs, the feed,
+  admin reports, applications, queue and search results, and the names in
+  bot, server, pack, template, team, user, emoji, sticker and tag page
+  headings.
 - Pending and denied bot and server pages are no longer public. Owners,
   team members and staff still see them, with a notice explaining the
   listing is hidden and can't receive votes, reviews or shop perks yet.

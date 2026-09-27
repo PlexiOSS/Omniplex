@@ -68,7 +68,10 @@ export default function TicketsPage() {
 
           {ticketList && ticketList.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 py-16 text-center dark:border-zinc-800">
-              <LifeBuoy size={28} className="mb-3 text-zinc-300 dark:text-zinc-700" />
+              <LifeBuoy
+                size={28}
+                className="mb-3 text-zinc-300 dark:text-zinc-700"
+              />
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 You haven&apos;t opened any tickets yet.
               </p>
@@ -79,9 +82,9 @@ export default function TicketsPage() {
                 <Link
                   key={ticket.id}
                   href={`/tickets/${ticket.id}`}
-                  className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 transition-colors hover:border-accent/40 dark:border-zinc-800"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 px-4 py-3 transition-colors hover:border-accent/40 dark:border-zinc-800"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
                       {ticket.issue}
                     </p>
@@ -91,9 +94,11 @@ export default function TicketsPage() {
                       {ticket.messages.length === 1 ? "" : "s"}
                     </p>
                   </div>
-                  <Badge variant={ticket.open ? "success" : "default"}>
-                    {ticket.open ? "Open" : "Closed"}
-                  </Badge>
+                  <span className="shrink-0">
+                    <Badge variant={ticket.open ? "success" : "default"}>
+                      {ticket.open ? "Open" : "Closed"}
+                    </Badge>
+                  </span>
                 </Link>
               ))}
             </div>

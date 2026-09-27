@@ -297,7 +297,7 @@ function ReviewItem({
           </span>
         </div>
         <StarRating value={review.stars} className="mt-1" />
-        <p className="mt-1.5 whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">
+        <p className="mt-1.5 whitespace-pre-wrap wrap-anywhere text-sm text-zinc-700 dark:text-zinc-300">
           {review.content}
         </p>
         <div className="mt-1.5 flex items-center gap-3">

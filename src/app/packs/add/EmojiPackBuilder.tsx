@@ -124,7 +124,7 @@ export function EmojiPackBuilder({
                     type="button"
                     onClick={() => removeEmoji(emoji.id)}
                     aria-label={`Remove ${emoji.name}`}
-                    className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900"
+                    className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-white transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 focus-visible:opacity-100 dark:bg-zinc-100 dark:text-zinc-900"
                   >
                     <X size={11} />
                   </button>

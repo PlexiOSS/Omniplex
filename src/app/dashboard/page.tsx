@@ -1195,7 +1195,7 @@ function DashboardPageInner() {
           size={64}
         />
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+          <h1 className="min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
             {displayName}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">

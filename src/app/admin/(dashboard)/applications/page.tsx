@@ -88,14 +88,16 @@ export default function AdminApplicationsPage() {
 
   if (error) {
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center"><p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
 
   if (!apps) {
     return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
       </div>
     );
   }
@@ -137,7 +139,7 @@ export default function AdminApplicationsPage() {
                     <dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
                       {q.question}
                     </dt>
-                    <dd className="mt-0.5 whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">
+                    <dd className="mt-0.5 whitespace-pre-wrap wrap-anywhere text-sm text-zinc-700 dark:text-zinc-300">
                       {app.answers[q.id] || "—"}
                     </dd>
                   </div>

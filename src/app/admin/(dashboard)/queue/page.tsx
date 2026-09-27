@@ -344,7 +344,7 @@ export default function AdminQueuePage() {
       </div>
 
       {resultMessage && (
-        <div className="mt-4 whitespace-pre-wrap rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+        <div className="mt-4 whitespace-pre-wrap wrap-anywhere rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
           {resultMessage}
         </div>
       )}
@@ -540,10 +540,9 @@ export default function AdminQueuePage() {
                           </span>
                         )}
                         {server.discord_nsfw_level > 0 && (
-                          <span
-                            title="Discord's own guild-level NSFW classification, distinct from the gated-channel count above"
-                          >
-                            Discord: {discordNsfwLevelLabel(server.discord_nsfw_level)}
+                          <span title="Discord's own guild-level NSFW classification, distinct from the gated-channel count above">
+                            Discord:{" "}
+                            {discordNsfwLevelLabel(server.discord_nsfw_level)}
                           </span>
                         )}
                         {server.claimed_by && (
