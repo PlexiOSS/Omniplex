@@ -1,16 +1,16 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 const SUSPICIOUS_PATTERNS: RegExp[] = [
   /<\s*script\b/i,
   /javascript\s*:/i,
   /vbscript\s*:/i,
   /data\s*:\s*text\/html/i,
-  /on[a-z]+\s*=\s*["']?/i,
+  /<[a-z][^>]*[\s/"']on[a-z]+\s*=/i,
   /<\s*svg\b/i,
   /<\s*object\b/i,
   /<\s*embed\b/i,
   /<\s*meta\b/i,
-  /expression\s*\(/i,
+  /(style\s*=\s*["']?[^"'>]*|<style\b[^>]*>[^<]*)expression\s*\(/i,
 ];
 
 export function containsSuspiciousMarkup(text: string): boolean {

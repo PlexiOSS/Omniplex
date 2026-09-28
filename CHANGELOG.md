@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Saving bot or server settings (including changing a vanity URL) failed
+  with "contains markup that isn't allowed" whenever the long description
+  held a normal Discord invite link, because `permissions=` looked like an
+  HTML event handler. The check now only flags `on*=` attributes inside
+  HTML tags. Matches the Popplio validator fix.
+- The same check also flagged ordinary text like "a regular expression
+  (regex)" as a CSS `expression()` attack. It now only looks inside a
+  `style` attribute or a `<style>` block.
+
 ## [1.3.0] - 2026-09-26
 
 ### Added
