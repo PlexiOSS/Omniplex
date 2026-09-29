@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Logged-in users saw "Bot not found" (and the same for servers, teams and
+  profiles) on perfectly normal listings. Server-rendered requests that
+  forward the session token now send `Origin: NEXT_PUBLIC_BASE_URL`, which
+  Popplio requires before it accepts a user session.
+
 - Saving bot or server settings (including changing a vanity URL) failed
   with "contains markup that isn't allowed" whenever the long description
   held a normal Discord invite link, because `permissions=` looked like an

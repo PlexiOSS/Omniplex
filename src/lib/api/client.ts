@@ -1,5 +1,5 @@
 import { clearSession } from "@/lib/utils/auth";
-import { API_URL } from "./config";
+import { API_URL, BASE_URL } from "./config";
 import type { ApiErrorBody } from "./types";
 
 export class ApiError extends Error {
@@ -40,6 +40,7 @@ async function request<T>(
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `User ${token}` } : {}),
+    ...(token && typeof window === "undefined" ? { Origin: BASE_URL } : {}),
     ...(rest.headers as Record<string, string>),
   };
 
