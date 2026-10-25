@@ -1,7 +1,7 @@
 "use client";
 
 import { Shuffle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { bots, servers } from "@/lib/api";
@@ -15,6 +15,35 @@ type Tab = {
 };
 
 const RANDOM_KEY = "__random__";
+const ENTITY_STORAGE_KEY = "omniplex:home-entity";
+
+type Entity = "bots" | "servers";
+
+const entityListeners = new Set<() => void>();
+
+function readEntity(): Entity {
+  try {
+    return localStorage.getItem(ENTITY_STORAGE_KEY) === "servers"
+      ? "servers"
+      : "bots";
+  } catch {
+    return "bots";
+  }
+}
+
+function writeEntity(entity: Entity) {
+  try {
+    localStorage.setItem(ENTITY_STORAGE_KEY, entity);
+  } catch {}
+  for (const listener of entityListeners) listener();
+}
+
+function subscribeEntity(listener: () => void) {
+  entityListeners.add(listener);
+  return () => {
+    entityListeners.delete(listener);
+  };
+}
 
 interface HomeTabsProps {
   tabs: Tab[];
@@ -22,13 +51,26 @@ interface HomeTabsProps {
    * client-side — doesn't make sense on a fixed set like Certified/Premium,
    * so it's opt-in. */
   showRandom?: boolean;
+  centerLastRow?: boolean;
 }
 
-export function HomeTabs({ tabs, showRandom = false }: HomeTabsProps) {
+export function HomeTabs({
+  tabs,
+  showRandom = false,
+  centerLastRow = false,
+}: HomeTabsProps) {
   const [active, setActive] = useState(tabs[0]?.key ?? "");
-  const [entity, setEntity] = useState<"bots" | "servers">("bots");
+  const entity = useSyncExternalStore(
+    subscribeEntity,
+    readEntity,
+    () => "bots" as const,
+  );
+  const setEntity = writeEntity;
+  const showTabStrip = tabs.length > 1 || showRandom;
   const [randomBots, setRandomBots] = useState<IndexBot[] | null>(null);
-  const [randomServers, setRandomServers] = useState<IndexServer[] | null>(null);
+  const [randomServers, setRandomServers] = useState<IndexServer[] | null>(
+    null,
+  );
   const [randomLoading, setRandomLoading] = useState(false);
 
   const isRandom = active === RANDOM_KEY;
@@ -40,7 +82,9 @@ export function HomeTabs({ tabs, showRandom = false }: HomeTabsProps) {
         ? bots.getRandom().then((res) => setRandomBots(res.bots))
         : servers.getRandom().then((res) => setRandomServers(res.servers));
     request
-      .catch(() => (entity === "bots" ? setRandomBots([]) : setRandomServers([])))
+      .catch(() =>
+        entity === "bots" ? setRandomBots([]) : setRandomServers([]),
+      )
       .finally(() => setRandomLoading(false));
   }
 
@@ -66,7 +110,12 @@ export function HomeTabs({ tabs, showRandom = false }: HomeTabsProps) {
           instead of ever dropping to a second row. */}
       <div className="flex items-center gap-3 border-b border-zinc-200 pb-3 dark:border-zinc-800">
         <div className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
-          <div className="flex flex-nowrap items-center gap-1">
+          <div
+            className={[
+              "flex flex-nowrap items-center gap-1",
+              showTabStrip ? "" : "hidden",
+            ].join(" ")}
+          >
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -109,7 +158,10 @@ export function HomeTabs({ tabs, showRandom = false }: HomeTabsProps) {
               aria-label="Shuffle again"
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-50 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
             >
-              <Shuffle size={14} className={randomLoading ? "animate-pulse" : ""} />
+              <Shuffle
+                size={14}
+                className={randomLoading ? "animate-pulse" : ""}
+              />
             </button>
           )}
           <div className="flex items-center rounded-lg bg-zinc-100 p-0.5 text-sm dark:bg-zinc-800">
@@ -138,14 +190,22 @@ export function HomeTabs({ tabs, showRandom = false }: HomeTabsProps) {
           Shuffling…
         </div>
       ) : items.length > 0 ? (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          className={
+            centerLastRow
+              ? "mt-6 flex flex-wrap justify-center gap-4 *:w-full sm:*:w-[calc((100%-1rem)/2)] lg:*:w-[calc((100%-2rem)/3)]"
+              : "mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          }
+        >
           {entity === "bots"
-            ? (items as IndexBot[]).slice(0, 9).map((bot) => (
-                <BotCard key={bot.bot_id} bot={bot} />
-              ))
-            : (items as IndexServer[]).slice(0, 9).map((server) => (
-                <ServerCard key={server.server_id} server={server} />
-              ))}
+            ? (items as IndexBot[])
+                .slice(0, 9)
+                .map((bot) => <BotCard key={bot.bot_id} bot={bot} />)
+            : (items as IndexServer[])
+                .slice(0, 9)
+                .map((server) => (
+                  <ServerCard key={server.server_id} server={server} />
+                ))}
         </div>
       ) : (
         <div className="mt-10 flex items-center justify-center text-sm text-zinc-400 dark:text-zinc-600">

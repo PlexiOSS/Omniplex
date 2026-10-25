@@ -47,7 +47,7 @@ export default function BannedPage() {
           Your account is banned
         </h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          You can still sign in to submit a ban appeal — that's the only part of
+          You can still sign in to submit a ban appeal. That's the only part of
           the site available to you right now. If you think this is a mistake,
           explain why in your appeal.
         </p>
@@ -89,7 +89,7 @@ export default function BannedPage() {
             )}
             {!existingAppeal.review_feedback && (
               <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-                We'll review it and follow up — you don't need to submit another
+                We'll review it and follow up. You don't need to submit another
                 one.
               </p>
             )}

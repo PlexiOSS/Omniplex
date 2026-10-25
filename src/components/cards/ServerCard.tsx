@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import type { IndexServer } from "@/lib/api/types";
 import { bannerUrl, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
-import { formatCount } from "@/lib/utils/format";
+import { formatCountLabel } from "@/lib/utils/format";
 
 interface ServerCardProps {
   server: IndexServer;
@@ -83,11 +83,11 @@ export function ServerCard({ server }: ServerCardProps) {
         <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="flex items-center gap-1">
             <Star size={12} />
-            {formatCount(server.approximate_votes)} votes
+            {formatCountLabel(server.approximate_votes, "vote")}
           </span>
           <span className="flex items-center gap-1">
             <Users size={12} />
-            {formatCount(server.total_members)} members
+            {formatCountLabel(server.total_members, "member")}
           </span>
         </div>
       </div>

@@ -141,7 +141,7 @@ export function WebhookTestModal({
             {result.ok ? (
               <>
                 <CircleCheck size={14} />
-                Sent — check delivery logs for the outcome.
+                Sent. Check delivery logs for the outcome.
               </>
             ) : (
               <>

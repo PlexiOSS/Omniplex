@@ -2,19 +2,31 @@ import { client } from "../client";
 import type {
   EntityVote,
   EntityVoteRedeemLogSummary,
+  EntityVoterList,
   PagedResult,
   TargetType,
   VoteCreditTier,
   VoteCreditTierRedeemSummary,
   VoterLeaderboardEntry,
+  VoterLeaderboardPeriod,
+  VoterLeaderboardRank,
 } from "../types";
 
 export const votesResource = {
-  /** Public, no auth needed. Most active voters, all-time, by total
-   * upvotes cast. Defaults to top 10 server-side; capped at 50. */
-  getLeaderboard: (limit?: number) =>
-    client.get<VoterLeaderboardEntry[]>(
-      `/votes/leaderboard${limit ? `?limit=${limit}` : ""}`,
+  getLeaderboard: (limit?: number, period: VoterLeaderboardPeriod = "all") => {
+    const params = new URLSearchParams({ period });
+    if (limit) params.set("limit", String(limit));
+    return client.get<VoterLeaderboardEntry[]>(`/votes/leaderboard?${params}`, {
+      cache: "no-store",
+    });
+  },
+
+  getLeaderboardRank: (
+    userId: string,
+    period: VoterLeaderboardPeriod = "all",
+  ) =>
+    client.get<VoterLeaderboardRank>(
+      `/votes/leaderboard/users/${encodeURIComponent(userId)}?period=${period}`,
       { cache: "no-store" },
     ),
 
@@ -24,17 +36,12 @@ export const votesResource = {
       { cache: "no-store" },
     ),
 
-  /** The sitewide tier catalog (not scoped to one entity) — same rows the
-   * per-entity credit summary's `tiers` field is drawn from, useful for
-   * showing the full ladder before a user has picked/owns an entity. */
   getGeneralCreditTiers: (targetType?: TargetType) =>
     client.get<VoteCreditTier[]>(
       `/votes/credit-tiers${targetType ? `?target_type=${targetType}` : ""}`,
       { cache: "no-store" },
     ),
 
-  /** A user's individual vote history on one entity (5/page) — distinct
-   * from the credit summary, which is an aggregate. */
   getUserVotes: (
     userId: string,
     targetType: TargetType,
@@ -52,7 +59,6 @@ export const votesResource = {
       { cache: "no-store" },
     ),
 
-  /** Converts up to `votes` of the entity's votes into spendable credits. */
   redeemCredits: (
     targetType: TargetType,
     targetId: string,
@@ -65,12 +71,25 @@ export const votesResource = {
       { token },
     ),
 
-  /** Public, no auth needed. Bare Discord snowflakes, one per distinct voter — no
-   * usernames/avatars/timestamps. Omitting `page` returns every voter unpaginated;
-   * pass page=1 (100/page) to get a real total via response length. */
-  getUserList: (targetType: TargetType, targetId: string, page?: number) =>
+  getVoters: (
+    targetType: TargetType,
+    targetId: string,
+    limit?: number,
+    token?: string,
+  ) =>
+    client.get<EntityVoterList>(
+      `/${targetType}/${targetId}/votes/voters${limit ? `?limit=${limit}` : ""}`,
+      { token, cache: "no-store" },
+    ),
+
+  getUserList: (
+    targetType: TargetType,
+    targetId: string,
+    page?: number,
+    token?: string,
+  ) =>
     client.get<string[]>(
       `/${targetType}/${targetId}/votes/user-list${page ? `?page=${page}` : ""}`,
-      { cache: "no-store" },
+      { token, cache: "no-store" },
     ),
 };

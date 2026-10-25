@@ -34,7 +34,7 @@ export default async function BlogPage() {
 
       {posts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-zinc-500 dark:text-zinc-400">
-          <p className="text-sm">No posts yet — check back soon.</p>
+          <p className="text-sm">No posts yet. Check back soon.</p>
         </div>
       ) : (
         <div className="divide-y divide-zinc-200 dark:divide-zinc-800">

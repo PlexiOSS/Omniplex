@@ -55,7 +55,7 @@ export function EmojiPackBuilder({
         continue;
       }
       if (file.size > MAX_BYTES) {
-        setError(`${file.name}: too large — 256KB max per emoji.`);
+        setError(`${file.name}: too large, 256KB max per emoji.`);
         continue;
       }
 

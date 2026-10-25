@@ -10,6 +10,8 @@ interface BannerProps {
   alt: string;
   className?: string;
   hideWhenMissing?: boolean;
+  sizeClassName?: string;
+  missingSizeClassName?: string;
 }
 
 export function Banner({
@@ -18,6 +20,8 @@ export function Banner({
   alt,
   className = "",
   hideWhenMissing = false,
+  sizeClassName = "",
+  missingSizeClassName,
 }: BannerProps) {
   const candidates = [src, fallbackSrc].filter((s): s is string => !!s);
   const [attempt, setAttempt] = useState(0);
@@ -31,6 +35,7 @@ export function Banner({
       className={[
         "relative overflow-hidden bg-linear-to-br from-accent/30 via-accent/10 to-transparent dark:from-accent/25 dark:via-accent/10",
         className,
+        !current && missingSizeClassName ? missingSizeClassName : sizeClassName,
         hideWhenMissing && !loaded ? "hidden" : "",
       ].join(" ")}
     >

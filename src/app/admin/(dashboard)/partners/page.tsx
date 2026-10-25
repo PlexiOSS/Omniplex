@@ -106,7 +106,7 @@ export default function PartnersAdminPage() {
       )}
       {partnerTypes.length === 0 && (
         <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
-          No partner types exist yet — a partner type has to be created
+          No partner types exist yet. A partner type has to be created
           (directly in the database) before a partner can be added here.
         </p>
       )}

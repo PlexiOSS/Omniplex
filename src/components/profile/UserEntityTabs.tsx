@@ -1,7 +1,13 @@
 "use client";
 
-import { Bot, Package, Server as ServerIcon, Users } from "lucide-react";
-import { useState } from "react";
+import {
+  Bot,
+  Package,
+  Server as ServerIcon,
+  ThumbsUp,
+  Users,
+} from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { BotCard } from "@/components/cards/BotCard";
 import { PackCard } from "@/components/cards/PackCard";
 import { ServerCard } from "@/components/cards/ServerCard";
@@ -13,9 +19,10 @@ interface UserEntityTabsProps {
   servers: IndexServer[];
   packs: BotPack[];
   teams: Team[];
+  activity?: ReactNode;
 }
 
-type EntityKey = "bots" | "servers" | "packs" | "teams";
+type EntityKey = "bots" | "servers" | "packs" | "teams" | "activity";
 
 /** Same underline-tab treatment as the dashboard's own tab bar. */
 export function UserEntityTabs({
@@ -23,11 +30,12 @@ export function UserEntityTabs({
   servers,
   packs,
   teams,
+  activity,
 }: UserEntityTabsProps) {
   const allTabs: {
     key: EntityKey;
     label: string;
-    count: number;
+    count: number | null;
     icon: typeof Bot;
   }[] = [
     { key: "bots", label: "Bots", count: bots.length, icon: Bot },
@@ -40,7 +48,19 @@ export function UserEntityTabs({
     { key: "packs", label: "Packs", count: packs.length, icon: Package },
     { key: "teams", label: "Teams", count: teams.length, icon: Users },
   ];
-  const tabs = allTabs.filter((t) => t.count > 0);
+  const tabs = [
+    ...allTabs.filter((t) => (t.count ?? 0) > 0),
+    ...(activity
+      ? [
+          {
+            key: "activity" as const,
+            label: "Activity",
+            count: null,
+            icon: ThumbsUp,
+          },
+        ]
+      : []),
+  ];
 
   const [active, setActive] = useState<EntityKey>(tabs[0]?.key ?? "bots");
 
@@ -64,15 +84,24 @@ export function UserEntityTabs({
             >
               <Icon size={14} />
               {label}
-              <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-xs dark:bg-zinc-800">
-                {count}
-              </span>
+              {count !== null && (
+                <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-xs dark:bg-zinc-800">
+                  {count}
+                </span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {active === "activity" && <div className="mt-6">{activity}</div>}
+
+      <div
+        className={[
+          "mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3",
+          active === "activity" ? "hidden" : "",
+        ].join(" ")}
+      >
         {active === "bots" &&
           bots.map((bot) => <BotCard key={bot.bot_id} bot={bot} />)}
         {active === "servers" &&

@@ -1,11 +1,22 @@
 import { client } from "../client";
-import type { SEO, UpdateUserPayload, User, UserPerm } from "../types";
+import type {
+  SEO,
+  UpdateUserPayload,
+  User,
+  UserActivity,
+  UserPerm,
+} from "../types";
 
 export const usersResource = {
+  getActivity: (userId: string) =>
+    client.get<UserActivity>(`/users/${userId}/activity`, {
+      next: { revalidate: 300 },
+    }),
+
   getUser: (userId: string, token?: string) =>
-    client.get<User>(`/users/${userId}`, token
-      ? { token, cache: "no-store" }
-      : { next: { revalidate: 60 } },
+    client.get<User>(
+      `/users/${userId}`,
+      token ? { token, cache: "no-store" } : { next: { revalidate: 60 } },
     ),
 
   /** Minimal metadata for generateMetadata() — avoids a full getUser() fetch. */
@@ -16,5 +27,8 @@ export const usersResource = {
     client.patch<User>(`/users/${userId}`, payload, { token }),
 
   getPerms: (userId: string, token: string) =>
-    client.get<UserPerm>(`/users/${userId}/perms`, { token, cache: "no-store" }),
+    client.get<UserPerm>(`/users/${userId}/perms`, {
+      token,
+      cache: "no-store",
+    }),
 };

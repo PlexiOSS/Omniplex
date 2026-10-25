@@ -69,11 +69,11 @@ export function SoundPackBuilder({
 
     for (const file of toUpload) {
       if (file.type !== ALLOWED_TYPE) {
-        setError(`${file.name}: unsupported audio type — MP3 only.`);
+        setError(`${file.name}: unsupported audio type, MP3 only.`);
         continue;
       }
       if (file.size > MAX_BYTES) {
-        setError(`${file.name}: too large — 2MB max per sound.`);
+        setError(`${file.name}: too large, 2MB max per sound.`);
         continue;
       }
 
@@ -86,7 +86,7 @@ export function SoundPackBuilder({
       }
 
       if (durationMs > MAX_DURATION_MS) {
-        setError(`${file.name}: too long — 10 seconds max per sound.`);
+        setError(`${file.name}: too long, 10 seconds max per sound.`);
         continue;
       }
 

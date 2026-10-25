@@ -198,7 +198,7 @@ export function TokenManager({
       {newToken && (
         <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
           <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
-            Copy this token now — you won&apos;t be able to see it again.
+            Copy this token now. You won&apos;t be able to see it again.
           </p>
           <div className="mt-2 flex items-center gap-2">
             <code className="flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap rounded-lg bg-white px-3 py-2 text-xs text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
@@ -223,7 +223,7 @@ export function TokenManager({
               title={
                 TEST_AUTH_ENABLED
                   ? undefined
-                  : "Coming soon — pending a Popplio deploy"
+                  : "Coming soon, pending a Popplio deploy"
               }
               className={!TEST_AUTH_ENABLED ? "opacity-50" : undefined}
             >
@@ -242,7 +242,7 @@ export function TokenManager({
               {testResult.ok ? (
                 <>
                   <CircleCheck size={12} />
-                  Valid — authorized as {testResult.targetType}
+                  Valid: authorized as {testResult.targetType}
                 </>
               ) : (
                 <>
@@ -266,7 +266,10 @@ export function TokenManager({
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {list === null
             ? "Loading…"
-            : `${list.length} token${list.length === 1 ? "" : "s"}`}
+            : (() => {
+                const n = list.filter((t) => t.type === "api").length;
+                return `${n} API token${n === 1 ? "" : "s"}`;
+              })()}
         </p>
         {canManage && !creating && (
           <Button
@@ -402,55 +405,93 @@ export function TokenManager({
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      {list === null && !error ? null : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {list?.length === 0 && !creating && (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 sm:col-span-2">
-              No tokens yet.
-            </p>
-          )}
-          {list?.map((s) => {
-            const expired = isExpired(s.expiry);
-            return (
-              <div
-                key={s.id}
-                className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                      {s.name || "Unnamed token"}
+      {list === null && !error
+        ? null
+        : (
+            [
+              {
+                key: "api",
+                title: "API tokens",
+                empty: "No API tokens yet.",
+                action: "Revoke",
+                items: (list ?? []).filter((s) => s.type === "api"),
+              },
+              {
+                key: "login",
+                title: "Signed-in devices",
+                empty: "",
+                action: "Sign out",
+                items: (list ?? []).filter((s) => s.type !== "api"),
+              },
+            ] as const
+          )
+            .filter(
+              (section) => section.key === "api" || section.items.length > 0,
+            )
+            .map((section) => (
+              <section key={section.key} className="mt-6 first:mt-0">
+                <h3 className="mb-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                  {section.title}
+                  <span className="ml-1.5 font-normal text-zinc-400 dark:text-zinc-500">
+                    {section.items.length}
+                  </span>
+                </h3>
+                {section.items.length === 0 ? (
+                  !creating && (
+                    <p className="rounded-xl border border-dashed border-zinc-200 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                      {section.empty}
                     </p>
-                    {expired && <Badge variant="danger">Expired</Badge>}
-                  </div>
-                  <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                    Created {formatDate(s.created_at)} ·{" "}
-                    {expired ? "expired" : "expires"} {formatDate(s.expiry)}
-                  </p>
-                  <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">
-                    {s.perm_limits.length === 0
-                      ? "Full access"
-                      : s.perm_limits.join(", ")}
-                  </p>
-                </div>
-                {canManage && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    loading={revokingId === s.id}
-                    onClick={() => handleRevoke(s.id)}
-                    className="shrink-0 px-3 text-xs"
-                  >
-                    <Trash2 size={12} />
-                    Revoke
-                  </Button>
+                  )
+                ) : (
+                  <ul className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+                    {section.items.map((s) => {
+                      const expired = isExpired(s.expiry);
+                      return (
+                        <li
+                          key={s.id}
+                          className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                                {s.name || "Unnamed token"}
+                              </p>
+                              {expired && (
+                                <Badge variant="danger">Expired</Badge>
+                              )}
+                            </div>
+                            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                              Created {formatDate(s.created_at)} ·{" "}
+                              {expired ? "expired" : "expires"}{" "}
+                              {formatDate(s.expiry)}
+                              {section.key === "api" &&
+                                ` · ${
+                                  s.perm_limits.length === 0
+                                    ? "Full access"
+                                    : `Limited to ${s.perm_limits.join(", ")}`
+                                }`}
+                            </p>
+                          </div>
+                          {canManage && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              loading={revokingId === s.id}
+                              onClick={() => handleRevoke(s.id)}
+                              className="shrink-0 px-3 text-xs"
+                            >
+                              <Trash2 size={12} />
+                              {section.action}
+                            </Button>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+              </section>
+            ))}
     </div>
   );
 }

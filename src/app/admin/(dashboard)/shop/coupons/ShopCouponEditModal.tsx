@@ -73,7 +73,7 @@ export function ShopCouponEditModal({
       expiryNum <= 0
     ) {
       setError(
-        "ID, code, max uses, reuse wait, and expiry are all required and must be greater than 0 — Popplio currently rejects 0/empty for these (a reproduced upstream bug, not a real limit you can opt out of).",
+        "ID, code, max uses, reuse wait, and expiry are all required and must be greater than 0. Popplio currently rejects 0/empty for these (a reproduced upstream bug, not a real limit you can opt out of).",
       );
       return;
     }

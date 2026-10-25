@@ -6,7 +6,12 @@ import { Suspense, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
-import type { Review, ServerEmoji, ServerSticker } from "@/lib/api/types";
+import type {
+  EntityVoterList,
+  Review,
+  ServerEmoji,
+  ServerSticker,
+} from "@/lib/api/types";
 import { EmojiStickerGallery } from "./EmojiStickerGallery";
 
 type Tab = "about" | "emojis" | "reviews" | "voters";
@@ -20,6 +25,7 @@ interface ServerPageTabsProps {
   /** When the tracking bot last synced this server's emojis/stickers. Null if never synced. */
   emojisSyncedAt: string | null;
   initialReviews: Review[];
+  initialVoters?: EntityVoterList | null;
 }
 
 const TAB_KEYS: Tab[] = ["about", "emojis", "reviews", "voters"];
@@ -59,6 +65,7 @@ function ServerPageTabsInner({
   stickers,
   emojisSyncedAt,
   initialReviews,
+  initialVoters,
   initialTab,
   highlightReviewId,
 }: ServerPageTabsProps & { initialTab: Tab; highlightReviewId?: string }) {
@@ -89,7 +96,12 @@ function ServerPageTabsInner({
       icon: MessageSquare,
       count: initialReviews.length,
     },
-    { key: "voters", label: "Voters", icon: Users, count: null },
+    {
+      key: "voters",
+      label: "Voters",
+      icon: Users,
+      count: initialVoters?.total ?? null,
+    },
   ];
 
   return (
@@ -152,7 +164,11 @@ function ServerPageTabsInner({
         )}
 
         {tab === "voters" && (
-          <VoterList targetType="server" targetId={serverId} />
+          <VoterList
+            targetType="server"
+            targetId={serverId}
+            initialData={initialVoters ?? undefined}
+          />
         )}
       </div>
     </div>

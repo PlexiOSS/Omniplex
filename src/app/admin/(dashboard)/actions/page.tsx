@@ -100,7 +100,7 @@ export default function AdminGlobalActionsPage() {
     <div className="mx-auto max-w-2xl px-4 py-10">
       <AdminPageHeader
         title="Global Actions"
-        description="RPC actions that apply to every entity of a type at once — no specific bot, server, or team to pick."
+        description="RPC actions that apply to every entity of a type at once, with no specific bot, server, or team to pick."
       />
 
       {loadError && (

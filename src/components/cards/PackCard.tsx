@@ -18,7 +18,7 @@ import {
   packEmojiUrl,
   packStickerUrl,
 } from "@/lib/utils/assets";
-import { formatCount } from "@/lib/utils/format";
+import { formatCountLabel } from "@/lib/utils/format";
 
 interface PackCardProps {
   pack: BotPack;
@@ -139,18 +139,18 @@ export function PackCard({ pack }: PackCardProps) {
       <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
         <span className="flex items-center gap-1">
           <Star size={12} />
-          {formatCount(pack.votes)} votes
+          {formatCountLabel(pack.votes, "vote")}
         </span>
         {(pack.bot_ids ?? []).length > 0 && (
           <span className="flex items-center gap-1">
             <Bot size={12} />
-            {(pack.bot_ids ?? []).length} bots
+            {formatCountLabel((pack.bot_ids ?? []).length, "bot")}
           </span>
         )}
         {(pack.server_ids ?? []).length > 0 && (
           <span className="flex items-center gap-1">
             <Server size={12} />
-            {(pack.server_ids ?? []).length} servers
+            {formatCountLabel((pack.server_ids ?? []).length, "server")}
           </span>
         )}
         {(pack.emojis ?? []).length > 0 && (

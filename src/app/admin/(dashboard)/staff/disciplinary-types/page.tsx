@@ -85,7 +85,7 @@ export default function DisciplinaryTypesPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Disciplinary Types"
-        description="Templates for staff warnings/suspensions — self-assignable severity, the permissions they limit a member to, and whether they need approval before taking effect."
+        description="Templates for staff warnings/suspensions: self-assignable severity, the permissions they limit a member to, and whether they need approval before taking effect."
         action={
           hasPerm("manage_disciplinaries") && (
             <Button variant="primary" size="sm" onClick={() => setEditing("new")}>

@@ -74,7 +74,7 @@ export default function ShopBenefitsPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Shop Benefits"
-        description="What buying a shop item actually gets you. Items reference these by ID — a benefit still in use can't be deleted."
+        description="What buying a shop item actually gets you. Items reference these by ID, and a benefit still in use can't be deleted."
         action={
           hasPerm("manage_shop") && (
             <Button

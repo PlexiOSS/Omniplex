@@ -11,7 +11,7 @@ import {
   discordDefaultAvatar,
   mirroredAvatarUrl,
 } from "@/lib/utils/assets";
-import { formatCount } from "@/lib/utils/format";
+import { formatCountLabel } from "@/lib/utils/format";
 
 interface BotCardProps {
   bot: IndexBot;
@@ -89,11 +89,11 @@ export function BotCard({ bot }: BotCardProps) {
         <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="flex items-center gap-1">
             <Star size={12} />
-            {formatCount(bot.approximate_votes)} votes
+            {formatCountLabel(bot.approximate_votes, "vote")}
           </span>
           <span className="flex items-center gap-1">
             <Server size={12} />
-            {formatCount(bot.servers)} servers
+            {formatCountLabel(bot.servers, "server")}
           </span>
         </div>
       </div>

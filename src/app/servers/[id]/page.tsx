@@ -3,7 +3,6 @@ import {
   ArrowRightLeft,
   ExternalLink,
   Eye,
-  Globe,
   MousePointerClick,
   Star,
   Users,
@@ -12,27 +11,36 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EntityBadges } from "@/components/badges/EntityBadges";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { UnlistedNotice } from "@/components/listing/UnlistedNotice";
+import { isListed, UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { LinkIcon } from "@/components/ui/LinkIcon";
+import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
 import { StatRow } from "@/components/ui/StatRow";
 import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
+import { WidgetDisclosure } from "@/components/widget/WidgetDisclosure";
 import { WidgetShare } from "@/components/widget/WidgetShare";
-import { reviews, servers, users, vanity } from "@/lib/api";
+import { reviews, servers, users, vanity, votes } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import { shortLinkUrl } from "@/lib/shortLinks";
 import {
   bannerUrl,
   mirroredAvatarUrl,
   teamAvatarUrl,
 } from "@/lib/utils/assets";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import {
+  isApiUnavailable,
+  isNotFoundError,
+  nullIfNotFound,
+} from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { getServerToken } from "@/lib/utils/serverSession";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
@@ -47,7 +55,7 @@ async function fetchServer(id: string, token?: string) {
     return await servers.getServer(id, token);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
-      const resolved = await vanity.resolve(id).catch(() => null);
+      const resolved = await vanity.resolve(id).catch(nullIfNotFound);
       if (resolved?.target_type === "server") {
         return servers.getServer(resolved.target_id, token);
       }
@@ -61,7 +69,7 @@ async function fetchServerSeo(id: string) {
     return await servers.getSeo(id);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
-      const resolved = await vanity.resolve(id).catch(() => null);
+      const resolved = await vanity.resolve(id).catch(nullIfNotFound);
       if (resolved?.target_type === "server") {
         return servers.getSeo(resolved.target_id);
       }
@@ -82,12 +90,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ServerPage({ params }: Props) {
   const { id } = await params;
+  const token = await getServerToken();
   let server = null;
   try {
-    server = await fetchServer(id, await getServerToken());
+    server = await fetchServer(id, token);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!server) notFound();
 
@@ -104,9 +114,23 @@ export default async function ServerPage({ params }: Props) {
       `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`,
   );
 
-  const [reviewList, similarServers] = await Promise.all([
-    reviews.getAll("server", server.server_id).catch(() => ({ reviews: [] })),
+  const [reviewList, similarServers, voterList] = await Promise.all([
+    reviews
+      .getAll(
+        "server",
+        server.server_id,
+        isListed(server.type) ? undefined : token,
+      )
+      .catch(() => ({ reviews: [] })),
     servers.getSimilar(server.server_id).catch(() => []),
+    votes
+      .getVoters(
+        "server",
+        server.server_id,
+        24,
+        isListed(server.type) ? undefined : token,
+      )
+      .catch(() => null),
   ]);
 
   const voteBlitzActive =
@@ -118,7 +142,7 @@ export default async function ServerPage({ params }: Props) {
         {voteBlitzActive && (
           <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
             <Zap size={12} />
-            Vote Blitz active — cooldown is halved right now
+            Vote Blitz active: cooldown is halved right now
           </div>
         )}
         {(() => {
@@ -147,6 +171,8 @@ export default async function ServerPage({ params }: Props) {
     </div>
   );
 
+  const shortLink = shortLinkUrl(server.vanity || server.server_id);
+
   return (
     <Container className="py-10">
       <Link
@@ -166,7 +192,9 @@ export default async function ServerPage({ params }: Props) {
           server.asset_versions?.banner,
         )}
         alt={server.name}
-        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+        className="mb-6 -mt-2 rounded-2xl"
+        sizeClassName="h-40 sm:h-52"
+        missingSizeClassName="h-20"
       />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
@@ -187,6 +215,7 @@ export default async function ServerPage({ params }: Props) {
                   <Badge variant="info">Supporter</Badge>
                 )}
                 {server.nsfw && <Badge variant="danger">NSFW</Badge>}
+                <EntityBadges targetType="server" targetId={server.server_id} />
               </div>
               <p className="mt-1 text-zinc-500 dark:text-zinc-400">
                 {server.short}
@@ -211,6 +240,7 @@ export default async function ServerPage({ params }: Props) {
               targetId={server.server_id}
               targetLabel="server"
             />
+            {shortLink && <ShortLinkButton url={shortLink} />}
             <ReminderToggle targetType="server" targetId={server.server_id} />
             <Link
               href={`/servers/compare?a=${encodeURIComponent(server.server_id)}`}
@@ -229,6 +259,7 @@ export default async function ServerPage({ params }: Props) {
             stickers={server.stickers}
             emojisSyncedAt={server.emojis_synced_at}
             initialReviews={reviewList.reviews}
+            initialVoters={voterList}
           />
         </div>
 
@@ -326,7 +357,7 @@ export default async function ServerPage({ params }: Props) {
                   <LinkItem
                     key={link.name}
                     href={link.value}
-                    icon={<Globe size={14} />}
+                    icon={<LinkIcon name={link.name} href={link.value} />}
                     label={link.name}
                   />
                 ))}
@@ -334,10 +365,12 @@ export default async function ServerPage({ params }: Props) {
             </div>
           )}
 
-          <WidgetShare
-            widgetPath={`/servers/${server.vanity || server.server_id}/widget`}
-            stats={SERVER_WIDGET_STATS}
-          />
+          <WidgetDisclosure>
+            <WidgetShare
+              widgetPath={`/servers/${server.vanity || server.server_id}/widget`}
+              stats={SERVER_WIDGET_STATS}
+            />
+          </WidgetDisclosure>
         </aside>
       </div>
 

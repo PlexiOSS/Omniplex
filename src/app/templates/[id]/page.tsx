@@ -9,7 +9,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import { reviews, serverTemplates } from "@/lib/api";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
 import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 import { TemplateContents } from "./TemplateContents";
 import { TemplateDetailActions } from "./TemplateDetailActions";
@@ -39,7 +39,8 @@ export default async function TemplatePage({ params }: Props) {
     template = await serverTemplates.getTemplate(id);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!template) notFound();
 

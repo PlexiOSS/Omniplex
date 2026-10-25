@@ -1,4 +1,5 @@
 import {
+  Activity,
   ArrowLeft,
   ArrowRightLeft,
   ExternalLink,
@@ -11,29 +12,38 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EntityBadges } from "@/components/badges/EntityBadges";
 import { BotPageTabs } from "@/components/bots/BotPageTabs";
 import { InvitePermissionNote } from "@/components/bots/InvitePermissionNote";
 import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { UnlistedNotice } from "@/components/listing/UnlistedNotice";
+import { isListed, UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { LinkIcon } from "@/components/ui/LinkIcon";
+import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
 import { StatRow } from "@/components/ui/StatRow";
 import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
+import { WidgetDisclosure } from "@/components/widget/WidgetDisclosure";
 import { WidgetShare } from "@/components/widget/WidgetShare";
-import { bots, reviews, vanity } from "@/lib/api";
+import { bots, reviews, vanity, votes } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import { shortLinkUrl } from "@/lib/shortLinks";
 import {
   bannerUrl,
   discordBannerUrl,
   mirroredAvatarUrl,
   teamAvatarUrl,
 } from "@/lib/utils/assets";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import {
+  isApiUnavailable,
+  isNotFoundError,
+  nullIfNotFound,
+} from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { getServerToken } from "@/lib/utils/serverSession";
 import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
@@ -48,7 +58,7 @@ async function fetchBot(id: string, token?: string) {
     return await bots.getBot(id, token);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
-      const resolved = await vanity.resolve(id).catch(() => null);
+      const resolved = await vanity.resolve(id).catch(nullIfNotFound);
       if (resolved?.target_type === "bot") {
         return bots.getBot(resolved.target_id, token);
       }
@@ -62,7 +72,7 @@ async function fetchBotSeo(id: string) {
     return await bots.getSeo(id);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
-      const resolved = await vanity.resolve(id).catch(() => null);
+      const resolved = await vanity.resolve(id).catch(nullIfNotFound);
       if (resolved?.target_type === "bot") {
         return bots.getSeo(resolved.target_id);
       }
@@ -83,22 +93,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BotPage({ params }: Props) {
   const { id } = await params;
+  const token = await getServerToken();
   let bot = null;
   try {
-    bot = await fetchBot(id, await getServerToken());
+    bot = await fetchBot(id, token);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!bot) notFound();
 
-  const [reviewList, commandList, changelogList, similarBots] =
+  const listedToken = isListed(bot.type) ? undefined : token;
+
+  const [reviewList, commandList, changelogList, similarBots, voterList] =
     await Promise.all([
-      reviews.getAll("bot", bot.bot_id).catch(() => ({ reviews: [] })),
-      bots.getCommands(bot.bot_id).catch(() => ({ commands: [] })),
-      bots.getChangelogs(bot.bot_id).catch(() => ({ changelogs: [] })),
+      reviews
+        .getAll("bot", bot.bot_id, listedToken)
+        .catch(() => ({ reviews: [] })),
+      bots.getCommands(bot.bot_id, listedToken).catch(() => ({ commands: [] })),
+      bots
+        .getChangelogs(bot.bot_id, listedToken)
+        .catch(() => ({ changelogs: [] })),
       bots.getSimilar(bot.bot_id).catch(() => []),
+      votes.getVoters("bot", bot.bot_id, 24, listedToken).catch(() => null),
     ]);
+
+  const uptimePercent =
+    bot.total_uptime > 0
+      ? Math.min(100, (bot.uptime / bot.total_uptime) * 100)
+      : null;
+  const statusLabel = bot.user.status
+    ? STATUS_LABELS[bot.user.status]
+    : undefined;
 
   const avatarSrc = mirroredAvatarUrl(
     "bots",
@@ -116,7 +143,7 @@ export default async function BotPage({ params }: Props) {
         {voteBlitzActive && (
           <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
             <Zap size={12} />
-            Vote Blitz active — cooldown is halved right now
+            Vote Blitz active: cooldown is halved right now
           </div>
         )}
         {bot.invite && (
@@ -141,6 +168,8 @@ export default async function BotPage({ params }: Props) {
     </div>
   );
 
+  const shortLink = shortLinkUrl(bot.vanity || bot.bot_id);
+
   return (
     <Container className="py-10">
       <Link
@@ -157,7 +186,9 @@ export default async function BotPage({ params }: Props) {
         src={bannerUrl("bots", bot.bot_id, bot.asset_versions?.banner)}
         fallbackSrc={discordBannerUrl("bots", bot.bot_id)}
         alt={bot.user.username}
-        className="mb-6 -mt-2 h-40 rounded-2xl sm:h-52"
+        className="mb-6 -mt-2 rounded-2xl"
+        sizeClassName="h-40 sm:h-52"
+        missingSizeClassName="h-20"
       />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
@@ -182,6 +213,12 @@ export default async function BotPage({ params }: Props) {
                 )}
                 {bot.supporter_badge && <Badge variant="info">Supporter</Badge>}
                 {bot.nsfw && <Badge variant="danger">NSFW</Badge>}
+                <EntityBadges targetType="bot" targetId={bot.bot_id} />
+                {statusLabel && (
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {statusLabel}
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-zinc-500 dark:text-zinc-400">
                 {bot.short}
@@ -207,6 +244,7 @@ export default async function BotPage({ params }: Props) {
               targetId={bot.bot_id}
               targetLabel="bot"
             />
+            {shortLink && <ShortLinkButton url={shortLink} />}
             <ReminderToggle targetType="bot" targetId={bot.bot_id} />
             <Link
               href={`/bots/compare?a=${encodeURIComponent(bot.bot_id)}`}
@@ -223,6 +261,7 @@ export default async function BotPage({ params }: Props) {
             commands={commandList.commands}
             changelogs={changelogList.changelogs}
             initialReviews={reviewList.reviews}
+            initialVoters={voterList}
           />
         </div>
 
@@ -247,6 +286,13 @@ export default async function BotPage({ params }: Props) {
                 label="Servers"
                 value={formatCount(bot.servers)}
               />
+              {uptimePercent !== null && (
+                <StatRow
+                  icon={<Activity size={14} />}
+                  label="Uptime"
+                  value={`${uptimePercent >= 99.95 ? "100" : uptimePercent.toFixed(1)}%`}
+                />
+              )}
               {bot.shards != null && (
                 <StatRow
                   icon={<Server size={14} />}
@@ -333,10 +379,12 @@ export default async function BotPage({ params }: Props) {
             </div>
           )}
 
-          <WidgetShare
-            widgetPath={`/bots/${bot.vanity || bot.bot_id}/widget`}
-            stats={BOT_WIDGET_STATS}
-          />
+          <WidgetDisclosure>
+            <WidgetShare
+              widgetPath={`/bots/${bot.vanity || bot.bot_id}/widget`}
+              stats={BOT_WIDGET_STATS}
+            />
+          </WidgetDisclosure>
         </aside>
       </div>
 
@@ -356,6 +404,13 @@ export default async function BotPage({ params }: Props) {
   );
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  online: "Online",
+  idle: "Idle",
+  dnd: "Do not disturb",
+  offline: "Offline",
+};
+
 function ExternalLinkItem({ href, label }: { href: string; label: string }) {
   return (
     <a
@@ -364,7 +419,14 @@ function ExternalLinkItem({ href, label }: { href: string; label: string }) {
       rel="noopener noreferrer"
       className="group flex items-center justify-between gap-2 rounded-lg -mx-2 px-2 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-50"
     >
-      <span className="truncate">{label}</span>
+      <span className="flex min-w-0 items-center gap-2">
+        <LinkIcon
+          name={label}
+          href={href}
+          className="shrink-0 text-zinc-400 transition-colors group-hover:text-accent dark:text-zinc-500"
+        />
+        <span className="truncate">{label}</span>
+      </span>
       <ExternalLink
         size={12}
         className="shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-accent"

@@ -1,13 +1,18 @@
 import { client } from "../client";
 import type {
   Bot,
+  BotBrowseSort,
   BotChangelog,
   BotChangelogFeedEntry,
+  BotChangelogFeedFilters,
   BotChangelogList,
   BotCommandInput,
   BotCommandList,
+  BotCommandSearchFilters,
   BotCommandSearchResult,
   BotSettingsUpdate,
+  BotWithCommands,
+  BrowseFilters,
   CaptchaSolution,
   CreateBotChangelogPayload,
   DiscordBotMeta,
@@ -16,6 +21,7 @@ import type {
   PagedResult,
   PatchBotTeamPayload,
   RandomBots,
+  RecentChangelogBot,
   SEO,
   UserVote,
 } from "../types";
@@ -29,11 +35,15 @@ export const botsResource = {
   getSeo: (id: string) =>
     client.get<SEO>(`/bots/${id}/seo`, { cache: "no-store" }),
 
-  getAll: (page = 1, sort?: "trending") =>
-    client.get<PagedResult<IndexBot[]>>(
-      `/bots/@all?page=${page}${sort ? `&sort=${sort}` : ""}`,
-      { cache: "no-store" },
-    ),
+  getAll: (page = 1, filters: BrowseFilters<BotBrowseSort> = {}) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (filters.sort) params.set("sort", filters.sort);
+    if (filters.tag) params.set("tag", filters.tag);
+    if (filters.certified) params.set("certified", "true");
+    return client.get<PagedResult<IndexBot[]>>(`/bots/@all?${params}`, {
+      cache: "no-store",
+    });
+  },
 
   getRandom: () =>
     client.get<RandomBots>("/bots/@random", {
@@ -93,30 +103,52 @@ export const botsResource = {
       token,
     }),
 
-  getCommands: (botId: string) =>
+  getCommands: (botId: string, token?: string) =>
     client.get<BotCommandList>(`/bots/${botId}/commands`, {
+      token,
       cache: "no-store",
     }),
 
   updateCommands: (botId: string, commands: BotCommandInput[], token: string) =>
     client.put<void>(`/bots/${botId}/commands`, { commands }, { token }),
 
-  getChangelogs: (botId: string) =>
+  getChangelogs: (botId: string, token?: string) =>
     client.get<BotChangelogList>(`/bots/${botId}/changelogs`, {
+      token,
       cache: "no-store",
     }),
 
-  getChangelogFeed: (page = 1) =>
-    client.get<PagedResult<BotChangelogFeedEntry[]>>(
-      `/bots/@changelogs?page=${page}`,
+  getChangelogFeed: (page = 1, filters: BotChangelogFeedFilters = {}) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (filters.q) params.set("q", filters.q);
+    if (filters.tag) params.set("tag", filters.tag);
+    if (filters.bot) params.set("bot", filters.bot);
+    return client.get<PagedResult<BotChangelogFeedEntry[]>>(
+      `/bots/@changelogs?${params}`,
       { cache: "no-store" },
-    ),
+    );
+  },
 
-  searchCommands: (query: string, page = 1) =>
-    client.get<PagedResult<BotCommandSearchResult[]>>(
-      `/bots/@commands?query=${encodeURIComponent(query)}&page=${page}`,
+  getRecentChangelogBots: () =>
+    client.get<RecentChangelogBot[]>("/bots/@changelogs/recent", {
+      cache: "no-store",
+    }),
+
+  searchCommands: (page = 1, filters: BotCommandSearchFilters = {}) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (filters.query) params.set("query", filters.query);
+    if (filters.tag) params.set("tag", filters.tag);
+    if (filters.bot) params.set("bot", filters.bot);
+    return client.get<PagedResult<BotCommandSearchResult[]>>(
+      `/bots/@commands?${params}`,
       { cache: "no-store" },
-    ),
+    );
+  },
+
+  getCommandBots: () =>
+    client.get<BotWithCommands[]>("/bots/@commands/bots", {
+      cache: "no-store",
+    }),
 
   createChangelog: (
     botId: string,

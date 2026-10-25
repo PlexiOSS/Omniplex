@@ -191,6 +191,19 @@ export interface BotCommandSearchResult {
   bot: PlatformUser;
 }
 
+export interface BotCommandSearchFilters {
+  query?: string;
+  tag?: string;
+  bot?: string;
+}
+
+export interface BotWithCommands {
+  bot_id: string;
+  commands: number;
+  preview: string[];
+  user: PlatformUser | null;
+}
+
 /** One entry in the sitewide changelog feed (GET /bots/@changelogs) --
  * a `BotChangelog` plus just enough of the owning bot's identity to
  * display and link back to it. */
@@ -202,6 +215,19 @@ export interface BotChangelogFeedEntry {
   version: string;
   created_at: string;
   user: PlatformUser;
+}
+
+export interface BotChangelogFeedFilters {
+  q?: string;
+  tag?: string;
+  bot?: string;
+}
+
+export interface RecentChangelogBot {
+  bot_id: string;
+  latest_at: string;
+  updates: number;
+  user: PlatformUser | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -743,11 +769,71 @@ export interface EntityVoteRedeemLogSummary {
   redeemed_credits: number;
 }
 
+export interface EntityVoter {
+  user: PlatformUser;
+  /** Upvotes since the last vote reset. */
+  votes: number;
+  total_votes: number;
+  last_voted_at: string;
+}
+
+export interface EntityVoterList {
+  voters: EntityVoter[];
+  /** Everyone who has ever upvoted the entity. */
+  total: number;
+}
+
+export type BotBrowseSort = "new" | "trending" | "votes" | "servers";
+export type ServerBrowseSort = "new" | "trending" | "votes" | "members";
+
+export interface BrowseFilters<S extends string> {
+  sort?: S;
+  tag?: string;
+  certified?: boolean;
+}
+
+export interface UserActivityReview {
+  id: string;
+  stars: number;
+  content: string;
+  created_at: string;
+  target: VoterLeaderboardFavorite;
+}
+
+export interface UserActivity {
+  month: VoterLeaderboardRank;
+  all_time: VoterLeaderboardRank;
+  top_voted: VoterLeaderboardFavorite[];
+  reviews: UserActivityReview[];
+}
+
+export type VoterLeaderboardPeriod = "all" | "month";
+
+export interface VoterLeaderboardFavorite {
+  target_type: "bot" | "server";
+  target_id: string;
+  name: string;
+  avatar: string;
+  vanity: string;
+  votes: number;
+}
+
 export interface VoterLeaderboardEntry {
   user: PlatformUser;
-  /** All-time upvote count across every entity -- not scoped to the
-   * current post-reset voting cycle. */
+  rank: number;
   votes: number;
+  bot_votes: number;
+  server_votes: number;
+  other_votes: number;
+  favorite: VoterLeaderboardFavorite | null;
+}
+
+export interface VoterLeaderboardRank {
+  /** 0 when the user has no counted upvotes in the period. */
+  rank: number;
+  votes: number;
+  total_voters: number;
+  period_start: string | null;
 }
 
 export interface EntityVote {
@@ -939,6 +1025,7 @@ export interface SearchQuery {
   shards?: SearchFilter;
   total_members?: SearchFilter;
   tags?: TagFilter;
+  page?: number;
 }
 
 export interface SearchResponse {
@@ -947,6 +1034,9 @@ export interface SearchResponse {
   servers?: IndexServer[];
   teams?: Team[];
   packs?: BotPack[];
+  /** Total matches per searched type across all pages. Missing on older API versions. */
+  counts?: Partial<Record<"bot" | "server" | "team" | "pack", number>>;
+  per_page?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -1400,6 +1490,7 @@ export interface Partner {
   /** Use `user.avatar` for a partner's image — Popplio never sends a separate one. */
   user: PlatformUser | null;
   bot_id: string | null;
+  bot?: PlatformUser | null;
 }
 
 export interface PartnerList {

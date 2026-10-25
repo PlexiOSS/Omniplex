@@ -13,21 +13,21 @@ Premium gives one of your bots or servers a shorter vote cooldown and a Premium 
 
 ## Plans
 
-Go to [Premium](/premium), pick **Bot** or **Server**, then pick the listing you want to upgrade only your own approved or certified listings that aren't already premium are eligible. Plans are Bronze, Silver, and Gold, differing only in how many days of premium you get for the price.
+Go to [Premium](/premium), pick **Bot** or **Server**, then pick the listing you want to upgrade. Only your own approved or certified listings that aren't already premium are eligible. Plans are Bronze, Silver, and Gold, differing only in how many days of premium you get for the price.
 
 ## Paying
 
 Two ways to pay:
 
-- **Card**, via Stripe Checkout redirects to Stripe's hosted checkout page, then back to Omniplex once it's done.
-- **PayPal** same idea, redirects to PayPal and back.
+- **Card**, via Stripe Checkout. You're sent to Stripe's hosted checkout page, then back to Omniplex once it's done.
+- **PayPal**, which works the same way: you're sent to PayPal and back.
 
-Neither method has your card or PayPal details ever touch Omniplex directly. After a successful payment you'll land on a confirmation page premium is applied automatically, no separate step needed.
+Neither method has your card or PayPal details ever touch Omniplex directly. After a successful payment you'll land on a confirmation page, and premium is applied automatically with no separate step needed. If a card payment went through but premium hasn't appeared, give it an hour: we check for paid purchases that weren't delivered every hour and apply them. If it still isn't there after that, [open a support ticket](/tickets).
 
 ## Discord server boosters
 
-If you boost *our* official Discord server (not the same thing as a "server" listing — this is about being a Nitro booster of our community), you get a free Bronze-plan redemption once every 30 days instead of paying — this option appears automatically on the [Premium](/premium) page when you're eligible.
+If you boost *our* official Discord server (not the same thing as a "server" listing; this is about being a Nitro booster of our community), you get a free Bronze-plan redemption once every 30 days instead of paying. This option appears automatically on the [Premium](/premium) page when you're eligible.
 
 ## Prefer not to pay with money?
 
-Bots and servers both earn a spendable credit balance from the votes they receive, which can go toward bonus premium days instead of buying a full plan see [Vote Credits & the Shop](/kb/premium/shop).
+Bots and servers both earn a spendable credit balance from the votes they receive, which can go toward bonus premium days instead of buying a full plan. See [Vote Credits & the Shop](/kb/premium/shop).

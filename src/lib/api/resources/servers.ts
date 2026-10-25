@@ -1,5 +1,6 @@
 import { client } from "../client";
 import type {
+  BrowseFilters,
   CaptchaSolution,
   DiscordServerMeta,
   IndexServer,
@@ -8,6 +9,7 @@ import type {
   RandomServers,
   SEO,
   Server,
+  ServerBrowseSort,
   ServerEmojiPreview,
   ServerSettingsUpdate,
   UserVote,
@@ -19,22 +21,24 @@ export const serversResource = {
       cache: "no-store",
     }),
 
-  /** Minimal metadata for generateMetadata() — avoids a full getServer() fetch. */
   getSeo: (id: string) =>
     client.get<SEO>(`/servers/${id}/seo`, { cache: "no-store" }),
 
-  getAll: (page = 1, sort?: "trending") =>
-    client.get<PagedResult<IndexServer[]>>(
-      `/servers/@all?page=${page}${sort ? `&sort=${sort}` : ""}`,
-      { cache: "no-store" },
-    ),
+  getAll: (page = 1, filters: BrowseFilters<ServerBrowseSort> = {}) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (filters.sort) params.set("sort", filters.sort);
+    if (filters.tag) params.set("tag", filters.tag);
+    if (filters.certified) params.set("certified", "true");
+    return client.get<PagedResult<IndexServer[]>>(`/servers/@all?${params}`, {
+      cache: "no-store",
+    });
+  },
 
   getRandom: () =>
     client.get<RandomServers>("/servers/@random", {
       cache: "no-store",
     }),
 
-  /** Other servers sharing at least one tag, ranked by how many they share. */
   getSimilar: (id: string) =>
     client.get<IndexServer[]>(`/servers/${id}/similar`, {
       cache: "no-store",
@@ -74,13 +78,11 @@ export const serversResource = {
   deleteServer: (serverId: string, token: string) =>
     client.delete<void>(`/servers/${serverId}`, { token }),
 
-  // Note: the backend returns 204 No Content on success, not the created server.
   createServer: (
     payload: import("../types").CreateServerPayload,
     token: string,
   ) => client.put<void>("/servers", payload, { token }),
 
-  /** Resolves an invite link to the real server's name/icon/member counts, ahead of submitting Add Server. */
   getServerMeta: (invite: string, token: string) =>
     client.get<DiscordServerMeta>(
       `/servers/meta?invite=${encodeURIComponent(invite)}`,

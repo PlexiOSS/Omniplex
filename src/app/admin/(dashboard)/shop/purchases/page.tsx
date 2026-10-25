@@ -79,7 +79,7 @@ export default function ShopPurchasesPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Shop Purchases"
-        description="The most recent 100 purchases across every entity, platform-wide — for abuse and fraud monitoring, not day-to-day shop management."
+        description="The most recent 100 purchases across every entity, platform-wide, for abuse and fraud monitoring, not day-to-day shop management."
       />
 
       {error && (

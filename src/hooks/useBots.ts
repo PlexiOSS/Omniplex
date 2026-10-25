@@ -7,29 +7,43 @@ import { bots } from "@/lib/api";
 import type {
   Bot,
   BotChangelogFeedEntry,
-  IndexBot,
+  BotChangelogFeedFilters,
+  BotCommandSearchFilters,
+  BotCommandSearchResult,
+  BotWithCommands,
   ListIndexBot,
   PagedResult,
+  RecentChangelogBot,
 } from "@/lib/api/types";
 
 export function useBotIndex() {
   return useSWR<ListIndexBot>("bots/index", () => bots.getIndex());
 }
 
-export function useBotList(page = 1, sort?: "trending") {
-  return useSWR<PagedResult<IndexBot[]>>(`bots/all/${page}/${sort ?? ""}`, () =>
-    bots.getAll(page, sort),
-  );
-}
-
 export function useBot(id: string) {
   return useSWR<Bot>(`bots/${id}`, () => bots.getBot(id));
 }
 
-export function useBotChangelogFeed(page = 1) {
+export function useBotChangelogFeed(
+  page = 1,
+  filters: BotChangelogFeedFilters = {},
+) {
   return useSWR<PagedResult<BotChangelogFeedEntry[]>>(
-    `bots/changelogs/feed/${page}`,
-    () => bots.getChangelogFeed(page),
+    [
+      "bots/changelogs/feed",
+      page,
+      filters.q ?? "",
+      filters.tag ?? "",
+      filters.bot ?? "",
+    ],
+    () => bots.getChangelogFeed(page, filters),
+    { keepPreviousData: true },
+  );
+}
+
+export function useRecentChangelogBots() {
+  return useSWR<RecentChangelogBot[]>("bots/changelogs/recent", () =>
+    bots.getRecentChangelogBots(),
   );
 }
 
@@ -40,5 +54,31 @@ export function useBotVoteInfo(
 ) {
   return useSWR(userId && token ? `bots/${botId}/votes/${userId}` : null, () =>
     bots.getVoteInfo(botId, userId!, token!),
+  );
+}
+
+export function useCommandSearch(
+  page: number,
+  filters: BotCommandSearchFilters,
+  enabled: boolean,
+) {
+  return useSWR<PagedResult<BotCommandSearchResult[]>>(
+    enabled
+      ? [
+          "bots/commands/search",
+          page,
+          filters.query ?? "",
+          filters.tag ?? "",
+          filters.bot ?? "",
+        ]
+      : null,
+    () => bots.searchCommands(page, filters),
+    { keepPreviousData: true },
+  );
+}
+
+export function useCommandBots() {
+  return useSWR<BotWithCommands[]>("bots/commands/bots", () =>
+    bots.getCommandBots(),
   );
 }

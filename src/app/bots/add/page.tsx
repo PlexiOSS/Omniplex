@@ -358,7 +358,7 @@ export default function AddBotPage() {
                 className="flex-1"
                 onClick={() => setConfirmed(true)}
               >
-                Looks right — continue
+                Looks right, continue
               </Button>
               <Button type="button" variant="ghost" onClick={changeBot}>
                 <Pencil size={12} />
@@ -488,7 +488,7 @@ export default function AddBotPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, long: e.target.value }))
                 }
-                placeholder="Describe your bot in detail — features, commands, setup instructions…"
+                placeholder="Describe your bot in detail: features, commands, setup instructions…"
                 className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
                 required
               />

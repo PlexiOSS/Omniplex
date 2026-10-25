@@ -140,13 +140,13 @@ export async function POST(req: Request) {
   }
   if (kind !== "pack-sound" && !ALLOWED_TYPES.has(file.type)) {
     return NextResponse.json(
-      { error: "Unsupported image type — use WebP, PNG, JPEG, or GIF." },
+      { error: "Unsupported image type. Use WebP, PNG, JPEG, or GIF." },
       { status: 400 },
     );
   }
   if (kind === "pack-sound" && file.type !== ALLOWED_AUDIO_TYPE) {
     return NextResponse.json(
-      { error: "Unsupported audio type — use MP3." },
+      { error: "Unsupported audio type. Use MP3." },
       { status: 400 },
     );
   }
@@ -156,7 +156,7 @@ export async function POST(req: Request) {
 
   if (file.size > maxBytes) {
     return NextResponse.json(
-      { error: `File too large — ${Math.floor(maxBytes / 1024)}KB max.` },
+      { error: `File too large: ${Math.floor(maxBytes / 1024)}KB max.` },
       { status: 400 },
     );
   }

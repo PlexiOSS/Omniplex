@@ -265,10 +265,11 @@ export default function AddServerPage() {
                 <div className="flex items-start gap-3 p-3 mt-4 text-sm text-yellow-800 border border-yellow-200 rounded-xl bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-400">
                   <AlertTriangle size={16} className="mt-0.5 shrink-0" />
                   <p>
-                    Our tracking bot isn't in this server yet. You can still
-                    list it, but features like emoji/sticker display, real
-                    invite generation, and live member counts won't work until
-                    it's invited.
+                    Our tracking bot needs to be in this server before you can
+                    list it. It's how we confirm you own or manage the server
+                    (you need to be the owner, or have Manage Server or
+                    Administrator), and it keeps your member counts, emojis and
+                    stickers up to date.
                     {serverMeta.bot_invite_url && (
                       <>
                         {" "}
@@ -280,7 +281,7 @@ export default function AddServerPage() {
                         >
                           Invite the bot
                         </a>
-                        , then continue.
+                        , then check again.
                       </>
                     )}
                   </p>
@@ -295,14 +296,26 @@ export default function AddServerPage() {
             )}
 
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="primary"
-                className="flex-1"
-                onClick={() => setConfirmed(true)}
-              >
-                Looks right — continue
-              </Button>
+              {serverMeta.bot_present ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  className="flex-1"
+                  onClick={() => setConfirmed(true)}
+                >
+                  Looks right, continue
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="primary"
+                  className="flex-1"
+                  loading={lookupLoading}
+                  onClick={lookupServer}
+                >
+                  I've invited the bot, check again
+                </Button>
+              )}
               <Button type="button" variant="ghost" onClick={changeServer}>
                 <Pencil size={12} />
                 Change
@@ -385,7 +398,7 @@ export default function AddServerPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, long: e.target.value }))
                 }
-                placeholder="Tell people what makes your server special — community, events, rules…"
+                placeholder="Tell people what makes your server special: community, events, rules…"
                 className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
                 required
               />
@@ -410,9 +423,7 @@ export default function AddServerPage() {
               requiredPerm="add_servers"
               entityLabel="servers"
               value={form.team_owner}
-              onChange={(team_owner) =>
-                setForm((f) => ({ ...f, team_owner }))
-              }
+              onChange={(team_owner) => setForm((f) => ({ ...f, team_owner }))}
             />
 
             <label className="flex items-center gap-3 cursor-pointer">

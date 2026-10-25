@@ -1,6 +1,12 @@
 "use client";
 
-import { BookOpen, Megaphone, MessageSquare, Terminal, Users } from "lucide-react";
+import {
+  BookOpen,
+  Megaphone,
+  MessageSquare,
+  Terminal,
+  Users,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
@@ -8,7 +14,12 @@ import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntityPermission } from "@/hooks/useEntityPermission";
-import type { BotChangelog, BotCommand, Review } from "@/lib/api/types";
+import type {
+  BotChangelog,
+  BotCommand,
+  EntityVoterList,
+  Review,
+} from "@/lib/api/types";
 import { BotChangelogSection } from "./BotChangelogSection";
 import { BotCommandsSection } from "./BotCommandsSection";
 
@@ -20,6 +31,7 @@ interface BotPageTabsProps {
   commands: BotCommand[];
   changelogs: BotChangelog[];
   initialReviews: Review[];
+  initialVoters?: EntityVoterList | null;
 }
 
 const TAB_KEYS: Tab[] = ["about", "commands", "changelog", "reviews", "voters"];
@@ -62,6 +74,7 @@ function BotPageTabsInner({
   commands,
   changelogs,
   initialReviews,
+  initialVoters,
   initialTab,
   highlightReviewId,
   highlightChangelogId,
@@ -100,7 +113,12 @@ function BotPageTabsInner({
       icon: MessageSquare,
       count: initialReviews.length,
     },
-    { key: "voters", label: "Voters", icon: Users, count: null },
+    {
+      key: "voters",
+      label: "Voters",
+      icon: Users,
+      count: initialVoters?.total ?? null,
+    },
   ];
 
   return (
@@ -172,7 +190,13 @@ function BotPageTabsInner({
           />
         )}
 
-        {tab === "voters" && <VoterList targetType="bot" targetId={botId} />}
+        {tab === "voters" && (
+          <VoterList
+            targetType="bot"
+            targetId={botId}
+            initialData={initialVoters ?? undefined}
+          />
+        )}
       </div>
     </div>
   );

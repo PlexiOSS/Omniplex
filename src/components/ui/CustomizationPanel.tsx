@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
-  useCustomization,
   ACCENT_OPTIONS,
-  FONT_OPTIONS,
-  LAYOUT_OPTIONS,
   type AccentColor,
+  FONT_OPTIONS,
   type FontOption,
+  LAYOUT_OPTIONS,
   type LayoutOption,
+  useCustomization,
 } from "@/hooks/useCustomization";
 
 interface CustomizationPanelProps {
   open: boolean;
   onClose: () => void;
+  inline?: boolean;
 }
 
 type Tab = "colors" | "fonts" | "layout" | "content";
@@ -26,7 +27,11 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "content", label: "Content" },
 ];
 
-export function CustomizationPanel({ open, onClose }: CustomizationPanelProps) {
+export function CustomizationPanel({
+  open,
+  onClose,
+  inline = false,
+}: CustomizationPanelProps) {
   const {
     accent,
     font,
@@ -54,7 +59,7 @@ export function CustomizationPanel({ open, onClose }: CustomizationPanelProps) {
 
   // Close on outside click
   useEffect(() => {
-    if (!open) return;
+    if (!open || inline) return;
     function onClick(e: MouseEvent) {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
         onClose();
@@ -62,17 +67,26 @@ export function CustomizationPanel({ open, onClose }: CustomizationPanelProps) {
     }
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, [open, onClose]);
+  }, [open, onClose, inline]);
 
   if (!open) return null;
 
   return (
     <div
       ref={panelRef}
-      className="fixed inset-x-3 top-16 z-50 mx-auto max-w-80 rounded-2xl border border-zinc-200 bg-white shadow-xl sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:mx-0 sm:w-80 sm:max-w-[calc(100vw-1.5rem)] dark:border-zinc-700 dark:bg-zinc-900"
+      className={
+        inline
+          ? ""
+          : "fixed inset-x-3 top-16 z-50 mx-auto max-w-80 rounded-2xl border border-zinc-200 bg-white shadow-xl sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:mx-0 sm:w-80 sm:max-w-[calc(100vw-1.5rem)] dark:border-zinc-700 dark:bg-zinc-900"
+      }
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
+      <div
+        className={[
+          "flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800",
+          inline ? "hidden" : "",
+        ].join(" ")}
+      >
         <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
           Customize
         </p>
@@ -185,8 +199,8 @@ export function CustomizationPanel({ open, onClose }: CustomizationPanelProps) {
                   Hide NSFW content
                 </span>
                 <span className="block text-xs text-zinc-400 dark:text-zinc-500">
-                  Removes bots and servers flagged NSFW from browse, search,
-                  and profile listings. Doesn&apos;t block a page you link to
+                  Removes bots and servers flagged NSFW from browse, search, and
+                  profile listings. Doesn&apos;t block a page you link to
                   directly.
                 </span>
               </span>
@@ -212,7 +226,7 @@ export function CustomizationPanel({ open, onClose }: CustomizationPanelProps) {
                 </span>
                 <span className="block text-xs text-zinc-400 dark:text-zinc-500">
                   {hideNsfw
-                    ? "Not applicable — NSFW content is already hidden above."
+                    ? "Not applicable: NSFW content is already hidden above."
                     : "Blurs avatar/banner images on NSFW cards, not the surrounding text."}
                 </span>
               </span>
@@ -226,9 +240,9 @@ export function CustomizationPanel({ open, onClose }: CustomizationPanelProps) {
             </label>
 
             <p className="text-xs text-zinc-400 dark:text-zinc-600">
-              Cookie controls aren&apos;t listed here. Omniplex doesn&apos;t
-              set any analytics or tracking cookies to begin with, only the
-              session cookie sign-in itself needs.
+              Cookie controls aren&apos;t listed here. Omniplex doesn&apos;t set
+              any analytics or tracking cookies to begin with, only the session
+              cookie sign-in itself needs.
             </p>
           </div>
         )}

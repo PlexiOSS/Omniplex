@@ -104,7 +104,7 @@ export function ReportModal({
         {submitted ? (
           <div className="text-center">
             <p className="text-sm text-zinc-700 dark:text-zinc-300">
-              Thanks — this has been sent to our staff for review.
+              Thanks! This has been sent to our staff for review.
             </p>
             <Button
               variant="secondary"

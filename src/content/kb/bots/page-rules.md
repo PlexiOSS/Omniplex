@@ -4,7 +4,7 @@ description: The rules that all bot and pack pages on Omniplex must follow.
 order: 2
 ---
 
-Keep in mind that all of the rules below are just general guidelines — we may offer exemptions or extra restrictions on a case-by-case basis.
+Keep in mind that all of the rules below are just general guidelines. We may offer exemptions or extra restrictions on a case-by-case basis.
 
 1. You may not include spam/junk, or completely irrelevant/nonsensical characters or phrases in your bot description to intentionally use up the character limit.
 2. You may not mention NSFW or include any NSFW content on the bot page (avatar or images).

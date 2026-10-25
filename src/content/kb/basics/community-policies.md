@@ -1,7 +1,7 @@
 ---
 title: Community Policies
 description: Our official community policies and guidelines for all users, server members, and staff.
-order: 3
+order: 4
 ---
 
 We are, first and foremost, a community, and we offer a variety of features including partnership, certification, verification, and of course most importantly text and voice chat. You should treat this server like you would any other bot list or general Discord community.
@@ -16,4 +16,4 @@ We are, first and foremost, a community, and we offer a variety of features incl
 8. **Staff/Admin Abuse.** While all of our staff members are entrusted with additional responsibility, they are not above the rules. If you see a staff member breaking the rules please let another member of our management/staff team know as soon as possible.
 9. **Available Channels.** All channels in our Discord server(s) will have pinned messages or channel descriptions explaining what they are there for and how everything works. If you don't understand something, feel free to ask.
 10. **Staff Communication.** We require all of our users and Discord community members to be open and welcoming to having conversations with our staff members regarding approvals, denials, staff applications, and staff positions. Blocking, banning, or defaming any of our staff members on any platform simply because you didn't like their decision is strictly prohibited and can result in a permanent ban with no chance of appeal.
-11. **Policy Acceptance.** Your presence in our Discord server(s) and usage of our website/services implies that you accept and understand these policies, including all further changes. Changes might be made at any time without prior written notice — it is your responsibility to stay up to date with change logs.
+11. **Policy Acceptance.** Your presence in our Discord server(s) and usage of our website/services implies that you accept and understand these policies, including all further changes. Changes might be made at any time without prior written notice. It is your responsibility to stay up to date with change logs.

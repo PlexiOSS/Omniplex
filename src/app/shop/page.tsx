@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  ArrowRight,
   Award,
+  Check,
   Coins,
   Megaphone,
   ShoppingBag,
@@ -13,9 +15,14 @@ import {
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import {
+  botOption,
+  EntityToggle,
+  ListingPicker,
+  serverOption,
+} from "@/components/billing/ListingPicker";
 import { Container } from "@/components/layout/Container";
 import { Pagination } from "@/components/search/Pagination";
-import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { SignInLink } from "@/components/ui/SignInLink";
@@ -35,10 +42,10 @@ import type {
   VoteCreditTier,
   VoteCreditTierRedeemSummary,
 } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { formatRelativeTime } from "@/lib/utils/format";
+import { formatCountLabel, formatRelativeTime } from "@/lib/utils/format";
 
 type Entity = Extract<TargetType, "bot" | "server">;
+type HistoryTab = "purchases" | "votes";
 
 const BENEFIT_ICONS: Record<string, typeof Sparkles> = {
   premium_days: Star,
@@ -86,9 +93,14 @@ function groupVoteHistory(votes: EntityVote[]): VoteHistoryEntry[] {
 }
 
 function durationLabel(hours: number): string {
-  if (hours <= 0) return "permanent";
-  if (hours < 24) return `${hours}h`;
-  return `${Math.round(hours / 24)}d`;
+  if (hours <= 0) return "Permanent";
+  if (hours < 24) return `${hours} hours`;
+  const days = Math.round(hours / 24);
+  return `${days} ${days === 1 ? "day" : "days"}`;
+}
+
+function credits(cents: number): string {
+  return (cents / 100).toFixed(2);
 }
 
 function ShopPageInner() {
@@ -119,6 +131,7 @@ function ShopPageInner() {
     EntityVote[]
   > | null>(null);
   const [voteHistoryPage, setVoteHistoryPage] = useState(1);
+  const [historyTab, setHistoryTab] = useState<HistoryTab>("purchases");
 
   useEffect(() => {
     shop.getItems().then((res) => setItems(res.items));
@@ -136,24 +149,32 @@ function ShopPageInner() {
       .catch(() => setTiers(null));
   }, [entity]);
 
-  const ownedBots = me?.user_bots ?? [];
-  const ownedServers = (me?.user_teams ?? []).flatMap(
-    (team) => team.entities?.servers ?? [],
-  );
+  const botOptions = (me?.user_bots ?? []).map((b) => botOption(b));
+  const seenServers = new Set<string>();
+  const serverOptions = (me?.user_teams ?? [])
+    .flatMap((team) => team.entities?.servers ?? [])
+    .filter((s) => {
+      if (seenServers.has(s.server_id)) return false;
+      seenServers.add(s.server_id);
+      return true;
+    })
+    .map((s) => serverOption(s));
+  const options = entity === "bot" ? botOptions : serverOptions;
+  const firstBotId = botOptions[0]?.id ?? "";
+  const firstServerId = serverOptions[0]?.id ?? "";
 
   useEffect(() => {
-    if (!botId && ownedBots.length === 1) setBotId(ownedBots[0].bot_id);
-    if (!serverId && ownedServers.length === 1) {
-      setServerId(ownedServers[0].server_id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [me]);
+    if (firstBotId) setBotId((current) => current || firstBotId);
+    if (firstServerId) setServerId((current) => current || firstServerId);
+  }, [firstBotId, firstServerId]);
 
   const targetId = entity === "bot" ? botId : serverId;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: entity/targetId are triggers, not read in the body
   useEffect(() => {
     setVoteHistoryPage(1);
+    setNotice(null);
+    setError(null);
   }, [entity, targetId]);
 
   useEffect(() => {
@@ -242,11 +263,18 @@ function ShopPageInner() {
   }
 
   const availableCredits = creditSummary?.available_credits ?? 0;
-  const ownedCount = entity === "bot" ? ownedBots.length : ownedServers.length;
   const applicableCoupons = publicCoupons.filter(
     (coupon) =>
       coupon.target_types.length === 0 || coupon.target_types.includes(entity),
   );
+  const visibleItems = (items ?? [])
+    .filter((item) => item.target_types.includes(entity))
+    .sort(
+      (a, b) => Number(a.benefits.length > 1) - Number(b.benefits.length > 1),
+    );
+  const hasCoupon = couponCode.trim().length > 0;
+  const signedIn = !authLoading && isAuthenticated;
+  const hasListing = signedIn && !meLoading && options.length > 0;
 
   return (
     <Container className="py-16">
@@ -258,369 +286,391 @@ function ShopPageInner() {
           Shop
         </h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          Every vote a bot or server earns converts into credits. Spend them on
-          priority placement, a featured homepage slot, bonus premium days, and
-          more no card needed.
+          The votes your bot or server earns convert into credits. Spend them on
+          boosts, a featured homepage slot, bonus premium days and more, with no
+          card needed.
         </p>
       </div>
 
-      <div className="mx-auto mt-6 flex w-fit items-center rounded-lg bg-zinc-100 p-0.5 text-sm dark:bg-zinc-800">
-        {(["bot", "server"] as const).map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setEntity(key)}
-            className={[
-              "rounded-md px-4 py-1.5 font-medium capitalize transition-colors",
-              entity === key
-                ? "bg-accent text-accent-fg shadow-sm"
-                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
-            ].join(" ")}
-          >
-            {key}
-          </button>
-        ))}
-      </div>
-
-      {tiers && tiers.length > 0 && (
-        <div className="mx-auto mt-8 max-w-md">
-          <p className="text-center text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600">
-            Vote credit tiers
-          </p>
-          <div className="mt-2 divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-            {tiers.map((tier) => (
-              <div
-                key={tier.id}
-                className="flex items-center justify-between px-4 py-2 text-sm"
-              >
-                <span className="text-zinc-700 dark:text-zinc-300">
-                  {tier.votes} vote{tier.votes === 1 ? "" : "s"}
-                </span>
-                <span className="font-medium text-zinc-950 dark:text-zinc-50">
-                  {(tier.cents / 100).toFixed(2)} credits
-                </span>
+      <div className="mx-auto mt-10 grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0 space-y-10">
+          <section>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                Items
+              </h2>
+              <EntityToggle value={entity} onChange={setEntity} />
+            </div>
+            {!items ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-36 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800"
+                  />
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            ) : visibleItems.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+                Nothing for {entity}s in the shop right now.
+              </p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {visibleItems.map((item) => {
+                  const Icon =
+                    BENEFIT_ICONS[item.benefits[0] ?? ""] ?? ShoppingBag;
+                  const affordable =
+                    hasCoupon || availableCredits >= Math.round(item.cents);
+                  const extraBenefits =
+                    item.benefits.length > 1
+                      ? item.benefits.map(benefitLabel)
+                      : [];
+                  return (
+                    <div
+                      key={item.id}
+                      className={[
+                        "flex min-w-0 flex-col rounded-xl border bg-white p-4 dark:bg-zinc-900",
+                        extraBenefits.length > 0
+                          ? "border-accent/30 sm:col-span-2 dark:border-accent/30"
+                          : "border-zinc-200 dark:border-zinc-800",
+                      ].join(" ")}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                          <Icon size={16} className="text-accent" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-zinc-950 dark:text-zinc-50">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            {durationLabel(item.duration)}
+                          </p>
+                        </div>
+                      </div>
+                      {item.description && (
+                        <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+                          {item.description}
+                        </p>
+                      )}
+                      {extraBenefits.length > 0 && (
+                        <ul className="mt-3 grid gap-x-4 gap-y-1.5 text-sm text-zinc-600 sm:grid-cols-2 dark:text-zinc-300">
+                          {extraBenefits.map((label) => (
+                            <li key={label} className="flex items-start gap-2">
+                              <Check
+                                size={14}
+                                className="mt-0.5 shrink-0 text-accent"
+                              />
+                              {label}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="mt-auto flex items-center justify-between gap-3 pt-4">
+                        <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                          <Coins size={14} className="text-accent" />
+                          {credits(item.cents)}
+                        </span>
+                        {hasListing && (
+                          <Button
+                            variant={affordable ? "primary" : "secondary"}
+                            size="sm"
+                            loading={purchasing === item.id}
+                            disabled={
+                              !targetId || !affordable || purchasing !== null
+                            }
+                            onClick={() => handlePurchase(item)}
+                          >
+                            {affordable
+                              ? "Buy"
+                              : `Need ${credits(Math.round(item.cents) - availableCredits)} more`}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
 
-      {authLoading || meLoading ? null : !isAuthenticated ? (
-        <div className="mx-auto mt-10 max-w-md rounded-2xl border border-zinc-200 p-8 text-center dark:border-zinc-800">
-          <p className="mb-3 text-sm text-zinc-500 dark:text-zinc-400">
-            Sign in to spend a {entity}&apos;s vote credits.
-          </p>
-          <SignInLink>
-            <Button variant="primary" size="sm">
-              Sign in
-            </Button>
-          </SignInLink>
-        </div>
-      ) : ownedCount === 0 ? (
-        <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          You don&apos;t have any {entity}s yet.
-        </p>
-      ) : (
-        <div className="mx-auto mt-10 max-w-md">
-          <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 capitalize">
-            {entity}
-          </p>
-          <div className="space-y-2">
-            {entity === "bot"
-              ? ownedBots.map((bot) => (
+          {hasListing && targetId && (
+            <section>
+              <div className="mb-3 flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
+                {(
+                  [
+                    ["purchases", "Purchases"],
+                    ["votes", "Your votes"],
+                  ] as const
+                ).map(([key, label]) => (
                   <button
-                    key={bot.bot_id}
+                    key={key}
                     type="button"
-                    onClick={() => setBotId(bot.bot_id)}
+                    onClick={() => setHistoryTab(key)}
                     className={[
-                      "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                      botId === bot.bot_id
-                        ? "border-accent bg-accent/5"
-                        : "border-zinc-200 hover:border-accent/40 dark:border-zinc-800",
+                      "-mb-px border-b-2 px-3 pb-2.5 text-sm font-medium transition-colors",
+                      historyTab === key
+                        ? "border-accent text-accent"
+                        : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
                     ].join(" ")}
                   >
-                    <Avatar
-                      src={mirroredAvatarUrl(
-                        "bots",
-                        bot.bot_id,
-                        bot.user.avatar,
-                      )}
-                      alt={bot.user.username}
-                      size={28}
-                    />
-                    <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                      {bot.user.username}
-                    </span>
-                  </button>
-                ))
-              : ownedServers.map((server) => (
-                  <button
-                    key={server.server_id}
-                    type="button"
-                    onClick={() => setServerId(server.server_id)}
-                    className={[
-                      "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                      serverId === server.server_id
-                        ? "border-accent bg-accent/5"
-                        : "border-zinc-200 hover:border-accent/40 dark:border-zinc-800",
-                    ].join(" ")}
-                  >
-                    <Avatar
-                      src={mirroredAvatarUrl(
-                        "servers",
-                        server.server_id,
-                        server.avatar ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
-                      )}
-                      alt={server.name}
-                      size={28}
-                    />
-                    <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                      {server.name}
-                    </span>
+                    {label}
                   </button>
                 ))}
-          </div>
-
-          {targetId && (
-            <div className="mt-5 flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-              <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-                <Coins size={15} className="text-accent" />
-                <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  {(availableCredits / 100).toFixed(2)}
-                </span>
-                credits available
               </div>
-              {voteSummary && voteSummary.votes > 0 && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  loading={redeeming}
-                  onClick={handleRedeem}
-                >
-                  Convert {voteSummary.votes} vote
-                  {voteSummary.votes === 1 ? "" : "s"} (
-                  {(voteSummary.total_credits / 100).toFixed(2)})
-                </Button>
+
+              {historyTab === "purchases" &&
+                (!purchases || purchases.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                    Nothing bought for this {entity} yet.
+                  </p>
+                ) : (
+                  <div className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+                    {purchases.map((purchase) => {
+                      const item = items?.find(
+                        (i) => i.id === purchase.item_id,
+                      );
+                      return (
+                        <div
+                          key={purchase.id}
+                          className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+                        >
+                          <span className="min-w-0 truncate text-zinc-700 dark:text-zinc-300">
+                            {item?.name ?? purchase.item_id}
+                          </span>
+                          <span className="flex shrink-0 items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                            <span>{credits(purchase.cents)} credits</span>
+                            <span>
+                              {formatRelativeTime(purchase.created_at)}
+                            </span>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+
+              {historyTab === "votes" &&
+                (!voteHistory || voteHistory.results.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                    You haven&apos;t voted for this {entity}
+                    {voteHistoryPage > 1 ? " on this page" : " yet"}.
+                  </p>
+                ) : (
+                  <>
+                    <div className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+                      {groupVoteHistory(voteHistory.results).map((entry, i) =>
+                        entry.kind === "vote" ? (
+                          <div
+                            key={entry.vote.itag}
+                            className="flex items-center justify-between px-4 py-3 text-sm"
+                          >
+                            <span className="text-zinc-700 dark:text-zinc-300">
+                              Vote #{entry.vote.vote_num}
+                            </span>
+                            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                              {formatRelativeTime(entry.vote.created_at)}
+                            </span>
+                          </div>
+                        ) : (
+                          <div
+                            // biome-ignore lint/suspicious/noArrayIndexKey: entries have no stable id, order is stable within a page
+                            key={`voided-${i}`}
+                            className="flex items-center justify-between px-4 py-3 text-sm"
+                          >
+                            <span
+                              className={
+                                entry.reason === "Vote credits redeemed"
+                                  ? "text-xs text-emerald-600 dark:text-emerald-400"
+                                  : "text-xs text-zinc-500 dark:text-zinc-400"
+                              }
+                            >
+                              {formatCountLabel(entry.count, "vote")}{" "}
+                              {entry.reason === "Vote credits redeemed"
+                                ? "redeemed for credits"
+                                : `cleared: ${entry.reason.toLowerCase()}`}
+                            </span>
+                            {entry.voidedAt && (
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                                {formatRelativeTime(entry.voidedAt)}
+                              </span>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                    {voteHistory.count > voteHistory.per_page && (
+                      <div className="mt-4">
+                        <Pagination
+                          page={voteHistoryPage}
+                          total={voteHistory.count}
+                          perPage={voteHistory.per_page}
+                          onPageChange={setVoteHistoryPage}
+                        />
+                      </div>
+                    )}
+                  </>
+                ))}
+            </section>
+          )}
+        </div>
+
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="space-y-4 p-5">
+              <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                Wallet
+              </h2>
+              {authLoading || meLoading ? (
+                <div className="h-12 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+              ) : !isAuthenticated ? (
+                <div className="text-center">
+                  <p className="mb-3 text-sm text-zinc-500 dark:text-zinc-400">
+                    Sign in to spend a {entity}&apos;s credits.
+                  </p>
+                  <SignInLink>
+                    <Button variant="primary" size="sm">
+                      Sign in
+                    </Button>
+                  </SignInLink>
+                </div>
+              ) : options.length === 0 ? (
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  You don&apos;t have any {entity}s yet.{" "}
+                  <Link
+                    href={entity === "bot" ? "/bots/add" : "/servers/add"}
+                    className="text-accent hover:underline"
+                  >
+                    Add one
+                  </Link>
+                </p>
+              ) : (
+                <>
+                  <ListingPicker
+                    entity={entity}
+                    options={options}
+                    value={targetId}
+                    onChange={entity === "bot" ? setBotId : setServerId}
+                  />
+                  {targetId && (
+                    <div>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Available credits
+                      </p>
+                      <p className="mt-0.5 flex items-center gap-2 text-2xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
+                        <Coins size={18} className="text-accent" />
+                        {credits(availableCredits)}
+                      </p>
+                      {voteSummary && voteSummary.votes > 0 ? (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          loading={redeeming}
+                          onClick={handleRedeem}
+                          className="mt-3 w-full"
+                        >
+                          Convert {formatCountLabel(voteSummary.votes, "vote")}{" "}
+                          into {credits(voteSummary.total_credits)}
+                        </Button>
+                      ) : (
+                        <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                          No unconverted votes right now.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {notice && (
+                <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                  {notice}
+                </p>
+              )}
+              {error && (
+                <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/30 dark:text-red-400">
+                  {error}
+                </p>
               )}
             </div>
-          )}
 
-          {targetId && applicableCoupons.length > 0 && (
-            <div className="mt-3">
-              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                <Ticket size={12} />
-                Available offers
-              </p>
-              <div className="space-y-1.5">
+            {hasListing && targetId && (
+              <div className="space-y-2 border-t border-zinc-100 bg-zinc-50/60 p-5 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                  <Ticket size={12} />
+                  Coupon
+                </p>
+                <Input
+                  placeholder="Enter a code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="text-sm"
+                />
                 {applicableCoupons.map((coupon) => (
                   <button
                     key={coupon.id}
                     type="button"
                     onClick={() => setCouponCode(coupon.code)}
-                    className="flex w-full items-center justify-between rounded-lg border border-dashed border-accent/30 bg-accent/5 px-3 py-2 text-left text-xs transition-colors hover:border-accent/60"
+                    className="flex w-full items-center justify-between gap-2 rounded-lg border border-dashed border-accent/30 bg-accent/5 px-3 py-2 text-left text-xs transition-colors hover:border-accent/60"
                   >
                     <span className="font-mono font-medium text-zinc-950 dark:text-zinc-50">
                       {coupon.code}
                     </span>
                     <span className="text-zinc-500 dark:text-zinc-400">
                       {coupon.cents == null
-                        ? "Covers any item"
-                        : `${(coupon.cents / 100).toFixed(2)} credit item cost`}
+                        ? "Makes an item free"
+                        : `Any item for ${credits(coupon.cents)}`}
                     </span>
                   </button>
                 ))}
               </div>
+            )}
+          </div>
+
+          {tiers && tiers.length > 0 && (
+            <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+              <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                How votes become credits
+              </h2>
+              <dl className="mt-3 space-y-1.5 text-sm">
+                {tiers.map((tier) => (
+                  <div key={tier.id} className="flex justify-between gap-2">
+                    <dt className="text-zinc-500 dark:text-zinc-400">
+                      {formatCountLabel(tier.votes, "vote")}
+                    </dt>
+                    <dd className="tabular-nums text-zinc-950 dark:text-zinc-50">
+                      {credits(tier.cents)} credits
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           )}
 
-          {targetId && (
-            <div className="mt-3">
-              <Input
-                placeholder="Have a coupon? Enter its code"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                className="text-sm"
+          <div className="space-y-2 text-xs text-zinc-500 dark:text-zinc-400">
+            <Link
+              href={`/premium${targetId ? `?${entity}=${targetId}` : ""}`}
+              className="group flex items-center justify-between rounded-lg px-1 py-1 transition-colors hover:text-accent"
+            >
+              Buy premium with a card instead
+              <ArrowRight
+                size={12}
+                className="transition-transform group-hover:translate-x-0.5"
               />
-            </div>
-          )}
-
-          {notice && (
-            <p className="mt-3 text-center text-xs text-green-600 dark:text-green-400">
-              {notice}
-            </p>
-          )}
-          {error && (
-            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
-        </div>
-      )}
-
-      {items && items.length > 0 && (
-        <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-2">
-          {items
-            .filter((item) => item.target_types.includes(entity))
-            .map((item) => {
-              const Icon = BENEFIT_ICONS[item.benefits[0] ?? ""] ?? ShoppingBag;
-              const affordable =
-                targetId && availableCredits >= Math.round(item.cents);
-              return (
-                <div
-                  key={item.id}
-                  className="flex flex-col rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800"
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon size={16} className="text-accent" />
-                    <p className="font-semibold text-zinc-950 dark:text-zinc-50">
-                      {item.name}
-                    </p>
-                  </div>
-                  {item.description && (
-                    <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                      {item.description}
-                    </p>
-                  )}
-                  {item.benefits.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {item.benefits.map((b) => (
-                        <span
-                          key={b}
-                          className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                        >
-                          {benefitLabel(b)}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                      {(item.cents / 100).toFixed(2)} credits
-                      {item.duration > 0 &&
-                        ` · ${durationLabel(item.duration)}`}
-                    </span>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      loading={purchasing === item.id}
-                      disabled={!targetId || !affordable || purchasing !== null}
-                      onClick={() => handlePurchase(item)}
-                    >
-                      {!targetId
-                        ? `Pick a ${entity}`
-                        : affordable
-                          ? "Buy"
-                          : "Not enough credits"}
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-      )}
-
-      {targetId && purchases && purchases.length > 0 && (
-        <div className="mx-auto mt-10 max-w-3xl">
-          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Purchase history
-          </h2>
-          <div className="mt-3 divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-            {purchases.map((purchase) => {
-              const item = items?.find((i) => i.id === purchase.item_id);
-              return (
-                <div
-                  key={purchase.id}
-                  className="flex items-center justify-between px-4 py-3 text-sm"
-                >
-                  <span className="text-zinc-700 dark:text-zinc-300">
-                    {item?.name ?? purchase.item_id}
-                  </span>
-                  <span className="flex items-center gap-3 text-xs text-zinc-400 dark:text-zinc-600">
-                    <span>{(purchase.cents / 100).toFixed(2)} credits</span>
-                    <span>{formatRelativeTime(purchase.created_at)}</span>
-                  </span>
-                </div>
-              );
-            })}
+            </Link>
+            <Link
+              href="/kb/premium/shop"
+              className="group flex items-center justify-between rounded-lg px-1 py-1 transition-colors hover:text-accent"
+            >
+              How credits and the shop work
+              <ArrowRight
+                size={12}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
+            </Link>
           </div>
-        </div>
-      )}
-
-      {targetId &&
-        voteHistory &&
-        (voteHistory.results.length > 0 || voteHistoryPage > 1) && (
-          <div className="mx-auto mt-10 max-w-3xl">
-            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Vote history
-            </h2>
-            {voteHistory.results.length === 0 ? (
-              <p className="mt-3 text-sm text-zinc-400 dark:text-zinc-600">
-                No votes on this page.
-              </p>
-            ) : (
-              <div className="mt-3 divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-                {groupVoteHistory(voteHistory.results).map((entry, i) =>
-                  entry.kind === "vote" ? (
-                    <div
-                      key={entry.vote.itag}
-                      className="flex items-center justify-between px-4 py-3 text-sm"
-                    >
-                      <span className="text-zinc-700 dark:text-zinc-300">
-                        Vote #{entry.vote.vote_num}
-                      </span>
-                      <span className="text-xs text-zinc-400 dark:text-zinc-600">
-                        {formatRelativeTime(entry.vote.created_at)}
-                      </span>
-                    </div>
-                  ) : (
-                    <div
-                      // biome-ignore lint/suspicious/noArrayIndexKey: entries have no stable id, order is stable within a page
-                      key={`voided-${i}`}
-                      className="flex items-center justify-between px-4 py-3 text-sm"
-                    >
-                      <span
-                        className={
-                          entry.reason === "Vote credits redeemed"
-                            ? "text-xs text-emerald-600 dark:text-emerald-400"
-                            : "text-xs text-zinc-400 dark:text-zinc-600"
-                        }
-                      >
-                        {entry.count} vote{entry.count === 1 ? "" : "s"}{" "}
-                        {entry.reason === "Vote credits redeemed"
-                          ? "redeemed for credits"
-                          : `cleared — ${entry.reason.toLowerCase()}`}
-                      </span>
-                      {entry.voidedAt && (
-                        <span className="text-xs text-zinc-400 dark:text-zinc-600">
-                          {formatRelativeTime(entry.voidedAt)}
-                        </span>
-                      )}
-                    </div>
-                  ),
-                )}
-              </div>
-            )}
-            {voteHistory.count > voteHistory.per_page && (
-              <div className="mt-4">
-                <Pagination
-                  page={voteHistoryPage}
-                  total={voteHistory.count}
-                  perPage={voteHistory.per_page}
-                  onPageChange={setVoteHistoryPage}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-      <p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-600">
-        Want to buy premium directly instead?{" "}
-        <Link href="/premium" className="underline underline-offset-2">
-          See plans
-        </Link>
-        .
-      </p>
+        </aside>
+      </div>
     </Container>
   );
 }

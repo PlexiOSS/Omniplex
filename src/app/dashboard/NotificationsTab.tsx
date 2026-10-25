@@ -1,9 +1,14 @@
 "use client";
 
-import { Check, ExternalLink, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ExternalLink,
+  Settings2,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pagination } from "@/components/search/Pagination";
 import { Button } from "@/components/ui/Button";
 import {
   alerts as alertsApi,
@@ -13,10 +18,8 @@ import { ApiError } from "@/lib/api/client";
 import type {
   Alert,
   AlertCategory,
-  AlertList,
   AlertType,
   NotificationPrefs,
-  PagedResult,
 } from "@/lib/api/types";
 import { ALERT_CATEGORY_LABELS } from "@/lib/api/types";
 import { alertLink } from "@/lib/utils/alerts";
@@ -183,7 +186,7 @@ function NotificationPrefsPanel({ userId, token }: NotificationsTabProps) {
   if (!prefs) return null;
 
   return (
-    <div className="mb-6 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="mb-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
       <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
         Notification preferences
       </p>
@@ -218,58 +221,178 @@ function NotificationPrefsPanel({ userId, token }: NotificationsTabProps) {
   );
 }
 
+type Filter = "all" | "unread" | AlertCategory;
+
+type Entry =
+  | { kind: "single"; alert: Alert }
+  | { kind: "reminders"; key: string; alerts: Alert[] };
+
+function isVoteReminder(alert: Alert) {
+  return alert.category === "votes" && /^vote for /i.test(alert.title);
+}
+
+function groupEntries(alerts: Alert[]): Entry[] {
+  const out: Entry[] = [];
+  for (const alert of alerts) {
+    const last = out[out.length - 1];
+    if (isVoteReminder(alert)) {
+      if (last?.kind === "reminders") {
+        last.alerts.push(alert);
+        continue;
+      }
+      out.push({ kind: "reminders", key: alert.itag, alerts: [alert] });
+      continue;
+    }
+    out.push({ kind: "single", alert });
+  }
+  return out.flatMap((e) =>
+    e.kind === "reminders" && e.alerts.length === 1
+      ? [{ kind: "single" as const, alert: e.alerts[0] }]
+      : [e],
+  );
+}
+
+function ReminderGroup({
+  alerts,
+  onAck,
+  onDelete,
+}: {
+  alerts: Alert[];
+  onAck: (itag: string) => void;
+  onDelete: (itag: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const unread = alerts.filter((a) => !a.acked).length;
+  const names = alerts.map((a) =>
+    a.title.replace(/^vote for /i, "").replace(/!$/, ""),
+  );
+  const preview = [...new Set(names)].slice(0, 3).join(", ");
+
+  return (
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-start gap-3 p-4 text-left"
+      >
+        <span
+          className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent ${unread ? "" : "opacity-30"}`}
+        />
+        <span className="min-w-0 flex-1">
+          <span className="font-medium text-zinc-950 dark:text-zinc-50">
+            {alerts.length} vote reminders
+          </span>
+          {unread > 0 && (
+            <span className="ml-1.5 rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold text-accent">
+              {unread} unread
+            </span>
+          )}
+          <span className="mt-0.5 block truncate text-sm text-zinc-500 dark:text-zinc-400">
+            You can vote again for {preview}
+            {names.length > 3 ? " and more" : ""}.
+          </span>
+          <span className="mt-1 block text-xs text-zinc-400 dark:text-zinc-600">
+            {formatRelativeTime(alerts[0].created_at)}
+          </span>
+        </span>
+        <ChevronDown
+          size={15}
+          className={`mt-1 shrink-0 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="space-y-2 border-t border-zinc-100 p-2 dark:border-zinc-800">
+          {alerts.map((alert) => (
+            <NotificationRow
+              key={alert.itag}
+              alert={alert}
+              onAck={onAck}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function NotificationsTab({ userId, token }: NotificationsTabProps) {
-  const [data, setData] = useState<PagedResult<AlertList> | null>(null);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
+  const [perPage, setPerPage] = useState(0);
   const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [showPrefs, setShowPrefs] = useState(false);
   const clearAll = useArmedConfirm();
   const [clearing, setClearing] = useState(false);
+  const [markingAll, setMarkingAll] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      const result = await alertsApi.list(userId, token, page);
-      setData(result);
-    } catch {
-      setError("Failed to load notifications.");
-    }
-  }, [userId, token, page]);
+  const loadPage = useCallback(
+    async (target: number, replace: boolean) => {
+      try {
+        const result = await alertsApi.list(userId, token, target);
+        setTotal(result.count);
+        setPerPage(result.per_page);
+        setPage(target);
+        setAlerts((prev) =>
+          replace ? result.results.alerts : [...prev, ...result.results.alerts],
+        );
+      } catch {
+        setError("Failed to load notifications.");
+      }
+    },
+    [userId, token],
+  );
 
   useEffect(() => {
-    load();
-  }, [load]);
+    loadPage(1, true);
+  }, [loadPage]);
+
+  async function loadMore() {
+    setLoadingMore(true);
+    await loadPage(page + 1, false);
+    setLoadingMore(false);
+  }
 
   async function ack(itag: string) {
-    if (!data) return;
-    setData({
-      ...data,
-      results: {
-        ...data.results,
-        alerts: data.results.alerts.map((a) =>
-          a.itag === itag ? { ...a, acked: true } : a,
-        ),
-      },
-    });
+    setAlerts((prev) =>
+      prev.map((a) => (a.itag === itag ? { ...a, acked: true } : a)),
+    );
     try {
       await alertsApi.patch(userId, token, [{ itag, patch: "ack" }]);
     } catch {
-      load();
+      loadPage(1, true);
+    }
+  }
+
+  async function markAllRead() {
+    const unread = alerts.filter((a) => !a.acked).map((a) => a.itag);
+    if (unread.length === 0) return;
+    setMarkingAll(true);
+    setAlerts((prev) => prev.map((a) => ({ ...a, acked: true })));
+    try {
+      await alertsApi.patch(
+        userId,
+        token,
+        unread.map((itag) => ({ itag, patch: "ack" as const })),
+      );
+    } catch {
+      loadPage(1, true);
+    } finally {
+      setMarkingAll(false);
     }
   }
 
   async function remove(itag: string) {
-    if (!data) return;
-    setData({
-      ...data,
-      count: data.count - 1,
-      results: {
-        ...data.results,
-        alerts: data.results.alerts.filter((a) => a.itag !== itag),
-      },
-    });
+    setAlerts((prev) => prev.filter((a) => a.itag !== itag));
+    setTotal((t) => (t === null ? t : Math.max(0, t - 1)));
     try {
       await alertsApi.patch(userId, token, [{ itag, patch: "delete" }]);
     } catch {
-      load();
+      loadPage(1, true);
     }
   }
 
@@ -277,8 +400,7 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
     setClearing(true);
     try {
       await alertsApi.deleteAll(userId, token);
-      setPage(1);
-      await load();
+      await loadPage(1, true);
     } finally {
       setClearing(false);
     }
@@ -288,7 +410,7 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
     return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
   }
 
-  if (!data) {
+  if (total === null) {
     return (
       <div className="flex justify-center py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
@@ -296,53 +418,133 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
     );
   }
 
-  const alerts = data.results.alerts;
+  const unreadCount = alerts.filter((a) => !a.acked).length;
+  const categories = CATEGORY_ORDER.filter((c) =>
+    alerts.some((a) => a.category === c),
+  );
+  const visible = alerts.filter((a) =>
+    filter === "all"
+      ? true
+      : filter === "unread"
+        ? !a.acked
+        : a.category === filter,
+  );
+  const entries = groupEntries(visible);
+  const hasMore = alerts.length < total && perPage > 0;
+
+  const chip = (key: Filter, label: string, count: number) => (
+    <button
+      key={key}
+      type="button"
+      onClick={() => setFilter(key)}
+      aria-pressed={filter === key}
+      className={[
+        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+        filter === key
+          ? "border-accent/40 bg-accent/10 text-accent"
+          : "border-zinc-200 text-zinc-600 hover:border-accent/40 hover:text-accent dark:border-zinc-700 dark:text-zinc-300",
+      ].join(" ")}
+    >
+      {label}
+      <span className="ml-1.5 tabular-nums opacity-70">{count}</span>
+    </button>
+  );
 
   return (
     <div>
-      <NotificationPrefsPanel userId={userId} token={token} />
-
-      <div className="flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {data.count} notification{data.count === 1 ? "" : "s"}
+          {total} notification{total === 1 ? "" : "s"}
+          {unreadCount > 0 && `, ${unreadCount} unread on this list`}
         </p>
-        {alerts.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1">
+          {unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={markingAll}
+              onClick={markAllRead}
+            >
+              <Check size={13} />
+              Mark all read
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
-            loading={clearing}
-            onClick={() => clearAll.trigger(handleClearAll)}
+            onClick={() => setShowPrefs((o) => !o)}
+            aria-expanded={showPrefs}
           >
-            {clearAll.armed ? "Confirm clear all?" : "Clear all"}
+            <Settings2 size={13} />
+            Preferences
           </Button>
-        )}
+          {alerts.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={clearing}
+              onClick={() => clearAll.trigger(handleClearAll)}
+            >
+              {clearAll.armed ? "Confirm clear all?" : "Clear all"}
+            </Button>
+          )}
+        </div>
       </div>
 
-      {alerts.length === 0 ? (
-        <p className="py-16 text-center text-sm text-zinc-400 dark:text-zinc-600">
-          No notifications.
-        </p>
-      ) : (
-        <div className="mt-4 space-y-2">
-          {alerts.map((alert) => (
-            <NotificationRow
-              key={alert.itag}
-              alert={alert}
-              onAck={ack}
-              onDelete={remove}
-            />
-          ))}
+      {showPrefs && <NotificationPrefsPanel userId={userId} token={token} />}
+
+      {alerts.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {chip("all", "All", alerts.length)}
+          {unreadCount > 0 && chip("unread", "Unread", unreadCount)}
+          {categories.map((c) =>
+            chip(
+              c,
+              ALERT_CATEGORY_LABELS[c],
+              alerts.filter((a) => a.category === c).length,
+            ),
+          )}
         </div>
       )}
 
-      {data.count > data.per_page && (
-        <div className="mt-6">
-          <Pagination
-            page={page}
-            total={data.count}
-            perPage={data.per_page}
-            onPageChange={setPage}
-          />
+      {entries.length === 0 ? (
+        <p className="py-16 text-center text-sm text-zinc-400 dark:text-zinc-600">
+          {alerts.length === 0
+            ? "No notifications."
+            : "No notifications match this filter."}
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {entries.map((entry) =>
+            entry.kind === "single" ? (
+              <NotificationRow
+                key={entry.alert.itag}
+                alert={entry.alert}
+                onAck={ack}
+                onDelete={remove}
+              />
+            ) : (
+              <ReminderGroup
+                key={entry.key}
+                alerts={entry.alerts}
+                onAck={ack}
+                onDelete={remove}
+              />
+            ),
+          )}
+        </div>
+      )}
+
+      {hasMore && (
+        <div className="mt-6 flex justify-center">
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={loadingMore}
+            onClick={loadMore}
+          >
+            Load more ({total - alerts.length} older)
+          </Button>
         </div>
       )}
     </div>

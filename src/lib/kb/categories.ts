@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 export interface KbCategoryMeta {
   slug: string;
@@ -29,51 +29,65 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     order: 3,
   },
   {
-    slug: "packs",
-    title: "Packs",
+    slug: "listings",
+    title: "Managing Listings",
     description:
-      "Rules and resources for packs curated collections of bots, servers, or emojis grouped together.",
+      "How-tos for running a listing: commands, changelog updates, teams, vanity URLs, banners, and listing a server.",
     order: 4,
   },
   {
-    slug: "voting",
-    title: "Voting",
+    slug: "developers",
+    title: "Developers",
     description:
-      "How voting works on Omniplex, including cooldowns, vote weight, and abuse policy.",
+      "Posting stats, bot status and uptime, vote webhooks, API tokens, and embeddable widgets.",
     order: 5,
+  },
+  {
+    slug: "packs",
+    title: "Packs",
+    description:
+      "Rules and resources for packs: curated collections of bots or servers, and sets of emojis, stickers or sounds.",
+    order: 6,
+  },
+  {
+    slug: "voting",
+    title: "Voting & Reviews",
+    description:
+      "How voting and reviews work on Omniplex, including cooldowns, the monthly reset, the leaderboard, and abuse policy.",
+    order: 7,
   },
   {
     slug: "programs",
     title: "Programs",
     description:
       "Information about Omniplex's staff, dev team, certification, and partnership programs.",
-    order: 6,
+    order: 8,
   },
   {
     slug: "account",
     title: "Account",
     description:
-      "Alerts, push notifications, and reminders staying on top of what's happening with your listings.",
-    order: 7,
+      "Alerts, push notifications, reminders, and your account data.",
+    order: 9,
   },
   {
     slug: "premium",
     title: "Premium & Shop",
     description:
       "Buying premium directly, and spending a bot's earned vote credits in the shop.",
-    order: 8,
+    order: 10,
   },
   {
     slug: "support",
     title: "Support",
     description: "Getting help from staff when something needs a human.",
-    order: 9,
+    order: 11,
   },
   {
     slug: "staff",
     title: "Staff",
     description:
       "How the staff team is structured, what each position can do, and how moderation actually works day to day.",
-    order: 10,
+    order: 12,
   },
 ];

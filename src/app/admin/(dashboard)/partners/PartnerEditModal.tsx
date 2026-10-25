@@ -130,7 +130,7 @@ export function PartnerEditModal({
                 {logoVersion ? "Replace logo" : "Upload logo"}
               </Button>
               <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
-                WebP, PNG, JPEG, or GIF — 5MB max.
+                WebP, PNG, JPEG, or GIF, 5MB max.
               </p>
               {uploadError && (
                 <p className="mt-1 text-xs text-red-600 dark:text-red-400">

@@ -4,6 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BsDiscord, BsGithub, BsTwitter } from "react-icons/bs";
 import { Container } from "@/components/layout/Container";
+import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import {
+  hasUserActivity,
+  UserActivityPanel,
+  VoterRankLine,
+} from "@/components/profile/UserActivitySection";
 import { UserEntityTabs } from "@/components/profile/UserEntityTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -12,6 +18,7 @@ import { badges as badgesApi, users } from "@/lib/api";
 import type { Link as ApiLink } from "@/lib/api/types";
 import { badgeColor, badgeIcon } from "@/lib/constants/badgeIcons";
 import { discordBannerUrl, mirroredAvatarUrl } from "@/lib/utils/assets";
+import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
 import { getServerToken } from "@/lib/utils/serverSession";
 
 interface Props {
@@ -64,11 +71,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function UserPage({ params }: Props) {
   const { id } = await params;
-  const [user, badgeData] = await Promise.all([
-    users.getUser(id, await getServerToken()).catch(() => null),
-    badgesApi.getForEntity("user", id).catch(() => null),
-  ]);
+  const badgePromise = badgesApi.getForEntity("user", id).catch(() => null);
+  const activityPromise = users.getActivity(id).catch(() => null);
+  let user = null;
+  try {
+    user = await users.getUser(id, await getServerToken());
+  } catch (err) {
+    if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
+    if (isNotFoundError(err)) notFound();
+    throw err;
+  }
   if (!user) notFound();
+  const [badgeData, activity] = await Promise.all([
+    badgePromise,
+    activityPromise,
+  ]);
 
   const customBadges = badgeData?.badges ?? [];
 
@@ -157,6 +174,7 @@ export default async function UserPage({ params }: Props) {
               {user.about}
             </p>
           )}
+          {activity && <VoterRankLine activity={activity} />}
           {publicLinks.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-4">
               {publicLinks.map((link: ApiLink) => {
@@ -184,6 +202,11 @@ export default async function UserPage({ params }: Props) {
         servers={allServers}
         packs={user.user_packs}
         teams={user.user_teams}
+        activity={
+          activity && hasUserActivity(activity) ? (
+            <UserActivityPanel activity={activity} />
+          ) : undefined
+        }
       />
 
       {hasNothingListed && (

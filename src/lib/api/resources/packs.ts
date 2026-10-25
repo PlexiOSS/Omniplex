@@ -10,11 +10,19 @@ import type {
 } from "../types";
 
 export const packsResource = {
-  getAll: (page = 1, packType?: PackType) =>
-    client.get<PagedResult<BotPack[]>>(
-      `/packs/@all?page=${page}${packType ? `&pack_type=${packType}` : ""}`,
-      { next: { revalidate: 30 } },
-    ),
+  getAll: (
+    page = 1,
+    packType?: PackType,
+    options: { sort?: "new" | "votes"; all?: boolean } = {},
+  ) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (packType) params.set("pack_type", packType);
+    if (options.sort) params.set("sort", options.sort);
+    if (options.all) params.set("all", "true");
+    return client.get<PagedResult<BotPack[]>>(`/packs/@all?${params}`, {
+      next: { revalidate: 30 },
+    });
+  },
 
   getPack: (url: string) =>
     client.get<BotPack>(`/packs/${url}`, {

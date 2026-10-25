@@ -546,6 +546,7 @@ export interface ChangelogCreateEntry {
   fixed: string[];
   removed: string[];
   security?: string[];
+  ping_roles?: boolean;
   /** ISO 8601 timestamp. Omit/undefined to fall back to now (create) or
    * leave the existing date untouched (update). */
   created_at?: string;
@@ -646,6 +647,7 @@ export interface BlogCreateEntry {
 export interface BlogUpdateEntry extends BlogCreateEntry {
   itag: string;
   draft: boolean;
+  ping_roles?: boolean;
 }
 
 // ---------------------------------------------------------------------------

@@ -2,6 +2,7 @@ import { ArrowLeft, Bot, Server, Star, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EntityBadges } from "@/components/badges/EntityBadges";
 import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
@@ -12,10 +13,12 @@ import { TeamManageLink } from "@/components/teams/TeamManageLink";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
 import { reviews, teams } from "@/lib/api";
 import { hasPermString } from "@/lib/permissions";
+import { shortLinkUrl } from "@/lib/shortLinks";
 import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
 import { formatCount } from "@/lib/utils/format";
 import { getServerToken } from "@/lib/utils/serverSession";
 import { TeamVoteButton } from "./TeamVoteButton";
@@ -41,7 +44,8 @@ export default async function TeamPage({ params }: Props) {
     team = await teams.getTeam(id, await getServerToken());
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!team) notFound();
 
@@ -54,6 +58,8 @@ export default async function TeamPage({ params }: Props) {
   const bots = team.entities?.bots ?? [];
   const servers = team.entities?.servers ?? [];
   const tags = team.tags ?? [];
+
+  const shortLink = shortLinkUrl(team.vanity || team.id);
 
   return (
     <Container className="py-10">
@@ -80,6 +86,7 @@ export default async function TeamPage({ params }: Props) {
               {team.name}
             </h1>
             {team.nsfw && <Badge variant="danger">NSFW</Badge>}
+            <EntityBadges targetType="team" targetId={team.id} />
           </div>
           {team.short && (
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -117,6 +124,7 @@ export default async function TeamPage({ params }: Props) {
               targetId={team.id}
               targetLabel="team"
             />
+            {shortLink && <ShortLinkButton url={shortLink} />}
           </div>
         </div>
       </div>

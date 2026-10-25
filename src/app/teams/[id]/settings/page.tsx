@@ -1,29 +1,32 @@
 "use client";
 
 import {
-  ArrowLeft,
+  ArrowUpRight,
   Bot,
   Coins,
-  MessageSquare,
+  FileText,
+  LayoutDashboard,
   Pencil,
   Plus,
   Server,
-  Star,
-  Trash2,
+  TriangleAlert,
   Upload,
   UserMinus,
   Users,
-  Webhook,
+  Webhook as WebhookIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+  FormMessage,
+  ManageShell,
+  SettingsCard,
+  StatGrid,
+  TextArea,
+  Toggle,
+  useSection,
+} from "@/app/dashboard/manage/ManageShell";
 import { Container } from "@/components/layout/Container";
 import { PermSelector } from "@/components/teams/PermSelector";
 import { Avatar } from "@/components/ui/Avatar";
@@ -31,7 +34,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
@@ -40,35 +42,52 @@ import { reviews, teams, votes, webhooks } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { PermissionData, Team, TeamMember } from "@/lib/api/types";
 import { hasPermString } from "@/lib/permissions";
-import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
-import { formatCount } from "@/lib/utils/format";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  teamAvatarUrl,
+} from "@/lib/utils/assets";
+import { formatCount, formatCountLabel } from "@/lib/utils/format";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
-type Tab = "overview" | "info" | "members" | "webhooks" | "credits" | "danger";
+const SECTIONS = [
+  "overview",
+  "info",
+  "members",
+  "webhooks",
+  "credits",
+  "danger",
+] as const;
+type Section = (typeof SECTIONS)[number];
 
 function SettingsSkeleton() {
   return (
     <Container className="py-10">
-      <div className="max-w-2xl space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
+      <div className="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <div className="space-y-3">
+          <Skeleton className="h-16 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-48 w-full rounded-xl" />
+        </div>
       </div>
     </Container>
   );
 }
 
-export default function TeamSettingsPage() {
+function TeamSettings() {
   const { session, loading: authLoading } = useRequireAuth();
   const params = useParams<{ id: string }>();
   const teamId = params.id;
+  const [section, setSection] = useSection(SECTIONS, "overview");
 
   const [team, setTeam] = useState<Team | null>(null);
   const [catalog, setCatalog] = useState<PermissionData[]>([]);
   const [ownPerms, setOwnPerms] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [notMember, setNotMember] = useState(false);
-  const [tab, setTab] = useState<Tab>("overview");
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -95,7 +114,7 @@ export default function TeamSettingsPage() {
 
   if (authLoading || loading) return <SettingsSkeleton />;
 
-  if (notMember || !team) {
+  if (notMember || !team || !session) {
     return (
       <Container className="flex flex-col items-center justify-center py-24 text-center">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -111,73 +130,97 @@ export default function TeamSettingsPage() {
     );
   }
 
-  const TABS: { key: Tab; label: string; perm?: string | string[] }[] = [
-    { key: "overview", label: "Overview" },
-    { key: "info", label: "Edit Info", perm: "edit_team" },
-    { key: "members", label: "Members" },
+  const can = (perm: string) => hasPermString(ownPerms, perm);
+  const allowed: Record<Section, boolean> = {
+    overview: true,
+    info: can("edit_team"),
+    members: true,
+    webhooks: can("manage_webhooks") || can("view_webhook_logs"),
+    credits: true,
+    danger: can("owner"),
+  };
+  const active = allowed[section] ? section : "overview";
+  const members = team.entities?.members ?? [];
+
+  const groups = [
     {
-      key: "webhooks",
-      label: "Webhooks",
-      perm: ["manage_webhooks", "view_webhook_logs"],
+      label: "Team",
+      items: [
+        {
+          key: "overview" as Section,
+          label: "Overview",
+          icon: LayoutDashboard,
+        },
+        { key: "info" as Section, label: "Profile", icon: FileText },
+        {
+          key: "members" as Section,
+          label: "Members",
+          icon: Users,
+          count: members.length,
+        },
+      ],
     },
-    { key: "credits", label: "Credits" },
-    { key: "danger", label: "Danger Zone", perm: "owner" },
-  ];
-  const visibleTabs = TABS.filter(
-    (t) =>
-      !t.perm ||
-      (Array.isArray(t.perm)
-        ? t.perm.some((p) => hasPermString(ownPerms, p))
-        : hasPermString(ownPerms, t.perm)),
-  );
+    {
+      label: "Developers",
+      items: [
+        { key: "webhooks" as Section, label: "Webhooks", icon: WebhookIcon },
+      ],
+    },
+    {
+      label: "Billing",
+      items: [
+        { key: "credits" as Section, label: "Vote credits", icon: Coins },
+      ],
+    },
+    {
+      label: "Ownership",
+      items: [
+        {
+          key: "danger" as Section,
+          label: "Danger zone",
+          icon: TriangleAlert,
+        },
+      ],
+    },
+  ]
+    .map((g) => ({ ...g, items: g.items.filter((i) => allowed[i.key]) }))
+    .filter((g) => g.items.length > 0);
 
   return (
-    <Container className="py-10">
-      <Link
-        href={`/teams/${teamId}`}
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        <ArrowLeft size={14} />
-        {team.name}
-      </Link>
-
-      <h1 className="mb-8 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-        Team Settings
-      </h1>
-
-      <div className="mb-10 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center gap-4">
-          {visibleTabs.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setTab(key)}
-              className={[
-                "relative -mb-px shrink-0 border-b-2 px-1 pb-4 pt-3 text-sm font-medium transition-colors",
-                tab === key
-                  ? "border-accent text-accent"
-                  : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
-              ].join(" ")}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {tab === "overview" && session && (
-        <OverviewTab team={team} ownPerms={ownPerms} token={session.token} />
+    <ManageShell
+      backHref="/dashboard?tab=teams"
+      backLabel="Your teams"
+      name={team.name}
+      avatar={teamAvatarUrl(team.id, team.asset_versions?.avatar)}
+      viewHref={`/teams/${team.vanity || team.id}`}
+      badges={
+        can("owner") ? (
+          <Badge variant="info">Owner</Badge>
+        ) : (
+          <Badge>Member</Badge>
+        )
+      }
+      groups={groups}
+      active={active}
+      onSelect={setSection}
+    >
+      {active === "overview" && (
+        <OverviewSection
+          team={team}
+          ownPerms={ownPerms}
+          token={session.token}
+        />
       )}
-      {tab === "info" && session && (
-        <EditInfoTab
+      {active === "info" && (
+        <EditInfoSection
           team={team}
           userId={session.user_id}
           token={session.token}
           onSaved={load}
         />
       )}
-      {tab === "members" && session && (
-        <MembersTab
+      {active === "members" && (
+        <MembersSection
           team={team}
           catalog={catalog}
           ownPerms={ownPerms}
@@ -186,47 +229,39 @@ export default function TeamSettingsPage() {
           onChanged={load}
         />
       )}
-      {tab === "webhooks" && session && (
-        <WebhooksTab team={team} ownPerms={ownPerms} token={session.token} />
+      {active === "webhooks" && (
+        <WebhookManager
+          targetType="team"
+          targetId={team.id}
+          authToken={session.token}
+          canManage={can("manage_webhooks")}
+          canViewLogs={can("view_webhook_logs")}
+        />
       )}
-      {tab === "credits" && session && (
+      {active === "credits" && (
         <VoteCreditsPanel
           targetType="team"
           targetId={team.id}
           token={session.token}
-          canRedeem={hasPermString(ownPerms, "redeem_vote_credits")}
+          canRedeem={can("redeem_vote_credits")}
         />
       )}
-      {tab === "danger" && session && (
-        <DangerTab team={team} token={session.token} />
+      {active === "danger" && (
+        <DangerSection team={team} token={session.token} />
       )}
-    </Container>
+    </ManageShell>
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
+export default function TeamSettingsPage() {
   return (
-    <div className="rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
-      <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-        {icon}
-        {label}
-      </div>
-      <p className="mt-1 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-        {value}
-      </p>
-    </div>
+    <Suspense>
+      <TeamSettings />
+    </Suspense>
   );
 }
 
-function OverviewTab({
+function OverviewSection({
   team,
   ownPerms,
   token,
@@ -285,73 +320,112 @@ function OverviewTab({
   const members = team.entities?.members ?? [];
   const bots = team.entities?.bots ?? [];
   const servers = team.entities?.servers ?? [];
+  const canEditBots = hasPermString(ownPerms, "edit_bots");
+  const canEditServers = hasPermString(ownPerms, "edit_servers");
+
+  const listings = [
+    ...bots.map((b) => ({
+      key: `bot-${b.bot_id}`,
+      kind: "Bot" as const,
+      name: b.user.username,
+      avatar: mirroredAvatarUrl("bots", b.bot_id, b.user.avatar),
+      viewHref: `/bots/${b.vanity || b.bot_id}`,
+      manageHref: canEditBots ? `/dashboard/bots/${b.bot_id}` : null,
+    })),
+    ...servers.map((s) => ({
+      key: `server-${s.server_id}`,
+      kind: "Server" as const,
+      name: s.name,
+      avatar: mirroredAvatarUrl("servers", s.server_id, s.avatar),
+      viewHref: `/servers/${s.vanity || s.server_id}`,
+      manageHref: canEditServers ? `/dashboard/servers/${s.server_id}` : null,
+    })),
+  ];
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Manage {team.name}&apos;s info, members, and permissions from here.
-          Only actions you have permission for are shown.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <StatCard
-          icon={<Star size={13} />}
-          label="Votes"
-          value={formatCount(team.votes)}
-        />
-        <StatCard
-          icon={<Users size={13} />}
-          label="Members"
-          value={String(members.length)}
-        />
-        <StatCard
-          icon={<Bot size={13} />}
-          label="Bots"
-          value={String(bots.length)}
-        />
-        <StatCard
-          icon={<Server size={13} />}
-          label="Servers"
-          value={String(servers.length)}
-        />
-        <StatCard
-          icon={<MessageSquare size={13} />}
-          label="Reviews"
-          value={
-            reviewStats
+    <div className="space-y-6">
+      <StatGrid
+        stats={[
+          { label: "Votes", value: formatCount(team.votes) },
+          { label: "Members", value: formatCount(members.length) },
+          { label: "Bots", value: formatCount(bots.length) },
+          { label: "Servers", value: formatCount(servers.length) },
+          {
+            label: "Reviews",
+            value: reviewStats
               ? reviewStats.count > 0
                 ? `${reviewStats.count} (${reviewStats.avgStars.toFixed(1)}★)`
                 : "0"
-              : "…"
-          }
-        />
-        <StatCard
-          icon={<Coins size={13} />}
-          label="Credits"
-          value={credits !== null ? (credits / 100).toFixed(2) : "…"}
-        />
-      </div>
+              : "…",
+          },
+          {
+            label: "Vote credits",
+            value: credits !== null ? (credits / 100).toFixed(2) : "…",
+          },
+        ]}
+      />
+
+      <SettingsCard
+        title="Listings"
+        description="Bots and servers this team owns."
+      >
+        {listings.length === 0 ? (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            This team doesn&apos;t own any listings yet.
+          </p>
+        ) : (
+          <ul className="-my-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+            {listings.map((l) => (
+              <li key={l.key} className="flex items-center gap-3 py-2.5">
+                <Avatar src={l.avatar} alt={l.name} size={32} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                    {l.name}
+                  </p>
+                  <p className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    {l.kind === "Bot" ? (
+                      <Bot size={11} />
+                    ) : (
+                      <Server size={11} />
+                    )}
+                    {l.kind}
+                  </p>
+                </div>
+                <Link
+                  href={l.viewHref}
+                  className="inline-flex items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                >
+                  View <ArrowUpRight size={11} />
+                </Link>
+                {l.manageHref && (
+                  <Link
+                    href={l.manageHref}
+                    className="text-xs font-medium text-accent hover:underline"
+                  >
+                    Manage
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </SettingsCard>
 
       {canViewWebhookActivity && (
-        <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-          <h3 className="mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-            <Webhook size={14} />
-            Webhook activity
-          </h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {webhookStats
-              ? `${webhookStats.configured} webhook${webhookStats.configured === 1 ? "" : "s"} configured, ${formatCount(webhookStats.deliveries)} ${webhookStats.deliveries === 1 ? "delivery" : "deliveries"} logged.`
-              : "Loading…"}
-          </p>
-        </div>
+        <SettingsCard
+          title="Webhook activity"
+          description={
+            webhookStats
+              ? `${formatCountLabel(webhookStats.configured, "webhook")} configured, ${formatCountLabel(webhookStats.deliveries, "delivery", "deliveries")} logged.`
+              : "Loading…"
+          }
+        />
       )}
     </div>
   );
 }
 
-function EditInfoTab({
+function EditInfoSection({
   team,
   userId,
   token,
@@ -403,7 +477,8 @@ function EditInfoTab({
     }
   }
 
-  async function handleSave() {
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
     setSaving(true);
     setError(null);
     setSaved(false);
@@ -432,47 +507,47 @@ function EditInfoTab({
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
-      <div>
-        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Banner
-        </p>
-        <Banner
-          src={bannerUrl("teams", team.id, bannerVersion)}
-          alt={team.name}
-          className="h-32 rounded-xl sm:h-40"
-        />
-        <input
-          ref={bannerInputRef}
-          type="file"
-          accept="image/webp,image/png,image/jpeg,image/gif"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            e.target.value = "";
-            if (file) handleImageUpload("team-banner", file);
-          }}
-        />
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          loading={uploadingBanner}
-          onClick={() => bannerInputRef.current?.click()}
-          className="mt-2"
-        >
-          <Upload size={14} />
-          {bannerVersion ? "Replace banner" : "Upload banner"}
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <Avatar
-          src={teamAvatarUrl(team.id, avatarVersion)}
-          alt={team.name}
-          size={56}
-        />
+    <div className="space-y-6">
+      <SettingsCard
+        title="Images"
+        description="WebP, PNG, JPEG, or GIF, 5MB max."
+        footer={imageError ? <FormMessage error={imageError} /> : undefined}
+      >
         <div>
+          <Banner
+            src={bannerUrl("teams", team.id, bannerVersion)}
+            alt={team.name}
+            className="h-32 rounded-xl sm:h-40"
+          />
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/webp,image/png,image/jpeg,image/gif"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) handleImageUpload("team-banner", file);
+            }}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            loading={uploadingBanner}
+            onClick={() => bannerInputRef.current?.click()}
+            className="mt-2"
+          >
+            <Upload size={14} />
+            {bannerVersion ? "Replace banner" : "Upload banner"}
+          </Button>
+        </div>
+        <div className="flex items-center gap-3">
+          <Avatar
+            src={teamAvatarUrl(team.id, avatarVersion)}
+            alt={team.name}
+            size={56}
+          />
           <input
             ref={avatarInputRef}
             type="file"
@@ -494,73 +569,52 @@ function EditInfoTab({
             <Upload size={14} />
             {avatarVersion ? "Replace avatar" : "Upload avatar"}
           </Button>
-          <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
-            WebP, PNG, JPEG, or GIF — 5MB max.
-          </p>
         </div>
-      </div>
+      </SettingsCard>
 
-      {imageError && (
-        <p className="text-sm text-red-600 dark:text-red-400">{imageError}</p>
-      )}
-
-      <Input
-        id="team-name"
-        label="Team Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-      />
-
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="team-short"
-          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+      <form onSubmit={handleSave}>
+        <SettingsCard
+          title="Profile"
+          description="How your team appears on its public page."
+          footer={
+            <>
+              <FormMessage error={error} success={saved ? "Saved." : null} />
+              <Button type="submit" variant="primary" loading={saving}>
+                Save changes
+              </Button>
+            </>
+          }
         >
-          Short Description
-        </label>
-        <textarea
-          id="team-short"
-          rows={2}
-          maxLength={150}
-          value={short}
-          onChange={(e) => setShort(e.target.value)}
-          className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
-        />
-      </div>
-
-      <Input
-        id="team-tags"
-        label="Tags"
-        placeholder="comma, separated, tags"
-        value={tags}
-        onChange={(e) => setTags(e.target.value)}
-      />
-
-      <label className="flex items-center gap-3 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={nsfw}
-          onChange={(e) => setNsfw(e.target.checked)}
-          className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-        />
-        <span className="text-sm text-zinc-700 dark:text-zinc-300">
-          This team is NSFW
-        </span>
-      </label>
-
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-
-      <Button variant="primary" loading={saving} onClick={handleSave}>
-        {saved ? "Saved!" : "Save Changes"}
-      </Button>
+          <Input
+            id="team-name"
+            label="Team name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <TextArea
+            id="team-short"
+            label="Short description"
+            rows={2}
+            maxLength={150}
+            value={short}
+            onChange={setShort}
+          />
+          <Input
+            id="team-tags"
+            label="Tags"
+            placeholder="comma, separated, tags"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+          />
+          <Toggle checked={nsfw} onChange={setNsfw} label="This team is NSFW" />
+        </SettingsCard>
+      </form>
     </div>
   );
 }
 
-function MembersTab({
+function MembersSection({
   team,
   catalog,
   ownPerms,
@@ -580,13 +634,13 @@ function MembersTab({
   const canEdit = hasPermString(ownPerms, "edit_team_members");
   const canDelete = hasPermString(ownPerms, "remove_team_members");
 
-  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
-  const [addingOpen, setAddingOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newUserId, setNewUserId] = useState("");
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
-  async function handleAdd() {
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
     if (!newUserId.trim()) return;
     setAdding(true);
     setAddError(null);
@@ -597,7 +651,6 @@ function MembersTab({
         token,
       );
       setNewUserId("");
-      setAddingOpen(false);
       onChanged();
     } catch (err) {
       setAddError(
@@ -609,118 +662,120 @@ function MembersTab({
   }
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {members.length} {members.length === 1 ? "member" : "members"}
-        </p>
-        {canAdd && (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setAddingOpen((o) => !o)}
+    <div className="space-y-6">
+      {canAdd && (
+        <form onSubmit={handleAdd}>
+          <SettingsCard
+            title="Add a member"
+            description="New members start with no permissions. Grant them below once they're added."
+            footer={
+              <>
+                <FormMessage error={addError} />
+                <Button type="submit" variant="primary" loading={adding}>
+                  <Plus size={14} />
+                  Add member
+                </Button>
+              </>
+            }
           >
-            <Plus size={14} />
-            Add Member
-          </Button>
-        )}
-      </div>
-
-      {addingOpen && (
-        <div className="mb-6 flex items-start gap-2 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-          <div className="flex-1">
             <Input
               id="new-member-id"
-              label="Discord User ID"
+              label="Discord user ID"
               placeholder="123456789012345678"
               value={newUserId}
               onChange={(e) => setNewUserId(e.target.value)}
             />
-            {addError && (
-              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-                {addError}
-              </p>
-            )}
-          </div>
-          <Button
-            variant="primary"
-            loading={adding}
-            onClick={handleAdd}
-            className="mt-6"
-          >
-            Add
-          </Button>
-        </div>
+          </SettingsCard>
+        </form>
       )}
 
-      <div className="space-y-2">
-        {members.map((member) => {
-          const isOwner = hasPermString(member.flags, "owner");
-          const isSelf = member.user?.id === currentUserId;
-          return (
-            <div
-              key={member.itag}
-              className="flex items-center gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800"
-            >
-              <Avatar
-                src={member.user?.avatar ?? ""}
-                alt={member.user?.username ?? "Unknown"}
-                size={36}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                  {member.user?.display_name ||
-                    member.user?.username ||
-                    "Unknown"}
-                </p>
-                <div className="mt-0.5 flex flex-wrap gap-1">
-                  {isOwner ? (
-                    <Badge variant="info">Owner</Badge>
-                  ) : (
-                    member.flags.map((flag) => <Badge key={flag}>{flag}</Badge>)
-                  )}
+      <SettingsCard
+        title="Members"
+        description={formatCountLabel(members.length, "member")}
+      >
+        <ul className="-my-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+          {members.map((member) => {
+            const memberId = member.user?.id ?? "";
+            const isOwner = hasPermString(member.flags, "owner");
+            const isSelf = memberId === currentUserId;
+            const editing = editingId === member.itag;
+            return (
+              <li key={member.itag} className="py-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Avatar
+                    src={member.user?.avatar ?? ""}
+                    alt={member.user?.username ?? "Unknown"}
+                    size={36}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                      {member.user?.display_name ||
+                        member.user?.username ||
+                        "Unknown"}
+                      {isSelf && (
+                        <span className="ml-1.5 text-xs font-normal text-zinc-400">
+                          (you)
+                        </span>
+                      )}
+                    </p>
+                    <div className="mt-0.5 flex min-w-0 flex-wrap gap-1">
+                      {isOwner ? (
+                        <Badge variant="info">Owner</Badge>
+                      ) : member.flags.length === 0 ? (
+                        <span className="text-xs text-zinc-400">
+                          No permissions
+                        </span>
+                      ) : (
+                        member.flags.map((flag) => (
+                          <Badge key={flag}>{flag}</Badge>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setEditingId(editing ? null : member.itag)
+                        }
+                        className="h-7 px-2 text-xs"
+                      >
+                        <Pencil size={12} />
+                        {editing ? "Close" : "Permissions"}
+                      </Button>
+                    )}
+                    {(canDelete || isSelf) && (
+                      <RemoveMemberButton
+                        teamId={team.id}
+                        userId={memberId}
+                        label={isSelf ? "Leave" : "Remove"}
+                        token={token}
+                        onRemoved={onChanged}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {canEdit && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingMember(member)}
-                    className="h-7 px-2 text-xs"
-                  >
-                    <Pencil size={12} />
-                    Permissions
-                  </Button>
-                )}
-                {(canDelete || isSelf) && (
-                  <RemoveMemberButton
+                {editing && (
+                  <MemberPermsEditor
                     teamId={team.id}
-                    userId={member.user?.id ?? ""}
+                    member={member}
+                    catalog={catalog}
+                    ownPerms={ownPerms}
                     token={token}
-                    onRemoved={onChanged}
+                    onCancel={() => setEditingId(null)}
+                    onSaved={() => {
+                      setEditingId(null);
+                      onChanged();
+                    }}
                   />
                 )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {editingMember && (
-        <EditMemberPermsModal
-          teamId={team.id}
-          member={editingMember}
-          catalog={catalog}
-          ownPerms={ownPerms}
-          token={token}
-          onClose={() => setEditingMember(null)}
-          onSaved={() => {
-            setEditingMember(null);
-            onChanged();
-          }}
-        />
-      )}
+              </li>
+            );
+          })}
+        </ul>
+      </SettingsCard>
     </div>
   );
 }
@@ -728,11 +783,13 @@ function MembersTab({
 function RemoveMemberButton({
   teamId,
   userId,
+  label,
   token,
   onRemoved,
 }: {
   teamId: string;
   userId: string;
+  label: string;
   token: string;
   onRemoved: () => void;
 }) {
@@ -764,18 +821,18 @@ function RemoveMemberButton({
       className="h-7 px-2 text-xs"
     >
       <UserMinus size={12} />
-      {confirming ? "Confirm?" : "Remove"}
+      {confirming ? "Confirm?" : label}
     </Button>
   );
 }
 
-function EditMemberPermsModal({
+function MemberPermsEditor({
   teamId,
   member,
   catalog,
   ownPerms,
   token,
-  onClose,
+  onCancel,
   onSaved,
 }: {
   teamId: string;
@@ -783,7 +840,7 @@ function EditMemberPermsModal({
   catalog: PermissionData[];
   ownPerms: string[];
   token: string;
-  onClose: () => void;
+  onCancel: () => void;
   onSaved: () => void;
 }) {
   const [perms, setPerms] = useState<string[]>(member.flags);
@@ -804,109 +861,80 @@ function EditMemberPermsModal({
   }
 
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={`Edit permissions — ${member.user?.username ?? "member"}`}
-    >
-      <div className="space-y-4">
-        <PermSelector
-          catalog={catalog}
-          granterPerms={ownPerms}
-          value={perms}
-          onChange={setPerms}
-        />
-
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" loading={saving} onClick={handleSave}>
-            Save
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
-}
-
-function WebhooksTab({
-  team,
-  ownPerms,
-  token,
-}: {
-  team: Team;
-  ownPerms: string[];
-  token: string;
-}) {
-  return (
-    <div className="max-w-2xl">
-      <WebhookManager
-        targetType="team"
-        targetId={team.id}
-        authToken={token}
-        canManage={hasPermString(ownPerms, "manage_webhooks")}
-        canViewLogs={hasPermString(ownPerms, "view_webhook_logs")}
+    <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+      <PermSelector
+        catalog={catalog}
+        granterPerms={ownPerms}
+        value={perms}
+        onChange={setPerms}
       />
-    </div>
-  );
-}
-
-function DangerTab({ team, token }: { team: Team; token: string }) {
-  const router = useRouter();
-  const [confirming, setConfirming] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function handleClick() {
-    if (!confirming) {
-      setConfirming(true);
-      confirmRef.current = setTimeout(() => setConfirming(false), 3000);
-      return;
-    }
-    if (confirmRef.current) clearTimeout(confirmRef.current);
-    setConfirming(false);
-    setDeleting(true);
-    setError(null);
-    teams
-      .deleteTeam(team.id, token)
-      .then(() => router.push("/dashboard"))
-      .catch((err) => {
-        setError(
-          err instanceof ApiError ? err.message : "Failed to delete team.",
-        );
-        setDeleting(false);
-      });
-  }
-
-  return (
-    <div className="max-w-2xl space-y-4">
-      <div className="rounded-xl border border-red-200 p-4 dark:border-red-900">
-        <h3 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-          Delete this team
-        </h3>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          This permanently deletes {team.name}. Bots and servers owned by this
-          team will be affected. This cannot be undone.
-        </p>
-        {error && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+        <FormMessage error={error} />
+        <Button variant="secondary" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
         <Button
-          variant={confirming ? "danger" : "secondary"}
-          loading={deleting}
-          onClick={handleClick}
-          className="mt-3"
+          variant="primary"
+          size="sm"
+          loading={saving}
+          onClick={handleSave}
         >
-          <Trash2 size={14} />
-          {confirming ? "Confirm delete?" : "Delete Team"}
+          Save permissions
         </Button>
       </div>
     </div>
+  );
+}
+
+function DangerSection({ team, token }: { team: Team; token: string }) {
+  const router = useRouter();
+  const [confirm, setConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function remove(e: React.FormEvent) {
+    e.preventDefault();
+    if (confirm !== team.name) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      await teams.deleteTeam(team.id, token);
+      router.push("/dashboard?tab=teams");
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Failed to delete the team.",
+      );
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={remove}>
+      <SettingsCard
+        tone="danger"
+        title="Delete this team"
+        description={`Permanently deletes ${team.name}. Bots and servers owned by this team will be affected. This can't be undone.`}
+        footer={
+          <>
+            <FormMessage error={error} />
+            <Button
+              type="submit"
+              variant="danger"
+              loading={deleting}
+              disabled={confirm !== team.name}
+            >
+              Delete team
+            </Button>
+          </>
+        }
+      >
+        <Input
+          id="delete-confirm"
+          label={`Type ${team.name} to confirm`}
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+        />
+      </SettingsCard>
+    </form>
   );
 }

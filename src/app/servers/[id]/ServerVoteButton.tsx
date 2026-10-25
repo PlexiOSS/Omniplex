@@ -41,7 +41,7 @@ export function ServerVoteButton({
     return (
       <SignInLink className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:bg-accent/5 hover:text-accent dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-accent/40 dark:hover:bg-accent/10">
         <ThumbsUp size={14} />
-        Sign in to vote
+        Sign in to vote · {formatCount(currentVotes)}
       </SignInLink>
     );
   }
@@ -130,12 +130,14 @@ export function ServerVoteButton({
         title="Downvote this server?"
       >
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Downvotes can't be removed or changed once submitted, and you can
-          only vote once every {voteCooldownHours(premium)} hours. Are you
-          sure?
+          Downvotes can't be removed or changed once submitted, and you can only
+          vote once every {voteCooldownHours(premium)} hours. Are you sure?
         </p>
         <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setConfirmingDownvote(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmingDownvote(false)}
+          >
             Cancel
           </Button>
           <Button

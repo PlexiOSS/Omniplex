@@ -41,15 +41,11 @@ export function VoteButton({
     return (
       <SignInLink className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:bg-accent/5 hover:text-accent dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-accent/40 dark:hover:bg-accent/10">
         <ThumbsUp size={14} />
-        Sign in to vote
+        Sign in to vote · {formatCount(currentVotes)}
       </SignInLink>
     );
   }
 
-  // Bots allow multiple votes over time, but only one vote (in either
-  // direction) per cooldown window — voting again to "switch" direction is
-  // rejected server-side the same as voting again in the same direction, so
-  // once either button succeeds both are disabled until the next window.
   const voted = votedDirection !== null;
 
   const handleVote = async (upvote: boolean) => {
@@ -65,10 +61,6 @@ export function VoteButton({
       if (!ok) return;
       setLocalVotes((v) => v + (upvote ? 1 : -1));
       setVotedDirection(upvote ? "up" : "down");
-      // approximate_votes updates synchronously on the backend, but this page's
-      // Stats sidebar was fetched server-side before the vote -- refresh so it
-      // (and anything else on the page reading the pre-vote count) catches up
-      // instead of only this button's own optimistic label doing so.
       router.refresh();
     } finally {
       setPendingDir(null);
@@ -130,12 +122,14 @@ export function VoteButton({
         title="Downvote this bot?"
       >
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Downvotes can't be removed or changed once submitted, and you can
-          only vote once every {voteCooldownHours(premium)} hours. Are you
-          sure?
+          Downvotes can't be removed or changed once submitted, and you can only
+          vote once every {voteCooldownHours(premium)} hours. Are you sure?
         </p>
         <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setConfirmingDownvote(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmingDownvote(false)}
+          >
             Cancel
           </Button>
           <Button

@@ -29,6 +29,9 @@ export function BlogEditModal({
   const [content, setContent] = useState(post?.content ?? "");
   const [tags, setTags] = useState<string[]>(post?.tags ?? []);
   const [draft, setDraft] = useState(post?.draft ?? false);
+  const [pingRoles, setPingRoles] = useState<boolean | null>(null);
+  const willAnnounce = !!post?.draft && !draft;
+  const ping = pingRoles ?? true;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,6 +52,7 @@ export function BlogEditModal({
           content,
           tags,
           draft,
+          ping_roles: willAnnounce ? ping : undefined,
         });
       } else {
         await arcadia.blog.create(loginToken, {
@@ -137,10 +141,23 @@ export function BlogEditModal({
             </span>
           </label>
         )}
+        {willAnnounce && (
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={ping}
+              onChange={(e) => setPingRoles(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+            />
+            <span className="text-sm text-zinc-700 dark:text-zinc-300">
+              Ping notified roles in the announcement
+            </span>
+          </label>
+        )}
         {!isEdit && (
           <p className="text-xs text-zinc-400 dark:text-zinc-600">
-            New posts publish immediately — you can mark it a draft after
-            creating it.
+            New posts are saved as drafts. Edit the post and untick Draft to
+            publish it and send the announcement.
           </p>
         )}
 

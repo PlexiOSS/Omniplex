@@ -6,8 +6,6 @@ import {
   Bell,
   Bot,
   ClipboardList,
-  GitBranch,
-  Globe,
   KeyRound,
   LayoutDashboard,
   LayoutTemplate,
@@ -15,8 +13,8 @@ import {
   MoreHorizontal,
   Package,
   Palette,
-  Pencil,
   Server as ServerIcon,
+  Settings,
   ShieldCheck,
   ShoppingBag,
   Sparkles,
@@ -28,8 +26,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
-import { TeamCard } from "@/components/cards/TeamCard";
+import { Suspense, useEffect, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { TokenManager } from "@/components/sessions/TokenManager";
@@ -43,7 +40,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { useMyTemplates } from "@/hooks/useTemplates";
 import { useMyThemes } from "@/hooks/useThemes";
-import { bots, platform, users } from "@/lib/api";
+import { platform, users } from "@/lib/api";
 import type {
   Link as ApiLink,
   BotType,
@@ -53,20 +50,23 @@ import type {
   User as UserType,
 } from "@/lib/api/types";
 import { hasAnyPermString, hasPermString } from "@/lib/permissions";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { formatCount } from "@/lib/utils/format";
+import { mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
+import { formatCount, formatCountLabel } from "@/lib/utils/format";
 import { ApplicationsTab } from "./ApplicationsTab";
-import { BotEditModal } from "./BotEditModal";
+import { DashboardNav } from "./DashboardNav";
+import {
+  ListingFilters,
+  type ListingSort,
+  matchesStatus,
+  type OwnershipFilter,
+  type StatusFilter,
+} from "./ListingFilters";
 import { NotificationsTab } from "./NotificationsTab";
+import { OverviewPanel } from "./OverviewPanel";
 import { PacksTab } from "./PacksTab";
 import { SecurityTab } from "./SecurityTab";
-import { ServerEditModal } from "./ServerEditModal";
-import { BotStatsModal, ServerStatsModal } from "./StatsModal";
 import { TemplatesTab } from "./TemplatesTab";
 import { ThemesTab } from "./ThemesTab";
-import { TokenModal } from "./TokenModal";
-import { TransferTeamModal } from "./TransferTeamModal";
-import { WebhookModal } from "./WebhookModal";
 
 type Tab =
   | "overview"
@@ -78,7 +78,7 @@ type Tab =
   | "themes"
   | "applications"
   | "teams"
-  | "tokens"
+  | "sessions"
   | "notifications"
   | "security";
 
@@ -109,97 +109,12 @@ function DashboardSkeleton() {
         </div>
       </div>
       <Skeleton className="w-full h-10 mb-8" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {["a", "b", "c"].map((key) => (
           <Skeleton key={key} className="h-40 rounded-xl" />
         ))}
       </div>
     </Container>
-  );
-}
-
-function OverviewTab({ me }: { me: UserType }) {
-  const websiteLink = me.extra_links.find((l) => l.name === "website")?.value;
-  const githubLink = me.extra_links.find((l) => l.name === "github")?.value;
-
-  return (
-    <div className="space-y-8">
-      {me.about && (
-        <p className="max-w-xl text-sm text-zinc-600 dark:text-zinc-300">
-          {me.about}
-        </p>
-      )}
-
-      <div className="flex flex-wrap gap-4">
-        {websiteLink && (
-          <a
-            href={websiteLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-          >
-            <Globe size={13} />
-            {websiteLink}
-          </a>
-        )}
-        {githubLink && (
-          <a
-            href={githubLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-          >
-            <GitBranch size={13} />
-            {githubLink}
-          </a>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          {
-            icon: <Bot size={14} />,
-            label: "Bots",
-            value: me.user_bots.length,
-          },
-          {
-            icon: <Package size={14} />,
-            label: "Packs",
-            value: me.user_packs.length,
-          },
-          {
-            icon: <Users size={14} />,
-            label: "Teams",
-            value: me.user_teams.length,
-          },
-        ].map(({ icon, label, value }) => (
-          <div
-            key={label}
-            className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <div className="flex items-center gap-2 text-zinc-400 dark:text-zinc-600">
-              {icon}
-              <span className="text-xs font-medium uppercase tracking-wide">
-                {label}
-              </span>
-            </div>
-            <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-              {value}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <div>
-        <Link
-          href={`/user/${me.user?.id ?? ""}`}
-          className="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          View public profile
-          <ArrowUpRight size={13} />
-        </Link>
-      </div>
-    </div>
   );
 }
 
@@ -274,114 +189,152 @@ function EditProfileTab({
     }
   }
 
+  const previewName = me.user?.display_name || me.user?.username || "Unknown";
+  const previewLinks = links.filter((l) => l.name.trim() && l.value.trim());
+
   return (
-    <div className="max-w-2xl space-y-5">
-      <div className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <div>
-          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Discord username or avatar out of date?
-          </p>
-          <p className="text-xs text-zinc-400 dark:text-zinc-600">
-            Refreshes the cached copy we show across the site.
-          </p>
+    <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="max-w-2xl space-y-5">
+        <div className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
+          <div>
+            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Discord username or avatar out of date?
+            </p>
+            <p className="text-xs text-zinc-400 dark:text-zinc-600">
+              Refreshes the cached copy we show across the site.
+            </p>
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={refreshingDiscord}
+            onClick={handleRefreshDiscord}
+          >
+            {discordRefreshed ? "Refreshed!" : "Refresh"}
+          </Button>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          loading={refreshingDiscord}
-          onClick={handleRefreshDiscord}
-        >
-          {discordRefreshed ? "Refreshed!" : "Refresh"}
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="about"
+            className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Bio
+          </label>
+          <textarea
+            id="about"
+            rows={3}
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
+            placeholder="Tell the community a bit about yourself…"
+            className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+          />
+        </div>
+
+        <div>
+          <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Links
+          </p>
+          <LinksEditor links={links} onChange={setLinks} />
+        </div>
+
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={captchaSponsorEnabled}
+            onChange={(e) => setCaptchaSponsorEnabled(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+          />
+          <span className="text-sm text-zinc-700 dark:text-zinc-300">
+            Sponsor captchas
+            <span className="block text-xs text-zinc-400">
+              Show a captcha before voting even on bots and servers that have
+              opted out of them.
+            </span>
+          </span>
+        </label>
+
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        )}
+
+        <Button variant="primary" loading={saving} onClick={handleSave}>
+          {saved ? "Saved!" : "Save Changes"}
         </Button>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="about"
-          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-        >
-          Bio
-        </label>
-        <textarea
-          id="about"
-          rows={3}
-          value={about}
-          onChange={(e) => setAbout(e.target.value)}
-          placeholder="Tell the community a bit about yourself…"
-          className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-        />
-      </div>
-
-      <div>
-        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Links
+      <aside className="xl:sticky xl:top-24 xl:self-start">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+          Preview
         </p>
-        <LinksEditor links={links} onChange={setLinks} />
-      </div>
-
-      <label className="flex cursor-pointer items-start gap-3">
-        <input
-          type="checkbox"
-          checked={captchaSponsorEnabled}
-          onChange={(e) => setCaptchaSponsorEnabled(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-        />
-        <span className="text-sm text-zinc-700 dark:text-zinc-300">
-          Sponsor captchas
-          <span className="block text-xs text-zinc-400">
-            Show a captcha before voting even on bots and servers that have
-            opted out of them.
-          </span>
-        </span>
-      </label>
-
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-
-      <Button variant="primary" loading={saving} onClick={handleSave}>
-        {saved ? "Saved!" : "Save Changes"}
-      </Button>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center gap-3">
+            <Avatar
+              src={mirroredAvatarUrl(
+                "users",
+                me.user?.id ?? "",
+                me.user?.avatar,
+              )}
+              alt={previewName}
+              size={48}
+            />
+            <div className="min-w-0">
+              <p className="truncate font-semibold text-zinc-950 dark:text-zinc-50">
+                {previewName}
+              </p>
+              <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                @{me.user?.username}
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+            {about.trim() || (
+              <span className="text-zinc-400 dark:text-zinc-500">
+                No bio yet.
+              </span>
+            )}
+          </p>
+          {previewLinks.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
+              {previewLinks.map((link) => (
+                <span
+                  key={link.name}
+                  className="text-xs font-medium capitalize text-accent"
+                >
+                  {link.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        <Link
+          href={`/user/${me.user?.id ?? ""}`}
+          className="mt-3 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
+        >
+          View public profile <ArrowUpRight size={13} />
+        </Link>
+      </aside>
     </div>
   );
 }
 
 function BotItem({
   bot,
-  token,
-  userId,
-  onDeleted,
-  mutate,
   team,
-  userTeams = [],
   canManage = true,
   myFlags = ["owner"],
 }: {
   bot: IndexBot;
-  token: string;
-  /** Needed for the team-transfer endpoint, which is path-scoped to the acting user. */
-  userId: string;
-  onDeleted: (id: string) => void;
-  mutate: () => void;
   /** Set when this bot is owned by a team the user is a member of, rather than owned directly. */
   team?: Team;
-  /** Every team the user belongs to — used to build the "Change Team" destination picker. */
-  userTeams?: Team[];
-  /** Whether the current user has permission to edit/delete this bot. Always true for directly-owned bots. */
+  /** Whether the current user has permission to edit this bot. Always true for directly-owned bots. */
   canManage?: boolean;
   /** The current user's resolved flags on this bot's team — defaults to owner for directly-owned bots. */
   myFlags?: string[];
 }) {
   const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
-  const [confirming, setConfirming] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [viewingStats, setViewingStats] = useState(false);
-  const [viewingTokens, setViewingTokens] = useState(false);
-  const [viewingWebhooks, setViewingWebhooks] = useState(false);
-  const [transferring, setTransferring] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const manageHref = `/dashboard/bots/${bot.bot_id}`;
   const canSeeTokens = hasAnyPermString(myFlags, [
     "view_sessions",
     "manage_sessions",
@@ -390,34 +343,13 @@ function BotItem({
     "view_webhooks",
     "manage_webhooks",
   ]);
-  const canManageWebhooks = hasPermString(myFlags, "manage_webhooks");
-  const canViewWebhookLogs = hasPermString(myFlags, "view_webhook_logs");
-  const canTransferTeam = hasPermString(myFlags, "delete_bots");
-  const transferCandidates = userTeams.filter((t) => {
-    if (team && t.id === team.id) return false;
-    const theirFlags =
-      t.entities?.members?.find((m) => m.user?.id === userId)?.flags ?? [];
-    return hasPermString(theirFlags, "add_bots");
-  });
+  const canDelete = hasPermString(myFlags, "delete_bots");
 
   const status = BOT_STATUS[bot.type];
 
-  function handleDeleteClick() {
-    if (!confirming) {
-      setConfirming(true);
-      confirmRef.current = setTimeout(() => setConfirming(false), 3000);
-      return;
-    }
-    if (confirmRef.current) clearTimeout(confirmRef.current);
-    setConfirming(false);
-    setDeleting(true);
-    bots
-      .deleteBot(bot.bot_id, token)
-      .then(() => {
-        setMenuOpen(false);
-        onDeleted(bot.bot_id);
-      })
-      .catch(() => setDeleting(false));
+  function go(href: string) {
+    setMenuOpen(false);
+    router.push(href);
   }
 
   return (
@@ -460,8 +392,10 @@ function BotItem({
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-3 mt-auto text-xs text-zinc-500 dark:text-zinc-400">
-        <span>{formatCount(bot.approximate_votes)} votes</span>
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="whitespace-nowrap">
+          {formatCountLabel(bot.approximate_votes, "vote")}
+        </span>
         <div className="flex items-center gap-2">
           <Link
             href={`/bots/${bot.vanity || bot.bot_id}`}
@@ -474,11 +408,11 @@ function BotItem({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setEditing(true)}
+              onClick={() => router.push(manageHref)}
               className="px-2 text-xs h-7"
             >
-              <Pencil size={12} />
-              Edit
+              <Settings size={12} />
+              Manage
             </Button>
           )}
           <Dropdown
@@ -500,153 +434,75 @@ function BotItem({
               (bot.type === "approved" || bot.type === "certified") && (
                 <DropdownItem
                   icon={<Sparkles size={14} />}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    router.push(`/premium?bot=${bot.bot_id}`);
-                  }}
+                  onClick={() => go(`/premium?bot=${bot.bot_id}`)}
                 >
                   Upgrade
                 </DropdownItem>
               )}
             <DropdownItem
               icon={<ShoppingBag size={14} />}
-              onClick={() => {
-                setMenuOpen(false);
-                router.push(`/shop?bot=${bot.bot_id}`);
-              }}
+              onClick={() => go(`/shop?bot=${bot.bot_id}`)}
             >
               Shop
             </DropdownItem>
-            <DropdownItem
-              icon={<BarChart2 size={14} />}
-              onClick={() => {
-                setMenuOpen(false);
-                setViewingStats(true);
-              }}
-            >
-              Stats
-            </DropdownItem>
             {canManage && (
-              <DropdownItem
-                icon={<Terminal size={14} />}
-                onClick={() => {
-                  setMenuOpen(false);
-                  router.push(`/bots/${bot.vanity || bot.bot_id}?tab=commands`);
-                }}
-              >
-                Commands
-              </DropdownItem>
-            )}
-            {canManage && (
-              <DropdownItem
-                icon={<Megaphone size={14} />}
-                onClick={() => {
-                  setMenuOpen(false);
-                  router.push(
-                    `/bots/${bot.vanity || bot.bot_id}?tab=changelog`,
-                  );
-                }}
-              >
-                Changelog
-              </DropdownItem>
-            )}
-            {canSeeTokens && (
-              <DropdownItem
-                icon={<KeyRound size={14} />}
-                onClick={() => {
-                  setMenuOpen(false);
-                  setViewingTokens(true);
-                }}
-              >
-                Tokens
-              </DropdownItem>
-            )}
-            {canSeeWebhooks && (
-              <DropdownItem
-                icon={<WebhookIcon size={14} />}
-                onClick={() => {
-                  setMenuOpen(false);
-                  setViewingWebhooks(true);
-                }}
-              >
-                Webhooks
-              </DropdownItem>
-            )}
-            {canTransferTeam && (
-              <DropdownItem
-                icon={<Users size={14} />}
-                onClick={() => {
-                  setMenuOpen(false);
-                  setTransferring(true);
-                }}
-              >
-                Change Team
-              </DropdownItem>
-            )}
-            {canManage && (
-              <DropdownItem
-                icon={<Trash2 size={14} />}
-                danger
-                loading={deleting}
-                onClick={handleDeleteClick}
-              >
-                {confirming ? "Confirm?" : "Delete"}
-              </DropdownItem>
+              <>
+                <DropdownItem
+                  icon={<BarChart2 size={14} />}
+                  onClick={() => go(`${manageHref}?section=stats`)}
+                >
+                  Statistics
+                </DropdownItem>
+                <DropdownItem
+                  icon={<Terminal size={14} />}
+                  onClick={() => go(`${manageHref}?section=commands`)}
+                >
+                  Commands
+                </DropdownItem>
+                <DropdownItem
+                  icon={<Megaphone size={14} />}
+                  onClick={() => go(`${manageHref}?section=changelog`)}
+                >
+                  Changelog
+                </DropdownItem>
+                {canSeeTokens && (
+                  <DropdownItem
+                    icon={<KeyRound size={14} />}
+                    onClick={() => go(`${manageHref}?section=sessions`)}
+                  >
+                    API sessions
+                  </DropdownItem>
+                )}
+                {canSeeWebhooks && (
+                  <DropdownItem
+                    icon={<WebhookIcon size={14} />}
+                    onClick={() => go(`${manageHref}?section=webhooks`)}
+                  >
+                    Webhooks
+                  </DropdownItem>
+                )}
+                {canDelete && (
+                  <DropdownItem
+                    icon={<Users size={14} />}
+                    onClick={() => go(`${manageHref}?section=team`)}
+                  >
+                    Change team
+                  </DropdownItem>
+                )}
+                {canDelete && (
+                  <DropdownItem
+                    icon={<Trash2 size={14} />}
+                    danger
+                    onClick={() => go(`${manageHref}?section=danger`)}
+                  >
+                    Delete
+                  </DropdownItem>
+                )}
+              </>
             )}
           </Dropdown>
         </div>
       </div>
-
-      {editing && (
-        <BotEditModal
-          botId={bot.bot_id}
-          userId={userId}
-          token={token}
-          onClose={() => setEditing(false)}
-          onSaved={mutate}
-        />
-      )}
-
-      {viewingTokens && (
-        <TokenModal
-          title="Bot API Tokens"
-          targetType="bot"
-          targetId={bot.bot_id}
-          authToken={token}
-          myPerms={myFlags}
-          onClose={() => setViewingTokens(false)}
-        />
-      )}
-
-      {viewingWebhooks && (
-        <WebhookModal
-          title="Bot Webhooks"
-          targetType="bot"
-          targetId={bot.bot_id}
-          authToken={token}
-          canManage={canManageWebhooks}
-          canViewLogs={canViewWebhookLogs}
-          onClose={() => setViewingWebhooks(false)}
-        />
-      )}
-
-      {transferring && (
-        <TransferTeamModal
-          botId={bot.bot_id}
-          userId={userId}
-          token={token}
-          candidates={transferCandidates}
-          onClose={() => setTransferring(false)}
-          onTransferred={mutate}
-        />
-      )}
-
-      {viewingStats && (
-        <BotStatsModal
-          botId={bot.bot_id}
-          onClose={() => setViewingStats(false)}
-        />
-      )}
     </div>
   );
 }
@@ -659,30 +515,16 @@ interface TeamBot {
 }
 
 function BotsTab({
-  bots: allBots,
-  teamBots: allTeamBots,
-  token,
-  userId,
-  userTeams,
-  mutate,
+  bots: botList,
+  teamBots: teamBotList,
 }: {
   bots: IndexBot[];
   teamBots: TeamBot[];
-  token: string;
-  userId: string;
-  userTeams: Team[];
-  mutate: () => void;
 }) {
-  const [deletedIds, setDeletedIds] = useState<string[]>([]);
-  const botList = allBots.filter((b) => !deletedIds.includes(b.bot_id));
-  const teamBotList = allTeamBots.filter(
-    (tb) => !deletedIds.includes(tb.bot.bot_id),
-  );
-
-  function handleDeleted(id: string) {
-    setDeletedIds((prev) => [...prev, id]);
-  }
-
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<ListingSort>("votes");
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [ownership, setOwnership] = useState<OwnershipFilter>("all");
   if (botList.length === 0 && teamBotList.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -699,57 +541,94 @@ function BotsTab({
     );
   }
 
+  const entries = [
+    ...botList.map((bot) => ({
+      bot,
+      team: undefined as Team | undefined,
+      canManage: true,
+      myFlags: ["owner"],
+    })),
+    ...teamBotList,
+  ];
+  const ownershipCounts = {
+    all: entries.length,
+    mine: botList.length,
+    team: teamBotList.length,
+  };
+  const byOwnership = entries.filter((e) =>
+    ownership === "all" ? true : ownership === "mine" ? !e.team : !!e.team,
+  );
+  const statusCounts: Record<StatusFilter, number> = {
+    all: byOwnership.length,
+    live: byOwnership.filter((e) => matchesStatus(e.bot.type, "live")).length,
+    review: byOwnership.filter((e) => matchesStatus(e.bot.type, "review"))
+      .length,
+    denied: byOwnership.filter((e) => matchesStatus(e.bot.type, "denied"))
+      .length,
+  };
+  const needle = query.trim().toLowerCase();
+  const visible = byOwnership
+    .filter((e) => matchesStatus(e.bot.type, status))
+    .filter(
+      (e) =>
+        !needle ||
+        e.bot.user.username.toLowerCase().includes(needle) ||
+        e.bot.bot_id.includes(needle) ||
+        (e.team?.name ?? "").toLowerCase().includes(needle),
+    )
+    .sort((a, b) =>
+      sort === "name"
+        ? a.bot.user.username.localeCompare(b.bot.user.username)
+        : sort === "newest"
+          ? new Date(b.bot.created_at).getTime() -
+            new Date(a.bot.created_at).getTime()
+          : b.bot.approximate_votes - a.bot.approximate_votes,
+    );
+
   return (
-    <div className="space-y-10">
-      <div>
-        <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {botList.length} {botList.length === 1 ? "bot" : "bots"}
-          </p>
-          <Link href="/bots/add">
-            <Button variant="secondary" size="sm">
-              Add a Bot
-            </Button>
-          </Link>
-        </div>
-        {botList.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {botList.map((bot) => (
-              <BotItem
-                key={bot.bot_id}
-                bot={bot}
-                token={token}
-                userId={userId}
-                userTeams={userTeams}
-                mutate={mutate}
-                onDeleted={handleDeleted}
-              />
-            ))}
-          </div>
-        )}
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          {formatCountLabel(entries.length, "bot")}
+          {teamBotList.length > 0 &&
+            ` (${formatCount(botList.length)} yours, ${formatCount(teamBotList.length)} through teams)`}
+        </p>
+        <Link href="/bots/add">
+          <Button variant="secondary" size="sm">
+            Add a Bot
+          </Button>
+        </Link>
       </div>
 
-      {teamBotList.length > 0 && (
-        <div>
-          <h3 className="mb-4 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-            Team Bots
-          </h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {teamBotList.map(({ bot, team, canManage, myFlags }) => (
-              <BotItem
-                key={bot.bot_id}
-                bot={bot}
-                token={token}
-                userId={userId}
-                userTeams={userTeams}
-                mutate={mutate}
-                onDeleted={handleDeleted}
-                team={team}
-                canManage={canManage}
-                myFlags={myFlags}
-              />
-            ))}
-          </div>
+      <ListingFilters
+        query={query}
+        onQuery={setQuery}
+        placeholder="Search your bots by name, ID or team"
+        sort={sort}
+        onSort={setSort}
+        status={status}
+        onStatus={setStatus}
+        statusCounts={statusCounts}
+        ownership={teamBotList.length > 0 ? ownership : undefined}
+        onOwnership={setOwnership}
+        ownershipCounts={ownershipCounts}
+      />
+
+      {visible.length === 0 ? (
+        <p className="py-12 text-center text-sm text-zinc-500 dark:text-zinc-400">
+          No bots match these filters.
+        </p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {visible.map(({ bot, team, canManage, myFlags }) => (
+            <BotItem
+              key={`${team?.id ?? "mine"}-${bot.bot_id}`}
+              bot={bot}
+              team={team}
+              canManage={canManage}
+              myFlags={myFlags}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -768,24 +647,15 @@ function ServerItem({
   team,
   canManage,
   myFlags,
-  userId,
-  token,
-  mutate,
 }: {
   server: IndexServer;
   team: Team;
   canManage: boolean;
   myFlags: string[];
-  userId: string;
-  token: string;
-  mutate: () => void;
 }) {
   const router = useRouter();
-  const [editing, setEditing] = useState(false);
-  const [viewingStats, setViewingStats] = useState(false);
-  const [viewingTokens, setViewingTokens] = useState(false);
-  const [viewingWebhooks, setViewingWebhooks] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const manageHref = `/dashboard/servers/${server.server_id}`;
   const canSeeTokens = hasAnyPermString(myFlags, [
     "view_sessions",
     "manage_sessions",
@@ -794,14 +664,18 @@ function ServerItem({
     "view_webhooks",
     "manage_webhooks",
   ]);
-  const canManageWebhooks = hasPermString(myFlags, "manage_webhooks");
-  const canViewWebhookLogs = hasPermString(myFlags, "view_webhook_logs");
+  const canDelete = hasPermString(myFlags, "delete_servers");
   const avatarSrc = mirroredAvatarUrl(
     "servers",
     server.server_id,
     server.avatar ||
       `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=64&background=random`,
   );
+
+  function go(href: string) {
+    setMenuOpen(false);
+    router.push(href);
+  }
 
   return (
     <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
@@ -839,8 +713,10 @@ function ServerItem({
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-3 mt-auto text-xs text-zinc-500 dark:text-zinc-400">
-        <span>{formatCount(server.approximate_votes)} votes</span>
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="whitespace-nowrap">
+          {formatCountLabel(server.approximate_votes, "vote")}
+        </span>
         <div className="flex items-center gap-2">
           <Link
             href={`/servers/${server.vanity || server.server_id}`}
@@ -853,11 +729,11 @@ function ServerItem({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setEditing(true)}
+              onClick={() => router.push(manageHref)}
               className="px-2 text-xs h-7"
             >
-              <Pencil size={12} />
-              Edit
+              <Settings size={12} />
+              Manage
             </Button>
           )}
           <Dropdown
@@ -879,112 +755,64 @@ function ServerItem({
               (server.type === "approved" || server.type === "certified") && (
                 <DropdownItem
                   icon={<Sparkles size={14} />}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    router.push(`/premium?server=${server.server_id}`);
-                  }}
+                  onClick={() => go(`/premium?server=${server.server_id}`)}
                 >
                   Upgrade
                 </DropdownItem>
               )}
             <DropdownItem
               icon={<ShoppingBag size={14} />}
-              onClick={() => {
-                setMenuOpen(false);
-                router.push(`/shop?server=${server.server_id}`);
-              }}
+              onClick={() => go(`/shop?server=${server.server_id}`)}
             >
               Shop
             </DropdownItem>
-            <DropdownItem
-              icon={<BarChart2 size={14} />}
-              onClick={() => {
-                setMenuOpen(false);
-                setViewingStats(true);
-              }}
-            >
-              Stats
-            </DropdownItem>
-            {canSeeTokens && (
-              <DropdownItem
-                icon={<KeyRound size={14} />}
-                onClick={() => {
-                  setMenuOpen(false);
-                  setViewingTokens(true);
-                }}
-              >
-                Tokens
-              </DropdownItem>
-            )}
-            {canSeeWebhooks && (
-              <DropdownItem
-                icon={<WebhookIcon size={14} />}
-                onClick={() => {
-                  setMenuOpen(false);
-                  setViewingWebhooks(true);
-                }}
-              >
-                Webhooks
-              </DropdownItem>
+            {canManage && (
+              <>
+                <DropdownItem
+                  icon={<BarChart2 size={14} />}
+                  onClick={() => go(`${manageHref}?section=stats`)}
+                >
+                  Statistics
+                </DropdownItem>
+                {canSeeTokens && (
+                  <DropdownItem
+                    icon={<KeyRound size={14} />}
+                    onClick={() => go(`${manageHref}?section=sessions`)}
+                  >
+                    API sessions
+                  </DropdownItem>
+                )}
+                {canSeeWebhooks && (
+                  <DropdownItem
+                    icon={<WebhookIcon size={14} />}
+                    onClick={() => go(`${manageHref}?section=webhooks`)}
+                  >
+                    Webhooks
+                  </DropdownItem>
+                )}
+                {canDelete && (
+                  <DropdownItem
+                    icon={<Trash2 size={14} />}
+                    danger
+                    onClick={() => go(`${manageHref}?section=danger`)}
+                  >
+                    Delete
+                  </DropdownItem>
+                )}
+              </>
             )}
           </Dropdown>
         </div>
       </div>
-
-      {editing && (
-        <ServerEditModal
-          serverId={server.server_id}
-          userId={userId}
-          token={token}
-          onClose={() => setEditing(false)}
-          onSaved={mutate}
-        />
-      )}
-
-      {viewingStats && (
-        <ServerStatsModal
-          serverId={server.server_id}
-          onClose={() => setViewingStats(false)}
-        />
-      )}
-
-      {viewingTokens && (
-        <TokenModal
-          title="Server API Tokens"
-          targetType="server"
-          targetId={server.server_id}
-          authToken={token}
-          myPerms={myFlags}
-          onClose={() => setViewingTokens(false)}
-        />
-      )}
-
-      {viewingWebhooks && (
-        <WebhookModal
-          title="Server Webhooks"
-          targetType="server"
-          targetId={server.server_id}
-          authToken={token}
-          canManage={canManageWebhooks}
-          canViewLogs={canViewWebhookLogs}
-          onClose={() => setViewingWebhooks(false)}
-        />
-      )}
     </div>
   );
 }
 
-function ServersTab({
-  teamServers,
-  userId,
-  token,
-  mutate,
-}: {
-  teamServers: TeamServer[];
-  userId: string;
-  token: string;
-  mutate: () => void;
-}) {
+function ServersTab({ teamServers }: { teamServers: TeamServer[] }) {
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<ListingSort>("votes");
+  const [status, setStatus] = useState<StatusFilter>("all");
+
   if (teamServers.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -996,7 +824,7 @@ function ServersTab({
           You don&apos;t have access to any listed servers yet.
         </p>
         <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
-          Servers are owned by teams — add one to create a team automatically.
+          Servers are owned by teams. Add one to create a team automatically.
         </p>
         <Link href="/servers/add" className="mt-4">
           <Button variant="secondary" size="sm">
@@ -1009,9 +837,9 @@ function ServersTab({
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {teamServers.length} {teamServers.length === 1 ? "server" : "servers"}
+          {formatCountLabel(teamServers.length, "server")}
         </p>
         <Link href="/servers/add">
           <Button variant="secondary" size="sm">
@@ -1019,30 +847,65 @@ function ServersTab({
           </Button>
         </Link>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {teamServers.map(({ server, team, canManage, myFlags }) => (
-          <ServerItem
-            key={server.server_id}
-            server={server}
-            team={team}
-            canManage={canManage}
-            myFlags={myFlags}
-            userId={userId}
-            token={token}
-            mutate={mutate}
-          />
-        ))}
+      <ListingFilters
+        query={query}
+        onQuery={setQuery}
+        placeholder="Search your servers by name, ID or team"
+        sort={sort}
+        onSort={setSort}
+        status={status}
+        onStatus={setStatus}
+        statusCounts={{
+          all: teamServers.length,
+          live: teamServers.filter((e) => matchesStatus(e.server.type, "live"))
+            .length,
+          review: teamServers.filter((e) =>
+            matchesStatus(e.server.type, "review"),
+          ).length,
+          denied: teamServers.filter((e) =>
+            matchesStatus(e.server.type, "denied"),
+          ).length,
+        }}
+      />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {teamServers
+          .filter((e) => matchesStatus(e.server.type, status))
+          .filter((e) => {
+            const needle = query.trim().toLowerCase();
+            return (
+              !needle ||
+              e.server.name.toLowerCase().includes(needle) ||
+              e.server.server_id.includes(needle) ||
+              e.team.name.toLowerCase().includes(needle)
+            );
+          })
+          .sort((a, b) =>
+            sort === "name"
+              ? a.server.name.localeCompare(b.server.name)
+              : sort === "votes"
+                ? b.server.approximate_votes - a.server.approximate_votes
+                : 0,
+          )
+          .map(({ server, team, canManage, myFlags }) => (
+            <ServerItem
+              key={server.server_id}
+              server={server}
+              team={team}
+              canManage={canManage}
+              myFlags={myFlags}
+            />
+          ))}
       </div>
     </div>
   );
 }
 
-function TeamsTab({ teams }: { teams: Team[] }) {
+function TeamsTab({ teams, userId }: { teams: Team[]; userId: string }) {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {teams.length} {teams.length === 1 ? "team" : "teams"}
+          {formatCountLabel(teams.length, "team")}
         </p>
         <Link href="/teams/add">
           <Button variant="secondary" size="sm">
@@ -1059,30 +922,102 @@ function TeamsTab({ teams }: { teams: Team[] }) {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {teams.map((team) => (
-            <TeamCard key={team.id} team={team} />
-          ))}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {teams.map((team) => {
+            const members = team.entities?.members ?? [];
+            const myFlags =
+              members.find((m) => m.user?.id === userId)?.flags ?? [];
+            const isOwner = hasPermString(myFlags, "owner");
+            return (
+              <div
+                key={team.id}
+                className="flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar
+                    src={teamAvatarUrl(team.id, team.asset_versions?.avatar)}
+                    alt={team.name}
+                    size={40}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/teams/${team.vanity || team.id}`}
+                      className="block truncate font-semibold text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50"
+                    >
+                      {team.name}
+                    </Link>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {isOwner ? "Owner" : "Member"}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {[
+                    formatCountLabel(members.length, "member"),
+                    formatCountLabel(team.entities?.bots?.length ?? 0, "bot"),
+                    formatCountLabel(
+                      team.entities?.servers?.length ?? 0,
+                      "server",
+                    ),
+                  ].join(" · ")}
+                </p>
+                <div className="mt-3 flex gap-4 border-t border-zinc-100 pt-3 text-sm dark:border-zinc-800">
+                  <Link
+                    href={`/teams/${team.vanity || team.id}`}
+                    className="text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
+                  >
+                    View
+                  </Link>
+                  <Link
+                    href={`/teams/${team.id}/settings`}
+                    className="text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
+                  >
+                    Settings
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
-const TABS: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-  { key: "overview", label: "Overview", icon: LayoutDashboard },
-  { key: "profile", label: "Edit Profile", icon: User },
-  { key: "bots", label: "Bots", icon: Bot },
-  { key: "servers", label: "Servers", icon: ServerIcon },
-  { key: "packs", label: "Packs", icon: Package },
-  { key: "templates", label: "Templates", icon: LayoutTemplate },
-  { key: "themes", label: "Themes", icon: Palette },
-  { key: "applications", label: "Applications", icon: ClipboardList },
-  { key: "teams", label: "Teams", icon: Users },
-  { key: "tokens", label: "API Tokens", icon: KeyRound },
-  { key: "notifications", label: "Notifications", icon: Bell },
-  { key: "security", label: "Security", icon: ShieldCheck },
+const NAV_GROUPS: {
+  label: string;
+  items: { key: Tab; label: string; icon: typeof LayoutDashboard }[];
+}[] = [
+  {
+    label: "Account",
+    items: [
+      { key: "overview", label: "Overview", icon: LayoutDashboard },
+      { key: "profile", label: "Profile", icon: User },
+      { key: "notifications", label: "Notifications", icon: Bell },
+      { key: "security", label: "Security", icon: ShieldCheck },
+      { key: "sessions", label: "Sessions", icon: KeyRound },
+    ],
+  },
+  {
+    label: "Listings",
+    items: [
+      { key: "bots", label: "Bots", icon: Bot },
+      { key: "servers", label: "Servers", icon: ServerIcon },
+      { key: "packs", label: "Packs", icon: Package },
+      { key: "templates", label: "Templates", icon: LayoutTemplate },
+      { key: "themes", label: "Themes", icon: Palette },
+      { key: "teams", label: "Teams", icon: Users },
+    ],
+  },
+  {
+    label: "Activity",
+    items: [
+      { key: "applications", label: "Applications", icon: ClipboardList },
+    ],
+  },
 ];
+
+const TABS = NAV_GROUPS.flatMap((g) => g.items);
 
 const VALID_TABS = new Set(TABS.map((t) => t.key));
 
@@ -1098,12 +1033,21 @@ function DashboardPageInner() {
   const { session, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<Tab>(() => {
-    const requested = searchParams.get("tab");
-    return requested && VALID_TABS.has(requested as Tab)
-      ? (requested as Tab)
+  const rawTab = searchParams.get("tab");
+  const requestedTab = rawTab === "tokens" ? "sessions" : rawTab;
+  const tab: Tab =
+    requestedTab && VALID_TABS.has(requestedTab as Tab)
+      ? (requestedTab as Tab)
       : "overview";
-  });
+  const setTab = (next: Tab) => {
+    router.replace(
+      next === "overview" ? "/dashboard" : `/dashboard?tab=${next}`,
+      {
+        scroll: false,
+      },
+    );
+    window.scrollTo({ top: 0 });
+  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -1157,188 +1101,173 @@ function DashboardPageInner() {
   // Bots owned by teams the user belongs to, alongside directly-owned bots.
   // Each team's `entities.bots` is already resolved by the API; we just need
   // to figure out whether the current user can manage them.
+  const seenBots = new Set(normalizedMe.user_bots.map((b) => b.bot_id));
   const teamBots: TeamBot[] = normalizedMe.user_teams.flatMap((team) => {
     const myFlags =
       team.entities?.members?.find((m) => m.user?.id === session.user_id)
         ?.flags ?? [];
     const canManage = hasPermString(myFlags, "edit_bots");
-    return (team.entities?.bots ?? []).map((bot) => ({
-      bot,
-      team,
-      canManage,
-      myFlags,
-    }));
+    return (team.entities?.bots ?? [])
+      .filter((bot) => {
+        if (seenBots.has(bot.bot_id)) return false;
+        seenBots.add(bot.bot_id);
+        return true;
+      })
+      .map((bot) => ({
+        bot,
+        team,
+        canManage,
+        myFlags,
+      }));
   });
 
   // Servers are always team-owned (no direct-ownership equivalent to a
   // bot's `owner` field), so this is the only source of listed servers.
+  const seenServers = new Set<string>();
   const teamServers: TeamServer[] = normalizedMe.user_teams.flatMap((team) => {
     const myFlags =
       team.entities?.members?.find((m) => m.user?.id === session.user_id)
         ?.flags ?? [];
     const canManage = hasPermString(myFlags, "edit_servers");
-    return (team.entities?.servers ?? []).map((server) => ({
-      server,
-      team,
-      canManage,
-      myFlags,
-    }));
+    return (team.entities?.servers ?? [])
+      .filter((server) => {
+        if (seenServers.has(server.server_id)) return false;
+        seenServers.add(server.server_id);
+        return true;
+      })
+      .map((server) => ({
+        server,
+        team,
+        canManage,
+        myFlags,
+      }));
   });
+
+  const counts: Partial<Record<Tab, number>> = {
+    bots: normalizedMe.user_bots.length + teamBots.length,
+    servers: teamServers.length,
+    packs: normalizedMe.user_packs.length,
+    templates: myTemplates.length,
+    themes: myThemes.length,
+    applications: myApplications.length,
+    teams: normalizedMe.user_teams.length,
+  };
+  const navGroups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.map((item) => ({ ...item, count: counts[item.key] })),
+  }));
+  const activeLabel = TABS.find((t) => t.key === tab)?.label ?? "Overview";
 
   return (
     <Container className="py-10">
-      {/* Profile header */}
-      <div className="flex items-start gap-4 mb-8">
-        <Avatar
-          src={mirroredAvatarUrl("users", session.user_id, avatar)}
-          alt={username}
-          size={64}
-        />
-        <div>
-          <h1 className="min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
-            {displayName}
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            @{username}
-          </p>
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {normalizedMe.staff && <Badge variant="info">Staff</Badge>}
-            {normalizedMe.certified && (
-              <Badge variant="success">Certified Dev</Badge>
-            )}
-            {normalizedMe.bot_developer && <Badge>Bot Developer</Badge>}
-            {normalizedMe.bug_hunters && (
-              <Badge variant="danger">Bug Hunter</Badge>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Tab bar */}
-      <div className="mb-10 overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex flex-nowrap items-center gap-4">
-          {TABS.map(({ key, label, icon: Icon }) => {
-            const count =
-              key === "bots"
-                ? normalizedMe.user_bots.length + teamBots.length
-                : key === "servers"
-                  ? teamServers.length
-                  : key === "packs"
-                    ? normalizedMe.user_packs.length
-                    : key === "templates"
-                      ? myTemplates.length
-                      : key === "themes"
-                        ? myThemes.length
-                        : key === "applications"
-                          ? myApplications.length
-                          : key === "teams"
-                            ? normalizedMe.user_teams.length
-                            : null;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setTab(key)}
-                className={[
-                  "relative -mb-px flex shrink-0 items-center gap-2 border-b-2 px-1 pb-4 pt-3 text-sm font-medium transition-colors",
-                  tab === key
-                    ? "border-accent text-accent"
-                    : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
-                ].join(" ")}
+      <div className="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <Avatar
+              src={mirroredAvatarUrl("users", session.user_id, avatar)}
+              alt={username}
+              size={40}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                {displayName}
+              </p>
+              <Link
+                href={`/user/${session.user_id}`}
+                className="inline-flex items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
               >
-                <Icon size={14} />
-                {label}
-                {count !== null && count > 0 && (
-                  <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-xs dark:bg-zinc-800">
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                View profile <ArrowUpRight size={11} />
+              </Link>
+            </div>
+          </div>
+          <DashboardNav groups={navGroups} active={tab} onSelect={setTab} />
+        </aside>
+
+        <div className="min-w-0">
+          <h1 className="mb-6 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+            {activeLabel}
+          </h1>
+
+          {tab === "overview" && (
+            <OverviewPanel
+              userId={session.user_id}
+              token={session.token}
+              bots={[...normalizedMe.user_bots, ...teamBots.map((t) => t.bot)]}
+              servers={teamServers.map((t) => t.server)}
+              onNavigate={setTab}
+            />
+          )}
+          {tab === "profile" && (
+            <EditProfileTab
+              me={normalizedMe}
+              token={session.token}
+              mutate={mutate}
+            />
+          )}
+          {tab === "bots" && (
+            <BotsTab bots={normalizedMe.user_bots} teamBots={teamBots} />
+          )}
+          {tab === "servers" && <ServersTab teamServers={teamServers} />}
+          {tab === "packs" && (
+            <PacksTab
+              packs={normalizedMe.user_packs}
+              userId={session.user_id}
+              userBots={normalizedMe.user_bots}
+              token={session.token}
+              mutate={mutate}
+            />
+          )}
+          {tab === "templates" && (
+            <TemplatesTab
+              templates={myTemplates}
+              userId={session.user_id}
+              token={session.token}
+              mutate={mutateTemplates}
+            />
+          )}
+          {tab === "themes" && (
+            <ThemesTab
+              themes={myThemes}
+              userId={session.user_id}
+              token={session.token}
+              mutate={mutateThemes}
+            />
+          )}
+          {tab === "applications" && <ApplicationsTab apps={myApplications} />}
+          {tab === "teams" && (
+            <TeamsTab
+              teams={normalizedMe.user_teams}
+              userId={session.user_id}
+            />
+          )}
+          {tab === "sessions" && (
+            <div>
+              <p className="mb-6 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
+                Everything that can act as you: API tokens you&apos;ve created,
+                and the devices you&apos;re signed in on. For a bot or server
+                token, use the Tokens button on that listing in Bots or Servers.
+              </p>
+              <TokenManager
+                targetType="user"
+                targetId={session.user_id}
+                authToken={session.token}
+                myPerms={["owner"]}
+                isSelf
+              />
+            </div>
+          )}
+          {tab === "notifications" && (
+            <NotificationsTab userId={session.user_id} token={session.token} />
+          )}
+          {tab === "security" && (
+            <SecurityTab
+              userId={session.user_id}
+              username={username}
+              token={session.token}
+            />
+          )}
         </div>
       </div>
-
-      {/* Tab content */}
-      {tab === "overview" && <OverviewTab me={normalizedMe} />}
-      {tab === "profile" && (
-        <EditProfileTab
-          me={normalizedMe}
-          token={session.token}
-          mutate={mutate}
-        />
-      )}
-      {tab === "bots" && (
-        <BotsTab
-          bots={normalizedMe.user_bots}
-          teamBots={teamBots}
-          token={session.token}
-          userId={session.user_id}
-          userTeams={normalizedMe.user_teams}
-          mutate={mutate}
-        />
-      )}
-      {tab === "servers" && (
-        <ServersTab
-          teamServers={teamServers}
-          userId={session.user_id}
-          token={session.token}
-          mutate={mutate}
-        />
-      )}
-      {tab === "packs" && (
-        <PacksTab
-          packs={normalizedMe.user_packs}
-          userId={session.user_id}
-          userBots={normalizedMe.user_bots}
-          token={session.token}
-          mutate={mutate}
-        />
-      )}
-      {tab === "templates" && (
-        <TemplatesTab
-          templates={myTemplates}
-          userId={session.user_id}
-          token={session.token}
-          mutate={mutateTemplates}
-        />
-      )}
-      {tab === "themes" && (
-        <ThemesTab
-          themes={myThemes}
-          userId={session.user_id}
-          token={session.token}
-          mutate={mutateThemes}
-        />
-      )}
-      {tab === "applications" && <ApplicationsTab apps={myApplications} />}
-      {tab === "teams" && <TeamsTab teams={normalizedMe.user_teams} />}
-      {tab === "tokens" && (
-        <div>
-          <p className="mb-6 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
-            Personal API tokens act as you across every endpoint. Bot- and
-            server-scoped tokens can be managed from each listing&apos;s
-            &quot;Tokens&quot; button on the Bots/Servers tabs.
-          </p>
-          <TokenManager
-            targetType="user"
-            targetId={session.user_id}
-            authToken={session.token}
-            myPerms={["owner"]}
-            isSelf
-          />
-        </div>
-      )}
-      {tab === "notifications" && (
-        <NotificationsTab userId={session.user_id} token={session.token} />
-      )}
-      {tab === "security" && (
-        <SecurityTab
-          userId={session.user_id}
-          username={username}
-          token={session.token}
-        />
-      )}
     </Container>
   );
 }

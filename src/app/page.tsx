@@ -1,19 +1,40 @@
 import { ArrowRight, BookOpen, Handshake, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { PackCard } from "@/components/cards/PackCard";
+import { ActivityStrip } from "@/components/home/ActivityStrip";
 import { HomeTabs } from "@/components/home/HomeTabs";
 import { PartnersMarquee } from "@/components/home/PartnersMarquee";
 import { RotatingWord } from "@/components/home/RotatingWord";
-import { StatsBar } from "@/components/home/StatsBar";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { SearchBar } from "@/components/search/SearchBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { blogs, bots, list, servers } from "@/lib/api";
-import type { Blog, ListStats, PartnerList } from "@/lib/api/types";
+import { blogs, bots, list, servers, votes } from "@/lib/api";
+import type {
+  Blog,
+  BotWithCommands,
+  IndexBot,
+  ListStats,
+  PartnerList,
+  RecentChangelogBot,
+  VoterLeaderboardEntry,
+} from "@/lib/api/types";
 import { COLLECTIONS } from "@/lib/constants/collections";
-import { formatRelativeTime } from "@/lib/utils/format";
+import { mirroredAvatarUrl } from "@/lib/utils/assets";
+import { formatCount, formatRelativeTime } from "@/lib/utils/format";
+import { totalListedBots } from "@/lib/utils/stats";
+
+const POPULAR_TAGS = [
+  "Moderation",
+  "Music",
+  "Economy",
+  "Fun",
+  "Games",
+  "Leveling",
+  "Utility",
+  "Anti-Raid",
+];
 
 export default async function HomePage() {
   let botIndex = null;
@@ -21,17 +42,26 @@ export default async function HomePage() {
   let stats: ListStats | null = null;
   let partnerList: PartnerList | null = null;
   let blogData: Blog | null = null;
+  let recentBots: RecentChangelogBot[] | null = null;
+  let topVoters: VoterLeaderboardEntry[] | null = null;
+  let commandBots: BotWithCommands[] | null = null;
 
   const extras = Promise.allSettled([
     list.getStats(),
     list.getPartners(),
     blogs.getAll(),
+    bots.getRecentChangelogBots(),
+    votes.getLeaderboard(3, "month"),
+    bots.getCommandBots(),
   ]).then(
     (results) =>
       results.map((r) => (r.status === "fulfilled" ? r.value : null)) as [
         ListStats | null,
         PartnerList | null,
         Blog | null,
+        RecentChangelogBot[] | null,
+        VoterLeaderboardEntry[] | null,
+        BotWithCommands[] | null,
       ],
   );
 
@@ -40,7 +70,8 @@ export default async function HomePage() {
       bots.getIndex(),
       servers.getIndex(),
     ]);
-    [stats, partnerList, blogData] = await extras;
+    [stats, partnerList, blogData, recentBots, topVoters, commandBots] =
+      await extras;
   } catch (err) {
     // Any error from the index endpoints — including 500 DB failures — means
     // the service is unavailable. Show the unavailable UI regardless of status.
@@ -68,18 +99,31 @@ export default async function HomePage() {
     },
   ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
+  const shownBotIds = new Set(
+    (botIndex?.top_voted ?? []).slice(0, 9).map((b) => b.bot_id),
+  );
+  const shownServerIds = new Set(
+    (serverIndex?.top_voted ?? []).slice(0, 9).map((s) => s.server_id),
+  );
+
   const highlightsTabs = [
     {
       key: "certified",
       label: "Certified",
-      bots: botIndex?.certified ?? [],
-      servers: serverIndex?.certified ?? [],
+      bots: (botIndex?.certified ?? []).filter(
+        (b) => !shownBotIds.has(b.bot_id),
+      ),
+      servers: (serverIndex?.certified ?? []).filter(
+        (s) => !shownServerIds.has(s.server_id),
+      ),
     },
     {
       key: "premium",
       label: "Premium",
-      bots: botIndex?.premium ?? [],
-      servers: serverIndex?.premium ?? [],
+      bots: (botIndex?.premium ?? []).filter((b) => !shownBotIds.has(b.bot_id)),
+      servers: (serverIndex?.premium ?? []).filter(
+        (s) => !shownServerIds.has(s.server_id),
+      ),
     },
   ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
@@ -101,6 +145,48 @@ export default async function HomePage() {
     },
   ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
+  const indexBots = new Map<string, IndexBot>();
+  for (const group of [
+    botIndex?.top_voted,
+    botIndex?.certified,
+    botIndex?.most_viewed,
+    botIndex?.premium,
+    botIndex?.recently_added,
+  ]) {
+    for (const bot of group ?? []) {
+      if (!bot.nsfw) indexBots.set(bot.bot_id, bot);
+    }
+  }
+  const collectionPreviews = COLLECTIONS.slice(0, 4).map((collection) => ({
+    collection,
+    bots: [...indexBots.values()]
+      .filter((b) =>
+        (b.tags ?? []).some(
+          (t) => t.toLowerCase() === collection.tag.toLowerCase(),
+        ),
+      )
+      .sort((a, b) => b.approximate_votes - a.approximate_votes)
+      .slice(0, 3),
+  }));
+
+  const listedBots = stats ? totalListedBots(stats) : 0;
+  const listedServers = stats
+    ? stats.total_approved_servers + stats.total_certified_servers
+    : 0;
+  const heroStats = stats
+    ? [
+        { label: "Bots", value: listedBots },
+        { label: "Servers", value: listedServers },
+        { label: "Votes cast", value: stats.total_votes },
+        { label: "Packs", value: stats.total_packs },
+      ].filter((stat) => stat.value > 0)
+    : [];
+
+  const hasActivity =
+    (recentBots?.length ?? 0) > 0 ||
+    (topVoters?.length ?? 0) > 0 ||
+    (commandBots?.length ?? 0) > 0;
+
   const packs = botIndex?.packs ?? [];
   const recentPosts = (blogData?.posts ?? [])
     .filter((p) => !p.draft)
@@ -121,8 +207,10 @@ export default async function HomePage() {
               />
             </h1>
             <p className="mt-4 text-lg text-zinc-500 dark:text-zinc-400">
-              Explore thousands of bots and servers. Vote, review, and find
-              exactly what your server needs.
+              {listedBots + listedServers > 0
+                ? `Explore ${formatCount(listedBots + listedServers)} bots and servers.`
+                : "Explore Discord bots and servers."}{" "}
+              Vote, review, and find exactly what your server needs.
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <SearchBar
@@ -137,6 +225,31 @@ export default async function HomePage() {
                 Browse all <ArrowRight size={14} />
               </Link>
             </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {POPULAR_TAGS.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/tags/${encodeURIComponent(tag)}`}
+                  className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+            {heroStats.length > 0 && (
+              <dl className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4">
+                {heroStats.map((stat) => (
+                  <div key={stat.label} className="flex flex-col items-center">
+                    <dt className="order-2 mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                      {stat.label}
+                    </dt>
+                    <dd className="order-1 text-2xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
+                      {formatCount(stat.value)}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </div>
         </Container>
       </section>
@@ -178,7 +291,7 @@ export default async function HomePage() {
               Hand-picked by our staff, bots and servers alike
             </p>
             <div className="mt-6">
-              <HomeTabs tabs={spotlightTabs} />
+              <HomeTabs tabs={spotlightTabs} centerLastRow />
             </div>
           </Container>
         </section>
@@ -210,16 +323,34 @@ export default async function HomePage() {
             href="/collections"
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {COLLECTIONS.slice(0, 4).map((collection) => (
+            {collectionPreviews.map(({ collection, bots: previewBots }) => (
               <Link
                 key={collection.slug}
                 href={`/tags/${encodeURIComponent(collection.tag)}`}
                 className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
               >
-                <Sparkles
-                  size={16}
-                  className="text-accent transition-transform group-hover:scale-110"
-                />
+                {previewBots.length > 0 ? (
+                  <div className="flex -space-x-2">
+                    {previewBots.map((bot) => (
+                      <Avatar
+                        key={bot.bot_id}
+                        src={mirroredAvatarUrl(
+                          "bots",
+                          bot.bot_id,
+                          bot.user.avatar,
+                        )}
+                        alt={bot.user.username}
+                        size={32}
+                        className="ring-2 ring-white dark:ring-zinc-900"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Sparkles
+                    size={16}
+                    className="text-accent transition-transform group-hover:scale-110"
+                  />
+                )}
                 <h3 className="mt-3 font-semibold text-zinc-950 dark:text-zinc-50">
                   {collection.title}
                 </h3>
@@ -231,6 +362,27 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
+
+      {hasActivity && (
+        <section className="border-t border-zinc-200 py-14 dark:border-zinc-800">
+          <Container>
+            <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+              Happening on Omniplex
+            </h2>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              Fresh updates, the most active voters, and every bot&apos;s
+              commands in one place
+            </p>
+            <div className="mt-6">
+              <ActivityStrip
+                recentBots={recentBots ?? []}
+                topVoters={topVoters ?? []}
+                commandBots={commandBots ?? []}
+              />
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Packs (bot, server, or emoji) */}
       {packs.length > 0 && (

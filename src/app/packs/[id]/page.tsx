@@ -21,10 +21,12 @@ import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { packs } from "@/lib/api";
+import { shortLinkUrl } from "@/lib/shortLinks";
 import { packEmojiUrl, packStickerUrl } from "@/lib/utils/assets";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
 import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 import { getPackWidgetStats } from "@/lib/widget/shared";
 import { PackVoteButton } from "./PackVoteButton";
@@ -71,7 +73,8 @@ export default async function PackPage({ params }: Props) {
     pack = await packs.getPack(id);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!pack) notFound();
 
@@ -143,6 +146,8 @@ export default async function PackPage({ params }: Props) {
       )}
     </div>
   );
+
+  const shortLink = shortLinkUrl(pack.url);
 
   return (
     <Container className="py-10">
@@ -270,6 +275,7 @@ export default async function PackPage({ params }: Props) {
               targetId={pack.url}
               targetLabel="pack"
             />
+            {shortLink && <ShortLinkButton url={shortLink} />}
           </div>
 
           {/* Bots in this pack */}

@@ -10,7 +10,7 @@ import { Modal } from "@/components/ui/Modal";
 import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
 import { packs } from "@/lib/api";
 import type { BotPack, IndexBot } from "@/lib/api/types";
-import { formatCount } from "@/lib/utils/format";
+import { formatCountLabel } from "@/lib/utils/format";
 import { EmojiStickerPackEditModal } from "./EmojiStickerPackEditModal";
 import { PackEditModal } from "./PackEditModal";
 
@@ -94,8 +94,10 @@ function PackItem({
         </div>
       )}
 
-      <div className="mt-auto flex items-center justify-between pt-3 text-xs text-zinc-500 dark:text-zinc-400">
-        <span>{formatCount(pack.votes)} votes</span>
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="whitespace-nowrap">
+          {formatCountLabel(pack.votes, "vote")}
+        </span>
         <div className="flex items-center gap-2">
           <Link
             href={`/packs/${pack.url}`}
@@ -212,7 +214,7 @@ export function PacksTab({
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {packList.map((pack) => (
             <PackItem
               key={pack.url}

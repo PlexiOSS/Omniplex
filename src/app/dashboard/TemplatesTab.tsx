@@ -57,7 +57,7 @@ function TemplateItem({
         </div>
       )}
 
-      <div className="mt-auto flex items-center justify-between pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
         <span>{template.usage_count} uses on Discord</span>
         <div className="flex items-center gap-2">
           <Link
@@ -137,7 +137,7 @@ export function TemplatesTab({
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {templates.map((template) => (
             <TemplateItem
               key={template.id}

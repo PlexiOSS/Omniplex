@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { Partner } from "@/lib/api/types";
-import { partnerAvatarUrl } from "@/lib/utils/assets";
+import { partnerLogoUrl } from "@/lib/utils/assets";
 
 interface PartnersMarqueeProps {
   partners: Partner[];
@@ -33,7 +33,7 @@ function PartnerCard({
       tabIndex={hidden ? -1 : undefined}
       className="group flex shrink-0 items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
     >
-      <Avatar src={partnerAvatarUrl(partner.id)} alt={partner.name} size={28} />
+      <Avatar src={partnerLogoUrl(partner)} alt={partner.name} size={28} />
       <span className="text-sm font-medium whitespace-nowrap text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
         {partner.name}
       </span>

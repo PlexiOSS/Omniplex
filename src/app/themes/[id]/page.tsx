@@ -8,7 +8,7 @@ import { CopyColorButton } from "@/components/themes/CopyColorButton";
 import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
 import { Avatar } from "@/components/ui/Avatar";
 import { themes } from "@/lib/api";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 interface Props {
@@ -32,7 +32,8 @@ export default async function ThemePage({ params }: Props) {
     theme = await themes.getById(id);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!theme) notFound();
 

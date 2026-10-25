@@ -8,7 +8,10 @@ import { useAppMeta } from "@/hooks/useApplications";
 import type { AppResponse, AppState } from "@/lib/api/types";
 import { formatRelativeTime } from "@/lib/utils/format";
 
-const STATE_BADGE: Record<AppState, { label: string; variant: "warning" | "success" | "danger" }> = {
+const STATE_BADGE: Record<
+  AppState,
+  { label: string; variant: "warning" | "success" | "danger" }
+> = {
   pending: { label: "Pending", variant: "warning" },
   approved: { label: "Approved", variant: "success" },
   denied: { label: "Denied", variant: "danger" },
@@ -65,7 +68,7 @@ export function ApplicationsTab({ apps }: { apps: AppResponse[] }) {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {apps
             .slice()
             .sort(

@@ -14,6 +14,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { SearchPalette } from "@/components/search/SearchPalette";
 import { Avatar } from "@/components/ui/Avatar";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
@@ -153,12 +154,16 @@ export function Header() {
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
+  const [mobileCustomizeOpen, setMobileCustomizeOpen] = useState(false);
 
   const isAdminSection =
     pathname.startsWith("/admin") &&
     pathname !== "/admin/login" &&
     !pathname.startsWith("/admin/auth");
   const links = isAdminSection ? ADMIN_NAV_LINKS : NAV_LINKS;
+  const mobileLinks: (NavLink | NavGroup)[] = isAdminSection
+    ? links
+    : [...links, { label: "Create", items: CREATE_LINKS }];
   const isActiveLink = (href: string) => {
     if (isAdminSection) return pathname === href;
     if (href === "/") return pathname === "/";
@@ -232,7 +237,13 @@ export function Header() {
             <div className="flex items-center gap-1">
               {/* Create menu */}
               {!isAdminSection && (
-                <NavGroupMenu label="Create" icon={Plus} items={CREATE_LINKS} />
+                <div className="hidden md:block">
+                  <NavGroupMenu
+                    label="Create"
+                    icon={Plus}
+                    items={CREATE_LINKS}
+                  />
+                </div>
               )}
 
               {/* Social links */}
@@ -262,7 +273,7 @@ export function Header() {
                 type="button"
                 onClick={() => setMobileNavOpen((o) => !o)}
                 className={[
-                  "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:hidden",
+                  "order-last flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:order-none md:hidden",
                   mobileNavOpen
                     ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
                     : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
@@ -279,7 +290,7 @@ export function Header() {
                   type="button"
                   onClick={() => setCustomizeOpen((o) => !o)}
                   className={[
-                    "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+                    "hidden h-9 w-9 items-center justify-center rounded-lg transition-colors md:flex",
                     customizeOpen
                       ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
                       : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
@@ -294,9 +305,13 @@ export function Header() {
                 />
               </div>
 
+              {!isAdminSection && <SearchPalette />}
+
               <NotificationBell />
 
-              <ThemeToggle />
+              <div className="hidden md:block">
+                <ThemeToggle />
+              </div>
 
               {isAuthenticated && session ? (
                 <div className="hidden ml-1 md:block">
@@ -319,7 +334,7 @@ export function Header() {
         {mobileNavOpen && (
           <nav className="border-t border-zinc-200 md:hidden dark:border-zinc-800">
             <Container className="flex flex-col gap-1 py-3">
-              {links.map((item) =>
+              {mobileLinks.map((item) =>
                 isNavGroup(item) ? (
                   <div
                     key={item.label}
@@ -382,6 +397,40 @@ export function Header() {
                     {item.label}
                   </Link>
                 ),
+              )}
+              <div className="flex items-center justify-between gap-2 px-3 pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setMobileCustomizeOpen((o) => !o)}
+                  aria-expanded={mobileCustomizeOpen}
+                  className={[
+                    "flex items-center gap-2 text-sm font-medium transition-colors",
+                    mobileCustomizeOpen
+                      ? "text-accent"
+                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
+                  ].join(" ")}
+                >
+                  <Settings2 size={16} />
+                  Customize
+                  <ChevronDown
+                    size={14}
+                    className={
+                      mobileCustomizeOpen
+                        ? "rotate-180 transition-transform"
+                        : "transition-transform"
+                    }
+                  />
+                </button>
+                <ThemeToggle />
+              </div>
+              {mobileCustomizeOpen && (
+                <div className="-mx-2">
+                  <CustomizationPanel
+                    inline
+                    open
+                    onClose={() => setMobileCustomizeOpen(false)}
+                  />
+                </div>
               )}
               {isAuthenticated && session ? (
                 <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">

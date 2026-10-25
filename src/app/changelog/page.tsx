@@ -4,6 +4,7 @@ import { ChangelogList } from "@/components/changelog/ChangelogList";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { changelogs } from "@/lib/api";
+import type { ChangelogProject } from "@/lib/api/types";
 import { isApiUnavailable } from "@/lib/utils/errors";
 
 export const metadata: Metadata = {
@@ -16,12 +17,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ChangelogPage() {
-  let entries: Awaited<ReturnType<typeof changelogs.getAll>>["entries"] = [];
+const PROJECTS: ChangelogProject[] = ["popplio", "omniplex", "keel"];
+
+interface Props {
+  searchParams: Promise<{ project?: string }>;
+}
+
+export default async function ChangelogPage({ searchParams }: Props) {
+  const { project } = await searchParams;
+  const activeProject = PROJECTS.includes(project as ChangelogProject)
+    ? (project as ChangelogProject)
+    : null;
+
+  let entries: Awaited<ReturnType<typeof changelogs.getAll>>["entries"];
   try {
     entries = (await changelogs.getAll()).entries;
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable />;
+    throw err;
   }
 
   return (
@@ -44,7 +57,7 @@ export default async function ChangelogPage() {
         </a>
       </div>
 
-      <ChangelogList entries={entries} />
+      <ChangelogList entries={entries} activeProject={activeProject} />
     </Container>
   );
 }

@@ -57,7 +57,7 @@ export function StickerPackBuilder({
         continue;
       }
       if (file.size > MAX_BYTES) {
-        setError(`${file.name}: too large — 256KB max per sticker.`);
+        setError(`${file.name}: too large, 256KB max per sticker.`);
         continue;
       }
 

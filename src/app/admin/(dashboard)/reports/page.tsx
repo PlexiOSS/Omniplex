@@ -73,7 +73,7 @@ export default function ReportsAdminPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Reports"
-        description="User-filed reports against bots, servers and packs — license violations, ToS violations, spam, and anything else that needs a look."
+        description="User-filed reports against bots, servers and packs: license violations, ToS violations, spam, and anything else that needs a look."
       />
 
       <div className="mt-6 flex flex-wrap gap-1.5">
@@ -128,7 +128,7 @@ export default function ReportsAdminPage() {
                   </Badge>
                 </div>
                 <p className="mt-1 line-clamp-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  {REASON_LABELS[report.reason]} — {report.description}
+                  {REASON_LABELS[report.reason]}: {report.description}
                 </p>
               </div>
               <span className="shrink-0 text-xs text-zinc-400 dark:text-zinc-600">

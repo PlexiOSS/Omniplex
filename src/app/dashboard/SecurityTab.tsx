@@ -149,7 +149,7 @@ export function SecurityTab({ userId, username, token }: SecurityTabProps) {
         <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
           Get a copy of your account, team, and activity data as JSON. This
           currently covers your account, teams, votes, reviews, tickets, alerts,
-          and reminders it doesn't yet include shop purchase history for
+          and reminders. It doesn't yet include shop purchase history for
           listings you own, since that's tracked against the listing rather than
           your account.
         </p>
@@ -236,7 +236,7 @@ export function SecurityTab({ userId, username, token }: SecurityTabProps) {
         <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
           Permanently delete your Omniplex account. This removes your account
           and everything tied to it that we're able to identify as yours. It
-          doesn't remove bots or servers owned by a team you're part of those
+          doesn't remove bots or servers owned by a team you're part of; those
           stay with the team. This can't be undone.
         </p>
 
@@ -250,7 +250,7 @@ export function SecurityTab({ userId, username, token }: SecurityTabProps) {
         {deleting && timedOut && (
           <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
             This is taking longer than usual. Your account may still be deleted
-            shortly — refresh this page to check again.
+            shortly. Refresh this page to check again.
           </p>
         )}
 

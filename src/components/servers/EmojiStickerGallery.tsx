@@ -86,7 +86,7 @@ function EmojiTile({ emoji }: { emoji: ServerEmoji }) {
     <button
       type="button"
       onClick={copy}
-      title={`:${emoji.name}: — click to copy`}
+      title={`:${emoji.name}: (click to copy)`}
       className="group relative flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
     >
       {emoji.animated && (
@@ -124,7 +124,7 @@ function StickerTile({ sticker }: { sticker: ServerSticker }) {
     <button
       type="button"
       onClick={copy}
-      title={`${sticker.name} — click to copy`}
+      title={`${sticker.name} (click to copy)`}
       className="group relative flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent/40 dark:hover:bg-accent/10"
     >
       {isAnimatedSticker(sticker.format) && (

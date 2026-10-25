@@ -4,7 +4,7 @@ description: Every staff permission that exists, grouped by category, and what h
 order: 2
 ---
 
-Permissions are granular each position on the [Staff Hierarchy](/kb/staff/hierarchy) page holds an explicit list of these, except for the four Administrator-level positions, which hold everything. Permissions marked **Dangerous** below are irreversible, hard to undo, or otherwise carry real risk if used carelessly.
+Permissions are granular. Each position on the [Staff Hierarchy](/kb/staff/hierarchy) page holds an explicit list of these, except for the four Administrator-level positions, which hold everything. Permissions marked **Dangerous** below are irreversible, hard to undo, or otherwise carry real risk if used carelessly.
 
 ## Administration
 
@@ -86,7 +86,7 @@ Permissions are granular each position on the [Staff Hierarchy](/kb/staff/hierar
 | Moderate Guild ⚠️ | Kick, ban, and time out members in the community Discord servers, via the staff bot's `/kick`, `/ban`, and `/timeout` commands. |
 | Warn Users | Send a formal warning to a member (DM plus a mod-log entry) via `/warn`, without kicking, banning, or timing them out. |
 
-All four commands refuse to act on a target who is themselves staff at a rank equal to or more senior than the caller's own there is one staff hierarchy (the [Staff Hierarchy](/kb/staff/hierarchy) page), not a separate one for Discord moderation.
+All four commands refuse to act on a target who is themselves staff at a rank equal to or more senior than the caller's own. There is one staff hierarchy (the [Staff Hierarchy](/kb/staff/hierarchy) page), not a separate one for Discord moderation.
 
 ## External Services
 
@@ -97,4 +97,4 @@ All four commands refuse to act on a target who is themselves staff at a rank eq
 
 ## Markers
 
-A handful of permissions carry no power in the panel at all they exist only to label a staff member for other services and role display: **Developer**, **Lead Developer**, **Human Resources**, **Bot Reviewer**, **Service Account**, and **Under Disciplinary**.
+A handful of permissions carry no power in the panel at all. They exist only to label a staff member for other services and role display: **Developer**, **Lead Developer**, **Human Resources**, **Bot Reviewer**, **Service Account**, and **Under Disciplinary**.

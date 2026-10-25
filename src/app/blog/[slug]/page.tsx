@@ -8,7 +8,7 @@ import { Markdown } from "@/components/markdown/Markdown";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { blogs } from "@/lib/api";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 interface Props {
@@ -32,7 +32,8 @@ export default async function BlogPostPage({ params }: Props) {
     post = await blogs.getPost(slug);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!post) notFound();
 

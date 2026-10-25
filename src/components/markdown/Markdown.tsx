@@ -4,6 +4,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
+import { rehypeHeadingIds } from "./rehypeHeadingIds";
 import { rehypeSanitizeStyle } from "./rehypeSanitizeStyle";
 import { markdownSanitizeSchema } from "./sanitizeSchema";
 
@@ -11,6 +12,8 @@ interface MarkdownProps {
   /** Markdown source, optionally containing inline HTML. May also be plain text. */
   content: string;
   className?: string;
+  softBreaks?: boolean;
+  headingIds?: boolean;
 }
 
 /**
@@ -19,15 +22,21 @@ interface MarkdownProps {
  * output can never carry scripts, event handlers, or other injected markup.
  * Pair with the `.prose` styles in globals.css for typography.
  */
-export function Markdown({ content, className }: MarkdownProps) {
+export function Markdown({
+  content,
+  className,
+  softBreaks = true,
+  headingIds = false,
+}: MarkdownProps) {
   return (
     <div className={["prose", className].filter(Boolean).join(" ")}>
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkBreaks]}
+        remarkPlugins={softBreaks ? [remarkGfm, remarkBreaks] : [remarkGfm]}
         rehypePlugins={[
           rehypeRaw,
           [rehypeSanitize, markdownSanitizeSchema],
           rehypeSanitizeStyle,
+          ...(headingIds ? [rehypeHeadingIds] : []),
           [
             rehypeExternalLinks,
             { target: "_blank", rel: ["noopener", "noreferrer"] },

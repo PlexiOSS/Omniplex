@@ -2,6 +2,7 @@
 
 import { Megaphone, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { Markdown } from "@/components/markdown/Markdown";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -118,12 +119,24 @@ export function BotChangelogSection({
                   </button>
                 )}
               </div>
-              <p className="mt-1 whitespace-pre-wrap wrap-anywhere text-sm text-zinc-600 dark:text-zinc-300">
-                {entry.content}
-              </p>
-              <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">
-                {formatRelativeTime(entry.created_at)}
-              </p>
+              <Markdown
+                content={entry.content}
+                softBreaks={false}
+                className="mt-1 text-sm text-zinc-600 dark:text-zinc-300"
+              />
+              <time
+                dateTime={entry.created_at}
+                title={new Date(entry.created_at).toLocaleString()}
+                suppressHydrationWarning
+                className="mt-2 block text-xs text-zinc-400 dark:text-zinc-600"
+              >
+                {new Date(entry.created_at).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                · {formatRelativeTime(entry.created_at)}
+              </time>
             </div>
           ))}
         </div>
@@ -209,14 +222,17 @@ function PostChangelogModal({
             htmlFor="changelog-content"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            What changed
+            What changed{" "}
+            <span className="font-normal text-zinc-400 dark:text-zinc-500">
+              (Markdown and HTML supported)
+            </span>
           </label>
           <textarea
             id="changelog-content"
             rows={6}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="- Added /warn and /mute&#10;- Fixed the welcome message not sending"
+            placeholder="### Added&#10;- `/warn` and `/mute`&#10;&#10;### Fixed&#10;- The welcome message not sending"
             className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
             required
           />

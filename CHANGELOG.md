@@ -7,13 +7,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-25
+
+**The Dashboard Update.** Settings pages for bots, servers and teams, a
+rebuilt dashboard, instant search everywhere, and a refresh of nearly
+every public page.
+
 ### Fixed
 
+- Premium plan cards read "1 month of premium (1 months)", and the page
+  promised "priority placement", which premium doesn't give.
+
+- The dashboard listed a bot or server twice when you could reach it both
+  directly and through a team, or through two teams, which also inflated
+  the Bots count (31 instead of 16) and duplicated entries on Overview.
+- Dashboard bot, server and pack cards said "1 votes", and their footers
+  overflowed in narrower layouts.
+
+- The header overflowed on phones once the search button was added. Below
+  the desktop breakpoint it now shows only search, notifications and the
+  menu button (moved to the far right), and Create, Customize and the theme
+  toggle live in the mobile menu. Customize expands inline inside the menu
+  instead of opening a floating panel over the page.
+
+- The search page said "Browsing everything search or pick a tag…" (another
+  stripped em dash).
+
+- About 80 sentences across the knowledge base (and two in the dashboard's
+  Security tab) had their em dashes stripped without rewording, leaving
+  run-on sentences such as "regardless of direction you can't use a
+  downvote". They're rewritten.
+- Getting Started listed the wrong submission requirements: short
+  descriptions are 30 to 150 characters (not "up to 191"), and a long
+  description of at least 500 characters, a prefix, a library and 1 to 5
+  tags are required. It now also covers sticker and sound packs.
+- Voting Rules didn't mention the monthly vote reset, the leaderboard, or
+  that downvotes need confirming; the Shop article now warns that votes
+  must be redeemed for credits before the reset.
+- Moderation Transparency said the report link is near the bottom of a
+  listing; it's near the top, and teams can be reported too.
+
+- The changelog page showed an empty list for unexpected API errors
+  instead of the error page, and its empty state read "No changelog
+  entries yet check back shortly" after the em-dash cleanup.
+
+- The About page's "Listed Bots" count left out certified bots.
+- Tag pages and `/packs` showed an empty state ("Nothing tagged",
+  "No packs available yet") for unexpected API errors instead of the
+  error page.
+
+- Commands showed their name twice (`ping /ping`) when the usage was just
+  the command name. Usage is now only shown when it adds something.
+- Reviews asked signed-out visitors to sign in twice when there were no
+  reviews yet.
+- Hard-wrapped bot changelog entries rendered every line break, so text
+  wrapped at about two thirds of the card's width. Changelogs (on bot
+  pages and in `/feed`) now join wrapped lines into paragraphs.
+- The Voters tab listed everyone who had ever voted, with no counts, so it
+  never added up to the vote total shown in Stats.
+
+- Highlights repeated the bots already shown in Top Voted. It now leaves
+  out anything in the first Top Voted page.
+- Spotlight showed a tab bar with a single tab, and an uneven last row
+  left gaps in the grid. The lone tab is hidden and the last row is
+  centred.
+- Cards said "1 votes", "1 bots" and "1 servers". Vote, server, member
+  and bot counts now use the singular for one.
+- The homepage fetched list stats on every load without showing them,
+  and the unused `StatsBar` component is removed.
+
+- The voter leaderboard showed "No votes cast yet." when the API was down
+  or failed. It now shows the service-unavailable state, and other errors
+  reach the error page.
+- The leaderboard description read "all-time every upvote ever cast",
+  left over from the em-dash cleanup.
+
+- Command names were shown with a doubled slash (`//help`) because stored
+  names already include it.
+
+- Owners and staff previewing a pending bot or server now see its
+  commands, changelog, reviews and voters. The page forwards the session
+  only for unlisted entries, so public listings keep their cached,
+  token-free requests.
+
+- Detail pages (bots, servers, teams, users, packs, emojis, stickers,
+  sounds, templates, themes, blog posts) turned every API error into
+  "Not found", which is how the logged-in-user auth bug hid behind "Bot
+  not found". Only a real 404 now shows the not-found page. Outages still
+  show "service unavailable", and any other error reaches the error page
+  with its digest and a "Try again" button. A failing vanity lookup is no
+  longer treated as "doesn't exist" either.
 - Logged-in users saw "Bot not found" (and the same for servers, teams and
   profiles) on perfectly normal listings. Server-rendered requests that
   forward the session token now send `Origin: NEXT_PUBLIC_BASE_URL`, which
-  Popplio requires before it accepts a user session.
-
+  Popplio requires before it accepts a user session. The same bug had been
+  silently rejecting the upload route's asset-version writes for every
+  regular user, so uploaded banners and team avatars never got a version;
+  they do now.
 - Saving bot or server settings (including changing a vanity URL) failed
   with "contains markup that isn't allowed" whenever the long description
   held a normal Discord invite link, because `permissions=` looked like an
@@ -22,6 +112,235 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The same check also flagged ordinary text like "a regular expression
   (regex)" as a CSS `expression()` attack. It now only looks inside a
   `style` attribute or a `<style>` block.
+
+### Security
+
+- Next.js 16.2.12 → 16.4.3, fixing several critical remote code execution
+  advisories this site was exposed to (in `next/og` `ImageResponse`, used
+  by the OG images and widgets, and in the image optimizer with AVIF/SVG
+  input) plus an image-optimizer SSRF and cache-poisoning issues.
+- The built-in image optimizer (`/_next/image`) is disabled
+  (`images.unoptimized: true`). Every image on the site was already
+  rendered unoptimized, so this changes nothing visible, but it removes an
+  endpoint that would fetch and process attacker-supplied images.
+- `overrides` pin patched versions of `postcss`, `nanoid`,
+  `source-map-js`, `js-yaml` and `baseline-browser-mapping`, which came in
+  through Next.js, Tailwind and gray-matter. `bun audit` reports no
+  vulnerabilities.
+
+### Added
+
+- Bot, server and team pages show their custom badges (such as Partner,
+  Veteran and Staff Pick) next to the built-in ones. Only user profiles
+  showed them before.
+
+- The admin changelog and blog editors have a "Ping notified roles in the
+  announcement" checkbox when saving will publish the entry. It defaults
+  to on for Omniplex changelogs and blog posts and off for other projects.
+- The blog editor said new posts publish immediately, but they're saved as
+  drafts. It now says to untick Draft to publish.
+
+- Bots, servers and teams have their own settings pages with a sidebar,
+  replacing the edit, stats, tokens, webhooks and change-team pop-ups.
+  Bots (`/dashboard/bots/{id}`): details, appearance, commands, changelog,
+  statistics, API sessions, webhooks, team and a danger zone. Servers
+  (`/dashboard/servers/{id}`): details including visibility, appearance,
+  statistics, API sessions, webhooks, team and a danger zone. Teams
+  (`/teams/{id}/settings`): overview with the team's listings, profile,
+  members (permissions now edit inline), webhooks, vote credits and a
+  danger zone. The section is kept in the URL, so links like
+  `?section=webhooks` go straight there. Dashboard cards link to these
+  pages through Manage and the actions menu.
+- Servers can be deleted from their settings page by anyone with the
+  Delete Servers team permission. Deleting a bot, server or team now asks
+  you to type its name to confirm.
+
+- Short-link domains. Set `SHORT_LINK_DOMAINS` (comma-separated, read at
+  runtime) and any request to `<domain>/<id or vanity>` redirects to that
+  bot, server, team, pack, emoji, sticker or sound on the main site, unknown
+  codes go to search, and longer paths redirect to the same path on the main
+  site. Adding a domain is a config change and a restart. Bot, server, team
+  and pack pages get a "Short link" button that copies the link on the first
+  configured domain (hidden when none is set). Implemented as a Next.js
+  proxy (`src/proxy.ts`).
+
+- Instant search: press Ctrl/Cmd+K or `/` anywhere (or click the search
+  icon in the header) to search as you type. It shows the top bots and
+  servers, matching tags, and a link to all results, searches only bots or
+  only servers when you're on those browse pages, and works from the
+  keyboard. On phones it has a close button instead of the keyboard hints.
+
+- Owners, and team members with permission to manage owner reviews, can
+  reply to a review as an **owner response** from the Reviews tab.
+
+- Knowledge base: new **Managing Listings** and **Developers** categories
+  and 14 new articles: Finding Bots & Servers, Reviews, Reporting &
+  Appeals, Your Data, Documenting Commands, Posting Changelog Updates,
+  Teams, Vanity URLs, Avatars & Banners, Listing a Server, Posting Stats,
+  Bot Status & Uptime, Vote Webhooks, API Tokens and Embeddable Widgets.
+  Each was checked against the current Popplio code.
+- Headings in knowledge base articles have anchor ids, so `#section` links
+  work (including the existing link to Permissions Reference's Guild
+  Moderation section).
+
+- `/bots` and `/servers` are rebuilt as server-rendered browse pages:
+  sort by newest, top voted, trending, or most servers/members; filter by
+  tag chips and "Certified only"; a result count; and filters and page
+  kept in the URL.
+- User profiles show the user's voter leaderboard rank and votes (this
+  month and all time) as one line under their links, and a new Activity
+  tab with the bots and servers they vote for most and their recent
+  reviews, each linking to the review on its page.
+- Tag pages show the real number of bots and servers with the tag (they
+  were capped at 12), "See all" links into the filtered browse pages, and
+  related tags.
+- `/packs` has Top and Newest sorting, pagination (it only ever showed the
+  first 12 packs), a result count, and a "Show all packs" toggle.
+
+- Bot pages show uptime (from Popplio's presence checks) in Stats and the
+  bot's status as text next to its name. Links get icons (GitHub, Discord,
+  X, docs, support, privacy, terms, or a globe). The Voters tab has a
+  count, and voters are listed with their votes since the last reset and
+  their all-time total. The commands list is a compact two-column grid
+  with a filter box (for bots with more than 8 commands) and a link to the
+  bot in the Command Directory. Changelog entries show their date as well
+  as how long ago they were posted.
+
+- Homepage refresh. The hero shows live counts of listed bots, servers,
+  votes and packs, plus one-click popular tags. A new "Happening on
+  Omniplex" section shows recently updated bots (linking into `/feed`),
+  the top voters this month and a Command Directory preview. Collection
+  cards show their top three bots' avatars. The Bots/Servers toggle is
+  remembered and applies to every section at once.
+
+- Voter leaderboard redesign: "This month" (the default, since the last
+  monthly vote reset) and "All time" tabs, the top three as highlighted
+  cards, up to 50 voters, links to each voter's profile, a per-type
+  breakdown of their votes, the listed bot or server they vote for most,
+  and a "You're #N of M voters" card for signed-in users.
+
+- Bot changelogs (on the bot page and in `/feed`) now render Markdown and
+  HTML, so headings like `### Added`, lists, code and links display
+  properly instead of as raw text. They go through the same sanitizer as
+  bot descriptions. The "Post update" form says Markdown and HTML are
+  supported and shows a Markdown example.
+
+- Partners that are bots listed on Omniplex now show the bot's avatar as
+  their logo on `/partners` and the homepage marquee, so it always matches
+  the bot. Other partners keep their uploaded logo. Link a partner to its
+  bot with the Bot ID field in the admin partner editor.
+
+### Changed
+
+- The Premium and Shop pages are rebuilt around a sticky side panel.
+  Premium lists what it actually includes (a 4-hour vote cooldown, the
+  Premium badge and the homepage Premium row), shows each plan's length
+  and price per month with a "Best value" tag, and has a checkout summary.
+  Bots that can't be upgraded show why ("Already premium", "In review")
+  instead of being hidden. Shop has a wallet panel with the balance, vote
+  conversion, coupons and conversion rates, shows how many more credits an
+  item needs, and splits purchase and vote history into tabs. Bundle
+  items such as Premium (Bronze) get a full-width card listing their
+  benefits, so single-benefit cards stay compact. Both pages
+  use a searchable picker instead of listing every bot down the page,
+  preselect your first listing, and include servers from all your teams
+  once each.
+- Bot and server API tokens are labelled "API sessions" in their settings
+  sidebar and the dashboard card menus.
+
+- Dashboard overhaul. A sidebar (grouped into Account, Listings and
+  Activity, with counts, and a section picker on mobile) replaces the
+  horizontally scrolling tab strip, and the current section is in the URL.
+  Overview now shows what needs attention (denied listings with a
+  re-review link, listings in review, a reminder to redeem this month's
+  votes before the reset, unread notifications), this month's numbers (votes
+  on your listings, live listings, your voter rank, votes you cast, your
+  most-voted listings) and quick actions. Bots and Servers have search,
+  sorting, status filters (live, in review, denied) and, for bots, a
+  yours/through-teams filter with an honest combined count. Teams show
+  member, bot and server counts, your role, and links to the team and its
+  settings. Notifications load more as you scroll instead of paging, can be
+  filtered by category or unread, group runs of vote reminders into one row,
+  have "Mark all read", and keep preferences behind a button. Profile shows a
+  live preview beside the form. "API Tokens" is renamed **Sessions**
+  (`?tab=sessions`; old `?tab=tokens` links still work) and lists API tokens
+  and signed-in devices separately, with "Revoke" and "Sign out".
+- The Apply page groups positions into Join the team, Programs and For bot
+  owners, now includes Bot Resubmission (it was hidden), shows whether each
+  is open, links each to its requirements, and links to your applications.
+- The footer's Discover column adds Trending Bots and Certified Bots.
+
+- The search page is rebuilt. The query, tags, result type and page are all
+  in the URL, results update as you type, there's an "All" view with each
+  type's top results and "See all N", per-type tabs with real counts and
+  paging, and the empty page links to browsing, collections and the Command
+  Directory instead of repeating the full bot list. The unused `useSearch`
+  hook is removed.
+- The Partners page lists bot partners first, links each bot partner to its
+  page on Omniplex, shows who runs each partner, drops the repeated type
+  badge, says so if partners fail to load, and ends with a "Want to partner
+  with us?" section linking to the requirements and application.
+
+- The Moderation Transparency page is redesigned: a summary row (reports
+  filed, share closed, bot approval rate, listings awaiting review),
+  side-by-side cards with proportional bars for the bot and server review
+  pipelines and for reports by reason and status, an enforcement card, and a
+  short "How moderation works" section linking to the rules, the reporting
+  guide and the team. Sections that fail to load say so instead of
+  disappearing, and the "…right now check back shortly" sentence is fixed.
+
+- Add a Server requires the tracking bot to be in the server (with an
+  "I've invited the bot, check again" button), since Popplio now checks that
+  you own or manage the server before listing it.
+- Pack Rules match how packs actually work: bot and server packs can include
+  anyone's listings, and the rules now cover emoji, sticker and sound packs.
+
+- The changelog page keeps the latest release of each project open and
+  collapses older ones to their summary and a count of changes ("4 added ·
+  6 fixed"), with "Show changes" to expand. Release text is capped at a
+  readable width, a sticky sidebar lists every version by project, each
+  release has a link anchor (`#popplio-1.9.1`, which opens it), the project
+  filter is kept in the URL (`/changelog?project=popplio`), and releases
+  show their date as well as how long ago they shipped.
+
+- The Team page groups staff by their most senior position (Executive,
+  Management and so on, with a count), shows each person's top position
+  as their title, their other roles as one line ("Also: … +N"), and their
+  `@username` so accounts with the same display name can be told apart.
+  Each card links to the person's profile.
+
+- Server pages get the bot-page changes: the embed widget behind "Get
+  embed code" for visitors, a short header strip when there's no banner,
+  link icons, and a Voters tab count.
+
+- The embed widget on bot pages is behind a "Get embed code" button. A bot
+  with no banner gets a short header strip instead of a full-height empty
+  one.
+- Signed-out vote buttons on bot, server, team and pack pages show the
+  vote count ("Sign in to vote · 8").
+
+- The Command Directory is useful before you type: it shows the bots that
+  have documented commands (with a preview of each one's commands) and
+  example searches taken from real command names. Search now matches
+  descriptions as well as names, results are grouped by bot with a copy
+  button for each command's usage, and a sidebar (same layout as `/feed`)
+  holds search, tag filters and a bot filter. Filters live in the URL. A
+  short call to action points bot owners at the API for documenting
+  commands.
+- Rewrote user-facing copy that used em dashes (about 60 strings across
+  the site and the 11 in the knowledge base) to use periods, colons or
+  commas instead. Title and label separators such as the page-title
+  suffix were left unchanged.
+
+- The `/feed` page is easier to navigate as it grows:
+  - Long updates collapse after a few lines with a "Show more" toggle.
+  - Updates are grouped under Today, Yesterday, This week, This month,
+    then by month.
+  - A search box, tag chips and a "More from this bot" button filter the
+    feed; filters live in the URL so filtered views can be shared.
+  - On wide screens a sticky sidebar holds the filters and a "Recently
+    updated" list of bots; on mobile the filters sit above the feed.
+  - Changing page scrolls back to the top.
 
 ## [1.3.0] - 2026-09-26
 

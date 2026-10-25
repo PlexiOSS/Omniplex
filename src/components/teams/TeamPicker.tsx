@@ -138,7 +138,7 @@ export function TeamPicker({
 
       {eligible.length === 0 && (
         <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">
-          None of your existing teams let you add {entityLabel} — you can still
+          None of your existing teams let you add {entityLabel}. You can still
           create a new team above, or{" "}
           <Link
             href="/dashboard?tab=teams"

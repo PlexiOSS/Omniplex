@@ -56,10 +56,10 @@ export default function NewTicketPage() {
     e.preventDefault();
     if (!session || !topic) return;
     if (issue.trim().length < 10) {
-      return setError("Give it a short subject line — at least 10 characters.");
+      return setError("Give it a short subject line, at least 10 characters.");
     }
     if (message.trim().length < MESSAGE_MIN) {
-      return setError(`Explain what's going on — at least ${MESSAGE_MIN} characters.`);
+      return setError(`Explain what's going on in at least ${MESSAGE_MIN} characters.`);
     }
 
     setSubmitting(true);
@@ -140,7 +140,7 @@ export default function NewTicketPage() {
               maxLength={MESSAGE_MAX}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Include anything staff would need to help — what you expected, what happened instead, and any relevant IDs or links."
+              placeholder="Include anything staff would need to help: what you expected, what happened instead, and any relevant IDs or links."
               className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
               required
             />

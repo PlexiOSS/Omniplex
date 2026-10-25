@@ -55,6 +55,9 @@ export function ChangelogEditModal({
   const [security, setSecurity] = useState((entry?.security ?? []).join("\n"));
   const [prerelease, setPrerelease] = useState(entry?.prerelease ?? false);
   const [published, setPublished] = useState(entry?.published ?? false);
+  const [pingRoles, setPingRoles] = useState<boolean | null>(null);
+  const willAnnounce = published && !entry?.published;
+  const ping = pingRoles ?? project === "omniplex";
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,6 +112,7 @@ export function ChangelogEditModal({
         fixed: linesToArray(fixed),
         removed: linesToArray(removed),
         security: linesToArray(security),
+        ping_roles: willAnnounce ? ping : undefined,
         created_at: releaseDate
           ? new Date(releaseDate).toISOString()
           : undefined,
@@ -192,7 +196,7 @@ export function ChangelogEditModal({
           </p>
           <p className="text-xs text-zinc-400 dark:text-zinc-600">
             Pulls the merged PRs between two refs on {project}&apos;s repo and
-            drafts the fields below from them. Review before saving — this
+            drafts the fields below from them. Review before saving: this
             overwrites whatever&apos;s currently in
             Added/Updated/Fixed/Removed/Security.
           </p>
@@ -295,6 +299,19 @@ export function ChangelogEditModal({
               Published (visible on the public changelog)
             </span>
           </label>
+          {willAnnounce && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={ping}
+                onChange={(e) => setPingRoles(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+              />
+              <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                Ping notified roles in the announcement
+              </span>
+            </label>
+          )}
         </div>
 
         {error && (

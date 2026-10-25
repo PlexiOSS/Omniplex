@@ -171,7 +171,7 @@ export function ShopItemEditModal({
           </p>
           {benefits.length === 0 ? (
             <p className="text-xs text-zinc-400 dark:text-zinc-600">
-              No shop benefits exist yet — create one first.
+              No shop benefits exist yet. Create one first.
             </p>
           ) : (
             <div className="space-y-1.5">
@@ -202,7 +202,7 @@ export function ShopItemEditModal({
           )}
           {hasUnrecognizedBenefit && (
             <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-              This item includes a display-only benefit — buying it won't have
+              This item includes a display-only benefit, so buying it won't have
               that effect.
             </p>
           )}

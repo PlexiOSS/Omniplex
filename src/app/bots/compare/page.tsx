@@ -18,7 +18,7 @@ interface Props {
 export const metadata: Metadata = {
   title: "Compare Bots",
   description:
-    "Compare two Discord bots side by side — votes, servers, and tags.",
+    "Compare two Discord bots side by side: votes, servers, and tags.",
 };
 
 async function fetchBotSafe(id: string | undefined): Promise<Bot | null> {

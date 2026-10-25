@@ -14,6 +14,17 @@ export function partnerAvatarUrl(
   );
 }
 
+export function partnerLogoUrl(partner: {
+  id: string;
+  bot_id: string | null;
+  bot?: { avatar: string } | null;
+}): string {
+  if (partner.bot_id && partner.bot) {
+    return mirroredAvatarUrl("bots", partner.bot_id, partner.bot.avatar);
+  }
+  return partnerAvatarUrl(partner.id);
+}
+
 export function teamAvatarUrl(teamId: string, version?: string | null): string {
   return withVersion(
     `/cdn/avatars/teams/${encodeURIComponent(teamId)}.webp`,
@@ -73,9 +84,6 @@ export function packStickerUrl(
   return `/cdn/stickers/packs/${encodeURIComponent(packUrl)}/${encodeURIComponent(stickerId)}.${animated ? "gif" : "webp"}`;
 }
 
-/** Sound packs only ever store MP3 (see app/api/uploads' AUDIO_EXTENSION),
- * so unlike packEmojiUrl/packStickerUrl there's no format flag to branch
- * on. */
 export function packSoundUrl(packUrl: string, soundId: string): string {
   return `/cdn/sounds/packs/${encodeURIComponent(packUrl)}/${encodeURIComponent(soundId)}.mp3`;
 }

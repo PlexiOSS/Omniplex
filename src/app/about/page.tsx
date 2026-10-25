@@ -8,7 +8,7 @@ import { totalListedBots } from "@/lib/utils/stats";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about Omniplex — the best place to discover Discord bots and servers.",
+  description: "Learn about Omniplex, the best place to discover Discord bots and servers.",
 };
 
 const FEATURES = [
@@ -34,7 +34,7 @@ const FEATURES = [
     icon: Users,
     title: "Bot Packs",
     description:
-      "Curated collections of bots built to work together — perfect for getting a server set up fast.",
+      "Curated collections of bots built to work together, perfect for getting a server set up fast.",
   },
 ];
 
@@ -72,7 +72,7 @@ export default async function AboutPage() {
       {stats && (
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: "Listed Bots", value: stats.total_approved_bots },
+            { label: "Listed Bots", value: totalListedBots(stats) },
             { label: "Total Submitted", value: stats.total_bots },
             { label: "Total Votes", value: stats.total_votes },
             { label: "Users", value: stats.total_users },

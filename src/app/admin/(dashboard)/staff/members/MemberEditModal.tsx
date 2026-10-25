@@ -76,7 +76,7 @@ export function MemberEditModal({
             </span>
           </p>
           <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
-            Everything this member can actually do — the combination of their
+            Everything this member can actually do: the combination of their
             positions above and the overrides below. Read-only here; edit
             positions on the Positions page.
           </p>
@@ -123,7 +123,7 @@ export function MemberEditModal({
             className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
           />
           <span className="text-sm text-zinc-700 dark:text-zinc-300">
-            Frozen — don't auto-update this member in resyncs
+            Frozen: don't auto-update this member in resyncs
           </span>
         </label>
 

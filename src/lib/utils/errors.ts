@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import { ApiError } from "@/lib/api/client";
 
@@ -8,7 +8,10 @@ export function isApiUnavailable(error: unknown): boolean {
   if (error instanceof ApiError) {
     return SERVER_ERROR_STATUSES.has(error.status);
   }
-  if (error instanceof TypeError && error.message.toLowerCase().includes("fetch")) {
+  if (
+    error instanceof TypeError &&
+    error.message.toLowerCase().includes("fetch")
+  ) {
     return true;
   }
   return false;
@@ -16,8 +19,20 @@ export function isApiUnavailable(error: unknown): boolean {
 
 export function isBoundaryApiError(error: Error): boolean {
   if (error.name === "ApiError") return true;
-  if (error.name === "TypeError" && error.message.toLowerCase().includes("fetch")) {
+  if (
+    error.name === "TypeError" &&
+    error.message.toLowerCase().includes("fetch")
+  ) {
     return true;
   }
   return false;
+}
+
+export function isNotFoundError(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 404;
+}
+
+export function nullIfNotFound(error: unknown): null {
+  if (isNotFoundError(error)) return null;
+  throw error;
 }

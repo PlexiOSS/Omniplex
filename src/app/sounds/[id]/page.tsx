@@ -12,7 +12,11 @@ import { Avatar } from "@/components/ui/Avatar";
 import { packs, sounds, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { packSoundUrl } from "@/lib/utils/assets";
-import { isApiUnavailable } from "@/lib/utils/errors";
+import {
+  isApiUnavailable,
+  isNotFoundError,
+  nullIfNotFound,
+} from "@/lib/utils/errors";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 interface Props {
@@ -24,7 +28,7 @@ async function fetchSound(id: string) {
     return await sounds.getById(id);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
-      const resolved = await vanity.resolve(id).catch(() => null);
+      const resolved = await vanity.resolve(id).catch(nullIfNotFound);
       if (resolved?.target_type === "pack_sound") {
         return sounds.getById(resolved.target_id);
       }
@@ -50,7 +54,8 @@ export default async function SoundPage({ params }: Props) {
     sound = await fetchSound(id);
   } catch (err) {
     if (isApiUnavailable(err)) return <ServiceUnavailable inline />;
-    notFound();
+    if (isNotFoundError(err)) notFound();
+    throw err;
   }
   if (!sound) notFound();
 

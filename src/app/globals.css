@@ -185,6 +185,9 @@ html {
 .prose * {
   max-width: 100%;
 }
+.prose [id] {
+  scroll-margin-top: 6rem;
+}
 .prose > *:first-child {
   margin-top: 0;
 }

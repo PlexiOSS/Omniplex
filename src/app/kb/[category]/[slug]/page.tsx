@@ -80,6 +80,7 @@ export default async function KbArticlePage({ params }: Props) {
           <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <Markdown
               content={article.content}
+              headingIds
               className="text-sm text-zinc-700 dark:text-zinc-300"
             />
           </div>

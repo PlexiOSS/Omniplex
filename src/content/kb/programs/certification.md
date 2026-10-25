@@ -4,11 +4,11 @@ description: Requirements, benefits, and terms for Omniplex's Certification Prog
 order: 1
 ---
 
-Certification is open to both bots and servers now apply for either through [Apply](/apps).
+Certification is open to both bots and servers. Apply for either through [Apply](/apps).
 
 ## Requirements
 
-These are the actual, automatically-checked requirements the application form enforces. You only need to clear **one** of the three reach/engagement bars below, not all of them we'd rather certify something that's genuinely excelling in one way than reject it for not excelling in every way at once.
+These are the actual, automatically-checked requirements the application form enforces. You only need to clear **one** of the three reach/engagement bars below, not all of them. We'd rather certify something that's genuinely excelling in one way than reject it for not excelling in every way at once.
 
 **Bots:**
 
@@ -31,7 +31,7 @@ The numeric requirements above get you through the door, but a staff member revi
 - A good long description that makes effective use of Markdown/HTML.
 - Follows best practices for Discord bots/servers.
 - An active, friendly, and helpful support server or community.
-- 100% original work if it's a fork, it should be heavily modified, not a re-skin.
+- 100% original work: if it's a fork, it should be heavily modified, not a re-skin.
 - Makes use of site features (Extra Links, tags, etc.) where relevant.
 - Bonus: uses the widget on a website, command, or GitHub repository.
 
@@ -40,7 +40,7 @@ The numeric requirements above get you through the door, but a staff member revi
 1. Certified badge on your bot or server's card and page.
 2. (Bots) Certified role in our Discord Server, listed highest amongst other bots.
 3. Featured on our main Discord Server.
-4. A strong shot at a Featured homepage slot on top of that, you can buy a guaranteed one directly through the [Shop](/kb/premium/shop).
+4. A strong shot at a Featured homepage slot. On top of that, you can buy a guaranteed one directly through the [Shop](/kb/premium/shop).
 
 ## Terms of Service
 

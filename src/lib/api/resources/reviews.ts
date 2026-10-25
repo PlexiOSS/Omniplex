@@ -7,10 +7,11 @@ import type {
 } from "../types";
 
 export const reviewsResource = {
-  getAll: (targetType: ReviewTargetType, targetId: string) =>
-    client.get<ReviewList>(`/${targetType}/${targetId}/reviews`, {
-      next: { revalidate: 30 },
-    }),
+  getAll: (targetType: ReviewTargetType, targetId: string, token?: string) =>
+    client.get<ReviewList>(
+      `/${targetType}/${targetId}/reviews`,
+      token ? { token, cache: "no-store" } : { next: { revalidate: 30 } },
+    ),
 
   create: (
     targetType: ReviewTargetType,

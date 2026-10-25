@@ -89,7 +89,7 @@ export function ReportDetailModal({
       );
       if (filtered.length === 0) {
         setError(
-          `No staff actions exist for ${targetType.toLowerCase()}s yet — only bots have moderation actions like force-removal today.`,
+          `No staff actions exist for ${targetType.toLowerCase()}s yet. Only bots have moderation actions like force-removal today.`,
         );
         return;
       }

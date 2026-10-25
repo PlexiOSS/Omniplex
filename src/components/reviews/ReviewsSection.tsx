@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
+import { useEntityPermission } from "@/hooks/useEntityPermission";
 import { useHighlightScroll } from "@/hooks/useHighlightScroll";
 import { reviews as reviewsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -28,6 +29,11 @@ export function ReviewsSection({
   highlightId,
 }: ReviewsSectionProps) {
   const { session, isAuthenticated } = useAuth();
+  const { hasPerm } = useEntityPermission(
+    targetType === "server_template" ? "team" : targetType,
+    targetType === "server_template" ? undefined : targetId,
+  );
+  const canRespondAsOwner = hasPerm("manage_owner_reviews");
   const [reviews, setReviews] = useState(initialReviews);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -81,7 +87,7 @@ export function ReviewsSection({
         )}
       </div>
 
-      {!isAuthenticated && (
+      {!isAuthenticated && roots.length > 0 && (
         <div className="rounded-xl border border-zinc-200 p-4 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
           <SignInLink className="text-accent underline underline-offset-2">
             Sign in
@@ -178,6 +184,7 @@ export function ReviewsSection({
                   targetId={targetId}
                   token={session.token}
                   parentId={review.id}
+                  canPostAsOwner={canRespondAsOwner}
                   compact
                   onCancel={() => setReplyingTo(null)}
                   onSaved={() => {
@@ -343,6 +350,7 @@ interface ReviewFormProps {
   token: string;
   parentId?: string;
   editingReview?: Review;
+  canPostAsOwner?: boolean;
   compact?: boolean;
   onCancel: () => void;
   onSaved: () => void;
@@ -354,10 +362,12 @@ function ReviewForm({
   token,
   parentId,
   editingReview,
+  canPostAsOwner = false,
   compact,
   onCancel,
   onSaved,
 }: ReviewFormProps) {
+  const [asOwner, setAsOwner] = useState(canPostAsOwner);
   const [stars, setStars] = useState(editingReview?.stars ?? 5);
   const [content, setContent] = useState(editingReview?.content ?? "");
   const [submitting, setSubmitting] = useState(false);
@@ -380,7 +390,12 @@ function ReviewForm({
         await reviewsApi.create(
           targetType,
           targetId,
-          { content, stars, parent_id: parentId, owner_review: false },
+          {
+            content,
+            stars,
+            parent_id: parentId,
+            owner_review: !!parentId && canPostAsOwner && asOwner,
+          },
           token,
         );
       }
@@ -410,6 +425,17 @@ function ReviewForm({
         required
         className="w-full resize-none rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
       />
+      {parentId && canPostAsOwner && !editingReview && (
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+          <input
+            type="checkbox"
+            checked={asOwner}
+            onChange={(e) => setAsOwner(e.target.checked)}
+            className="accent-accent"
+          />
+          Post as an owner response
+        </label>
+      )}
       {error && (
         <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
       )}

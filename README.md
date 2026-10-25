@@ -51,10 +51,11 @@ The frontend is decoupled from both backends it talks to Popplio (`src/lib/api/`
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:3000` | Canonical URL of this instance used in metadata, sitemaps, and as the OAuth redirect URI. Must exactly match what's registered in the Discord Developer Portal and in Popplio/Arcadia's own redirect allowlists. |
 | `NEXT_PUBLIC_API_URL` | `https://spider-staging.omniplex.gg` | Popplio API base URL |
 | `NEXT_PUBLIC_CDN_URL` | `https://cdn.omniplex.gg` | Asset CDN base URL |
-| `NEXT_PUBLIC_ARCADIA_URL` | `https://staging--panel-api.omniplex.gg` | Arcadia panel API base URL powers `/admin` |
-| `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` | `infinity-list` | Arcadia's configured `panel_scope` for this instance — must match Arcadia's own config exactly or staff login fails |
+| `NEXT_PUBLIC_ARCADIA_URL` | `https://staging--panel-api.omniplex.gg` | Arcadia panel API base URL, which powers `/admin` |
+| `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` | `infinity-list` | Arcadia's configured `panel_scope` for this instance. Must match Arcadia's own config exactly or staff login fails |
+| `SHORT_LINK_DOMAINS` | (none) | Comma-separated short-link domains, such as `botlist.site`. `<domain>/<id or vanity>` redirects to that listing, other paths redirect to the same path on `NEXT_PUBLIC_BASE_URL`, and the first domain is used by the "Short link" button. Read at runtime, so adding a domain needs a restart, not a rebuild. Point the domain's DNS at this deployment and add it in Railpack first. |
 
-Copy `.env.template` to `.env.local` to override any of these for local development. None are required to run the app against staging the defaults point there already.
+Copy `.env.template` to `.env.local` to override any of these for local development. None are required to run the app against staging; the defaults point there already.
 
 ---
 
