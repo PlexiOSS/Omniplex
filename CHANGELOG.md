@@ -134,9 +134,11 @@ every public page.
   Veteran and Staff Pick) next to the built-in ones. Only user profiles
   showed them before.
 
-- The admin changelog and blog editors have a "Ping notified roles in the
-  announcement" checkbox when saving will publish the entry. It defaults
-  to on for Omniplex changelogs and blog posts and off for other projects.
+- The admin changelog and blog editors have a "Ping notified roles when
+  published" checkbox on entries that haven't been announced yet. It turns
+  on once Published is ticked (or Draft is unticked for blog posts), and
+  defaults to on for Omniplex changelogs and blog posts and off for other
+  projects.
 - The blog editor said new posts publish immediately, but they're saved as
   drafts. It now says to untick Draft to publish.
 

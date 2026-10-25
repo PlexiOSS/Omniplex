@@ -141,16 +141,22 @@ export function BlogEditModal({
             </span>
           </label>
         )}
-        {willAnnounce && (
-          <label className="flex items-center gap-2 cursor-pointer">
+        {!!post?.draft && (
+          <label
+            className={[
+              "flex items-center gap-2",
+              willAnnounce ? "cursor-pointer" : "cursor-not-allowed opacity-50",
+            ].join(" ")}
+          >
             <input
               type="checkbox"
+              disabled={!willAnnounce}
               checked={ping}
               onChange={(e) => setPingRoles(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
             />
             <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              Ping notified roles in the announcement
+              Ping notified roles when published
             </span>
           </label>
         )}
