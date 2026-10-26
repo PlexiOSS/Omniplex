@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-25
+
+### Added
+
+- Badge rules and linked roles in the admin badge editor: an "Award
+  automatically" picker (grouped by Listing, Voting, Ownership and Discord,
+  with the number or role ID each rule needs) and a "Use for Discord
+  linked roles" toggle that shows how many of Discord's 5 slots are used.
+  The badge list shows each badge's rule and linked-role status, and a
+  rule type the panel doesn't recognise is shown and kept rather than
+  dropped.
+- `/linked-roles`, where members connect their Discord account so servers
+  can give them roles for their badges, its `/linked-roles/callback`
+  page, and a Linked Roles knowledge base article covering both connecting
+  and setting up a linked role in a server.
+
+- A brand kit in `public/brand` (guide in `public/brand/README.md`): logo
+  marks, the Geist wordmark and app icon as SVG and PNG; favicons and app
+  icons; banners for X, GitHub, link previews, Discord, LinkedIn and
+  YouTube with a backdrop of real bots from the list; 21 static and 7
+  animated Discord emojis; 8 static and 5 animated stickers; and regular
+  plus nine seasonal themes (Halloween, Autumn, Winter, Holiday, New Year,
+  Valentine's, Spring, Pride, Summer), each with a static and animated
+  server icon, an app icon, a logo emoji, a Discord banner and an X
+  header.
+- Sub-brands for the three Omniplex bots in `public/brand/bots`: Popplio
+  (indigo, chat badge), Infernoplex (ember, flame badge) and Arcadia (teal,
+  shield badge), each with a static and animated avatar, an app icon, a
+  logo emoji, a name lockup, and Discord profile, README and social
+  preview banners.
+
 ## [1.4.0] - 2026-10-25
 
 **The Dashboard Update.** Settings pages for bots, servers and teams, a

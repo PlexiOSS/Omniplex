@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import { ARCADIA_URL } from "./config";
 import { touchArcadiaSession } from "./session";
@@ -6,6 +6,7 @@ import type {
   AuthorizeAction,
   BadgeAction,
   BadgeCatalogEntry,
+  BadgeRuleKind,
   BaseAnalytics,
   BlogAction,
   BlogPost,
@@ -632,6 +633,15 @@ export const arcadia = {
         UpdateBadges: {
           login_token: loginToken,
           action: "List" satisfies BadgeAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    ruleKinds: async (loginToken: string): Promise<BadgeRuleKind[]> => {
+      const res = await postQuery({
+        UpdateBadges: {
+          login_token: loginToken,
+          action: "RuleKinds" satisfies BadgeAction,
         },
       });
       return (await assertOk(res)).json();

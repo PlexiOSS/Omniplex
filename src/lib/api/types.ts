@@ -1830,3 +1830,21 @@ export interface ApiErrorBody {
   message: string;
   context?: Record<string, string>;
 }
+
+export interface LinkedRoleBadge {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface LinkedRolesMeta {
+  enabled: boolean;
+  client_id: string;
+  badges: LinkedRoleBadge[];
+}
+
+export interface LinkedRolesResult {
+  user_id: string;
+  username: string;
+  badges: string[];
+}

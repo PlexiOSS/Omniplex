@@ -602,6 +602,25 @@ export interface BadgeCatalogEntry {
   created_by: string;
   last_updated: string;
   updated_by: string;
+  auto_rule?: BadgeRule | null;
+  linked_role?: boolean;
+}
+
+export interface BadgeRule {
+  type: string;
+  value?: number;
+  role_id?: string;
+}
+
+export interface BadgeRuleKind {
+  type: string;
+  category: string;
+  label: string;
+  description: string;
+  targets: string[];
+  value_label?: string;
+  min_value?: number;
+  needs_role?: boolean;
 }
 
 export interface BadgeUpsert {
@@ -611,10 +630,13 @@ export interface BadgeUpsert {
   icon: string;
   color: BadgeColor;
   target_types: string[];
+  auto_rule: BadgeRule | null;
+  linked_role: boolean;
 }
 
 export type BadgeAction =
   | "List"
+  | "RuleKinds"
   | { Create: BadgeUpsert }
   | { Edit: BadgeUpsert }
   | { Delete: { id: string } };

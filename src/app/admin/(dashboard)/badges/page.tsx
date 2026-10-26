@@ -1,13 +1,13 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Link2, Pencil, Plus, Trash2, Zap } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import type { BadgeCatalogEntry } from "@/lib/arcadia/types";
+import type { BadgeCatalogEntry, BadgeRuleKind } from "@/lib/arcadia/types";
 import { badgeIcon } from "@/lib/constants/badgeIcons";
-import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../AdminContext";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { BadgeEditModal } from "./BadgeEditModal";
@@ -16,6 +16,7 @@ export default function BadgesPage() {
   const { loginToken, hasPerm } = useAdmin();
 
   const [badges, setBadges] = useState<BadgeCatalogEntry[] | null>(null);
+  const [ruleKinds, setRuleKinds] = useState<BadgeRuleKind[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<BadgeCatalogEntry | "new" | null>(
     null,
@@ -26,7 +27,12 @@ export default function BadgesPage() {
 
   const load = useCallback(async () => {
     try {
-      setBadges(await arcadia.badges.list(loginToken));
+      const [list, kinds] = await Promise.all([
+        arcadia.badges.list(loginToken),
+        arcadia.badges.ruleKinds(loginToken).catch(() => []),
+      ]);
+      setBadges(list);
+      setRuleKinds(kinds);
     } catch (err) {
       setError(
         err instanceof ArcadiaError ? err.message : "Failed to load badges.",
@@ -60,14 +66,16 @@ export default function BadgesPage() {
 
   if (error && !badges) {
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center"><p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
 
   if (!badges) {
     return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
       </div>
     );
   }
@@ -76,7 +84,7 @@ export default function BadgesPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <AdminPageHeader
         title="Badges"
-        description="The catalog of purely decorative badges award one to a user, bot, server, or team from its Actions menu in Search or Report detail."
+        description="Decorative badges for users, bots, servers and teams. Award one from an entity's Actions menu in Search or Report detail, or give a badge a rule to award it automatically."
         action={
           hasPerm("manage_badges") && (
             <Button
@@ -137,6 +145,20 @@ export default function BadgesPage() {
                 {badge.target_types.map((t) => (
                   <Badge key={t}>{t}</Badge>
                 ))}
+                {badge.auto_rule && (
+                  <Badge variant="info">
+                    <Zap size={11} />
+                    {ruleKinds.find((k) => k.type === badge.auto_rule?.type)
+                      ?.label ?? badge.auto_rule.type}
+                    {badge.auto_rule.value ? ` (${badge.auto_rule.value})` : ""}
+                  </Badge>
+                )}
+                {badge.linked_role && (
+                  <Badge variant="success">
+                    <Link2 size={11} />
+                    Linked role
+                  </Badge>
+                )}
               </div>
               <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
                 {badge.description}
@@ -149,6 +171,8 @@ export default function BadgesPage() {
       {editing === "new" && (
         <BadgeEditModal
           loginToken={loginToken}
+          ruleKinds={ruleKinds}
+          otherLinkedCount={badges.filter((b) => b.linked_role).length}
           onClose={() => setEditing(null)}
           onSaved={load}
         />
@@ -157,6 +181,10 @@ export default function BadgesPage() {
         <BadgeEditModal
           loginToken={loginToken}
           badge={editing}
+          ruleKinds={ruleKinds}
+          otherLinkedCount={
+            badges.filter((b) => b.linked_role && b.id !== editing.id).length
+          }
           onClose={() => setEditing(null)}
           onSaved={load}
         />

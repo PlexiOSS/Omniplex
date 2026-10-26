@@ -10,6 +10,7 @@ export { captchaResource as captcha } from "./resources/captcha";
 export { changelogsResource as changelogs } from "./resources/changelogs";
 export { dataResource as data } from "./resources/data";
 export { emojisResource as emojis } from "./resources/emojis";
+export { linkedRolesResource as linkedRoles } from "./resources/linkedRoles";
 export { listResource as list } from "./resources/list";
 export { notificationsResource as notifications } from "./resources/notifications";
 export { packsResource as packs } from "./resources/packs";
