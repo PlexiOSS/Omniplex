@@ -22,6 +22,10 @@ import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import {
+  ENTITY_ACTION_CLASS,
+  ENTITY_ACTION_ROW,
+} from "@/components/ui/entityAction";
 import { LinkIcon } from "@/components/ui/LinkIcon";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
 import { StatRow } from "@/components/ui/StatRow";
@@ -234,21 +238,21 @@ export default async function ServerPage({ params }: Props) {
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
           <div className="mt-5 lg:hidden">{actionsCard}</div>
 
-          <div className="mt-3 flex items-center gap-4">
+          <div className={ENTITY_ACTION_ROW}>
+            {shortLink && <ShortLinkButton url={shortLink} />}
+            <ReminderToggle targetType="server" targetId={server.server_id} />
+            <Link
+              href={`/servers/compare?a=${encodeURIComponent(server.server_id)}`}
+              className={ENTITY_ACTION_CLASS}
+            >
+              <ArrowRightLeft size={13} />
+              Compare
+            </Link>
             <ReportModal
               targetType="server"
               targetId={server.server_id}
               targetLabel="server"
             />
-            {shortLink && <ShortLinkButton url={shortLink} />}
-            <ReminderToggle targetType="server" targetId={server.server_id} />
-            <Link
-              href={`/servers/compare?a=${encodeURIComponent(server.server_id)}`}
-              className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-            >
-              <ArrowRightLeft size={14} />
-              Compare
-            </Link>
           </div>
 
           <ServerPageTabs

@@ -13,6 +13,7 @@ import { TeamManageLink } from "@/components/teams/TeamManageLink";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { ENTITY_ACTION_ROW } from "@/components/ui/entityAction";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
 import { reviews, teams } from "@/lib/api";
 import { hasPermString } from "@/lib/permissions";
@@ -118,13 +119,13 @@ export default async function TeamPage({ params }: Props) {
             <TeamVoteButton teamId={team.id} currentVotes={team.votes} />
           </div>
 
-          <div className="mt-3 flex items-center gap-4">
+          <div className={ENTITY_ACTION_ROW}>
+            {shortLink && <ShortLinkButton url={shortLink} />}
             <ReportModal
               targetType="team"
               targetId={team.id}
               targetLabel="team"
             />
-            {shortLink && <ShortLinkButton url={shortLink} />}
           </div>
         </div>
       </div>

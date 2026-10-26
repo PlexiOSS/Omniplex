@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The Short link, Vote reminder, Compare and Report actions on bot,
+  server, pack and team pages are now matching small buttons in one row
+  that wraps cleanly on phones, instead of mixed text links in different
+  sizes. Report sits last, and the labels are shorter ("Report", "Vote
+  reminder" / "Reminder on").
+
 ## [1.6.0] - 2026-10-25
 
 ### Added

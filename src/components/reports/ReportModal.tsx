@@ -3,6 +3,7 @@
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { ENTITY_ACTION_REPORT_CLASS } from "@/components/ui/entityAction";
 import { Modal } from "@/components/ui/Modal";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,9 +46,9 @@ export function ReportModal({
 
   if (!isAuthenticated) {
     return (
-      <SignInLink className="inline-flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-600 dark:hover:text-zinc-300">
-        <Flag size={12} />
-        Report this {targetLabel}
+      <SignInLink className={ENTITY_ACTION_REPORT_CLASS}>
+        <Flag size={13} />
+        Report
       </SignInLink>
     );
   }
@@ -94,23 +95,24 @@ export function ReportModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-600 dark:hover:text-zinc-300"
+        className={ENTITY_ACTION_REPORT_CLASS}
+        title={`Report this ${targetLabel}`}
       >
-        <Flag size={12} />
-        Report this {targetLabel}
+        <Flag size={13} />
+        Report
       </button>
 
-      <Modal open={open} onClose={handleClose} title={`Report this ${targetLabel}`}>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        title={`Report this ${targetLabel}`}
+      >
         {submitted ? (
           <div className="text-center">
             <p className="text-sm text-zinc-700 dark:text-zinc-300">
               Thanks! This has been sent to our staff for review.
             </p>
-            <Button
-              variant="secondary"
-              onClick={handleClose}
-              className="mt-4"
-            >
+            <Button variant="secondary" onClick={handleClose} className="mt-4">
               Close
             </Button>
           </div>
@@ -168,7 +170,11 @@ export function ReportModal({
               <Button variant="secondary" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button variant="danger" onClick={handleSubmit} loading={submitting}>
+              <Button
+                variant="danger"
+                onClick={handleSubmit}
+                loading={submitting}
+              >
                 Submit Report
               </Button>
             </div>

@@ -2,6 +2,10 @@
 
 import { Bell, BellRing } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  ENTITY_ACTION_ACTIVE_CLASS,
+  ENTITY_ACTION_CLASS,
+} from "@/components/ui/entityAction";
 import { useAuth } from "@/hooks/useAuth";
 import { reminders } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -48,9 +52,19 @@ export function ReminderToggle({ targetType, targetId }: ReminderToggleProps) {
     setActive(next);
     try {
       if (next) {
-        await reminders.create(session.user_id, targetType, targetId, session.token);
+        await reminders.create(
+          session.user_id,
+          targetType,
+          targetId,
+          session.token,
+        );
       } else {
-        await reminders.remove(session.user_id, targetType, targetId, session.token);
+        await reminders.remove(
+          session.user_id,
+          targetType,
+          targetId,
+          session.token,
+        );
       }
     } catch (err) {
       setActive(!next); // revert on failure
@@ -65,15 +79,16 @@ export function ReminderToggle({ targetType, targetId }: ReminderToggleProps) {
       type="button"
       onClick={toggle}
       disabled={busy}
-      className={[
-        "inline-flex items-center gap-1.5 text-xs font-medium transition-colors disabled:opacity-50",
+      aria-pressed={active}
+      title={
         active
-          ? "text-accent"
-          : "text-zinc-400 hover:text-zinc-700 dark:text-zinc-600 dark:hover:text-zinc-300",
-      ].join(" ")}
+          ? "You'll get a reminder when you can vote again"
+          : "Get a reminder when you can vote again"
+      }
+      className={active ? ENTITY_ACTION_ACTIVE_CLASS : ENTITY_ACTION_CLASS}
     >
-      {active ? <BellRing size={12} /> : <Bell size={12} />}
-      {active ? "Reminder set" : "Remind me to vote again"}
+      {active ? <BellRing size={13} /> : <Bell size={13} />}
+      {active ? "Reminder on" : "Vote reminder"}
     </button>
   );
 }

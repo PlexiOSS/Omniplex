@@ -21,6 +21,7 @@ import { ReportModal } from "@/components/reports/ReportModal";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
+import { ENTITY_ACTION_ROW } from "@/components/ui/entityAction";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { packs } from "@/lib/api";
@@ -269,13 +270,13 @@ export default async function PackPage({ params }: Props) {
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
           <div className="mt-5 lg:hidden">{actionsCard}</div>
 
-          <div className="mt-3 flex items-center gap-4">
+          <div className={ENTITY_ACTION_ROW}>
+            {shortLink && <ShortLinkButton url={shortLink} />}
             <ReportModal
               targetType="pack"
               targetId={pack.url}
               targetLabel="pack"
             />
-            {shortLink && <ShortLinkButton url={shortLink} />}
           </div>
 
           {/* Bots in this pack */}

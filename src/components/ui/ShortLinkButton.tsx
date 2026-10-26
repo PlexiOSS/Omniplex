@@ -2,6 +2,7 @@
 
 import { Check, Link2 } from "lucide-react";
 import { useState } from "react";
+import { ENTITY_ACTION_CLASS } from "@/components/ui/entityAction";
 
 interface ShortLinkButtonProps {
   url: string;
@@ -26,14 +27,14 @@ export function ShortLinkButton({ url }: ShortLinkButtonProps) {
       type="button"
       onClick={copy}
       title={`Copy ${display}`}
-      className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+      className={ENTITY_ACTION_CLASS}
     >
       {copied ? (
-        <Check size={14} className="text-emerald-500" />
+        <Check size={13} className="text-emerald-500" />
       ) : (
-        <Link2 size={14} />
+        <Link2 size={13} />
       )}
-      {copied ? "Copied!" : "Short link"}
+      {copied ? "Copied" : "Short link"}
     </button>
   );
 }
