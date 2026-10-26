@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Connecting linked roles could fail with "This link has expired or
+  didn't come from Omniplex" when Discord finished the sign-in in a
+  different tab or browser than the one that started it, which is common
+  when starting from the Discord mobile app. The check now uses a
+  short-lived cookie as well as the tab's storage, and only rejects a
+  sign-in when a different one was started in the same browser.
+
 ### Changed
 
 - The Short link, Vote reminder, Compare and Report actions on bot,

@@ -8,10 +8,7 @@ import { Container } from "@/components/layout/Container";
 import { linkedRoles } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { LinkedRolesResult } from "@/lib/api/types";
-import {
-  LINKED_ROLES_STATE_KEY,
-  linkedRolesRedirectUri,
-} from "../ConnectButton";
+import { linkedRolesRedirectUri, takeLinkedRolesState } from "../ConnectButton";
 
 function Callback() {
   const params = useSearchParams();
@@ -25,17 +22,13 @@ function Callback() {
 
     const code = params.get("code");
     const state = params.get("state");
-    let expected: string | null = null;
-    try {
-      expected = sessionStorage.getItem(LINKED_ROLES_STATE_KEY);
-      sessionStorage.removeItem(LINKED_ROLES_STATE_KEY);
-    } catch {}
+    const expected = takeLinkedRolesState();
 
     if (params.get("error")) {
       setError("You cancelled the connection on Discord.");
       return;
     }
-    if (!code || !state || state !== expected) {
+    if (!code || (expected && state !== expected)) {
       setError(
         "This link has expired or didn't come from Omniplex. Start again from the Linked Roles page.",
       );
