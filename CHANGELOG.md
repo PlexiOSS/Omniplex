@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- An All Tags page (`/tags`) listing every tag in use with how many bots
+  and servers have it: the eight most used as cards, then the rest as
+  chips, with a filter box, Bots/Servers tabs and Most used or A–Z
+  sorting. It's linked from the homepage tags ("All tags"), the Browse
+  menu and the footer, and is in the sitemap.
+
+### Changed
+
+- Linked roles run through Infernoplex: the Linked Roles knowledge base
+  article and page tell server owners to add Infernoplex and pick it as
+  the requirement, and members pick Infernoplex when connecting from
+  Discord.
+
+- The homepage stats are a three-across grid of six (bots, servers,
+  certified, packs, votes cast and users), so they line up on phones
+  instead of wrapping into an uneven two-column block.
+
 ## [1.5.0] - 2026-10-25
 
 ### Added

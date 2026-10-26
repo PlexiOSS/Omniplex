@@ -56,6 +56,7 @@ const NAV_LINKS: (NavLink | NavGroup)[] = [
       { href: "/templates", label: "Templates" },
       { href: "/themes", label: "Themes" },
       { href: "/collections", label: "Collections" },
+      { href: "/tags", label: "Tags" },
     ],
   },
   {

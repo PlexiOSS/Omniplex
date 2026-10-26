@@ -177,8 +177,13 @@ export default async function HomePage() {
     ? [
         { label: "Bots", value: listedBots },
         { label: "Servers", value: listedServers },
-        { label: "Votes cast", value: stats.total_votes },
+        {
+          label: "Certified",
+          value: stats.total_certified_bots + stats.total_certified_servers,
+        },
         { label: "Packs", value: stats.total_packs },
+        { label: "Votes cast", value: stats.total_votes },
+        { label: "Users", value: stats.total_users },
       ].filter((stat) => stat.value > 0)
     : [];
 
@@ -235,9 +240,15 @@ export default async function HomePage() {
                   {tag}
                 </Link>
               ))}
+              <Link
+                href="/tags"
+                className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent/10"
+              >
+                All tags <ArrowRight size={12} />
+              </Link>
             </div>
             {heroStats.length > 0 && (
-              <dl className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4">
+              <dl className="mx-auto mt-10 grid max-w-xl grid-cols-3 gap-x-4 gap-y-6">
                 {heroStats.map((stat) => (
                   <div key={stat.label} className="flex flex-col items-center">
                     <dt className="order-2 mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">

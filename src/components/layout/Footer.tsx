@@ -13,6 +13,7 @@ const FOOTER_LINKS = [
       { href: "/packs", label: "View Packs" },
       { href: "/bots?sort=trending", label: "Trending Bots" },
       { href: "/bots?certified=true", label: "Certified Bots" },
+      { href: "/tags", label: "All Tags" },
       { href: "/search", label: "Search" },
     ],
   },

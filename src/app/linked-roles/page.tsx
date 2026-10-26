@@ -81,12 +81,12 @@ export default async function LinkedRolesPage() {
       </div>
 
       <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        Running a server?{" "}
+        Running a server? Add Infernoplex, then{" "}
         <Link
           href="/kb/account/linked-roles"
           className="text-accent hover:underline"
         >
-          Set up a linked role
+          set up a linked role
         </Link>
       </p>
     </Container>

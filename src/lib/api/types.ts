@@ -1848,3 +1848,13 @@ export interface LinkedRolesResult {
   username: string;
   badges: string[];
 }
+
+export interface ListTag {
+  tag: string;
+  bots: number;
+  servers: number;
+}
+
+export interface ListTags {
+  tags: ListTag[];
+}
