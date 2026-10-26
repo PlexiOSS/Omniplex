@@ -1,24 +1,29 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  GripVertical,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { staff } from "@/lib/api";
-import type { PermissionData } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffPosition } from "@/lib/arcadia/types";
-import { AdminPageHeader } from "../../../AdminPageHeader";
 import { useAdmin } from "../../../AdminContext";
-import { PositionEditModal } from "./PositionEditModal";
+import { AdminPageHeader } from "../../../AdminPageHeader";
 
 export default function StaffPositionsPage() {
+  const router = useRouter();
   const { loginToken, staffMember, hasPerm } = useAdmin();
 
   const [positions, setPositions] = useState<StaffPosition[] | null>(null);
-  const [catalog, setCatalog] = useState<PermissionData[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<StaffPosition | "new" | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -31,12 +36,7 @@ export default function StaffPositionsPage() {
 
   const load = useCallback(async () => {
     try {
-      const [pos, cat] = await Promise.all([
-        arcadia.staffPositions.list(loginToken),
-        staff.getPermissionCatalog(),
-      ]);
-      setPositions(pos);
-      setCatalog(cat.perms);
+      setPositions(await arcadia.staffPositions.list(loginToken));
     } catch (err) {
       setError(
         err instanceof ArcadiaError ? err.message : "Failed to load positions.",
@@ -47,6 +47,51 @@ export default function StaffPositionsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+  const [moving, setMoving] = useState(false);
+
+  async function moveTo(fromId: string, toId: string) {
+    if (!positions || fromId === toId) return;
+    const from = positions.findIndex((p) => p.id === fromId);
+    const to = positions.findIndex((p) => p.id === toId);
+    if (from < 0 || to < 0) return;
+    const range =
+      from < to ? positions.slice(from, to + 1) : positions.slice(to, from + 1);
+    if (range.some((p) => p.index <= myLowestIndex)) {
+      setError("You can't move a position above your own rank.");
+      return;
+    }
+    setMoving(true);
+    setError(null);
+    try {
+      if (from < to) {
+        for (let k = from; k < to; k++) {
+          await arcadia.staffPositions.swapIndex(
+            loginToken,
+            fromId,
+            positions[k + 1].id,
+          );
+        }
+      } else {
+        for (let k = from; k > to; k--) {
+          await arcadia.staffPositions.swapIndex(
+            loginToken,
+            fromId,
+            positions[k - 1].id,
+          );
+        }
+      }
+    } catch (err) {
+      setError(
+        err instanceof ArcadiaError ? err.message : "Failed to reorder.",
+      );
+    } finally {
+      await load();
+      setMoving(false);
+    }
+  }
 
   async function handleSwap(a: string, b: string) {
     try {
@@ -79,28 +124,31 @@ export default function StaffPositionsPage() {
       .finally(() => setDeleting(null));
   }
 
-  if (error && !positions) {
+  if (error && !positions)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center"><p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!positions) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!positions) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Staff Positions"
-        description="Lower index = more senior. You can't edit, delete, or reorder positions at or below your own lowest index."
+        description="Drag to reorder: higher up is more senior. You can't edit, delete or move positions at or above your own rank."
         action={
           hasPerm("manage_staff_roles") && (
-            <Button variant="primary" size="sm" onClick={() => setEditing("new")}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => router.push("/admin/staff/positions/new")}
+            >
               <Plus size={14} />
               New Position
             </Button>
@@ -112,23 +160,64 @@ export default function StaffPositionsPage() {
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
         {positions.map((position, i) => {
           const locked = position.index <= myLowestIndex;
           const prev = positions[i - 1];
           const next = positions[i + 1];
+          const canDrag = !locked && hasPerm("manage_staff_roles") && !moving;
 
           return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: drag-and-drop row; the arrow buttons are the keyboard alternative
             <div
               key={position.id}
-              className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+              draggable={canDrag}
+              onDragStart={(e) => {
+                setDragId(position.id);
+                e.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(e) => {
+                if (!dragId || locked) return;
+                e.preventDefault();
+                setOverId(position.id);
+              }}
+              onDragLeave={() =>
+                setOverId((o) => (o === position.id ? null : o))
+              }
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragId) moveTo(dragId, position.id);
+                setDragId(null);
+                setOverId(null);
+              }}
+              onDragEnd={() => {
+                setDragId(null);
+                setOverId(null);
+              }}
+              className={[
+                "flex items-center gap-3 px-4 py-3.5 transition-colors",
+                dragId === position.id ? "opacity-40" : "",
+                overId === position.id && dragId !== position.id
+                  ? "bg-accent/10 ring-1 ring-inset ring-accent/40"
+                  : "hover:bg-zinc-50 dark:hover:bg-zinc-800/40",
+                moving ? "pointer-events-none opacity-60" : "",
+              ].join(" ")}
             >
+              <span
+                className={[
+                  "shrink-0",
+                  canDrag
+                    ? "cursor-grab text-zinc-400 active:cursor-grabbing"
+                    : "text-zinc-200 dark:text-zinc-700",
+                ].join(" ")}
+                title={canDrag ? "Drag to reorder" : undefined}
+              >
+                <GripVertical size={16} />
+              </span>
               <div className="flex flex-col gap-0.5">
                 <button
                   type="button"
-                  disabled={
-                    !prev || locked || !hasPerm("manage_staff_roles")
-                  }
+                  disabled={!prev || locked || !hasPerm("manage_staff_roles")}
                   onClick={() => prev && handleSwap(position.id, prev.id)}
                   className="text-zinc-400 hover:text-zinc-900 disabled:opacity-30 dark:hover:text-zinc-50"
                 >
@@ -136,9 +225,7 @@ export default function StaffPositionsPage() {
                 </button>
                 <button
                   type="button"
-                  disabled={
-                    !next || locked || !hasPerm("manage_staff_roles")
-                  }
+                  disabled={!next || locked || !hasPerm("manage_staff_roles")}
                   onClick={() => next && handleSwap(position.id, next.id)}
                   className="text-zinc-400 hover:text-zinc-900 disabled:opacity-30 dark:hover:text-zinc-50"
                 >
@@ -151,7 +238,7 @@ export default function StaffPositionsPage() {
                   <span className="font-semibold text-zinc-950 dark:text-zinc-50">
                     {position.name}
                   </span>
-                  <Badge variant="info">index {position.index}</Badge>
+                  <Badge variant="info">#{position.index}</Badge>
                   {locked && <Badge variant="warning">Locked</Badge>}
                 </div>
                 <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
@@ -167,7 +254,11 @@ export default function StaffPositionsPage() {
                     variant="ghost"
                     size="sm"
                     disabled={locked}
-                    onClick={() => setEditing(position)}
+                    onClick={() =>
+                      router.push(
+                        `/admin/staff/positions/${encodeURIComponent(position.id)}`,
+                      )
+                    }
                   >
                     <Pencil size={12} />
                   </Button>
@@ -190,31 +281,6 @@ export default function StaffPositionsPage() {
           );
         })}
       </div>
-
-      {editing === "new" && (
-        <PositionEditModal
-          loginToken={loginToken}
-          granterPerms={staffMember.resolved_perms}
-          catalog={catalog}
-          defaultIndex={
-            positions.length > 0
-              ? Math.max(...positions.map((p) => p.index)) + 1
-              : 0
-          }
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
-      {editing && editing !== "new" && (
-        <PositionEditModal
-          loginToken={loginToken}
-          granterPerms={staffMember.resolved_perms}
-          catalog={catalog}
-          position={editing}
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
     </div>
   );
 }

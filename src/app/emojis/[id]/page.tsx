@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { AssetDownloadButton } from "@/components/packs/AssetDownloadButton";
 import { AssetShortLink } from "@/components/packs/AssetShortLink";
+import { DiscordPreview } from "@/components/packs/DiscordPreview";
 import { SimilarPackAssets } from "@/components/packs/SimilarPackAssets";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -107,6 +108,8 @@ export default async function EmojiPage({ params }: Props) {
             </Link>
           </p>
 
+          <DiscordPreview kind="emoji" src={assetUrl} name={emoji.name} />
+
           <SimilarPackAssets
             kind="emoji"
             packUrl={emoji.pack_url}
@@ -127,7 +130,7 @@ export default async function EmojiPage({ params }: Props) {
 
           <AssetShortLink vanity={emoji.vanity} basePath="/emojis" />
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
               Stats
             </h3>
@@ -140,7 +143,7 @@ export default async function EmojiPage({ params }: Props) {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
               Uploaded by
             </h3>

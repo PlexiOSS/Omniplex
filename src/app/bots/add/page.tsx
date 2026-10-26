@@ -1,12 +1,24 @@
 "use client";
 
-import { BookOpen, Pencil, Server, ShieldCheck } from "lucide-react";
+import { BookOpen, Bot, Pencil, Server, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { InviteCheck } from "@/components/bots/InviteCheck";
+import { JoinServerCard } from "@/components/discord/JoinServerCard";
+import {
+  FieldLabel,
+  FormChecklist,
+  FormError,
+  FormLayout,
+  FormSection,
+  FormSteps,
+  NsfwToggle,
+  TEXTAREA_CLASS,
+} from "@/components/forms/FormSection";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { TeamPicker } from "@/components/teams/TeamPicker";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -221,137 +233,183 @@ export default function AddBotPage() {
     }
   }
 
+  const stage = !botMeta || !botIdConfirmed ? 0 : !confirmed ? 1 : 2;
+
+  const rulesNote = (
+    <div className="flex items-start gap-3 rounded-xl border border-accent/20 bg-accent/5 p-4 text-sm text-zinc-700 dark:text-zinc-300">
+      <BookOpen size={16} className="mt-0.5 shrink-0 text-accent" />
+      <p>
+        Read the{" "}
+        <Link
+          href="/kb/bots/rules"
+          className="font-medium text-accent underline underline-offset-2"
+        >
+          Bot Rules
+        </Link>{" "}
+        and{" "}
+        <Link
+          href="/kb/bots/page-rules"
+          className="font-medium text-accent underline underline-offset-2"
+        >
+          Page Rules
+        </Link>{" "}
+        first. Bots that don't follow them are denied.
+      </p>
+    </div>
+  );
+
+  const prepAside = (
+    <>
+      <FormChecklist
+        title="Before you start"
+        items={[
+          "Your bot's application ID from the Discord Developer Portal.",
+          <>
+            <strong className="font-medium text-zinc-800 dark:text-zinc-200">
+              Public Bot
+            </strong>{" "}
+            turned on, so anyone can invite it.
+          </>,
+          "An invite link that doesn't ask for Administrator.",
+          "A short description (30+ characters) and a long one (500+).",
+          "A prefix, or / if it only uses slash commands.",
+        ]}
+      />
+      <FormChecklist
+        title="What happens next"
+        numbered
+        items={[
+          "Your bot joins the review queue.",
+          "A reviewer tests it against the Bot Rules.",
+          "You're notified when it's approved, or told why if it's denied.",
+        ]}
+      />
+      {rulesNote}
+    </>
+  );
+
   return (
     <Container className="py-10">
-      <div className="max-w-xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Add a Bot
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Submit your Discord bot for review. You'll need the bot's Discord
-            user ID find it in the{" "}
-            <a
-              href="https://discord.com/developers/applications"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-accent underline-offset-2"
-            >
-              Developer Portal
-            </a>
-            .
-          </p>
-        </div>
+      <PageHeader
+        icon={Bot}
+        title="Add a Bot"
+        description="Submit your Discord bot for review. Our staff check every bot before it goes live."
+      />
+      <FormSteps
+        steps={["Find your bot", "Confirm", "Details"]}
+        current={stage}
+      />
 
-        <div className="flex items-start gap-3 p-4 mb-6 text-sm border rounded-xl border-accent/20 bg-accent/5 text-zinc-700 dark:text-zinc-300">
-          <BookOpen size={16} className="mt-0.5 shrink-0 text-accent" />
-          <p>
-            Before submitting, please read the{" "}
-            <Link
-              href="/kb/bots/rules"
-              className="font-medium underline text-accent underline-offset-2"
-            >
-              Bot Rules
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/kb/bots/page-rules"
-              className="font-medium underline text-accent underline-offset-2"
-            >
-              Page Rules
-            </Link>
-            . Bots that don't follow them will be denied.
-          </p>
-        </div>
-
-        {!botMeta || !botIdConfirmed ? (
-          <div className="space-y-4">
-            <Input
-              id="bot_id"
-              label="Bot ID"
-              placeholder="123456789012345678"
-              value={form.bot_id}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, bot_id: e.target.value }))
-              }
-              required
-            />
-
-            {needsFallback && (
+      {stage === 0 ? (
+        <FormLayout aside={prepAside}>
+          <FormSection
+            title="Find your bot"
+            description={
+              <>
+                Paste your bot's application ID from the{" "}
+                <a
+                  href="https://discord.com/developers/applications"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent underline underline-offset-2"
+                >
+                  Developer Portal
+                </a>
+                . We'll pull in its name and avatar.
+              </>
+            }
+          >
+            <div className="space-y-4">
               <Input
-                id="fallback_bot_id"
-                label="Fallback Bot ID"
-                placeholder="Usually the same as the Bot ID above"
-                value={fallbackBotId}
-                onChange={(e) => setFallbackBotId(e.target.value)}
+                id="bot_id"
+                label="Bot ID"
+                placeholder="123456789012345678"
+                value={form.bot_id}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, bot_id: e.target.value }))
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    lookupBot();
+                  }
+                }}
+                required
               />
-            )}
 
-            {lookupError && (
-              <div className="px-4 py-3 text-sm text-red-700 border border-red-200 rounded-xl bg-red-50 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-                {lookupError}
-              </div>
-            )}
-
-            <Button
-              type="button"
-              variant="primary"
-              loading={lookupLoading}
-              onClick={lookupBot}
-              className="w-full"
-            >
-              Look up bot
-            </Button>
-          </div>
-        ) : !confirmed ? (
-          <div className="space-y-4">
-            <div className="p-5 border rounded-2xl border-zinc-200 dark:border-zinc-800">
-              <div className="flex items-center gap-4">
-                <Avatar src={botMeta.avatar} alt={botMeta.name} size={64} />
-                <div className="min-w-0">
-                  <p className="text-lg font-semibold truncate text-zinc-950 dark:text-zinc-50">
-                    {botMeta.name}
-                  </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {botMeta.bot_id}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-4">
-                <Badge variant="success">
-                  <ShieldCheck size={11} />
-                  Public
-                </Badge>
-                {botMeta.fallback && (
-                  <Badge variant="warning">
-                    Limited info (fallback lookup)
-                  </Badge>
-                )}
-                {(botMeta.flags ?? []).map((flag) => (
-                  <Badge key={flag}>{flag.replaceAll("_", " ")}</Badge>
-                ))}
-              </div>
-
-              <div className="mt-3 flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                <Server size={14} />
-                {formatCount(botMeta.guild_count)} servers reported
-              </div>
-
-              {botMeta.description && (
-                <p className="mt-3 text-sm line-clamp-3 text-zinc-500 dark:text-zinc-400">
-                  {botMeta.description}
-                </p>
+              {needsFallback && (
+                <Input
+                  id="fallback_bot_id"
+                  label="Fallback Bot ID"
+                  placeholder="Usually the same as the Bot ID above"
+                  value={fallbackBotId}
+                  onChange={(e) => setFallbackBotId(e.target.value)}
+                />
               )}
+
+              {lookupError && <FormError>{lookupError}</FormError>}
+
+              <Button
+                type="button"
+                variant="primary"
+                loading={lookupLoading}
+                onClick={lookupBot}
+                className="w-full"
+              >
+                Look up bot
+              </Button>
+            </div>
+          </FormSection>
+        </FormLayout>
+      ) : stage === 1 && botMeta ? (
+        <FormLayout aside={prepAside}>
+          <FormSection
+            title="Is this your bot?"
+            description="This comes straight from Discord."
+          >
+            <div className="flex items-center gap-4">
+              <Avatar src={botMeta.avatar} alt={botMeta.name} size={64} />
+              <div className="min-w-0">
+                <p className="truncate text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                  {botMeta.name}
+                </p>
+                <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                  {botMeta.bot_id}
+                </p>
+              </div>
             </div>
 
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Badge variant="success">
+                <ShieldCheck size={11} />
+                Public
+              </Badge>
+              {botMeta.fallback && (
+                <Badge variant="warning">Limited info (fallback lookup)</Badge>
+              )}
+              {(botMeta.flags ?? []).map((flag) => (
+                <Badge key={flag}>{flag.replaceAll("_", " ")}</Badge>
+              ))}
+            </div>
+
+            <div className="mt-3 flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+              <Server size={14} />
+              {formatCount(botMeta.guild_count)} servers reported
+            </div>
+
+            {botMeta.description && (
+              <p className="mt-3 line-clamp-3 text-sm text-zinc-500 dark:text-zinc-400">
+                {botMeta.description}
+              </p>
+            )}
+
             {lookupError && (
-              <div className="px-4 py-3 text-sm text-red-700 border border-red-200 rounded-xl bg-red-50 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-                {lookupError}
+              <div className="mt-4">
+                <FormError>{lookupError}</FormError>
               </div>
             )}
 
-            <div className="flex gap-2">
+            <div className="mt-5 flex gap-2">
               <Button
                 type="button"
                 variant="primary"
@@ -365,104 +423,158 @@ export default function AddBotPage() {
                 Change
               </Button>
             </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Fetched bot identity — name comes straight from Discord and
-                can't be edited here, it's re-fetched from the Bot ID above. */}
-            <div className="flex items-center gap-3 p-3 border rounded-xl border-zinc-200 dark:border-zinc-800">
-              <Avatar src={botMeta.avatar} alt={botMeta.name} size={40} />
-              <div className="flex-1 min-w-0">
-                <Input
-                  id="bot_name"
-                  label="Bot Name"
-                  value={botMeta.name}
-                  disabled
-                />
+          </FormSection>
+        </FormLayout>
+      ) : botMeta ? (
+        <form onSubmit={handleSubmit}>
+          <FormLayout
+            aside={
+              <>
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    Preview
+                  </p>
+                  <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        src={botMeta.avatar}
+                        alt={botMeta.name}
+                        size={44}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-zinc-950 dark:text-zinc-50">
+                          {botMeta.name}
+                        </p>
+                        <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                          {form.library.trim() || "Library"}
+                          {form.prefix.trim() && ` · ${form.prefix.trim()}`}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={changeBot}
+                        aria-label="Change bot"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                    </div>
+                    <p className="mt-3 line-clamp-3 text-sm text-zinc-600 dark:text-zinc-300">
+                      {form.short.trim() ||
+                        "Your short description shows here."}
+                    </p>
+                    {form.tags.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1">
+                        {form.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {error && <FormError>{error}</FormError>}
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  loading={submitting}
+                  size="lg"
+                  className="w-full"
+                >
+                  Submit for review
+                </Button>
+                <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+                  Your draft is saved in this browser as you type.
+                </p>
+                {rulesNote}
+              </>
+            }
+          >
+            <JoinServerCard />
+
+            <FormSection
+              step={1}
+              title="Basics"
+              description="How people find and add your bot."
+            >
+              <div className="space-y-4">
+                <div>
+                  <FieldLabel
+                    htmlFor="short"
+                    required
+                    count={`${form.short.length}/191`}
+                  >
+                    Short Description
+                  </FieldLabel>
+                  <textarea
+                    id="short"
+                    rows={2}
+                    maxLength={191}
+                    value={form.short}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, short: e.target.value }))
+                    }
+                    placeholder="One or two sentences describing what your bot does."
+                    className={`resize-none ${TEXTAREA_CLASS}`}
+                    required
+                  />
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    At least 30 characters.
+                  </p>
+                </div>
+
+                <div>
+                  <Input
+                    id="invite"
+                    label="Invite URL"
+                    type="url"
+                    placeholder="https://discord.com/oauth2/authorize?client_id=..."
+                    value={form.invite}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, invite: e.target.value }))
+                    }
+                    required
+                  />
+                  <InviteCheck invite={form.invite} />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    id="prefix"
+                    label="Prefix"
+                    placeholder="! or / for slash commands only"
+                    maxLength={10}
+                    value={form.prefix}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, prefix: e.target.value }))
+                    }
+                    required
+                  />
+                  <Input
+                    id="library"
+                    label="Library"
+                    placeholder="discord.js, discord.py, serenity…"
+                    value={form.library}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, library: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={changeBot}
-              >
-                <Pencil size={12} />
-                Change
-              </Button>
-            </div>
+            </FormSection>
 
-            {/* Short description */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="short"
-                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                Short Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="short"
-                rows={2}
-                maxLength={191}
-                value={form.short}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, short: e.target.value }))
-                }
-                placeholder="One or two sentences describing what your bot does."
-                className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-                required
-              />
-              <p className="text-xs text-right text-zinc-400">
-                {form.short.length}/191 (30 minimum)
-              </p>
-            </div>
-
-            {/* Invite URL */}
-            <Input
-              id="invite"
-              label="Invite URL"
-              type="url"
-              placeholder="https://discord.com/oauth2/authorize?client_id=..."
-              value={form.invite}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, invite: e.target.value }))
-              }
-              required
-            />
-            <InviteCheck invite={form.invite} />
-
-            {/* Prefix */}
-            <Input
-              id="prefix"
-              label="Prefix"
-              placeholder="! / $ / . / (use / for slash-command only bots)"
-              maxLength={10}
-              value={form.prefix}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, prefix: e.target.value }))
-              }
-              required
-            />
-
-            {/* Library */}
-            <Input
-              id="library"
-              label="Library"
-              placeholder="discord.js, discord.py, serenity…"
-              value={form.library}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, library: e.target.value }))
-              }
-              required
-            />
-
-            {/* Tags */}
-            <div>
-              <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Tags <span className="text-red-500">*</span>
-                <span className="ml-1 text-xs font-normal text-zinc-400">
-                  (1-5)
-                </span>
-              </p>
+            <FormSection
+              step={2}
+              title="Tags"
+              description="Pick 1 to 5 that describe what your bot does."
+            >
               <TagPicker
                 available={AVAILABLE_TAGS}
                 selected={form.tags}
@@ -470,86 +582,68 @@ export default function AddBotPage() {
                   setForm((f) => ({ ...f, tags: tags.slice(0, 5) }))
                 }
               />
-            </div>
+            </FormSection>
 
-            {/* Long description */}
-            <div className="flex flex-col gap-1.5">
-              <label
+            <FormSection
+              step={3}
+              title="Long description"
+              description="Your bot's page: features, commands and setup. HTML is supported."
+            >
+              <FieldLabel
                 htmlFor="long"
-                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                required
+                count={`${form.long.length} / 500 min`}
               >
-                Long Description <span className="text-red-500">*</span>{" "}
-                <span className="text-xs text-zinc-400">(HTML supported)</span>
-              </label>
+                Description
+              </FieldLabel>
               <textarea
                 id="long"
-                rows={8}
+                rows={12}
                 value={form.long}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, long: e.target.value }))
                 }
                 placeholder="Describe your bot in detail: features, commands, setup instructions…"
-                className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+                className={`resize-y ${TEXTAREA_CLASS}`}
                 required
               />
-              <p className="text-xs text-right text-zinc-400">
-                {form.long.length} characters (500 minimum)
-              </p>
-            </div>
+            </FormSection>
 
-            {/* Extra links */}
-            <div>
-              <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Extra Links
-              </p>
-              <LinksEditor
-                links={form.links}
-                onChange={(links) => setForm((f) => ({ ...f, links }))}
-              />
-            </div>
-
-            <TeamPicker
-              teams={me?.user_teams ?? []}
-              currentUserId={session.user_id}
-              requiredPerm="add_bots"
-              entityLabel="bots"
-              value={form.team_owner}
-              onChange={(team_owner) => setForm((f) => ({ ...f, team_owner }))}
-            />
-
-            {/* NSFW */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.nsfw}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, nsfw: e.target.checked }))
-                }
-                className="w-4 h-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-              />
-              <span className="text-sm text-zinc-700 dark:text-zinc-300">
-                This bot contains NSFW content
-              </span>
-            </label>
-
-            {error && (
-              <div className="px-4 py-3 text-sm text-red-700 border border-red-200 rounded-xl bg-red-50 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              loading={submitting}
-              size="lg"
-              className="w-full"
+            <FormSection
+              step={4}
+              title="Links and ownership"
+              description="Support server, website or source code, and who owns the listing."
             >
-              Submit Bot
-            </Button>
-          </form>
-        )}
-      </div>
+              <div className="space-y-5">
+                <div>
+                  <FieldLabel>Extra Links</FieldLabel>
+                  <LinksEditor
+                    links={form.links}
+                    onChange={(links) => setForm((f) => ({ ...f, links }))}
+                  />
+                </div>
+
+                <TeamPicker
+                  teams={me?.user_teams ?? []}
+                  currentUserId={session.user_id}
+                  requiredPerm="add_bots"
+                  entityLabel="bots"
+                  value={form.team_owner}
+                  onChange={(team_owner) =>
+                    setForm((f) => ({ ...f, team_owner }))
+                  }
+                />
+
+                <NsfwToggle
+                  checked={form.nsfw}
+                  onChange={(nsfw) => setForm((f) => ({ ...f, nsfw }))}
+                  label="This bot has NSFW content or commands."
+                />
+              </div>
+            </FormSection>
+          </FormLayout>
+        </form>
+      ) : null}
     </Container>
   );
 }

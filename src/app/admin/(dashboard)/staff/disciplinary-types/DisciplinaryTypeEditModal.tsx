@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { PermissionData } from "@/lib/api/types";
-import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import type { StaffDisciplinaryType } from "@/lib/arcadia/types";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import type { PermissionData } from "@/lib/api/types";
+import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
+import type { StaffDisciplinaryType } from "@/lib/arcadia/types";
 import { ArcadiaPermSelector } from "../../ArcadiaPermSelector";
 
 interface DisciplinaryTypeEditModalProps {

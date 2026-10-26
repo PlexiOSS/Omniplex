@@ -7,8 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-25
+
 ### Added
 
+- Five new day themes in the brand kit (`public/brand/themes/`): St.
+  Patrick's Day, Earth Day, Canada Day, Truth and Reconciliation (Orange
+  Shirt Day) and Remembrance. Each has the same server icon, animated
+  icon, emoji and banners as the seasonal themes. Truth and
+  Reconciliation and Remembrance are deliberately calm, with no falling
+  particles. The brand README's calendar lists when to use each one.
+- A Platform Stats page at `/about/stats`: listed bots, listed servers,
+  votes, users and packs, bots and servers broken down by status
+  (approved, certified, in review, denied), and the most used tags.
+- "How it looks in Discord" previews on emoji and sticker pages, showing
+  the asset in a message in Discord's dark and light themes.
+- A "Join the Omniplex Discord server" card on the Add a Bot and Add a
+  Server forms (optional, with the benefits), which turns into "You're in
+  the Omniplex Discord server" once you've joined and has an "I've
+  joined, check again" button. Certification, Server Certification and
+  Partner applications show the required version and can't be submitted
+  until you've joined, and the Apply page marks those programs as for
+  server members.
+- Queue cards show whether an owner is in the Omniplex Discord server.
+- A staff panel sidebar replacing the admin links in the header: the
+  signed-in staff member and their top position, a "Jump to" filter, the
+  pages grouped into General, Moderation, Staff, Content and Shop (each
+  group collapsible), live counts for the queue, open reports, open
+  tickets and pending applications (refreshed every minute), Back to
+  Omniplex and Sign out, and a collapse-to-icons mode. Collapsed groups
+  and the icon mode are remembered. On phones it's a section picker at the
+  top of the page.
+- The staff panel Overview shows what needs attention (bot and server
+  queues with unclaimed counts and the oldest wait, open reports, open
+  tickets, pending applications, each linking to its page) and the latest
+  staff actions, above the existing platform totals.
+- Queue entries show how long they've been waiting ("Waiting 9 days",
+  amber after a week and red after two) and how long ago they were
+  claimed.
+- The staff position editor can set a position's roles in the main,
+  testing and staff servers, and keeps any other corresponding roles it
+  doesn't recognise.
+- Redesigned staff sign-in and two-factor screens: an Arcadia-branded
+  panel, a Discord → Two-factor → Done progress indicator, a six-box code
+  entry that accepts a pasted code and submits on its own, the setup QR
+  code on a white tile so it scans in dark mode, and the manual key in
+  groups of four with a copy button.
 - An All Tags page (`/tags`) listing every tag in use with how many bots
   and servers have it: the eight most used as cards, then the rest as
   chips, with a filter box, Bots/Servers tabs and Most used or A–Z
@@ -17,14 +61,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The About page was rebuilt: live numbers linking to Platform Stats, the
+  Infinity Bot List story, what you can do on Omniplex (including badges,
+  linked roles and the developer API), the three Omniplex bots, and links
+  to stats, moderation, the team, status, docs and the changelog. It no
+  longer claims "thousands" of bots or describes packs as bots only.
+- Every submit form now shares one layout: a page header, numbered
+  section cards, and a sticky side column with a live preview or
+  guidance, the error message and the submit button. This covers Add a
+  Bot, Add a Server, Create a Pack, Create a Team, Submit a Theme, Submit
+  a Server Template, Open a Ticket and the staff/partner application
+  forms.
+  - Add a Bot and Add a Server show a step indicator (find, confirm,
+    details), and the first two steps have "Before you start" and "What
+    happens next" panels instead of empty space. Prefix and library sit
+    side by side, and the preview shows your short description and tags
+    as you type.
+  - Create a Pack has icon type cards, a URL field that shows the full
+    link, a per-type description placeholder, a clearer list of added
+    bots or servers, and a live preview.
+  - Submit a Theme previews the theme on your own profile card as you
+    pick colors.
+  - Application forms put each question in its own numbered card, with
+    the role's details and an answered-questions progress bar beside
+    them.
+  - The NSFW checkbox is now a labelled card on every form.
+- The sidebar cards on emoji, sticker, sound, template and theme pages
+  now have a solid card background.
+- The homepage hero no longer shows the stats grid.
+- The rotating word in the homepage heading ("bots", "servers", "packs")
+  resizes to each word instead of reserving room for the longest one, so
+  "Discord bots" and "Discord packs" no longer have a gap in the middle.
+- Public pages share a page header (an icon tile, title, description and
+  actions) and shared loading, error and empty states: Emojis, Stickers,
+  Sounds, Server Templates, Themes, Blog and Collections use them, so
+  loading is a centred spinner, a failed load can be retried instead of
+  only saying it failed, and Legal gets the same icon header as Tickets.
+- The 404 page links to browsing bots and servers, search and the
+  knowledge base instead of only "Go home", and the error page offers
+  Try again and Go home and asks people to open a ticket with the error
+  code if it keeps happening.
+- The changelog, blog, badge, coupon and staff position editors are full
+  pages (`/admin/<section>/new` and `/admin/<section>/<id>`) instead of
+  pop-ups, with a back link, the section header and taller text boxes.
+  The list pages link to them, so an edit can be bookmarked or opened in a
+  new tab.
+- Staff Members has a search (name, ID or position) and No MFA, Frozen
+  and Unaccounted filters with counts, sorts by rank, marks you with a
+  "You" tag, highlights each member's top position and shows a lock
+  instead of the edit button for people ranked above you.
+- Staff Positions can be reordered by dragging a row (the arrows stay for
+  keyboard use). A drag that would pass a position at or above your rank
+  is refused before anything changes.
+- RPC Logs is an expandable list: each row says who ran what, on which
+  target and why; opening it shows every field with readable labels and
+  the raw data. It has a search (staff, action or target ID) and
+  Succeeded, Failed and Pending filters.
+- Design overhaul of the staff panel's shared parts, so every section
+  picks it up: pages are wider with consistent padding; page headers show
+  the section (such as "Staff") with the page's icon; the Badges, Blog,
+  Changelog, Partners, Reports, Search, Shop, Disciplinary Types, Members,
+  Positions, Templates and Tickets lists are one joined card with dividers
+  and row hover instead of a stack of separate boxes; empty states have an
+  icon; and Queue, Applications and stat cards sit on a raised surface.
+- The sign-in page and Discord callback share a new split layout: what an
+  account gets you on an Omniplex-branded panel, and the sign-in on the
+  other side. It explains what Omniplex asks Discord for (basic profile
+  and server list, never passwords, email or messages), links the Terms
+  and Privacy Policy, and gives errors an icon and clearer wording,
+  including a "Your account is banned" heading before the appeal button.
+- Staff panel pages share one loading state and one error state, and the
+  error state has a "Try again" button instead of only a message.
+- The admin Applications page takes position names from the live
+  `/apps/meta` list instead of a hardcoded copy.
+- The site footer is hidden in the staff panel.
 - Linked roles run through Infernoplex: the Linked Roles knowledge base
   article and page tell server owners to add Infernoplex and pick it as
   the requirement, and members pick Infernoplex when connecting from
   Discord.
 
-- The homepage stats are a three-across grid of six (bots, servers,
-  certified, packs, votes cast and users), so they line up on phones
-  instead of wrapping into an uneven two-column block.
+### Fixed
+
+- The Platform Status link on the About page went to a page that
+  doesn't exist. It now goes to status.omniplex.gg.
+- The payment success page said premium was applied "to your bot" even
+  when a server was upgraded.
+- More copy left behind by the em-dash cleanup: "ranked automatically by
+  votes nothing here is hand-ordered" on Collections, and `--` on Server
+  Templates, Submit a Template, the pack upload form and the vote credits
+  panel.
+- Saving a coupon in the staff panel cleared its allowed users, so a
+  coupon meant for specific people became usable by anyone after any
+  edit. The editor now has an Allowed users field and keeps the existing
+  requirements.
+- The coupon editor labelled reuse wait and expiry in seconds, but
+  Popplio reads them as hours, and it required all three limits even
+  though each is optional. They're now in hours and can be left empty
+  for no limit. The price field is labelled as the item price with the
+  coupon (in credits) rather than a dollar discount, and the coupon list
+  says "Items for 0.50 credits", "Items free" and "unlimited uses"
+  instead of "0.50 off" and "? uses".
+- Staff panel copy: the Search description ran two sentences together,
+  the Coupons description used `--`, and the Positions description said
+  positions "at or below your own lowest index" when it meant at or
+  above your rank.
 
 ## [1.5.0] - 2026-10-25
 

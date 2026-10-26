@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { PermissionData } from "@/lib/api/types";
+import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffMember } from "@/lib/arcadia/types";
 import { ArcadiaPermSelector } from "../../ArcadiaPermSelector";
 

@@ -2,15 +2,16 @@
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { staff } from "@/lib/api";
 import type { PermissionData } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffDisciplinaryType } from "@/lib/arcadia/types";
-import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
-import { AdminPageHeader } from "../../../AdminPageHeader";
 import { useAdmin } from "../../../AdminContext";
+import { AdminPageHeader } from "../../../AdminPageHeader";
 import { DisciplinaryTypeEditModal } from "./DisciplinaryTypeEditModal";
 
 export default function DisciplinaryTypesPage() {
@@ -67,28 +68,31 @@ export default function DisciplinaryTypesPage() {
       .finally(() => setDeleting(null));
   }
 
-  if (error && !types) {
+  if (error && !types)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center"><p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!types) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!types) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Disciplinary Types"
         description="Templates for staff warnings/suspensions: self-assignable severity, the permissions they limit a member to, and whether they need approval before taking effect."
         action={
           hasPerm("manage_disciplinaries") && (
-            <Button variant="primary" size="sm" onClick={() => setEditing("new")}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setEditing("new")}
+            >
               <Plus size={14} />
               New Type
             </Button>
@@ -100,7 +104,7 @@ export default function DisciplinaryTypesPage() {
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
         {types.length === 0 && (
           <AdminEmptyState message="No disciplinary types yet." />
         )}
@@ -118,9 +122,7 @@ export default function DisciplinaryTypesPage() {
                     <Pencil size={12} />
                   </Button>
                   <Button
-                    variant={
-                      confirmDeleteId === type.id ? "danger" : "ghost"
-                    }
+                    variant={confirmDeleteId === type.id ? "danger" : "ghost"}
                     size="sm"
                     loading={deleting === type.id}
                     onClick={() => handleDeleteClick(type.id)}

@@ -83,50 +83,9 @@ const CREATE_LINKS = [
   { href: "/teams/add", label: "Create a Team" },
 ];
 
-const ADMIN_NAV_LINKS: (NavLink | NavGroup)[] = [
-  { href: "/admin", label: "Overview" },
-  {
-    label: "Moderation",
-    items: [
-      { href: "/admin/queue", label: "Queue" },
-      { href: "/admin/applications", label: "Applications" },
-      { href: "/admin/reports", label: "Reports" },
-      { href: "/admin/tickets", label: "Tickets" },
-      { href: "/admin/actions", label: "Global Actions" },
-    ],
-  },
-  {
-    label: "Staff",
-    items: [
-      { href: "/admin/staff/positions", label: "Positions" },
-      { href: "/admin/staff/members", label: "Members" },
-      { href: "/admin/staff/disciplinary-types", label: "Disciplinary Types" },
-    ],
-  },
-  {
-    label: "Content",
-    items: [
-      { href: "/admin/blog", label: "Blog" },
-      { href: "/admin/changelog", label: "Changelog" },
-      { href: "/admin/partners", label: "Partners" },
-      { href: "/admin/badges", label: "Badges" },
-      { href: "/admin/templates", label: "Templates" },
-    ],
-  },
-  {
-    label: "Shop",
-    items: [
-      { href: "/admin/shop/items", label: "Items" },
-      { href: "/admin/shop/benefits", label: "Benefits" },
-      { href: "/admin/shop/tiers", label: "Vote Credit Tiers" },
-      { href: "/admin/shop/coupons", label: "Coupons" },
-      { href: "/admin/shop/whitelist", label: "Bot Whitelist" },
-      { href: "/admin/shop/purchases", label: "Purchases" },
-    ],
-  },
-  { href: "/admin/search", label: "Search" },
-  { href: "/admin/logs", label: "Logs" },
-];
+function AdminHeaderWrap({ children }: { children: React.ReactNode }) {
+  return <div className="w-full px-4 lg:px-5">{children}</div>;
+}
 
 function isNavGroup(item: NavLink | NavGroup): item is NavGroup {
   return "items" in item;
@@ -161,7 +120,7 @@ export function Header() {
     pathname.startsWith("/admin") &&
     pathname !== "/admin/login" &&
     !pathname.startsWith("/admin/auth");
-  const links = isAdminSection ? ADMIN_NAV_LINKS : NAV_LINKS;
+  const links = isAdminSection ? [] : NAV_LINKS;
   const mobileLinks: (NavLink | NavGroup)[] = isAdminSection
     ? links
     : [...links, { label: "Create", items: CREATE_LINKS }];
@@ -170,6 +129,8 @@ export function Header() {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
+
+  const HeaderWrap = isAdminSection ? AdminHeaderWrap : Container;
 
   function exitStaffPanel() {
     router.push("/");
@@ -185,7 +146,7 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
-        <Container>
+        <HeaderWrap>
           <div className="flex items-center justify-between gap-4 h-14">
             {/* Logo */}
             <Link
@@ -329,7 +290,7 @@ export function Header() {
               )}
             </div>
           </div>
-        </Container>
+        </HeaderWrap>
 
         {/* Mobile nav panel */}
         {mobileNavOpen && (

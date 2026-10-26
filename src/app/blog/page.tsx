@@ -1,11 +1,13 @@
+import { ArrowRight, Newspaper } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { blogs } from "@/lib/api";
+import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { Container } from "@/components/layout/Container";
-import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { blogs } from "@/lib/api";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { formatRelativeTime } from "@/lib/utils/format";
 
@@ -23,19 +25,16 @@ export default async function BlogPage() {
 
   return (
     <Container className="py-10">
-      <div className="mb-10">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Blog
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          News, updates, and guides from the Omniplex team.
-        </p>
-      </div>
+      <PageHeader
+        icon={Newspaper}
+        title="Blog"
+        description="News, updates and guides from the Omniplex team."
+      />
 
       {posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-zinc-500 dark:text-zinc-400">
-          <p className="text-sm">No posts yet. Check back soon.</p>
-        </div>
+        <EmptyState icon={Newspaper} title="No posts yet">
+          Check back soon.
+        </EmptyState>
       ) : (
         <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
           {posts.map((post) => (

@@ -1,22 +1,23 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { BlogPost } from "@/lib/arcadia/types";
-import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
-import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
-import { BlogEditModal } from "./BlogEditModal";
+import { AdminPageHeader } from "../../AdminPageHeader";
 
 export default function BlogAdminPage() {
+  const router = useRouter();
   const { loginToken, hasPerm } = useAdmin();
 
   const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<BlogPost | "new" | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDeleteItag, setConfirmDeleteItag] = useState<string | null>(
     null,
@@ -57,22 +58,21 @@ export default function BlogAdminPage() {
       .finally(() => setDeleting(null));
   }
 
-  if (error && !posts) {
+  if (error && !posts)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center"><p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!posts) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!posts) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Blog"
         description={
@@ -82,7 +82,11 @@ export default function BlogAdminPage() {
         }
         action={
           hasPerm("manage_blog") && (
-            <Button variant="primary" size="sm" onClick={() => setEditing("new")}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => router.push("/admin/blog/new")}
+            >
               <Plus size={14} />
               New Post
             </Button>
@@ -94,10 +98,8 @@ export default function BlogAdminPage() {
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      <div className="mt-6 space-y-2">
-        {posts.length === 0 && (
-          <AdminEmptyState message="No blog posts yet." />
-        )}
+      <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+        {posts.length === 0 && <AdminEmptyState message="No blog posts yet." />}
         {posts.map((post) => (
           <AdminListRow
             key={post.itag}
@@ -107,7 +109,11 @@ export default function BlogAdminPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setEditing(post)}
+                    onClick={() =>
+                      router.push(
+                        `/admin/blog/${encodeURIComponent(post.itag)}`,
+                      )
+                    }
                   >
                     <Pencil size={12} />
                   </Button>
@@ -141,22 +147,6 @@ export default function BlogAdminPage() {
           </AdminListRow>
         ))}
       </div>
-
-      {editing === "new" && (
-        <BlogEditModal
-          loginToken={loginToken}
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
-      {editing && editing !== "new" && (
-        <BlogEditModal
-          loginToken={loginToken}
-          post={editing}
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
     </div>
   );
 }

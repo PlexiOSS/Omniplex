@@ -76,8 +76,8 @@ export function VoteCreditsPanel({
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Every vote earns credits, the same way it already does for bots and
           servers. The shop itself is bot/server-only for now, so there's
-          nowhere to spend credits yet -- redeemed credits stay banked here
-          until that changes.
+          nowhere to spend credits yet. Redeemed credits stay banked here until
+          that changes.
         </p>
       </div>
 

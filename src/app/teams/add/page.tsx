@@ -1,9 +1,20 @@
 "use client";
 
+import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  FieldLabel,
+  FormChecklist,
+  FormError,
+  FormLayout,
+  FormSection,
+  NsfwToggle,
+  TEXTAREA_CLASS,
+} from "@/components/forms/FormSection";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TagPicker } from "@/components/ui/TagPicker";
@@ -90,102 +101,136 @@ export default function AddTeamPage() {
 
   return (
     <Container className="py-10">
-      <div className="max-w-xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Create a Team
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Teams own bots and servers on behalf of a group instead of a
-            single person, with per-member permissions.
-          </p>
-        </div>
+      <PageHeader
+        icon={Users}
+        title="Create a Team"
+        description="Teams own bots and servers on behalf of a group, with permissions for each member."
+      />
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <Input
-            id="name"
-            label="Team Name"
-            placeholder="My Cool Team"
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            required
-          />
+      <form onSubmit={handleSubmit}>
+        <FormLayout
+          aside={
+            <>
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Preview
+                </p>
+                <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-base font-semibold text-accent ring-1 ring-accent/15">
+                      {(form.name.trim()[0] ?? "T").toUpperCase()}
+                    </span>
+                    <p className="min-w-0 truncate font-semibold text-zinc-950 dark:text-zinc-50">
+                      {form.name.trim() || "Your team name"}
+                    </p>
+                  </div>
+                  <p className="mt-3 line-clamp-3 text-sm text-zinc-600 dark:text-zinc-300">
+                    {form.short.trim() || "What's this team about?"}
+                  </p>
+                  {form.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {form.tags.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="short"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Short Description
-            </label>
-            <textarea
-              id="short"
-              rows={2}
-              maxLength={SHORT_MAX}
-              value={form.short}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, short: e.target.value }))
-              }
-              placeholder="What's this team about?"
-              className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-            />
-            <p className="text-xs text-right text-zinc-400">
-              {form.short.length}/{SHORT_MAX}
-            </p>
-          </div>
+              <FormChecklist
+                title="After you create it"
+                numbered
+                items={[
+                  "Invite members and choose what each one can do.",
+                  "Pick this team as the owner when you add a bot or server.",
+                  "Move existing bots and servers to it from your dashboard.",
+                ]}
+              />
 
-          <div>
-            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Tags
-            </p>
+              {error && <FormError>{error}</FormError>}
+
+              <Button
+                type="submit"
+                variant="primary"
+                loading={submitting}
+                size="lg"
+                className="w-full"
+              >
+                Create Team
+              </Button>
+            </>
+          }
+        >
+          <FormSection
+            step={1}
+            title="Basics"
+            description="How your team shows up on its page and on listings it owns."
+          >
+            <div className="space-y-4">
+              <Input
+                id="name"
+                label="Team Name"
+                placeholder="My Cool Team"
+                value={form.name}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, name: e.target.value }))
+                }
+                required
+              />
+              <div>
+                <FieldLabel
+                  htmlFor="short"
+                  count={`${form.short.length}/${SHORT_MAX}`}
+                >
+                  Short Description
+                </FieldLabel>
+                <textarea
+                  id="short"
+                  rows={2}
+                  maxLength={SHORT_MAX}
+                  value={form.short}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, short: e.target.value }))
+                  }
+                  placeholder="What's this team about?"
+                  className={`resize-none ${TEXTAREA_CLASS}`}
+                />
+              </div>
+            </div>
+          </FormSection>
+
+          <FormSection step={2} title="Tags" description="Optional.">
             <TagPicker
               available={AVAILABLE_TAGS}
               selected={form.tags}
               onChange={(tags) => setForm((f) => ({ ...f, tags }))}
             />
-          </div>
+          </FormSection>
 
-          <div>
-            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Extra Links
-            </p>
-            <LinksEditor
-              links={form.links}
-              onChange={(links) => setForm((f) => ({ ...f, links }))}
-            />
-          </div>
-
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.nsfw}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, nsfw: e.target.checked }))
-              }
-              className="w-4 h-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-            />
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              This team's content is NSFW
-            </span>
-          </label>
-
-          {error && (
-            <div className="px-4 py-3 text-sm text-red-700 border border-red-200 rounded-xl bg-red-50 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            loading={submitting}
-            size="lg"
-            className="w-full"
+          <FormSection
+            step={3}
+            title="Links"
+            description="Website, support server or socials."
           >
-            Create Team
-          </Button>
-        </form>
-      </div>
+            <div className="space-y-5">
+              <LinksEditor
+                links={form.links}
+                onChange={(links) => setForm((f) => ({ ...f, links }))}
+              />
+              <NsfwToggle
+                checked={form.nsfw}
+                onChange={(nsfw) => setForm((f) => ({ ...f, nsfw }))}
+                label="This team's content is NSFW."
+              />
+            </div>
+          </FormSection>
+        </FormLayout>
+      </form>
     </Container>
   );
 }

@@ -160,6 +160,8 @@ export interface PartialBot {
   servers: number;
   claimed_by: string | null;
   last_claimed: string | null;
+  created_at?: string;
+  owner_in_server?: boolean;
   approval_note: string;
   mentionable: string[];
   invite: string;
@@ -185,6 +187,8 @@ export interface PartialServer {
   premium: boolean;
   claimed_by: string | null;
   last_claimed: string | null;
+  created_at?: string;
+  owner_in_server?: boolean;
   approval_note: string;
   mentionable: string[];
   moderation_flagged: boolean;

@@ -24,12 +24,8 @@ export function TemplateEditModal({
   const isEdit = !!template;
   const [name, setName] = useState(template?.name ?? "");
   const [emoji, setEmoji] = useState(template?.emoji ?? "");
-  const [tagsInput, setTagsInput] = useState(
-    (template?.tags ?? []).join(", "),
-  );
-  const [description, setDescription] = useState(
-    template?.description ?? "",
-  );
+  const [tagsInput, setTagsInput] = useState((template?.tags ?? []).join(", "));
+  const [description, setDescription] = useState(template?.description ?? "");
   const [type, setType] = useState(template?.type ?? "");
   const [entityType, setEntityType] = useState<"bot" | "server">(
     template?.entity_type ?? "bot",

@@ -2,11 +2,12 @@
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { VoteCreditTier } from "@/lib/arcadia/types";
-import { AdminListRow, AdminEmptyState } from "@/components/admin/AdminListRow";
 import { useAdmin } from "../../../AdminContext";
 import { AdminPageHeader } from "../../../AdminPageHeader";
 import { VoteCreditTierEditModal } from "./VoteCreditTierEditModal";
@@ -55,22 +56,21 @@ export default function VoteCreditTiersPage() {
       .finally(() => setDeleting(null));
   }
 
-  if (error && !tiers) {
+  if (error && !tiers)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center"><p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!tiers) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!tiers) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Vote Credit Tiers"
         description="How many votes convert into how much shop credit, per entity type."
@@ -92,7 +92,7 @@ export default function VoteCreditTiersPage() {
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
         {tiers.length === 0 && (
           <AdminEmptyState message="No vote credit tiers yet." />
         )}

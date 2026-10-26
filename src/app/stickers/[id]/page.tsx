@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { AssetDownloadButton } from "@/components/packs/AssetDownloadButton";
 import { AssetShortLink } from "@/components/packs/AssetShortLink";
+import { DiscordPreview } from "@/components/packs/DiscordPreview";
 import { SimilarPackAssets } from "@/components/packs/SimilarPackAssets";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -111,6 +112,8 @@ export default async function StickerPage({ params }: Props) {
             </Link>
           </p>
 
+          <DiscordPreview kind="sticker" src={assetUrl} name={sticker.name} />
+
           <SimilarPackAssets
             kind="sticker"
             packUrl={sticker.pack_url}
@@ -131,7 +134,7 @@ export default async function StickerPage({ params }: Props) {
 
           <AssetShortLink vanity={sticker.vanity} basePath="/stickers" />
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
               Stats
             </h3>
@@ -144,7 +147,7 @@ export default async function StickerPage({ params }: Props) {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
               Uploaded by
             </h3>

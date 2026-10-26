@@ -1,8 +1,10 @@
 "use client";
 
 import { Link2, Pencil, Plus, Trash2, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
@@ -10,17 +12,14 @@ import type { BadgeCatalogEntry, BadgeRuleKind } from "@/lib/arcadia/types";
 import { badgeIcon } from "@/lib/constants/badgeIcons";
 import { useAdmin } from "../../AdminContext";
 import { AdminPageHeader } from "../../AdminPageHeader";
-import { BadgeEditModal } from "./BadgeEditModal";
 
 export default function BadgesPage() {
+  const router = useRouter();
   const { loginToken, hasPerm } = useAdmin();
 
   const [badges, setBadges] = useState<BadgeCatalogEntry[] | null>(null);
   const [ruleKinds, setRuleKinds] = useState<BadgeRuleKind[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<BadgeCatalogEntry | "new" | null>(
-    null,
-  );
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const confirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,24 +63,21 @@ export default function BadgesPage() {
       .finally(() => setDeleting(null));
   }
 
-  if (error && !badges) {
+  if (error && !badges)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!badges) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!badges) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Badges"
         description="Decorative badges for users, bots, servers and teams. Award one from an entity's Actions menu in Search or Report detail, or give a badge a rule to award it automatically."
@@ -90,7 +86,7 @@ export default function BadgesPage() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => setEditing("new")}
+              onClick={() => router.push("/admin/badges/new")}
             >
               <Plus size={14} />
               New Badge
@@ -103,7 +99,7 @@ export default function BadgesPage() {
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
         {badges.length === 0 && <AdminEmptyState message="No badges yet." />}
         {badges.map((badge) => {
           const Icon = badgeIcon(badge.icon);
@@ -116,7 +112,11 @@ export default function BadgesPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setEditing(badge)}
+                      onClick={() =>
+                        router.push(
+                          `/admin/badges/${encodeURIComponent(badge.id)}`,
+                        )
+                      }
                     >
                       <Pencil size={12} />
                     </Button>
@@ -167,28 +167,6 @@ export default function BadgesPage() {
           );
         })}
       </div>
-
-      {editing === "new" && (
-        <BadgeEditModal
-          loginToken={loginToken}
-          ruleKinds={ruleKinds}
-          otherLinkedCount={badges.filter((b) => b.linked_role).length}
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
-      {editing && editing !== "new" && (
-        <BadgeEditModal
-          loginToken={loginToken}
-          badge={editing}
-          ruleKinds={ruleKinds}
-          otherLinkedCount={
-            badges.filter((b) => b.linked_role && b.id !== editing.id).length
-          }
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
     </div>
   );
 }

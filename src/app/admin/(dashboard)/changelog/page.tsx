@@ -1,15 +1,16 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ChangelogEntry } from "@/lib/arcadia/types";
 import { useAdmin } from "../../AdminContext";
 import { AdminPageHeader } from "../../AdminPageHeader";
-import { ChangelogEditModal } from "./ChangelogEditModal";
 
 const PROJECT_LABEL: Record<string, string> = {
   popplio: "Popplio",
@@ -18,11 +19,11 @@ const PROJECT_LABEL: Record<string, string> = {
 };
 
 export default function ChangelogAdminPage() {
+  const router = useRouter();
   const { loginToken, hasPerm } = useAdmin();
 
   const [entries, setEntries] = useState<ChangelogEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<ChangelogEntry | "new" | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDeleteItag, setConfirmDeleteItag] = useState<string | null>(
     null,
@@ -63,24 +64,21 @@ export default function ChangelogAdminPage() {
       .finally(() => setDeleting(null));
   }
 
-  if (error && !entries) {
+  if (error && !entries)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!entries) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!entries) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Changelog"
         description={
@@ -94,7 +92,7 @@ export default function ChangelogAdminPage() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => setEditing("new")}
+              onClick={() => router.push("/admin/changelog/new")}
             >
               <Plus size={14} />
               New Entry
@@ -107,7 +105,7 @@ export default function ChangelogAdminPage() {
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
         {entries.length === 0 && (
           <AdminEmptyState message="No changelog entries yet." />
         )}
@@ -120,7 +118,11 @@ export default function ChangelogAdminPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setEditing(entry)}
+                    onClick={() =>
+                      router.push(
+                        `/admin/changelog/${encodeURIComponent(entry.itag)}`,
+                      )
+                    }
                   >
                     <Pencil size={12} />
                   </Button>
@@ -163,22 +165,6 @@ export default function ChangelogAdminPage() {
           </AdminListRow>
         ))}
       </div>
-
-      {editing === "new" && (
-        <ChangelogEditModal
-          loginToken={loginToken}
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
-      {editing && editing !== "new" && (
-        <ChangelogEditModal
-          loginToken={loginToken}
-          entry={editing}
-          onClose={() => setEditing(null)}
-          onSaved={load}
-        />
-      )}
     </div>
   );
 }

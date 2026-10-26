@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Scale } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
@@ -6,7 +6,8 @@ import { getLegalDocuments } from "@/lib/legal/content";
 
 export const metadata: Metadata = {
   title: "Legal",
-  description: "Omniplex's Terms of Service, Privacy Policy, and other policies.",
+  description:
+    "Omniplex's Terms of Service, Privacy Policy, and other policies.",
 };
 
 export default function LegalPage() {
@@ -15,7 +16,10 @@ export default function LegalPage() {
   return (
     <Container className="py-10">
       <div className="mx-auto max-w-2xl text-center">
-        <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+          <Scale size={22} className="text-accent" />
+        </div>
+        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
           Legal
         </h1>
         <p className="mt-2 text-zinc-500 dark:text-zinc-400">

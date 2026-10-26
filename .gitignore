@@ -22,7 +22,6 @@ bun.lockb
 # production
 /build
 docs/
-public/brand
 
 # misc
 .DS_Store

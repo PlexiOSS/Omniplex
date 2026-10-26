@@ -72,7 +72,7 @@ export default async function HomePage() {
     ]);
     [stats, partnerList, blogData, recentBots, topVoters, commandBots] =
       await extras;
-  } catch (err) {
+  } catch {
     // Any error from the index endpoints — including 500 DB failures — means
     // the service is unavailable. Show the unavailable UI regardless of status.
     return <ServiceUnavailable />;
@@ -173,19 +173,6 @@ export default async function HomePage() {
   const listedServers = stats
     ? stats.total_approved_servers + stats.total_certified_servers
     : 0;
-  const heroStats = stats
-    ? [
-        { label: "Bots", value: listedBots },
-        { label: "Servers", value: listedServers },
-        {
-          label: "Certified",
-          value: stats.total_certified_bots + stats.total_certified_servers,
-        },
-        { label: "Packs", value: stats.total_packs },
-        { label: "Votes cast", value: stats.total_votes },
-        { label: "Users", value: stats.total_users },
-      ].filter((stat) => stat.value > 0)
-    : [];
 
   const hasActivity =
     (recentBots?.length ?? 0) > 0 ||
@@ -247,20 +234,6 @@ export default async function HomePage() {
                 All tags <ArrowRight size={12} />
               </Link>
             </div>
-            {heroStats.length > 0 && (
-              <dl className="mx-auto mt-10 grid max-w-xl grid-cols-3 gap-x-4 gap-y-6">
-                {heroStats.map((stat) => (
-                  <div key={stat.label} className="flex flex-col items-center">
-                    <dt className="order-2 mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                      {stat.label}
-                    </dt>
-                    <dd className="order-1 text-2xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
-                      {formatCount(stat.value)}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            )}
           </div>
         </Container>
       </section>

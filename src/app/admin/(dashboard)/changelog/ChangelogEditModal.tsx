@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ChangelogEntry, ChangelogProject } from "@/lib/arcadia/types";
+import { EditorPage } from "../EditorPage";
 
 interface ChangelogEditModalProps {
   loginToken: string;
@@ -134,9 +134,9 @@ export function ChangelogEditModal({
   }
 
   return (
-    <Modal
-      open
-      onClose={onClose}
+    <EditorPage
+      onBack={onClose}
+      backLabel="Back to Changelog"
       title={isEdit ? "Edit Changelog Entry" : "New Changelog Entry"}
     >
       <div className="space-y-4">
@@ -268,7 +268,7 @@ export function ChangelogEditModal({
             </label>
             <textarea
               id={`changelog-${key}`}
-              rows={3}
+              rows={5}
               value={value}
               onChange={(e) => setValue(e.target.value)}
               className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 font-mono text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
@@ -335,6 +335,6 @@ export function ChangelogEditModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </EditorPage>
   );
 }

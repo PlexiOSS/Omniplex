@@ -1,8 +1,19 @@
 "use client";
 
+import { LayoutTemplate } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  FieldLabel,
+  FormChecklist,
+  FormError,
+  FormLayout,
+  FormSection,
+  NsfwToggle,
+  TEXTAREA_CLASS,
+} from "@/components/forms/FormSection";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TagPicker } from "@/components/ui/TagPicker";
@@ -67,21 +78,49 @@ export default function AddServerTemplatePage() {
 
   return (
     <Container className="py-10">
-      <div className="mx-auto max-w-xl">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Submit a Server Template
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Share a Discord server template -- a one-click starting point with
-            channels, roles, and permissions already set up. The template's name
-            is pulled straight from Discord, so it has to already exist there
-            first.
-          </p>
-        </div>
+      <PageHeader
+        icon={LayoutTemplate}
+        title="Submit a Server Template"
+        description="Share a one-click starting point with channels, roles and permissions already set up."
+      />
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="flex flex-col gap-1.5">
+      <form onSubmit={handleSubmit}>
+        <FormLayout
+          aside={
+            <>
+              <FormChecklist
+                title="Getting a template code"
+                numbered
+                items={[
+                  "Open Server Settings in the server you want to share.",
+                  "Go to Server Template and create one (or sync an existing one).",
+                  "Copy the link. The code is the part after discord.new/ or discord.com/template/.",
+                ]}
+              />
+              <p className="px-1 text-xs text-zinc-500 dark:text-zinc-400">
+                The template's name comes straight from Discord, so it has to
+                exist there first.
+              </p>
+
+              {error && <FormError>{error}</FormError>}
+
+              <Button
+                type="submit"
+                variant="primary"
+                loading={submitting}
+                size="lg"
+                className="w-full"
+              >
+                Submit Template
+              </Button>
+            </>
+          }
+        >
+          <FormSection
+            step={1}
+            title="Template"
+            description="The code from your Discord template link."
+          >
             <Input
               id="code"
               label="Template Code"
@@ -92,79 +131,54 @@ export default function AddServerTemplatePage() {
               }
               required
             />
-            <p className="text-xs text-zinc-400 dark:text-zinc-600">
-              The part after{" "}
-              <span className="font-mono">discord.com/template/</span> when you
-              share a template from Server Settings.
-            </p>
-          </div>
+          </FormSection>
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="short"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Description <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="short"
-              rows={3}
-              maxLength={150}
-              value={form.short}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, short: e.target.value }))
-              }
-              placeholder="What kind of server is this template for?"
-              className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-              required
-            />
-            <p className="text-right text-xs text-zinc-400">
-              {form.short.length}/150
-            </p>
-          </div>
-
-          <div>
-            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Tags <span className="text-red-500">*</span>
-            </p>
-            <TagPicker
-              available={SERVER_TAGS}
-              selected={form.tags}
-              onChange={(tags) => setForm((f) => ({ ...f, tags }))}
-            />
-          </div>
-
-          <label className="flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
-              checked={form.nsfw}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, nsfw: e.target.checked }))
-              }
-              className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-            />
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              This template is for an NSFW-oriented server
-            </span>
-          </label>
-
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            loading={submitting}
-            size="lg"
-            className="w-full"
+          <FormSection
+            step={2}
+            title="Details"
+            description="Help people decide if it fits their server."
           >
-            Submit Template
-          </Button>
-        </form>
-      </div>
+            <div className="space-y-5">
+              <div>
+                <FieldLabel
+                  htmlFor="short"
+                  required
+                  count={`${form.short.length}/150`}
+                >
+                  Description
+                </FieldLabel>
+                <textarea
+                  id="short"
+                  rows={3}
+                  maxLength={150}
+                  value={form.short}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, short: e.target.value }))
+                  }
+                  placeholder="What kind of server is this template for?"
+                  className={`resize-none ${TEXTAREA_CLASS}`}
+                  required
+                />
+              </div>
+
+              <div>
+                <FieldLabel required>Tags</FieldLabel>
+                <TagPicker
+                  available={SERVER_TAGS}
+                  selected={form.tags}
+                  onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+                />
+              </div>
+
+              <NsfwToggle
+                checked={form.nsfw}
+                onChange={(nsfw) => setForm((f) => ({ ...f, nsfw }))}
+                label="This template is for an NSFW-oriented server."
+              />
+            </div>
+          </FormSection>
+        </FormLayout>
+      </form>
     </Container>
   );
 }

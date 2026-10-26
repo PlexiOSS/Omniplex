@@ -82,6 +82,11 @@ function PositionCard({ position }: { position: Position }) {
           <Badge variant="success">Open</Badge>
         )}
       </div>
+      {position.requires_main_server && (
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          For members of the Omniplex Discord server
+        </p>
+      )}
       {position.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {position.tags.map((tag) => (

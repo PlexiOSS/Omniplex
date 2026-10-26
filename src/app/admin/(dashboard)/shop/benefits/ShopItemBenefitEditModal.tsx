@@ -86,8 +86,8 @@ export function ShopItemBenefitEditModal({
           <p className="text-xs text-amber-600 dark:text-amber-400">
             "{id.trim()}" isn't one of the IDs the purchase flow recognizes
             (premium_days, priority_boost, featured_slot, supporter_badge,
-            vote_blitz), so this benefit will be purchasable but won't actually do
-            anything when applied.
+            vote_blitz), so this benefit will be purchasable but won't actually
+            do anything when applied.
           </p>
         )}
         <Input

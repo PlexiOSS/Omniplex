@@ -1,12 +1,13 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { useOAuthMeta } from "@/hooks/useOAuthMeta";
 import { auth } from "@/lib/api";
+import { AuthShell } from "../AuthShell";
 
 /** Persisted across the Discord redirect round trip so the callback knows
  * which scope to request — mirrors the existing `auth_redirect` pattern. */
@@ -101,51 +102,51 @@ function SauronInner() {
 
   if (error) {
     return (
-      <Container className="flex flex-1 flex-col items-center justify-center py-24">
-        <div className="w-full max-w-sm space-y-6 text-center">
-          <div>
-            <h1 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
-              Sign in failed
-            </h1>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              {error}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2">
-            {banned ? (
-              <Button variant="primary" onClick={retryBanExempt}>
-                Continue to appeal
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                onClick={() => {
-                  called.current = false;
-                  setError(null);
-                  router.replace("/auth/login");
-                }}
-              >
-                Try again
-              </Button>
-            )}
-            <Button variant="ghost" onClick={() => router.replace("/")}>
-              Go to home
-            </Button>
-          </div>
+      <AuthShell>
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
+          <AlertTriangle size={20} className="text-red-600 dark:text-red-400" />
         </div>
-      </Container>
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+          {banned ? "Your account is banned" : "Sign in failed"}
+        </h1>
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{error}</p>
+        <div className="mt-8 flex flex-col gap-2">
+          {banned ? (
+            <Button variant="primary" onClick={retryBanExempt}>
+              Continue to appeal
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              onClick={() => {
+                called.current = false;
+                setError(null);
+                router.replace("/auth/login");
+              }}
+            >
+              Try again
+            </Button>
+          )}
+          <Button variant="ghost" onClick={() => router.replace("/")}>
+            Go to home
+          </Button>
+        </div>
+      </AuthShell>
     );
   }
 
   return (
-    <Container className="flex flex-1 flex-col items-center justify-center py-24">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+    <AuthShell>
+      <div className="flex flex-col items-center py-10 text-center">
+        <div className="h-9 w-9 animate-spin rounded-full border-2 border-zinc-200 border-t-accent dark:border-zinc-800 dark:border-t-accent" />
+        <p className="mt-4 text-sm font-medium text-zinc-950 dark:text-zinc-50">
           Signing you in…
         </p>
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          This only takes a moment.
+        </p>
       </div>
-    </Container>
+    </AuthShell>
   );
 }
 

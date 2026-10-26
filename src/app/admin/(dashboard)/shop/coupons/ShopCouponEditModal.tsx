@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ShopCoupon, ShopItem } from "@/lib/arcadia/types";
+import { EditorPage } from "../../EditorPage";
 
 const TARGET_TYPES = ["bot", "server"] as const;
 
@@ -31,17 +31,20 @@ export function ShopCouponEditModal({
   const [isPublic, setIsPublic] = useState(coupon?.public ?? false);
   const [usable, setUsable] = useState(coupon?.usable ?? true);
   const [maxUses, setMaxUses] = useState(
-    coupon?.max_uses != null ? String(coupon.max_uses) : "1",
+    coupon ? (coupon.max_uses != null ? String(coupon.max_uses) : "") : "1",
   );
-  const [reuseWaitSeconds, setReuseWaitSeconds] = useState(
+  const [reuseWaitHours, setReuseWaitHours] = useState(
     coupon?.reuse_wait_duration != null
       ? String(coupon.reuse_wait_duration)
       : "",
   );
-  const [expirySeconds, setExpirySeconds] = useState(
+  const [expiryHours, setExpiryHours] = useState(
     coupon?.expiry != null ? String(coupon.expiry) : "",
   );
-  const [dollars, setDollars] = useState(
+  const [allowedUsers, setAllowedUsers] = useState(
+    (coupon?.allowed_users ?? []).join("\n"),
+  );
+  const [credits, setCredits] = useState(
     coupon?.cents != null ? (coupon.cents / 100).toFixed(2) : "",
   );
   const [applicableItems, setApplicableItems] = useState<string[]>(
@@ -57,24 +60,37 @@ export function ShopCouponEditModal({
     setList(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   }
 
-  async function handleSave() {
-    const maxUsesNum = Number(maxUses);
-    const reuseWaitNum = Number(reuseWaitSeconds);
-    const expiryNum = Number(expirySeconds);
+  function optionalWhole(value: string): number | null | undefined {
+    if (!value.trim()) return null;
+    const n = Number(value);
+    return Number.isInteger(n) && n > 0 ? n : undefined;
+  }
 
+  async function handleSave() {
+    const maxUsesNum = optionalWhole(maxUses);
+    const reuseWaitNum = optionalWhole(reuseWaitHours);
+    const expiryNum = optionalWhole(expiryHours);
+    const users = allowedUsers
+      .split(/[\s,]+/)
+      .map((u) => u.trim())
+      .filter(Boolean);
+
+    if (!id.trim() || !code.trim()) {
+      setError("ID and code are required.");
+      return;
+    }
     if (
-      !id.trim() ||
-      !code.trim() ||
-      !Number.isFinite(maxUsesNum) ||
-      maxUsesNum <= 0 ||
-      !Number.isFinite(reuseWaitNum) ||
-      reuseWaitNum <= 0 ||
-      !Number.isFinite(expiryNum) ||
-      expiryNum <= 0
+      maxUsesNum === undefined ||
+      reuseWaitNum === undefined ||
+      expiryNum === undefined
     ) {
       setError(
-        "ID, code, max uses, reuse wait, and expiry are all required and must be greater than 0. Popplio currently rejects 0/empty for these (a reproduced upstream bug, not a real limit you can opt out of).",
+        "Max uses, reuse wait and expiry must be whole numbers above 0, or left empty for no limit.",
       );
+      return;
+    }
+    if (users.some((u) => !/^\d{17,20}$/.test(u))) {
+      setError("Allowed users must be Discord user IDs.");
       return;
     }
 
@@ -89,9 +105,9 @@ export function ShopCouponEditModal({
         reuse_wait_duration: reuseWaitNum,
         expiry: expiryNum,
         applicable_items: applicableItems,
-        cents: dollars.trim() ? Math.round(Number(dollars) * 100) : null,
-        requirements: [],
-        allowed_users: [],
+        cents: credits.trim() ? Math.round(Number(credits) * 100) : null,
+        requirements: coupon?.requirements ?? [],
+        allowed_users: users,
         usable,
         target_types: targetTypes,
       };
@@ -109,9 +125,9 @@ export function ShopCouponEditModal({
   }
 
   return (
-    <Modal
-      open
-      onClose={onClose}
+    <EditorPage
+      onBack={onClose}
+      backLabel="Back to Coupons"
       title={isEdit ? "Edit Coupon" : "Create Coupon"}
     >
       <div className="space-y-4">
@@ -139,39 +155,61 @@ export function ShopCouponEditModal({
             label="Max uses"
             type="number"
             min={1}
+            placeholder="Unlimited"
             value={maxUses}
             onChange={(e) => setMaxUses(e.target.value)}
-            required
           />
           <Input
             id="coupon-reuse-wait"
-            label="Reuse wait (sec)"
+            label="Reuse wait (hours)"
             type="number"
             min={1}
-            value={reuseWaitSeconds}
-            onChange={(e) => setReuseWaitSeconds(e.target.value)}
-            required
+            placeholder="None"
+            value={reuseWaitHours}
+            onChange={(e) => setReuseWaitHours(e.target.value)}
           />
           <Input
             id="coupon-expiry"
-            label="Expires in (sec)"
+            label="Expires after (hours)"
             type="number"
             min={1}
-            value={expirySeconds}
-            onChange={(e) => setExpirySeconds(e.target.value)}
-            required
+            placeholder="Never"
+            value={expiryHours}
+            onChange={(e) => setExpiryHours(e.target.value)}
           />
         </div>
+        <p className="-mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          Leave any of these empty for no limit. Expiry counts from when the
+          coupon was created.
+        </p>
 
         <Input
           id="coupon-cents"
-          label="Discount (dollars, optional)"
+          label="Item price with this coupon (credits, optional)"
           type="number"
           min={0}
           step={0.01}
-          value={dollars}
-          onChange={(e) => setDollars(e.target.value)}
+          placeholder="Free"
+          value={credits}
+          onChange={(e) => setCredits(e.target.value)}
         />
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="coupon-allowed-users"
+            className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Allowed users (optional)
+          </label>
+          <textarea
+            id="coupon-allowed-users"
+            rows={2}
+            value={allowedUsers}
+            onChange={(e) => setAllowedUsers(e.target.value)}
+            placeholder="Discord user IDs, one per line. Empty means anyone."
+            className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 font-mono text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+          />
+        </div>
 
         <div className="flex gap-6">
           <label className="flex cursor-pointer items-center gap-2">
@@ -263,6 +301,6 @@ export function ShopCouponEditModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </EditorPage>
   );
 }

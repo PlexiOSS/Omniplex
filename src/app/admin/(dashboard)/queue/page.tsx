@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -28,7 +29,7 @@ import type {
   TargetType,
 } from "@/lib/arcadia/types";
 import { noAdminReportUrl } from "@/lib/noadmin";
-import { formatCount } from "@/lib/utils/format";
+import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 import {
   isDiscordAuthorizeUrl,
   requestsAdministrator,
@@ -65,6 +66,23 @@ function safeInviteUrl(clientId: string): string {
 }
 
 /** Discord's own guild-level NSFW classification (0=default, 1=explicit, 2=safe, 3=age-restricted). */
+function WaitingBadge({ since }: { since?: string }) {
+  if (!since) return null;
+  const days = Math.floor((Date.now() - new Date(since).getTime()) / 86400000);
+  const label =
+    days < 1
+      ? "Submitted today"
+      : `Waiting ${days} ${days === 1 ? "day" : "days"}`;
+  return (
+    <Badge
+      variant={days >= 14 ? "danger" : days >= 7 ? "warning" : "default"}
+      title={`Submitted ${new Date(since).toLocaleString()}`}
+    >
+      {label}
+    </Badge>
+  );
+}
+
 function discordNsfwLevelLabel(level: number): string {
   switch (level) {
     case 1:
@@ -282,21 +300,18 @@ export default function AdminQueuePage() {
     );
   }
 
-  if (error) {
+  if (error)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!bots || !servers) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!bots || !servers) return <AdminLoading />;
 
   const tabs: {
     key: QueueTab;
@@ -316,7 +331,7 @@ export default function AdminQueuePage() {
   const activeCount = activeTab === "bots" ? bots.length : servers.length;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Review Queue"
         description={`${activeCount} ${activeTab === "bots" ? "bot" : "server"}${activeCount === 1 ? "" : "s"} pending or claimed for review.`}
@@ -376,7 +391,7 @@ export default function AdminQueuePage() {
               return (
                 <div
                   key={bot.bot_id}
-                  className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+                  className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm shadow-black/2 dark:border-zinc-800 dark:bg-zinc-900"
                 >
                   <div className="flex items-start gap-3">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
@@ -394,6 +409,19 @@ export default function AdminQueuePage() {
                         </span>
                         <Badge variant={bot.claimed_by ? "warning" : "default"}>
                           {bot.claimed_by ? "Claimed" : "Unclaimed"}
+                        </Badge>
+                        <WaitingBadge since={bot.created_at} />
+                        <Badge
+                          variant={bot.owner_in_server ? "success" : "default"}
+                          title={
+                            bot.owner_in_server
+                              ? "At least one owner is in the Omniplex Discord server, so you can reach them there"
+                              : "No owner is in the Omniplex Discord server, so contact them through the site"
+                          }
+                        >
+                          {bot.owner_in_server
+                            ? "Owner in server"
+                            : "Owner not in server"}
                         </Badge>
                         {bot.moderation_flagged && (
                           <Badge
@@ -430,6 +458,8 @@ export default function AdminQueuePage() {
                             Claimed by{" "}
                             {claimers[bot.claimed_by]?.username ??
                               bot.claimed_by}
+                            {bot.last_claimed &&
+                              ` ${formatRelativeTime(bot.last_claimed)}`}
                           </span>
                         )}
                       </div>
@@ -498,7 +528,7 @@ export default function AdminQueuePage() {
               return (
                 <div
                   key={server.server_id}
-                  className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+                  className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm shadow-black/2 dark:border-zinc-800 dark:bg-zinc-900"
                 >
                   <div className="flex items-start gap-3">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
@@ -514,6 +544,21 @@ export default function AdminQueuePage() {
                           variant={server.claimed_by ? "warning" : "default"}
                         >
                           {server.claimed_by ? "Claimed" : "Unclaimed"}
+                        </Badge>
+                        <WaitingBadge since={server.created_at} />
+                        <Badge
+                          variant={
+                            server.owner_in_server ? "success" : "default"
+                          }
+                          title={
+                            server.owner_in_server
+                              ? "At least one owner is in the Omniplex Discord server, so you can reach them there"
+                              : "No owner is in the Omniplex Discord server, so contact them through the site"
+                          }
+                        >
+                          {server.owner_in_server
+                            ? "Owner in server"
+                            : "Owner not in server"}
                         </Badge>
                         {server.nsfw && <Badge variant="danger">NSFW</Badge>}
                         {server.premium && (
@@ -574,6 +619,8 @@ export default function AdminQueuePage() {
                             Claimed by{" "}
                             {claimers[server.claimed_by]?.username ??
                               server.claimed_by}
+                            {server.last_claimed &&
+                              ` ${formatRelativeTime(server.last_claimed)}`}
                           </span>
                         )}
                       </div>

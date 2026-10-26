@@ -2,12 +2,13 @@
 
 import { Flag } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { Report, ReportStatus } from "@/lib/arcadia/types";
 import { formatRelativeTime } from "@/lib/utils/format";
-import { AdminPageHeader } from "../../AdminPageHeader";
 import { useAdmin } from "../../AdminContext";
+import { AdminPageHeader } from "../../AdminPageHeader";
 import { ReportDetailModal } from "./ReportDetailModal";
 
 const STATUS_TABS: { key: ReportStatus | null; label: string }[] = [
@@ -70,7 +71,7 @@ export default function ReportsAdminPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Reports"
         description="User-filed reports against bots, servers and packs: license violations, ToS violations, spam, and anything else that needs a look."
@@ -94,19 +95,30 @@ export default function ReportsAdminPage() {
         ))}
       </div>
 
-      {error && (
+      {error && reports && (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
       {!reports ? (
-        <div className="flex justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-        </div>
+        error ? (
+          <AdminError
+            message={error}
+            onRetry={() => {
+              setError(null);
+              load();
+            }}
+          />
+        ) : (
+          <AdminLoading />
+        )
       ) : (
-        <div className="mt-6 space-y-2">
+        <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
           {reports.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center text-zinc-500 dark:text-zinc-400">
-              <Flag size={24} className="mb-2 text-zinc-300 dark:text-zinc-700" />
+              <Flag
+                size={24}
+                className="mb-2 text-zinc-300 dark:text-zinc-700"
+              />
               <p className="text-sm">No reports here.</p>
             </div>
           )}
@@ -115,7 +127,7 @@ export default function ReportsAdminPage() {
               key={report.id}
               type="button"
               onClick={() => setSelected(report)}
-              className="flex w-full items-center gap-3 rounded-xl border border-zinc-200 p-4 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:hover:border-accent/40 dark:hover:bg-accent/10"
+              className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/5 dark:hover:bg-accent/10"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">

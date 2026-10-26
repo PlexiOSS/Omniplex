@@ -140,8 +140,8 @@ export function VoteCreditTierEditModal({
           onChange={(e) => setPosition(e.target.value)}
         />
         <p className="-mt-3 text-xs text-zinc-400 dark:text-zinc-600">
-          Display order. Tiers push each other down on conflict, so exact
-          values don't need to be unique up front.
+          Display order. Tiers push each other down on conflict, so exact values
+          don't need to be unique up front.
         </p>
 
         {error && (

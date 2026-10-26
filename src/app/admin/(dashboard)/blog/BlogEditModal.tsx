@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
 import { TagPicker } from "@/components/ui/TagPicker";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { BlogPost } from "@/lib/arcadia/types";
+import { EditorPage } from "../EditorPage";
 
 interface BlogEditModalProps {
   loginToken: string;
@@ -72,7 +72,11 @@ export function BlogEditModal({
   }
 
   return (
-    <Modal open onClose={onClose} title={isEdit ? "Edit Post" : "New Post"}>
+    <EditorPage
+      onBack={onClose}
+      backLabel="Back to Blog"
+      title={isEdit ? "Edit Post" : "New Post"}
+    >
       <div className="space-y-4">
         <Input
           id="blog-title"
@@ -113,7 +117,7 @@ export function BlogEditModal({
           </label>
           <textarea
             id="blog-content"
-            rows={12}
+            rows={20}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 font-mono text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
@@ -180,6 +184,6 @@ export function BlogEditModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </EditorPage>
   );
 }

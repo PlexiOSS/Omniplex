@@ -1,10 +1,19 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LifeBuoy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  FieldLabel,
+  FormChecklist,
+  FormError,
+  FormLayout,
+  FormSection,
+  TEXTAREA_CLASS,
+} from "@/components/forms/FormSection";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { SignInLink } from "@/components/ui/SignInLink";
@@ -59,7 +68,9 @@ export default function NewTicketPage() {
       return setError("Give it a short subject line, at least 10 characters.");
     }
     if (message.trim().length < MESSAGE_MIN) {
-      return setError(`Explain what's going on in at least ${MESSAGE_MIN} characters.`);
+      return setError(
+        `Explain what's going on in at least ${MESSAGE_MIN} characters.`,
+      );
     }
 
     setSubmitting(true);
@@ -72,7 +83,9 @@ export default function NewTicketPage() {
       );
       router.push(`/tickets/${created.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to open ticket.");
+      setError(
+        err instanceof ApiError ? err.message : "Failed to open ticket.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -80,92 +93,124 @@ export default function NewTicketPage() {
 
   return (
     <Container className="py-10">
-      <div className="mx-auto max-w-xl">
-        <Link
-          href="/tickets"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+      <Link
+        href="/tickets"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+      >
+        <ArrowLeft size={14} />
+        Back to tickets
+      </Link>
+
+      <PageHeader
+        icon={LifeBuoy}
+        title="Open a Ticket"
+        description="Get help from the Omniplex staff team. Replies show up on the ticket and in your notifications."
+      />
+
+      <form onSubmit={handleSubmit}>
+        <FormLayout
+          aside={
+            <>
+              <FormChecklist
+                title="Help us help you"
+                items={[
+                  "Pick the topic that fits best so the right staff see it.",
+                  "Include bot, server or user IDs and any links.",
+                  "Say what you expected and what happened instead.",
+                  "Don't share passwords, tokens or payment details.",
+                ]}
+              />
+              <p className="px-1 text-xs text-zinc-500 dark:text-zinc-400">
+                Looking for a quick answer? Try the{" "}
+                <Link
+                  href="/kb"
+                  className="text-accent underline underline-offset-2"
+                >
+                  knowledge base
+                </Link>{" "}
+                first.
+              </p>
+
+              {error && <FormError>{error}</FormError>}
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={submitting}
+                className="w-full"
+              >
+                Open Ticket
+              </Button>
+            </>
+          }
         >
-          <ArrowLeft size={14} />
-          Back to tickets
-        </Link>
-
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Open a Ticket
-        </h1>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          <div>
-            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Topic
-            </p>
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+          <FormSection
+            step={1}
+            title="Topic"
+            description="What do you need help with?"
+          >
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {topics.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => setTopic(t.id)}
+                  aria-pressed={topic === t.id}
                   className={[
-                    "rounded-lg border px-3 py-2 text-left text-xs font-medium transition-colors",
+                    "rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-colors",
                     topic === t.id
-                      ? "border-accent bg-accent/5 text-accent"
-                      : "border-zinc-200 text-zinc-600 hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:text-zinc-400",
+                      ? "border-accent bg-accent/5 text-accent ring-1 ring-accent/30"
+                      : "border-zinc-200 text-zinc-700 hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:text-zinc-300",
                   ].join(" ")}
                 >
                   {t.name}
                 </button>
               ))}
             </div>
-          </div>
+          </FormSection>
 
-          <Input
-            id="issue"
-            label="Subject"
-            value={issue}
-            onChange={(e) => setIssue(e.target.value)}
-            placeholder="Short summary of the issue"
-            maxLength={ISSUE_MAX}
-            required
-          />
-
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="message"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              What&apos;s going on?
-            </label>
-            <textarea
-              id="message"
-              rows={6}
-              maxLength={MESSAGE_MAX}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Include anything staff would need to help: what you expected, what happened instead, and any relevant IDs or links."
-              className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
-              required
-            />
-            <p className="text-right text-xs text-zinc-400">
-              {message.length}/{MESSAGE_MAX} (min {MESSAGE_MIN})
-            </p>
-          </div>
-
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            loading={submitting}
-            className="w-full"
+          <FormSection
+            step={2}
+            title="Details"
+            description="The more detail, the faster we can help."
           >
-            Open Ticket
-          </Button>
-        </form>
-      </div>
+            <div className="space-y-4">
+              <Input
+                id="issue"
+                label="Subject"
+                value={issue}
+                onChange={(e) => setIssue(e.target.value)}
+                placeholder="Short summary of the issue"
+                maxLength={ISSUE_MAX}
+                required
+              />
+              <div>
+                <FieldLabel
+                  htmlFor="message"
+                  required
+                  count={`${message.length}/${MESSAGE_MAX}`}
+                >
+                  What&apos;s going on?
+                </FieldLabel>
+                <textarea
+                  id="message"
+                  rows={8}
+                  maxLength={MESSAGE_MAX}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="What you expected, what happened instead, and any relevant IDs or links."
+                  className={`resize-y ${TEXTAREA_CLASS}`}
+                  required
+                />
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  At least {MESSAGE_MIN} characters.
+                </p>
+              </div>
+            </div>
+          </FormSection>
+        </FormLayout>
+      </form>
     </Container>
   );
 }

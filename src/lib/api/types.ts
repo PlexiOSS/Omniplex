@@ -1160,6 +1160,7 @@ export interface AppPosition {
   questions: AppQuestion[];
   hidden: boolean;
   closed: boolean;
+  requires_main_server?: boolean;
   /** Go duration string, e.g. "48h0m0s" — 0s means no cooldown. */
   cooldown: string;
 }
@@ -1857,4 +1858,8 @@ export interface ListTag {
 
 export interface ListTags {
   tags: ListTag[];
+}
+
+export interface MainServerStatus {
+  member: boolean;
 }

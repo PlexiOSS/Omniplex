@@ -37,7 +37,7 @@ export function StatCard({
   counts?: Record<string, number>;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center gap-2 text-zinc-400 dark:text-zinc-600">
         {icon}
         <span className="text-xs font-medium uppercase tracking-wide">

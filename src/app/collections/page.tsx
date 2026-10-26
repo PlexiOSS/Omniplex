@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { search } from "@/lib/api";
 import type { IndexBot, IndexServer } from "@/lib/api/types";
@@ -51,18 +52,11 @@ export default async function CollectionsPage() {
 
   return (
     <Container className="py-10">
-      <div className="mb-10 flex items-center gap-2">
-        <Sparkles size={16} className="text-accent" />
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Collections
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Curated by tag, ranked automatically by votes nothing here is
-            hand-ordered.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={Sparkles}
+        title="Collections"
+        description="The best bots and servers for each tag, ranked automatically by votes. Nothing here is hand-ordered."
+      />
 
       <div className="space-y-12">
         {previews.map(({ collection, bots, servers }) => {

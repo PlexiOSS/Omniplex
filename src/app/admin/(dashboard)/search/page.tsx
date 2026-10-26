@@ -11,7 +11,7 @@ import { Pagination } from "@/components/search/Pagination";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { usePagination } from "@/hooks/usePagination";
 import type { ReviewTargetType } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
@@ -159,7 +159,7 @@ export default function AdminSearchPage() {
   // An empty query matches everything (ILIKE '%%'), so this pre-fills the
   // page with the full Bot list on load instead of an empty results area —
   // switching the type dropdown re-runs it too.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only re-run when the type dropdown changes
   useEffect(() => {
     runSearch(targetType, query.trim());
   }, [targetType]);
@@ -189,10 +189,10 @@ export default function AdminSearchPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Search"
-        description="Find any bot, server, pack, team, or user by ID or name to take action outside the queue. Starts pre-filled with everything narrow it down as you type."
+        description="Find any bot, server, pack, team, or user by ID or name to take action outside the queue. It lists everything to start with; search to narrow it down."
       />
 
       <form
@@ -273,7 +273,7 @@ export default function AdminSearchPage() {
       )}
 
       {results && (
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
           {results.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <ShieldOff
@@ -291,7 +291,7 @@ export default function AdminSearchPage() {
             return (
               <div
                 key={info.id}
-                className="flex items-start gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+                className="flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
               >
                 <Avatar src={info.avatar} alt={info.name} size={40} />
                 <div className="min-w-0 flex-1">

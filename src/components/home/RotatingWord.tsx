@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 interface RotatingWordProps {
-  /** Cycled in order. Add more here later — nothing else needs to change. */
   words: string[];
   intervalMs?: number;
   className?: string;
 }
 
 const FADE_MS = 180;
+const RESIZE_MS = 320;
 
-/** Crossfades + slight slide in place — inline like static text but snappier.
- * Uses opacity + translate + blur for a crisp swap; stays inline so the hero
- * doesn't reflow for longer words like "servers"/"packs". */
 export function RotatingWord({
   words,
   intervalMs = 2000,
@@ -21,6 +18,19 @@ export function RotatingWord({
 }: RotatingWordProps) {
   const [index, setIndex] = useState(0);
   const [anim, setAnim] = useState<"in" | "out">("in");
+  const [widths, setWidths] = useState<number[]>([]);
+  const measureRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  useLayoutEffect(() => {
+    const measure = () =>
+      setWidths(
+        measureRefs.current.map((el) => el?.getBoundingClientRect().width ?? 0),
+      );
+    measure();
+    window.addEventListener("resize", measure);
+    document.fonts?.ready.then(measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   useEffect(() => {
     if (words.length <= 1) return;
@@ -38,24 +48,36 @@ export function RotatingWord({
   }, [words, intervalMs]);
 
   const entering = anim === "in";
-  const longest = words.reduce((a, b) => (a.length >= b.length ? a : b), "");
+  const width = widths[index];
 
   return (
-    <span className="inline-grid align-baseline">
-      {/* Sizer — invisible but reserves width of longest word so the h1 never reflows */}
+    <span
+      className="relative inline-block whitespace-nowrap align-baseline"
+      style={{
+        width: width ? `${width}px` : undefined,
+        transition: `width ${RESIZE_MS}ms cubic-bezier(0.4,0,0.2,1)`,
+      }}
+    >
       <span
-        className={["invisible col-start-1 row-start-1", className]
-          .filter(Boolean)
-          .join(" ")}
         aria-hidden="true"
+        className="pointer-events-none invisible absolute top-0 left-0 whitespace-nowrap"
       >
-        {longest}
+        {words.map((w, i) => (
+          <span
+            key={w}
+            ref={(el) => {
+              measureRefs.current[i] = el;
+            }}
+            className={["absolute top-0 left-0", className]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {w}
+          </span>
+        ))}
       </span>
       <span
-        className={[
-          "col-start-1 row-start-1 inline-block will-change-transform",
-          className,
-        ]
+        className={["inline-block will-change-transform", className]
           .filter(Boolean)
           .join(" ")}
         style={{

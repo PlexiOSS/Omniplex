@@ -1,7 +1,8 @@
-import { Plus } from "lucide-react";
+import { LayoutTemplate, Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Button } from "@/components/ui/Button";
 import { serverTemplates } from "@/lib/api";
@@ -30,23 +31,21 @@ export default async function ServerTemplatesPage({ searchParams }: Props) {
 
   return (
     <Container className="py-10">
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Server Templates
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            One-click Discord server templates -- channels, roles, and
-            permissions, ready to clone into your own server.
-          </p>
-        </div>
-        <Link href="/templates/add">
-          <Button variant="primary" size="sm">
-            <Plus size={14} />
-            Submit a Template
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        icon={LayoutTemplate}
+        title="Server Templates"
+        description="One-click Discord server templates: channels, roles, and permissions, ready to clone into your own server."
+        actions={
+          <>
+            <Link href="/templates/add">
+              <Button variant="primary" size="sm">
+                <Plus size={14} />
+                Submit a Template
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
       <div className="mb-6 flex flex-wrap gap-1.5">
         <Link

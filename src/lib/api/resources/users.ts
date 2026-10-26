@@ -1,5 +1,6 @@
 import { client } from "../client";
 import type {
+  MainServerStatus,
   SEO,
   UpdateUserPayload,
   User,
@@ -8,6 +9,12 @@ import type {
 } from "../types";
 
 export const usersResource = {
+  getMainServerStatus: (userId: string, token: string) =>
+    client.get<MainServerStatus>(`/users/${userId}/main-server`, {
+      token,
+      cache: "no-store",
+    }),
+
   getActivity: (userId: string) =>
     client.get<UserActivity>(`/users/${userId}/activity`, {
       next: { revalidate: 300 },

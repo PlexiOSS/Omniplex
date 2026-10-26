@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AdminLoading } from "@/components/admin/AdminState";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { RPCMethod, RPCWebAction, TargetType } from "@/lib/arcadia/types";
@@ -109,9 +110,7 @@ export default function AdminGlobalActionsPage() {
         </p>
       )}
 
-      {!methods && !loadError && (
-        <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
-      )}
+      {!methods && !loadError && <AdminLoading />}
 
       {methods && methods.length === 0 && (
         <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">

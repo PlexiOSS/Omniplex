@@ -2,6 +2,7 @@
 
 import { ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ShopItem } from "@/lib/arcadia/types";
@@ -59,24 +60,21 @@ export default function ShopPurchasesPage() {
 
   const itemName = (id: string) => items.find((i) => i.id === id)?.name ?? id;
 
-  if (error && !purchases) {
+  if (error && !purchases)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!purchases) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!purchases) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Shop Purchases"
         description="The most recent 100 purchases across every entity, platform-wide, for abuse and fraud monitoring, not day-to-day shop management."

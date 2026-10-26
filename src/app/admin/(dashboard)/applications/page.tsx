@@ -2,26 +2,15 @@
 
 import { Check, ClipboardList, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { apps as appsApi } from "@/lib/api";
 import type { PlatformUser } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import { useAdmin } from "../../AdminContext";
 import { AdminPageHeader } from "../../AdminPageHeader";
 import { RpcActionModal } from "../RpcActionModal";
-
-// Mirrors the 7 positions registered in popplio/apps/apps.go — hardcoded since
-// Popplio has no live "list positions" endpoint, same reasoning as this
-// codebase's other hand-maintained catalogs (see STATIC_PERMISSION_CATALOG).
-const POSITION_LABELS: Record<string, string> = {
-  staff: "Staff Team",
-  dev: "Dev Team",
-  partners: "Partners",
-  resubmit: "Bot Resubmission",
-  banappeal: "Ban Appeal",
-  certification: "Certification",
-  server_certification: "Server Certification",
-};
 
 interface Question {
   id: string;
@@ -47,6 +36,9 @@ export default function AdminApplicationsPage() {
   const { loginToken, hasPerm } = useAdmin();
 
   const [apps, setApps] = useState<AppResponse[] | null>(null);
+  const [positionNames, setPositionNames] = useState<Record<string, string>>(
+    {},
+  );
   const [error, setError] = useState<string | null>(null);
   const [modalAction, setModalAction] = useState<{
     app: AppResponse;
@@ -74,6 +66,17 @@ export default function AdminApplicationsPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    appsApi
+      .getMeta()
+      .then((meta) =>
+        setPositionNames(
+          Object.fromEntries(meta.positions.map((p) => [p.id, p.name])),
+        ),
+      )
+      .catch(() => {});
+  }, []);
+
   async function handleModalSubmit(reason: string) {
     if (!modalAction) return;
     const { app, approve } = modalAction;
@@ -86,24 +89,21 @@ export default function AdminApplicationsPage() {
     await load();
   }
 
-  if (error) {
+  if (error)
     return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      </div>
+      <AdminError
+        message={error}
+        onRetry={() => {
+          setError(null);
+          load();
+        }}
+      />
     );
-  }
 
-  if (!apps) {
-    return (
-      <div className="mx-auto flex max-w-5xl justify-center px-4 py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
-  }
+  if (!apps) return <AdminLoading />;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Applications"
         description={`${apps.length} pending application${apps.length === 1 ? "" : "s"} across certification, partnership, and staff programs.`}
@@ -124,13 +124,13 @@ export default function AdminApplicationsPage() {
           {apps.map((app) => (
             <div
               key={app.app_id}
-              className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+              className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm shadow-black/2 dark:border-zinc-800 dark:bg-zinc-900"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold text-zinc-950 dark:text-zinc-50">
                   {app.user?.display_name ?? app.user?.username ?? app.user_id}
                 </span>
-                <Badge>{POSITION_LABELS[app.position] ?? app.position}</Badge>
+                <Badge>{positionNames[app.position] ?? app.position}</Badge>
               </div>
 
               <dl className="mt-3 space-y-2">

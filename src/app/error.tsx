@@ -1,8 +1,10 @@
 "use client";
 
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { useEffect } from "react";
-import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Container } from "@/components/layout/Container";
+import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Button } from "@/components/ui/Button";
 import { isBoundaryApiError } from "@/lib/utils/errors";
 
@@ -22,22 +24,43 @@ export default function GlobalError({
     return <ServiceUnavailable onRetry={unstable_retry} />;
   }
 
-  // Unexpected runtime error → generic fallback
   return (
     <Container className="flex flex-1 flex-col items-center justify-center py-24 text-center">
-      <p className="font-mono text-sm text-zinc-400 dark:text-zinc-600">
-        {error.digest ?? "ERR"}
-      </p>
-      <h1 className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
+        <AlertTriangle size={22} className="text-red-600 dark:text-red-400" />
+      </div>
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
         Something went wrong
       </h1>
       <p className="mt-2 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-        An unexpected error occurred. If this keeps happening, please let us
-        know.
+        An unexpected error stopped this page from loading. Trying again usually
+        fixes it.
       </p>
-      <Button variant="secondary" onClick={unstable_retry} className="mt-6">
-        Try again
-      </Button>
+      <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <Button variant="primary" onClick={unstable_retry}>
+          <RefreshCw size={14} />
+          Try again
+        </Button>
+        <Link href="/">
+          <Button variant="secondary">Go home</Button>
+        </Link>
+      </div>
+      <p className="mt-8 text-xs text-zinc-400 dark:text-zinc-500">
+        Still broken?{" "}
+        <Link href="/tickets" className="underline hover:text-accent">
+          Open a support ticket
+        </Link>
+        {error.digest && (
+          <>
+            {" "}
+            and include this code:{" "}
+            <span className="font-mono text-zinc-600 dark:text-zinc-300">
+              {error.digest}
+            </span>
+          </>
+        )}
+        .
+      </p>
     </Container>
   );
 }

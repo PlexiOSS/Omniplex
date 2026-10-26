@@ -125,7 +125,7 @@ export default async function SoundPage({ params }: Props) {
 
           <AssetShortLink vanity={sound.vanity} basePath="/sounds" />
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
               Stats
             </h3>
@@ -142,7 +142,7 @@ export default async function SoundPage({ params }: Props) {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
               Uploaded by
             </h3>

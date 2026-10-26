@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type {
   BadgeCatalogEntry,
@@ -11,6 +10,7 @@ import type {
   BadgeRuleKind,
 } from "@/lib/arcadia/types";
 import { BADGE_ICON_NAMES, badgeIcon } from "@/lib/constants/badgeIcons";
+import { EditorPage } from "../EditorPage";
 
 const TARGET_TYPES = ["user", "bot", "server", "team"] as const;
 const COLORS: BadgeColor[] = [
@@ -113,9 +113,9 @@ export function BadgeEditModal({
   }
 
   return (
-    <Modal
-      open
-      onClose={onClose}
+    <EditorPage
+      onBack={onClose}
+      backLabel="Back to Badges"
       title={isEdit ? "Edit Badge" : "Create Badge"}
     >
       <div className="space-y-4">
@@ -355,6 +355,6 @@ export function BadgeEditModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </EditorPage>
   );
 }

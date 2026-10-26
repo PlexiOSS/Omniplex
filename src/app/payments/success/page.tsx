@@ -18,7 +18,7 @@ export default function PaymentSuccessPage() {
         Payment successful
       </h1>
       <p className="mt-2 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-        Thanks! Premium has been applied to your bot. It may take a minute
+        Thanks! Premium has been applied to your listing. It may take a minute
         to show up.
       </p>
       <Link href="/dashboard" className="mt-6">

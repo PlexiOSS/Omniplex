@@ -3,6 +3,7 @@
 import { LifeBuoy } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/hooks/useAuth";
 import { tickets } from "@/lib/api";
@@ -55,7 +56,7 @@ export default function AdminTicketsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Tickets"
         description="Every support ticket platform-wide. Open one to reply, close it, or reopen it."
@@ -79,14 +80,22 @@ export default function AdminTicketsPage() {
         ))}
       </div>
 
-      {error && (
+      {error && ticketList && (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
       {!ticketList ? (
-        <div className="flex justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-        </div>
+        error ? (
+          <AdminError
+            message={error}
+            onRetry={() => {
+              setError(null);
+              load();
+            }}
+          />
+        ) : (
+          <AdminLoading />
+        )
       ) : ticketList.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <LifeBuoy
@@ -98,12 +107,12 @@ export default function AdminTicketsPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-6 space-y-2">
+        <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
           {ticketList.map((ticket) => (
             <Link
               key={ticket.id}
               href={`/tickets/${ticket.id}`}
-              className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:hover:border-accent/40 dark:hover:bg-accent/10"
+              className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-accent/5 dark:hover:bg-accent/10"
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">

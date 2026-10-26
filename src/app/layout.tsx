@@ -9,6 +9,7 @@ import {
 } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { HideOnAdmin } from "@/components/layout/HideOnAdmin";
 import { CustomizationProvider } from "@/components/providers/CustomizationProvider";
 import { SoundPlayerProvider } from "@/components/providers/SoundPlayerProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -71,7 +72,9 @@ export default function RootLayout({
             <SoundPlayerProvider>
               <Header />
               <main className="flex flex-1 flex-col">{children}</main>
-              <Footer />
+              <HideOnAdmin>
+                <Footer />
+              </HideOnAdmin>
               <SoundPlayerBar />
             </SoundPlayerProvider>
           </CustomizationProvider>

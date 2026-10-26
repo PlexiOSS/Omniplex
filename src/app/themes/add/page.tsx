@@ -1,8 +1,16 @@
 "use client";
 
+import { Palette } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  FormError,
+  FormLayout,
+  FormSection,
+} from "@/components/forms/FormSection";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
 import { Button } from "@/components/ui/Button";
 import { ColorInput } from "@/components/ui/ColorInput";
 import { Input } from "@/components/ui/Input";
@@ -84,75 +92,124 @@ export default function AddThemePage() {
     }
   }
 
+  const previewPrimary = HEX6_PATTERN.test(form.primaryColor)
+    ? form.primaryColor
+    : "#5865F2";
+  const previewSecondary = HEX6_PATTERN.test(form.secondaryColor)
+    ? form.secondaryColor
+    : "#EB459E";
+
   return (
     <Container className="py-10">
-      <div className="mx-auto max-w-xl">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Submit a Theme
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          A name plus two hex colors no file upload needed.
-        </p>
+      <PageHeader
+        icon={Palette}
+        title="Submit a Theme"
+        description="A Discord profile theme is just a name and two colors. No file upload needed."
+      />
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-          <Input
-            id="theme-name"
-            label="Name"
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="Sunset Vibes"
-            maxLength={40}
-            required
-          />
+      <form onSubmit={handleSubmit}>
+        <FormLayout
+          aside={
+            <>
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Preview
+                </p>
+                {me.user ? (
+                  <ThemePreviewCard
+                    themeName={form.name.trim() || "Your theme"}
+                    tags={form.tags}
+                    primaryColor={previewPrimary}
+                    secondaryColor={previewSecondary}
+                    owner={me.user}
+                    compact
+                  />
+                ) : (
+                  <div
+                    className="h-48 rounded-2xl"
+                    style={{
+                      background: `linear-gradient(135deg, ${previewPrimary}, ${previewSecondary})`,
+                    }}
+                  />
+                )}
+              </div>
 
-          <ColorInput
-            id="theme-primary"
-            label="Primary Color"
-            value={form.primaryColor}
-            onChange={(v) => setForm((f) => ({ ...f, primaryColor: v }))}
-            required
-          />
+              {error && <FormError>{error}</FormError>}
 
-          <ColorInput
-            id="theme-secondary"
-            label="Secondary Color"
-            value={form.secondaryColor}
-            onChange={(v) => setForm((f) => ({ ...f, secondaryColor: v }))}
-            required
-          />
+              <Button
+                type="submit"
+                variant="primary"
+                loading={submitting}
+                size="lg"
+                className="w-full"
+              >
+                Submit Theme
+              </Button>
+              <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+                The preview uses your own profile.
+              </p>
+            </>
+          }
+        >
+          <FormSection
+            step={1}
+            title="Name"
+            description="What people see in the theme gallery."
+          >
+            <Input
+              id="theme-name"
+              label="Name"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder="Sunset Vibes"
+              maxLength={40}
+              required
+            />
+          </FormSection>
 
-          <div>
-            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Categories{" "}
-              <span className="text-xs font-normal text-zinc-400">
-                (up to 3)
-              </span>
-            </p>
+          <FormSection
+            step={2}
+            title="Colors"
+            description="The two colors of the profile gradient, as 6-digit hex codes."
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ColorInput
+                id="theme-primary"
+                label="Primary Color"
+                value={form.primaryColor}
+                onChange={(v) => setForm((f) => ({ ...f, primaryColor: v }))}
+                required
+              />
+              <ColorInput
+                id="theme-secondary"
+                label="Secondary Color"
+                value={form.secondaryColor}
+                onChange={(v) => setForm((f) => ({ ...f, secondaryColor: v }))}
+                required
+              />
+            </div>
+            <div
+              className="mt-4 h-3 rounded-full"
+              style={{
+                background: `linear-gradient(90deg, ${previewPrimary}, ${previewSecondary})`,
+              }}
+            />
+          </FormSection>
+
+          <FormSection
+            step={3}
+            title="Categories"
+            description="Pick up to 3 so people can find it."
+          >
             <TagPicker
               available={THEME_CATEGORIES}
               selected={form.tags}
               onChange={(tags) => setForm((f) => ({ ...f, tags }))}
               max={3}
             />
-          </div>
-
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            loading={submitting}
-            size="lg"
-            className="w-full"
-          >
-            Submit Theme
-          </Button>
-        </form>
-      </div>
+          </FormSection>
+        </FormLayout>
+      </form>
     </Container>
   );
 }

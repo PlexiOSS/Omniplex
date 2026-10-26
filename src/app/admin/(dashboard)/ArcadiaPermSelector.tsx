@@ -102,8 +102,7 @@ export function ArcadiaPermSelector({
       <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">
         {perms.map((perm) => {
           const isOverridden = value.includes(perm.id);
-          const isImplicit =
-            !isOverridden && resolvedPerms.includes(perm.id);
+          const isImplicit = !isOverridden && resolvedPerms.includes(perm.id);
           const checked = isOverridden || isImplicit;
           const canGrant = hasPermString(granterPerms, perm.id);
           // A permission already granted via a position can't be usefully
