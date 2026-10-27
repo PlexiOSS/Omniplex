@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A `Dockerfile` for running the site in a container. It builds on
+  `node:24.22.1-trixie-slim` (the Node 24 security release from
+  2026-10-20), installs dependencies with Bun from `bun.lock`, and runs
+  `next start` as the unprivileged `node` user on port 3000. The
+  `NEXT_PUBLIC_*` values are build arguments, because Next.js inlines
+  them at build time; any left empty fall back to the defaults instead of
+  becoming blank. Runtime settings (`S3_*`, `SHORT_LINK_DOMAINS`) are
+  passed when the container starts.
+
 ## [1.7.0] - 2026-10-27
 
 ### Added
