@@ -35,10 +35,17 @@ export const paymentsResource = {
     forType: Extract<TargetType, "bot" | "server">,
     forId: string,
     token: string,
+    credits = 0,
   ) =>
     client.post<RedirectUser>(
       `/users/${userId}/stripe`,
-      { id: "premium", name: planId, for: forId, for_type: forType },
+      {
+        id: "premium",
+        name: planId,
+        for: forId,
+        for_type: forType,
+        credits,
+      },
       { token },
     ),
 
@@ -49,10 +56,17 @@ export const paymentsResource = {
     forType: Extract<TargetType, "bot" | "server">,
     forId: string,
     token: string,
+    credits = 0,
   ) =>
     client.post<RedirectUser>(
       `/users/${userId}/paypal`,
-      { id: "premium", name: planId, for: forId, for_type: forType },
+      {
+        id: "premium",
+        name: planId,
+        for: forId,
+        for_type: forType,
+        credits,
+      },
       { token },
     ),
 

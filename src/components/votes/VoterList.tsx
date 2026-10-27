@@ -4,6 +4,8 @@ import { Users } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
 import { Avatar } from "@/components/ui/Avatar";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState, LoadingState } from "@/components/ui/PageStates";
 import { useAuth } from "@/hooks/useAuth";
 import { votes } from "@/lib/api";
 import type { EntityVoterList, TargetType } from "@/lib/api/types";
@@ -32,80 +34,89 @@ export function VoterList({
   );
 
   if (error) {
-    return (
-      <p className="py-12 text-center text-sm text-zinc-500 dark:text-zinc-400">
-        Couldn&apos;t load voters right now.
-      </p>
-    );
+    return <ErrorState message="Couldn't load voters right now." />;
   }
 
   if (!data) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
-      </div>
-    );
+    return <LoadingState label="Loading voters…" />;
   }
 
   if (data.voters.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Users size={28} className="mb-3 text-zinc-300 dark:text-zinc-700" />
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          No votes yet.
-        </p>
-      </div>
+      <EmptyState icon={Users} title="No votes yet">
+        Be the first to vote.
+      </EmptyState>
     );
   }
 
   const extra = Math.max(data.total - data.voters.length, 0);
+  const top = Math.max(1, ...data.voters.map((v) => v.votes));
+  const RANK = [
+    "bg-amber-400/15 text-amber-600 ring-amber-400/30 dark:text-amber-400",
+    "bg-zinc-300/20 text-zinc-600 ring-zinc-400/30 dark:text-zinc-300",
+    "bg-orange-400/15 text-orange-700 ring-orange-400/30 dark:text-orange-400",
+  ];
 
   return (
     <div>
       <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
-        {formatCountLabel(data.total, "person", "people")} voted. Counts are
-        since the last monthly vote reset, with all-time totals alongside.
+        {formatCountLabel(data.total, "person", "people")} voted since the last
+        monthly reset.
       </p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {data.voters.map((voter) => {
+      <ol className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+        {data.voters.map((voter, i) => {
           const name = voter.user.display_name || voter.user.username;
           return (
-            <Link
-              key={voter.user.id}
-              href={`/user/${voter.user.id}`}
-              className="group flex min-w-0 items-center gap-3 rounded-xl border border-zinc-200 px-3 py-2.5 transition-colors hover:border-accent/40 dark:border-zinc-800"
-            >
-              <Avatar
-                src={mirroredAvatarUrl(
-                  "users",
-                  voter.user.id,
-                  voter.user.avatar,
-                )}
-                alt={name}
-                size={32}
-              />
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-800 transition-colors group-hover:text-accent dark:text-zinc-200">
-                {name}
-              </span>
-              <span className="flex shrink-0 flex-col items-end">
+            <li key={voter.user.id}>
+              <Link
+                href={`/user/${voter.user.id}`}
+                className="group flex min-w-0 items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+              >
                 <span
                   className={[
-                    "text-sm font-semibold",
-                    voter.votes > 0
-                      ? "text-zinc-800 dark:text-zinc-200"
+                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-semibold tabular-nums",
+                    i < 3
+                      ? `ring-1 ${RANK[i]}`
                       : "text-zinc-400 dark:text-zinc-500",
                   ].join(" ")}
                 >
-                  {formatCountLabel(voter.votes, "vote")}
+                  {i + 1}
                 </span>
-                <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                  {formatCount(voter.total_votes)} all time
+                <Avatar
+                  src={mirroredAvatarUrl(
+                    "users",
+                    voter.user.id,
+                    voter.user.avatar,
+                  )}
+                  alt={name}
+                  size={32}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-zinc-900 transition-colors group-hover:text-accent dark:text-zinc-100">
+                    {name}
+                  </span>
+                  <span className="mt-1 block h-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                    <span
+                      className="block h-full rounded-full bg-indigo-500"
+                      style={{ width: `${(voter.votes / top) * 100}%` }}
+                    />
+                  </span>
                 </span>
-              </span>
-            </Link>
+                <span className="w-24 shrink-0 text-right">
+                  <span className="block text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                    {formatCountLabel(voter.votes, "vote")}
+                  </span>
+                  {voter.total_votes !== voter.votes && (
+                    <span className="block text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
+                      {formatCount(voter.total_votes)} all time
+                    </span>
+                  )}
+                </span>
+              </Link>
+            </li>
           );
         })}
-      </div>
+      </ol>
       {extra > 0 && (
         <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
           and {formatCountLabel(extra, "other voter")}

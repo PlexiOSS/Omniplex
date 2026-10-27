@@ -8,7 +8,7 @@ import {
   Copy,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PermSelector } from "@/components/teams/PermSelector";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -87,7 +87,7 @@ export function TokenManager({
 
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
-  function load() {
+  const load = useCallback(() => {
     setError(null);
     sessions
       .list(targetType, targetId, authToken)
@@ -97,18 +97,19 @@ export function TokenManager({
           err instanceof ApiError ? err.message : "Failed to load tokens.",
         );
       });
-  }
+  }, [targetType, targetId, authToken]);
 
   useEffect(() => {
     load();
-    if (canManage && !isOwner) {
-      teams
-        .getPermissionCatalog()
-        .then((res) => setCatalog(res.perms))
-        .catch(() => setCatalog([]));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetType, targetId]);
+  }, [load]);
+
+  useEffect(() => {
+    if (!canManage || isOwner) return;
+    teams
+      .getPermissionCatalog()
+      .then((res) => setCatalog(res.perms))
+      .catch(() => setCatalog([]));
+  }, [canManage, isOwner]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -286,7 +287,7 @@ export function TokenManager({
       {canManage && creating && (
         <form
           onSubmit={handleCreate}
-          className="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+          className="space-y-3 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900"
         >
           <Input
             label="Name"

@@ -37,7 +37,7 @@ function Tile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <p className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
         <Icon size={13} />
         {label}
@@ -65,7 +65,7 @@ function StatusCard({
 }) {
   const total = rows.reduce((sum, r) => sum + r.value, 0);
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
           <Icon size={15} className="text-accent" />
@@ -107,7 +107,7 @@ function TopTags({ tags }: { tags: ListTag[] }) {
   const top = tags.slice(0, TOP_TAGS);
   const max = Math.max(1, ...top.map((t) => t.bots + t.servers));
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
           Most used tags

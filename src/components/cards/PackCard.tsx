@@ -34,7 +34,7 @@ export function PackCard({ pack }: PackCardProps) {
     <Link
       href={href}
       data-nsfw={isNsfw || undefined}
-      className="group flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
+      className="group flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-4 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
     >
       <div className="flex items-start gap-3">
         <div className="flex shrink-0 -space-x-2">

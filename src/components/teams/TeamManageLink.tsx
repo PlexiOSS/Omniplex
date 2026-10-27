@@ -17,7 +17,7 @@ export function TeamManageLink({ teamId }: TeamManageLinkProps) {
   return (
     <Link
       href={`/teams/${teamId}/settings`}
-      className="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+      className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
     >
       <Settings size={14} />
       Manage Team

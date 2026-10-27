@@ -12,7 +12,7 @@ interface CompareCardProps {
 
 export function CompareCard({ entity, sharedTags }: CompareCardProps) {
   return (
-    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900">
       <Link href={entity.href} className="flex items-center gap-3">
         <Avatar src={entity.avatarSrc} alt={entity.name} size={48} />
         <div className="min-w-0">

@@ -289,6 +289,7 @@ export async function POST(req: Request) {
       }
     } catch (err) {
       if (!(err instanceof S3UnavailableError)) throw err;
+      console.error(err, err.cause);
       return NextResponse.json(
         { error: "Storage is temporarily unavailable. Please try again." },
         { status: 503 },

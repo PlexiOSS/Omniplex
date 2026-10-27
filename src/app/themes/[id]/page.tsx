@@ -47,15 +47,8 @@ export default async function ThemePage({ params }: Props) {
         All Themes
       </Link>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-        {/* Main */}
-        <div className="min-w-0">
-          {/* The theme's name/categories render as badges inside the card
-           * itself now, not as a separate heading below it -- this h1
-           * stays for page semantics/SEO without visually repeating what
-           * the card already shows. */}
-          <h1 className="sr-only">{theme.name}</h1>
-
+      <section className="grid overflow-hidden rounded-2xl border border-zinc-200 bg-white lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="border-b border-zinc-200 bg-zinc-50 bg-[radial-gradient(#e4e4e7_1px,transparent_1px)] [background-size:16px_16px] p-6 sm:p-8 lg:border-r lg:border-b-0 dark:border-zinc-800 dark:bg-zinc-950 dark:bg-[radial-gradient(#27272a_1px,transparent_1px)]">
           <ThemePreviewCard
             themeName={theme.name}
             tags={theme.tags}
@@ -63,57 +56,66 @@ export default async function ThemePage({ params }: Props) {
             secondaryColor={theme.secondary_color}
             owner={theme.owner}
           />
-
-          <div className="mt-6 space-y-2">
-            <CopyColorButton
-              label="Primary Color"
-              color={theme.primary_color}
-            />
-            <CopyColorButton
-              label="Secondary Color"
-              color={theme.secondary_color}
-            />
-          </div>
         </div>
 
-        {/* Sidebar */}
-        <aside className="space-y-4">
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-              Stats
-            </h3>
-            <dl className="space-y-2.5">
-              <div className="flex items-center justify-between gap-2 text-sm">
-                <span className="text-zinc-500 dark:text-zinc-400">
-                  Submitted
-                </span>
-                <span className="font-medium text-zinc-950 dark:text-zinc-50">
-                  {formatRelativeTime(theme.created_at)}
-                </span>
-              </div>
-            </dl>
-          </div>
-
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-              Submitted by
-            </h3>
+        <div className="flex min-w-0 flex-col p-6 sm:p-8">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 wrap-anywhere sm:text-3xl dark:text-zinc-50">
+            {theme.name}
+          </h1>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-zinc-500 dark:text-zinc-400">
             <Link
               href={`/user/${theme.owner.id}`}
-              className="flex items-center gap-2.5"
+              className="inline-flex min-w-0 items-center gap-1.5 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
             >
               <Avatar
                 src={theme.owner.avatar}
                 alt={theme.owner.username}
-                size={32}
+                size={20}
               />
-              <span className="truncate text-sm font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
-                {theme.owner.display_name || theme.owner.username}
+              <span className="truncate">
+                by {theme.owner.display_name || theme.owner.username}
               </span>
             </Link>
+            <span>Submitted {formatRelativeTime(theme.created_at)}</span>
           </div>
-        </aside>
-      </div>
+          {theme.tags.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {theme.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div
+            className="mt-6 h-3 rounded-full ring-1 ring-black/5 dark:ring-white/10"
+            style={{
+              background: `linear-gradient(90deg, ${theme.primary_color}, ${theme.secondary_color})`,
+            }}
+          />
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <CopyColorButton label="Primary" color={theme.primary_color} />
+            <CopyColorButton label="Secondary" color={theme.secondary_color} />
+          </div>
+
+          <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm dark:border-zinc-800 dark:bg-zinc-950">
+            <p className="font-medium text-zinc-950 dark:text-zinc-50">
+              Use it on Discord
+            </p>
+            <ol className="mt-2 list-decimal space-y-1 pl-5 text-zinc-600 dark:text-zinc-300">
+              <li>Open User Settings, then Profiles.</li>
+              <li>
+                Under Profile Theme, set Primary and Accent to these colors.
+              </li>
+              <li>Save. Profile themes need Discord Nitro.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
     </Container>
   );
 }

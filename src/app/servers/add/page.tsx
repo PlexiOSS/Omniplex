@@ -198,7 +198,7 @@ export default function AddServerPage() {
   const stage = !serverMeta ? 0 : !confirmed ? 1 : 2;
 
   const rulesNote = (
-    <div className="flex items-start gap-3 rounded-xl border border-accent/20 bg-accent/5 p-4 text-sm text-zinc-700 dark:text-zinc-300">
+    <div className="flex items-start gap-3 rounded-2xl border border-accent/20 bg-accent/5 p-4 text-sm text-zinc-700 dark:text-zinc-300">
       <BookOpen size={16} className="mt-0.5 shrink-0 text-accent" />
       <p>
         Read the{" "}

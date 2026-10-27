@@ -6,6 +6,7 @@ import { PackCard } from "@/components/cards/PackCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { TeamCard } from "@/components/cards/TeamCard";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { bots as botsApi, search, servers as serversApi } from "@/lib/api";
 import { isApiUnavailable } from "@/lib/utils/errors";
@@ -90,27 +91,34 @@ export default async function TagPage({ params }: Props) {
   return (
     <Container className="py-10">
       <div className="mb-8">
-        <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600">
-          <TagIcon size={12} />
-          Tag
-        </div>
-        <h1 className="mt-1 min-w-0 text-2xl font-semibold text-zinc-950 wrap-anywhere dark:text-zinc-50">
-          {decoded}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {[
-            botPage.count > 0 && formatCountLabel(botPage.count, "bot"),
-            serverPage.count > 0 &&
-              formatCountLabel(serverPage.count, "server"),
-            teams.length > 0 && formatCountLabel(teams.length, "team"),
-            packs.length > 0 && formatCountLabel(packs.length, "pack"),
-          ]
-            .filter(Boolean)
-            .join(", ") || "No results"}{" "}
-          tagged &quot;{decoded}&quot;, most voted first.
-        </p>
+        <PageHeader
+          icon={TagIcon}
+          title={decoded}
+          description={
+            <>
+              {[
+                botPage.count > 0 && formatCountLabel(botPage.count, "bot"),
+                serverPage.count > 0 &&
+                  formatCountLabel(serverPage.count, "server"),
+                teams.length > 0 && formatCountLabel(teams.length, "team"),
+                packs.length > 0 && formatCountLabel(packs.length, "pack"),
+              ]
+                .filter(Boolean)
+                .join(", ") || "No results"}{" "}
+              tagged &quot;{decoded}&quot;, most voted first.
+            </>
+          }
+          actions={
+            <Link
+              href="/tags"
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+            >
+              All tags
+            </Link>
+          }
+        />
         {related.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="-mt-4 flex flex-wrap items-center gap-2">
             <span className="text-xs text-zinc-400 dark:text-zinc-500">
               Related:
             </span>

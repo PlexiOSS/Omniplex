@@ -1,10 +1,11 @@
 "use client";
 
-import { Megaphone, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Megaphone, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { useHighlightScroll } from "@/hooks/useHighlightScroll";
@@ -53,11 +54,11 @@ export function BotChangelogSection({
 
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-          Changelog
-        </h2>
-        {canEdit && (
+      {canEdit && (
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            Updates shown on your bot's page and in the Feed.
+          </p>
           <Button
             variant="secondary"
             size="sm"
@@ -66,78 +67,23 @@ export function BotChangelogSection({
             <Plus size={12} />
             Post Update
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {changelogs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Megaphone
-            size={28}
-            className="mb-3 text-zinc-300 dark:text-zinc-700"
-          />
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No updates posted yet.
-          </p>
-        </div>
+        <EmptyState icon={Megaphone} title="No updates posted yet" />
       ) : (
         <div className="space-y-4">
           {changelogs.map((entry) => (
-            <div
+            <ChangelogEntry
               key={entry.id}
-              id={`changelog-${entry.id}`}
-              className={[
-                "scroll-mt-24 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800",
-                entry.id === highlightId &&
-                  "ring-2 ring-accent ring-offset-2 dark:ring-offset-zinc-950",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium text-zinc-950 dark:text-zinc-50">
-                    {entry.title}
-                  </p>
-                  {entry.version && (
-                    <Badge variant="info">{entry.version}</Badge>
-                  )}
-                </div>
-                {canEdit && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(entry.id)}
-                    disabled={deleting === entry.id}
-                    aria-label="Delete update"
-                    className={[
-                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors disabled:opacity-50",
-                      confirmDeleteId === entry.id
-                        ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
-                        : "text-zinc-400 hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400",
-                    ].join(" ")}
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                )}
-              </div>
-              <Markdown
-                content={entry.content}
-                softBreaks={false}
-                className="mt-1 text-sm text-zinc-600 dark:text-zinc-300"
-              />
-              <time
-                dateTime={entry.created_at}
-                title={new Date(entry.created_at).toLocaleString()}
-                suppressHydrationWarning
-                className="mt-2 block text-xs text-zinc-400 dark:text-zinc-600"
-              >
-                {new Date(entry.created_at).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}{" "}
-                · {formatRelativeTime(entry.created_at)}
-              </time>
-            </div>
+              entry={entry}
+              highlighted={entry.id === highlightId}
+              canEdit={canEdit}
+              deleting={deleting === entry.id}
+              confirming={confirmDeleteId === entry.id}
+              onDelete={() => handleDelete(entry.id)}
+            />
           ))}
         </div>
       )}
@@ -151,6 +97,107 @@ export function BotChangelogSection({
         />
       )}
     </div>
+  );
+}
+
+const COLLAPSE_AT = 700;
+
+function ChangelogEntry({
+  entry,
+  highlighted,
+  canEdit,
+  deleting,
+  confirming,
+  onDelete,
+}: {
+  entry: BotChangelog;
+  highlighted: boolean;
+  canEdit?: boolean;
+  deleting: boolean;
+  confirming: boolean;
+  onDelete: () => void;
+}) {
+  const long = entry.content.length > COLLAPSE_AT;
+  const [expanded, setExpanded] = useState(highlighted);
+
+  return (
+    <article
+      id={`changelog-${entry.id}`}
+      className={[
+        "scroll-mt-24 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900",
+        highlighted &&
+          "ring-2 ring-accent ring-offset-2 dark:ring-offset-zinc-950",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <header className="flex items-start justify-between gap-3 border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-50">
+              {entry.title}
+            </h3>
+            {entry.version && <Badge variant="info">{entry.version}</Badge>}
+          </div>
+          <time
+            dateTime={entry.created_at}
+            title={new Date(entry.created_at).toLocaleString()}
+            suppressHydrationWarning
+            className="mt-0.5 block text-xs text-zinc-500 dark:text-zinc-400"
+          >
+            {new Date(entry.created_at).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}{" "}
+            · {formatRelativeTime(entry.created_at)}
+          </time>
+        </div>
+        {canEdit && (
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={deleting}
+            aria-label="Delete update"
+            className={[
+              "flex h-8 shrink-0 items-center justify-center rounded-lg px-2 text-xs font-medium transition-colors disabled:opacity-50",
+              confirming
+                ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                : "w-8 text-zinc-400 hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400",
+            ].join(" ")}
+          >
+            {confirming ? "Delete?" : <Trash2 size={14} />}
+          </button>
+        )}
+      </header>
+      <div className="relative px-5 py-4">
+        <div
+          className={long && !expanded ? "max-h-72 overflow-hidden" : undefined}
+        >
+          <Markdown
+            content={entry.content}
+            softBreaks={false}
+            className="text-sm text-zinc-600 dark:text-zinc-300"
+          />
+        </div>
+        {long && !expanded && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-zinc-900" />
+        )}
+      </div>
+      {long && (
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="flex w-full items-center justify-center gap-1 border-t border-zinc-100 py-2.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-accent dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800/40"
+        >
+          {expanded ? "Show less" : "Show full update"}
+          <ChevronDown
+            size={13}
+            className={`transition-transform ${expanded ? "rotate-180" : ""}`}
+          />
+        </button>
+      )}
+    </article>
   );
 }
 

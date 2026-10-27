@@ -8,10 +8,17 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  size?: "md" | "lg";
 }
 
 /** Centered overlay dialog. Closes on Escape or backdrop click. */
-export function Modal({ open, onClose, title, children }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  size = "md",
+}: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,7 +48,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm">
       <div
         ref={panelRef}
-        className="my-8 w-full max-w-lg rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        className={`my-8 w-full ${size === "lg" ? "max-w-4xl" : "max-w-lg"} rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900`}
       >
         <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
           <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">

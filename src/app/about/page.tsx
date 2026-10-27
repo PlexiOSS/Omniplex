@@ -284,7 +284,7 @@ export default async function AboutPage() {
               {...(external
                 ? { target: "_blank", rel: "noopener noreferrer" }
                 : {})}
-              className="group flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
+              className="group flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 transition-colors group-hover:bg-accent/10 group-hover:text-accent dark:bg-zinc-800 dark:text-zinc-300">
                 <Icon size={16} />

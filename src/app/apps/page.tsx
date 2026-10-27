@@ -1,8 +1,10 @@
-import { ArrowRight, Briefcase, ClipboardList } from "lucide-react";
+import { ArrowRight, Briefcase, ClipboardList, CloudOff } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { apps } from "@/lib/api";
 
 export const metadata: Metadata = {
@@ -71,7 +73,7 @@ function preview(info: string, max = 160): string {
 function PositionCard({ position }: { position: Position }) {
   const requirements = REQUIREMENTS[position.id];
   return (
-    <div className="flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start justify-between gap-2">
         <p className="font-semibold text-zinc-950 dark:text-zinc-50">
           {position.name}
@@ -144,38 +146,39 @@ export default async function AppsPage() {
   ].filter((s) => s.positions.length > 0);
 
   return (
-    <Container className="py-16">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <Briefcase size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Apply
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          Join the team, apply for certification or partnership, or ask for a
-          denied bot to be reviewed again. Every application is read by a real
-          person.
-        </p>
-        <Link
-          href="/dashboard?tab=applications"
-          className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
-        >
-          <ClipboardList size={14} />
-          Your applications
-        </Link>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={Briefcase}
+        title="Apply"
+        description={
+          <>
+            Join the team, apply for certification or partnership, or ask for a
+            denied bot to be reviewed again. Every application is read by a real
+            person.
+          </>
+        }
+        actions={
+          <Link
+            href="/dashboard?tab=applications"
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+          >
+            <ClipboardList size={14} />
+            Your applications
+          </Link>
+        }
+      />
 
       {!meta ? (
-        <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Couldn&apos;t load open positions right now. Check back shortly.
-        </p>
+        <EmptyState icon={CloudOff} title="Couldn't load open positions">
+          Check back shortly.
+        </EmptyState>
       ) : sections.length === 0 ? (
-        <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          There aren&apos;t any open positions right now.
-        </p>
+        <EmptyState icon={Briefcase} title="No open positions right now">
+          Check back later, or follow announcements in our Discord.
+        </EmptyState>
       ) : (
-        <div className="mx-auto mt-12 max-w-4xl space-y-12">
+        <div className="mx-auto max-w-4xl space-y-12">
           {sections.map((section) => (
             <section key={section.key}>
               <div className="mb-4">

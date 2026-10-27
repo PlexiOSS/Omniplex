@@ -32,7 +32,7 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     slug: "listings",
     title: "Managing Listings",
     description:
-      "How-tos for running a listing: commands, changelog updates, teams, vanity URLs, banners, and listing a server.",
+      "How-tos for running a listing: commands, changelog updates, teams, vanity URLs, banners, formatting with Markdown and HTML, styling your page, and listing a server.",
     order: 4,
   },
   {

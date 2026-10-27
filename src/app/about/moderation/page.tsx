@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { list, reports } from "@/lib/api";
 import type { ReportReason, ReportStatus } from "@/lib/api/types";
 import { formatCount } from "@/lib/utils/format";
@@ -61,7 +62,7 @@ function SummaryStat({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <p className="text-2xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
         {value}
       </p>
@@ -83,7 +84,7 @@ function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="min-w-0 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">{title}</h2>
       {description && (
         <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
@@ -225,22 +226,21 @@ export default async function ModerationPage() {
     : null;
 
   return (
-    <Container className="py-16">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <ShieldCheck size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Moderation Transparency
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          How listings are reviewed and reports are handled, in numbers.
-          Individual reports, and who filed them, are only ever visible to
-          staff.
-        </p>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={ShieldCheck}
+        title="Moderation Transparency"
+        description={
+          <>
+            How listings are reviewed and reports are handled, in numbers.
+            Individual reports, and who filed them, are only ever visible to
+            staff.
+          </>
+        }
+      />
 
-      <div className="mx-auto mt-10 max-w-5xl space-y-6">
+      <div className="mx-auto max-w-5xl space-y-6">
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <SummaryStat
             label="Reports filed"
@@ -376,7 +376,7 @@ export default async function ModerationPage() {
           </Card>
         </div>
 
-        <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900/50">
           <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">
             How moderation works
           </h2>

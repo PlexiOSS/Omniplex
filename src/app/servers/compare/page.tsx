@@ -1,8 +1,15 @@
-import { Eye, MousePointerClick, Star, Users } from "lucide-react";
+import {
+  ArrowRightLeft,
+  Eye,
+  MousePointerClick,
+  Star,
+  Users,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { CompareSlot } from "@/components/compare/CompareSlot";
 import type { CompareEntity } from "@/components/compare/types";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { servers, vanity } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -99,14 +106,11 @@ export default async function CompareServersPage({ searchParams }: Props) {
 
   return (
     <Container className="py-10" narrow>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Compare Servers
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Pick two servers to compare side by side.
-        </p>
-      </div>
+      <PageHeader
+        icon={ArrowRightLeft}
+        title="Compare Servers"
+        description={<>Pick two servers to compare side by side.</>}
+      />
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <CompareSlot

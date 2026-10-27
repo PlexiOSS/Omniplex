@@ -1,8 +1,10 @@
+import { Server } from "lucide-react";
 import Link from "next/link";
 import { BrowseControls, browseHref } from "@/components/browse/BrowseControls";
 import { UrlPagination } from "@/components/browse/UrlPagination";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { servers } from "@/lib/api";
 import type {
@@ -57,16 +59,17 @@ export default async function ServersPage({ searchParams }: Props) {
 
   return (
     <Container className="py-10">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          All Servers
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Browse Discord servers listed on Omniplex.{" "}
-          {formatCountLabel(data.count, "server", "servers")}
-          {filtered ? " match these filters." : " in total."}
-        </p>
-      </div>
+      <PageHeader
+        icon={Server}
+        title="All Servers"
+        description={
+          <>
+            Browse Discord servers listed on Omniplex.{" "}
+            {formatCountLabel(data.count, "server", "servers")}
+            {filtered ? " match these filters." : " in total."}
+          </>
+        }
+      />
 
       <BrowseControls
         basePath="/servers"

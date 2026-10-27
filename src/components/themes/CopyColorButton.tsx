@@ -25,23 +25,28 @@ export function CopyColorButton({ label, color }: CopyColorButtonProps) {
     <button
       type="button"
       onClick={handleCopy}
-      className="flex w-full items-center justify-between gap-2 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800"
+      className="group flex w-full min-w-0 items-center gap-3 rounded-xl border border-zinc-200 bg-white p-2 pr-3 text-left transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <span className="flex items-center gap-2">
-        <span
-          className="h-4 w-4 shrink-0 rounded-full border border-black/10 dark:border-white/10"
-          style={{ backgroundColor: color }}
-        />
-        <span className="font-medium text-zinc-950 dark:text-zinc-50">
+      <span
+        className="h-11 w-11 shrink-0 rounded-lg ring-1 ring-black/10 dark:ring-white/10"
+        style={{ backgroundColor: color }}
+      />
+      <span className="min-w-0 flex-1">
+        <span className="block text-xs text-zinc-500 dark:text-zinc-400">
           {label}
         </span>
-        <code className="text-zinc-500 dark:text-zinc-400">{color}</code>
+        <code className="block font-mono text-sm font-medium text-zinc-950 dark:text-zinc-50">
+          {color}
+        </code>
       </span>
-      {copied ? (
-        <Check size={14} className="shrink-0 text-accent" />
-      ) : (
-        <Copy size={14} className="shrink-0 text-zinc-400" />
-      )}
+      <span className="inline-flex h-8 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-medium text-zinc-500 transition-colors group-hover:bg-zinc-100 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:bg-zinc-800 dark:group-hover:text-zinc-100">
+        {copied ? (
+          <Check size={13} className="text-emerald-500" />
+        ) : (
+          <Copy size={13} />
+        )}
+        {copied ? "Copied" : "Copy"}
+      </span>
     </button>
   );
 }

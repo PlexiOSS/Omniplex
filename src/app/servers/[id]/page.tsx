@@ -3,6 +3,7 @@ import {
   ArrowRightLeft,
   ExternalLink,
   Eye,
+  Gem,
   MousePointerClick,
   Star,
   Users,
@@ -26,11 +27,11 @@ import {
   ENTITY_ACTION_CLASS,
   ENTITY_ACTION_ROW,
 } from "@/components/ui/entityAction";
-import { LinkIcon } from "@/components/ui/LinkIcon";
+import { MobileActionBar } from "@/components/ui/MobileActionBar";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
+import { SidebarLink } from "@/components/ui/SidebarLink";
 import { StatRow } from "@/components/ui/StatRow";
 import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
-import { WidgetDisclosure } from "@/components/widget/WidgetDisclosure";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { reviews, servers, users, vanity, votes } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -141,7 +142,7 @@ export default async function ServerPage({ params }: Props) {
     !!server.vote_blitz_until && new Date(server.vote_blitz_until) > new Date();
 
   const actionsCard = (
-    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900">
       <div className="flex flex-col gap-2">
         {voteBlitzActive && (
           <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
@@ -236,7 +237,9 @@ export default async function ServerPage({ params }: Props) {
           )}
 
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
-          <div className="mt-5 lg:hidden">{actionsCard}</div>
+          <div id="mobile-actions" className="mt-5 scroll-mt-24 lg:hidden">
+            {actionsCard}
+          </div>
 
           <div className={ENTITY_ACTION_ROW}>
             {shortLink && <ShortLinkButton url={shortLink} />}
@@ -248,6 +251,10 @@ export default async function ServerPage({ params }: Props) {
               <ArrowRightLeft size={13} />
               Compare
             </Link>
+            <WidgetShare
+              widgetPath={`/servers/${server.vanity || server.server_id}/widget`}
+              stats={SERVER_WIDGET_STATS}
+            />
             <ReportModal
               targetType="server"
               targetId={server.server_id}
@@ -272,8 +279,8 @@ export default async function ServerPage({ params }: Props) {
           {/* Actions (desktop only — mobile version renders above the About section) */}
           <div className="hidden lg:block">{actionsCard}</div>
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
               Stats
             </h3>
             <dl className="space-y-2.5">
@@ -282,23 +289,43 @@ export default async function ServerPage({ params }: Props) {
                 label="Votes"
                 value={formatCount(server.approximate_votes)}
               />
-              <StatRow
-                icon={<Users size={14} />}
-                label="Members"
-                value={formatCount(server.total_members)}
-              />
-              {server.online_members != null && (
+              <div>
                 <StatRow
                   icon={<Users size={14} />}
-                  label="Online"
-                  value={formatCount(server.online_members)}
+                  label="Members"
+                  value={formatCount(server.total_members)}
+                />
+                {server.online_members != null && server.total_members > 0 && (
+                  <>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                      <div
+                        className="h-full rounded-full bg-emerald-500"
+                        style={{
+                          width: `${Math.min(100, (server.online_members / server.total_members) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      {formatCount(server.online_members)} online
+                    </p>
+                  </>
+                )}
+              </div>
+              {(server.boost_count ?? 0) > 0 && (
+                <StatRow
+                  icon={<Gem size={14} />}
+                  label="Boosts"
+                  value={`${server.premium_tier ? `Level ${server.premium_tier} · ` : ""}${formatCount(server.boost_count ?? 0)}`}
                 />
               )}
-              <StatRow
-                icon={<Eye size={14} />}
-                label="Page Views"
-                value={formatCount(server.clicks)}
-              />
+              {server.clicks > 0 && (
+                <StatRow
+                  icon={<Eye size={14} />}
+                  label="Page Views"
+                  value={formatCount(server.clicks)}
+                />
+              )}
               {server.invite_clicks > 0 && (
                 <StatRow
                   icon={<MousePointerClick size={14} />}
@@ -310,8 +337,8 @@ export default async function ServerPage({ params }: Props) {
           </div>
 
           {(server.team_owner || owner?.user) && (
-            <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-              <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+              <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 {server.team_owner ? "Team" : "Owner"}
               </h3>
               {server.team_owner ? (
@@ -320,10 +347,14 @@ export default async function ServerPage({ params }: Props) {
                   className="flex items-center gap-2.5"
                 >
                   <Avatar
-                    src={teamAvatarUrl(
-                      server.team_owner.id,
-                      server.team_owner.asset_versions?.avatar,
-                    )}
+                    src={
+                      server.team_owner.asset_versions?.avatar
+                        ? teamAvatarUrl(
+                            server.team_owner.id,
+                            server.team_owner.asset_versions.avatar,
+                          )
+                        : avatarSrc
+                    }
                     alt={server.team_owner.name}
                     size={32}
                   />
@@ -352,29 +383,21 @@ export default async function ServerPage({ params }: Props) {
           )}
 
           {server.extra_links.length > 0 && (
-            <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-              <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+              <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 Links
               </h3>
               <div className="space-y-1">
                 {server.extra_links.map((link) => (
-                  <LinkItem
+                  <SidebarLink
                     key={link.name}
                     href={link.value}
-                    icon={<LinkIcon name={link.name} href={link.value} />}
                     label={link.name}
                   />
                 ))}
               </div>
             </div>
           )}
-
-          <WidgetDisclosure>
-            <WidgetShare
-              widgetPath={`/servers/${server.vanity || server.server_id}/widget`}
-              stats={SERVER_WIDGET_STATS}
-            />
-          </WidgetDisclosure>
         </aside>
       </div>
 
@@ -393,36 +416,13 @@ export default async function ServerPage({ params }: Props) {
           </div>
         </section>
       )}
-    </Container>
-  );
-}
-
-function LinkItem({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex items-center justify-between gap-2 rounded-lg -mx-2 px-2 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-50"
-    >
-      <span className="flex items-center gap-2 truncate">
-        <span className="shrink-0 text-zinc-400 transition-colors group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300">
-          {icon}
-        </span>
-        <span className="truncate">{label}</span>
-      </span>
-      <ExternalLink
-        size={12}
-        className="shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-accent"
+      <MobileActionBar
+        targetId="mobile-actions"
+        name={server.name}
+        avatar={avatarSrc}
+        primaryHref={server.extra_links.find((l) => l.name === "invite")?.value}
+        primaryLabel="Join"
       />
-    </a>
+    </Container>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
-import { Megaphone } from "lucide-react";
+import { Megaphone, Rss } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
 import { FeedEntry } from "@/components/feed/FeedEntry";
 import { RecentBots } from "@/components/feed/RecentBots";
 import { DirectoryFilters } from "@/components/filters/DirectoryFilters";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Pagination } from "@/components/search/Pagination";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useBotChangelogFeed, useRecentChangelogBots } from "@/hooks/useBots";
@@ -126,14 +127,11 @@ function FeedView() {
 
   return (
     <Container className="py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Feed
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Updates bot owners have posted, newest first.
-        </p>
-      </div>
+      <PageHeader
+        icon={Rss}
+        title="Feed"
+        description={<>Updates bot owners have posted, newest first.</>}
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <aside className="min-w-0 space-y-8 lg:sticky lg:top-24 lg:order-last lg:self-start">
@@ -162,7 +160,7 @@ function FeedView() {
               {SKELETON_KEYS.map((k) => (
                 <div
                   key={k}
-                  className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+                  className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900"
                 >
                   <div className="flex items-center gap-2.5">
                     <Skeleton className="h-8 w-8 shrink-0 rounded-full" />

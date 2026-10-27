@@ -72,7 +72,7 @@ export function VoteCreditsPanel({
 
   return (
     <div className="max-w-2xl space-y-4">
-      <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Every vote earns credits, the same way it already does for bots and
           servers. The shop itself is bot/server-only for now, so there's

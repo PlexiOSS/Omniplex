@@ -311,7 +311,7 @@ export default async function HomePage() {
               <Link
                 key={collection.slug}
                 href={`/tags/${encodeURIComponent(collection.tag)}`}
-                className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
+                className="group flex flex-col rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
               >
                 {previewBots.length > 0 ? (
                   <div className="flex -space-x-2">
@@ -429,7 +429,7 @@ export default async function HomePage() {
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
+                  className="group flex flex-col rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
                 >
                   {post.tags.length > 0 && (
                     <div className="mb-3 flex gap-1.5">

@@ -4,6 +4,7 @@ import { LifeBuoy, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
@@ -25,22 +26,21 @@ export default function TicketsPage() {
   }, [session]);
 
   return (
-    <Container className="py-16">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <LifeBuoy size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Support Tickets
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          Something wrong with your account, a payment, or a listing? Open a
-          ticket and a staff member will follow up here.
-        </p>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={LifeBuoy}
+        title="Support Tickets"
+        description={
+          <>
+            Something wrong with your account, a payment, or a listing? Open a
+            ticket and a staff member will follow up here.
+          </>
+        }
+      />
 
       {authLoading ? null : !isAuthenticated ? (
-        <div className="mx-auto mt-10 max-w-md rounded-2xl border border-zinc-200 p-8 text-center dark:border-zinc-800">
+        <div className="mx-auto max-w-md rounded-2xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
           <p className="mb-3 text-sm text-zinc-500 dark:text-zinc-400">
             Sign in to open or view your tickets.
           </p>
@@ -51,7 +51,7 @@ export default function TicketsPage() {
           </SignInLink>
         </div>
       ) : (
-        <div className="mx-auto mt-10 max-w-2xl">
+        <div className="mx-auto max-w-2xl">
           <div className="mb-6 flex items-center justify-between">
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               {ticketList === null

@@ -2,6 +2,7 @@ import {
   Activity,
   ArrowLeft,
   ArrowRightLeft,
+  Code2,
   ExternalLink,
   Eye,
   MousePointerClick,
@@ -21,6 +22,7 @@ import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { isListed, UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
@@ -28,14 +30,15 @@ import {
   ENTITY_ACTION_CLASS,
   ENTITY_ACTION_ROW,
 } from "@/components/ui/entityAction";
-import { LinkIcon } from "@/components/ui/LinkIcon";
+import { MobileActionBar } from "@/components/ui/MobileActionBar";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
+import { SidebarLink } from "@/components/ui/SidebarLink";
 import { StatRow } from "@/components/ui/StatRow";
 import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
-import { WidgetDisclosure } from "@/components/widget/WidgetDisclosure";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { bots, reviews, vanity, votes } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import { BASE_URL } from "@/lib/api/config";
 import { shortLinkUrl } from "@/lib/shortLinks";
 import {
   bannerUrl,
@@ -142,7 +145,7 @@ export default async function BotPage({ params }: Props) {
     !!bot.vote_blitz_until && new Date(bot.vote_blitz_until) > new Date();
 
   const actionsCard = (
-    <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900">
       <div className="flex flex-col gap-2">
         {voteBlitzActive && (
           <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
@@ -173,6 +176,7 @@ export default async function BotPage({ params }: Props) {
   );
 
   const shortLink = shortLinkUrl(bot.vanity || bot.bot_id);
+  const ratedReviews = reviewList.reviews.filter((r) => !r.parent_id);
 
   return (
     <Container className="py-10">
@@ -240,7 +244,9 @@ export default async function BotPage({ params }: Props) {
           )}
 
           {/* Actions (mobile only — desktop version lives in the sidebar) */}
-          <div className="mt-5 lg:hidden">{actionsCard}</div>
+          <div id="mobile-actions" className="mt-5 scroll-mt-24 lg:hidden">
+            {actionsCard}
+          </div>
 
           <div className={ENTITY_ACTION_ROW}>
             {shortLink && <ShortLinkButton url={shortLink} />}
@@ -252,6 +258,10 @@ export default async function BotPage({ params }: Props) {
               <ArrowRightLeft size={13} />
               Compare
             </Link>
+            <WidgetShare
+              widgetPath={`/bots/${bot.vanity || bot.bot_id}/widget`}
+              stats={BOT_WIDGET_STATS}
+            />
             <ReportModal
               targetType="bot"
               targetId={bot.bot_id}
@@ -275,8 +285,8 @@ export default async function BotPage({ params }: Props) {
           <div className="hidden lg:block">{actionsCard}</div>
 
           {/* Stats */}
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
               Stats
             </h3>
             <dl className="space-y-2.5">
@@ -291,11 +301,26 @@ export default async function BotPage({ params }: Props) {
                 value={formatCount(bot.servers)}
               />
               {uptimePercent !== null && (
-                <StatRow
-                  icon={<Activity size={14} />}
-                  label="Uptime"
-                  value={`${uptimePercent >= 99.95 ? "100" : uptimePercent.toFixed(1)}%`}
-                />
+                <div>
+                  <StatRow
+                    icon={<Activity size={14} />}
+                    label="Uptime"
+                    value={`${uptimePercent >= 99.95 ? "100" : uptimePercent.toFixed(1)}%`}
+                  />
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                    <div
+                      className={[
+                        "h-full rounded-full",
+                        uptimePercent >= 95
+                          ? "bg-emerald-500"
+                          : uptimePercent >= 80
+                            ? "bg-amber-500"
+                            : "bg-red-500",
+                      ].join(" ")}
+                      style={{ width: `${Math.max(uptimePercent, 2)}%` }}
+                    />
+                  </div>
+                </div>
               )}
               {bot.shards != null && (
                 <StatRow
@@ -304,11 +329,13 @@ export default async function BotPage({ params }: Props) {
                   value={formatCount(bot.shards)}
                 />
               )}
-              <StatRow
-                icon={<Eye size={14} />}
-                label="Page Views"
-                value={formatCount(bot.clicks)}
-              />
+              {bot.clicks > 0 && (
+                <StatRow
+                  icon={<Eye size={14} />}
+                  label="Page Views"
+                  value={formatCount(bot.clicks)}
+                />
+              )}
               {bot.invite_clicks > 0 && (
                 <StatRow
                   icon={<MousePointerClick size={14} />}
@@ -317,15 +344,33 @@ export default async function BotPage({ params }: Props) {
                 />
               )}
               {bot.library && (
-                <StatRow icon={null} label="Library" value={bot.library} />
+                <div className="flex items-start justify-between gap-3 text-sm">
+                  <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+                    <Code2 size={14} />
+                    Library
+                  </span>
+                  <span className="flex flex-wrap justify-end gap-1">
+                    {bot.library
+                      .split(/[\s,/]+/)
+                      .filter(Boolean)
+                      .map((lib) => (
+                        <span
+                          key={lib}
+                          className="rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                        >
+                          {lib}
+                        </span>
+                      ))}
+                  </span>
+                </div>
               )}
             </dl>
           </div>
 
           {/* Owner */}
           {(bot.team_owner || bot.owner) && (
-            <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-              <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+              <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 {bot.team_owner ? "Team" : "Owner"}
               </h3>
               {bot.team_owner ? (
@@ -334,10 +379,14 @@ export default async function BotPage({ params }: Props) {
                   className="flex items-center gap-2.5"
                 >
                   <Avatar
-                    src={teamAvatarUrl(
-                      bot.team_owner.id,
-                      bot.team_owner.asset_versions?.avatar,
-                    )}
+                    src={
+                      bot.team_owner.asset_versions?.avatar
+                        ? teamAvatarUrl(
+                            bot.team_owner.id,
+                            bot.team_owner.asset_versions.avatar,
+                          )
+                        : avatarSrc
+                    }
                     alt={bot.team_owner.name}
                     size={32}
                   />
@@ -367,13 +416,13 @@ export default async function BotPage({ params }: Props) {
 
           {/* Links */}
           {bot.extra_links.length > 0 && (
-            <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-              <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+              <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 Links
               </h3>
               <div className="space-y-1">
                 {bot.extra_links.map((link) => (
-                  <ExternalLinkItem
+                  <SidebarLink
                     key={link.name}
                     href={link.value}
                     label={link.name}
@@ -382,13 +431,6 @@ export default async function BotPage({ params }: Props) {
               </div>
             </div>
           )}
-
-          <WidgetDisclosure>
-            <WidgetShare
-              widgetPath={`/bots/${bot.vanity || bot.bot_id}/widget`}
-              stats={BOT_WIDGET_STATS}
-            />
-          </WidgetDisclosure>
         </aside>
       </div>
 
@@ -404,6 +446,40 @@ export default async function BotPage({ params }: Props) {
           </div>
         </section>
       )}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: bot.user.username,
+          description: bot.short,
+          image: avatarSrc,
+          url: `${BASE_URL}/bots/${bot.vanity || bot.bot_id}`,
+          applicationCategory: "CommunicationApplication",
+          operatingSystem: "Discord",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          ...(ratedReviews.length > 0
+            ? {
+                aggregateRating: {
+                  "@type": "AggregateRating",
+                  ratingValue: (
+                    ratedReviews.reduce((sum, r) => sum + r.stars, 0) /
+                    ratedReviews.length
+                  ).toFixed(1),
+                  reviewCount: ratedReviews.length,
+                  bestRating: 5,
+                  worstRating: 1,
+                },
+              }
+            : {}),
+        }}
+      />
+      <MobileActionBar
+        targetId="mobile-actions"
+        name={bot.user.username}
+        avatar={avatarSrc}
+        primaryHref={bot.invite || undefined}
+        primaryLabel="Add"
+      />
     </Container>
   );
 }
@@ -414,27 +490,3 @@ const STATUS_LABELS: Record<string, string> = {
   dnd: "Do not disturb",
   offline: "Offline",
 };
-
-function ExternalLinkItem({ href, label }: { href: string; label: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex items-center justify-between gap-2 rounded-lg -mx-2 px-2 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-50"
-    >
-      <span className="flex min-w-0 items-center gap-2">
-        <LinkIcon
-          name={label}
-          href={href}
-          className="shrink-0 text-zinc-400 transition-colors group-hover:text-accent dark:text-zinc-500"
-        />
-        <span className="truncate">{label}</span>
-      </span>
-      <ExternalLink
-        size={12}
-        className="shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-accent"
-      />
-    </a>
-  );
-}

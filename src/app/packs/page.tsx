@@ -1,8 +1,10 @@
+import { Package } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { UrlPagination } from "@/components/browse/UrlPagination";
 import { PackCard } from "@/components/cards/PackCard";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { packs } from "@/lib/api";
 import type { BotPack, PackType, PagedResult } from "@/lib/api/types";
@@ -86,16 +88,17 @@ export default async function PacksPage({ searchParams }: Props) {
 
   return (
     <Container className="py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Packs
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Curated collections of bots, servers, and emojis.{" "}
-          {formatCountLabel(data.count, "pack")}
-          {state.type || !state.all ? " match these filters." : " in total."}
-        </p>
-      </div>
+      <PageHeader
+        icon={Package}
+        title="Packs"
+        description={
+          <>
+            Curated collections of bots, servers, and emojis.{" "}
+            {formatCountLabel(data.count, "pack")}
+            {state.type || !state.all ? " match these filters." : " in total."}
+          </>
+        }
+      />
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-1.5">

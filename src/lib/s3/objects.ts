@@ -3,7 +3,7 @@
 import type { Readable } from "node:stream";
 import {
   GetObjectCommand,
-  HeadObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getS3Client } from "./client";
@@ -36,17 +36,18 @@ export type GetObjectResult =
 export async function headObject(key: string): Promise<ObjectMeta | null> {
   try {
     const res = await getS3Client().send(
-      new HeadObjectCommand({ Bucket: S3_BUCKET, Key: key }),
+      new ListObjectsV2Command({ Bucket: S3_BUCKET, Prefix: key, MaxKeys: 1 }),
     );
+    const match = res.Contents?.find((o) => o.Key === key);
+    if (!match) return null;
     return {
-      contentType: res.ContentType ?? "application/octet-stream",
-      contentLength: res.ContentLength,
-      lastModified: res.LastModified,
-      etag: res.ETag,
-      metadata: res.Metadata ?? {},
+      contentType: "application/octet-stream",
+      contentLength: match.Size,
+      lastModified: match.LastModified,
+      etag: match.ETag,
+      metadata: {},
     };
   } catch (err) {
-    if (isNotFound(err)) return null;
     throw new S3UnavailableError("headObject", key, err);
   }
 }

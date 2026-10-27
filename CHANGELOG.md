@@ -7,22 +7,167 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-27
+
+### Added
+
+- Twelve knowledge base guides:
+  - Bots: Adding a Bot, Getting Your Bot Approved, Writing a Great Bot
+    Page.
+  - Servers: Getting Your Server Approved, Writing a Great Server Page,
+    Your Server Page (member and online counts, boosts, the emoji
+    showcase, votes, reviews and sharing).
+  - Packs: Creating a Pack, Emoji and Sticker Packs, Sound Packs,
+    Managing Your Packs.
+  - The Premium article explains using credits for a discount at
+    checkout.
+  - Managing Listings: Markdown and HTML in Descriptions (what's
+    supported and what's stripped) and Styling Your Page (the allowed
+    inline CSS properties, with examples for cards, badges, grids and
+    embeds).
+
+### Changed
+
+- SEO:
+  - The sitemap lists every listed bot, server and pack (paging through
+    the API, up to 50 pages each), every knowledge base category and
+    article, published blog posts, tag pages and the public section
+    pages. It used to include only the first page of bots and servers.
+  - Every page has structured data for the site (`WebSite` with a
+    search action, which can give Omniplex a search box in Google, and
+    `Organization` with the logo and social profiles).
+  - Bot pages have `SoftwareApplication` data, with an aggregate rating
+    when the bot has reviews, so search results can show stars.
+  - The site title is "Omniplex: Discord Bot List and Server List", with
+    a new description and keywords. The old description claimed
+    "thousands of bots".
+- Reviews and replies have a Copy link action. The link opens the page
+  with that review highlighted, and staff can paste it into the new
+  Delete Review action in the staff panel.
+
+- Premium checkout can use the chosen bot's or server's vote credits for
+  a discount. The order summary offers "Use N credits for $X off" when
+  the listing has credits, covering up to half the price, and shows the
+  original total struck through next to the new one. Unpaid checkouts
+  return the credits.
+- Server pages show the server's boost level and boost count in the
+  sidebar when it has any boosts.
+
+- Emoji, sticker and sound pages put everything in one card: the
+  preview on a dotted background, then the name, pack, uploader, stats
+  (downloads, type or length, upload date) and actions (Download, Short
+  link, View pack). This replaces the sidebar of four small cards.
+- Theme pages show the profile preview next to the theme's name, tags
+  and author, a gradient strip, large copyable color swatches, and steps
+  for applying the theme on Discord.
+- Template pages merge the stats and uploader into one Details card,
+  which also lists the number of channels and roles.
+- Dashboard listing cards (bots, servers, packs, templates, teams and
+  themes) have the same footer strip: stats on the left and View,
+  Manage and the menu on the right. Team cards have a Settings button.
+- Team pages:
+  - A profile-style header with the avatar overlapping the banner, the
+    vote and Manage buttons, and a stack of member avatars.
+  - Stats for team votes, combined votes across the team's listings,
+    members, bots and servers.
+  - Members link to their profiles, and each section heading shows a
+    count.
+- On bot and server pages, a team without its own avatar shows the
+  listing's avatar instead of initials.
+- Bot and server sidebars:
+  - Uptime has a colored meter.
+  - Online members are shown as a share of all members.
+  - Page views are hidden when there are none.
+  - A bot's libraries show as separate chips.
+  - Links show their domain under the name, with a larger icon.
+- On phones, a bar with Vote and Add (or Join) slides up from the bottom
+  of bot and server pages once the main buttons scroll out of view.
+- Reviews on bot, server, team and template pages:
+  - A summary card replaces the "Reviews" heading: the average rating,
+    a 5 to 1 star breakdown and a "Write a review" or "Edit your review"
+    button (or "Sign in to review").
+  - With more than one review, they can be sorted by newest, highest or
+    lowest.
+  - Each review is a card with its replies inside it. Owner responses
+    are tinted and tagged "Owner", your own reviews are tagged "You",
+    and Reply shows how many replies there are.
+  - Replies no longer show a star rating or ask for one.
+  - Deleting asks for a second click to confirm.
+
+- The widget moved out of the bot, server and pack sidebars into an
+  Embed button in the action row. It opens a wide dialog with a large
+  preview on a background that matches the chosen theme, Markdown, HTML
+  and image URL tabs with the full code and a Copy button, and theme,
+  accent and stat options beside it. The sidebar is shorter, so short
+  tabs no longer leave a large gap.
+- The Voters tab is a ranked list with the top three highlighted and a
+  bar compared with the top voter, and the all-time total only shows
+  when it differs from this month's.
+- Bot changelog updates are cards with the title, version and date in a
+  header and the notes below. Long updates collapse with a "Show full
+  update" button.
+- Bot commands are listed in one card per category, with the command
+  name highlighted, its usage underneath and the description beside it.
+- Cards across the site share one style: rounded corners, padding and a
+  solid background in both themes. Some cards were see-through with no
+  background, and corner sizes varied from page to page.
+- Notifications are one list instead of a stack of boxes. Each one has an
+  icon for its kind, unread ones are tinted with a dot by the title, the
+  time sits on the right, and the open, read and delete buttons appear on
+  hover (always on touch screens). Grouped vote reminders open inline,
+  the footer says "Showing 20 of 60" instead of a total that didn't match
+  the filters, and preferences are toggle cards.
+- Search has a centred search box with a clear button and example
+  searches, a "Filter by tag" row linking to All tags, an Explore grid
+  with icons (bots, servers, packs, collections, commands, tags), pill
+  tabs for result types, and proper empty and error states.
+- The Team page shows each person as a profile card with their avatar,
+  name and other roles, instead of repeating the group's role as a badge.
+- Listing, directory and info pages use the shared page header. Partners,
+  Apply, Leaderboard, Legal, Tickets, Team, Moderation, Premium, Shop and
+  Linked Roles keep a centred header. Their empty and failed-to-load
+  states use the shared empty state.
+- Payment success and cancelled, the banned page and the linked roles
+  callback use one shared status card.
+- Dashboard and settings sections show the section's icon in the header.
+  Settings cards match the form cards, checkbox options are bordered
+  cards, and the profile editor is split into Profile and Discord profile
+  cards with Save in the card footer. The bot Commands and Changelog
+  sections no longer repeat the page title.
+- The Short link, Vote reminder, Compare and Report actions on bot,
+  server, pack and team pages are now matching small buttons in one row
+  that wraps cleanly on phones, instead of mixed text links in different
+  sizes. Report sits last, and the labels are shorter ("Report", "Vote
+  reminder" / "Reminder on").
+
 ### Fixed
 
+- Create a Pack requires 1 to 5 tags and a short description of at least
+  10 characters before submitting, matching what Popplio accepts.
+  Previously a pack without tags failed only after you pressed Create.
+- The Create a Pack URL field now matches what Popplio accepts: it drops
+  anything but letters, numbers and dashes as you type, stops at 20
+  characters and says so in its hint. It used to suggest dashes, which
+  the server then rejected after items had already been uploaded.
+- Uploading emojis, stickers and sounds failed with "Storage is
+  temporarily unavailable". The S3 endpoint is the Cloudflare-proxied
+  `cdn.omniplex.gg`, and Cloudflare changes signed HEAD and ranged or
+  conditional GET requests on file URLs, so storage rejected them with
+  SignatureDoesNotMatch, sometimes intermittently. The check for whether
+  an upload's key already exists, and the CDN health check, now use
+  bucket list requests, which Cloudflare passes through untouched.
+- The API sessions panel only loaded the token list once, so it didn't
+  reload after switching to another bot, server or team, and it could
+  miss the permission list when your permissions loaded late.
+- The bot page's Changelog and Commands tabs showed owner-only text
+  ("Updates shown on your bot's page and in the Feed") to every visitor.
+  It now only shows to people who can edit the bot.
 - Connecting linked roles could fail with "This link has expired or
   didn't come from Omniplex" when Discord finished the sign-in in a
   different tab or browser than the one that started it, which is common
   when starting from the Discord mobile app. The check now uses a
   short-lived cookie as well as the tab's storage, and only rejects a
   sign-in when a different one was started in the same browser.
-
-### Changed
-
-- The Short link, Vote reminder, Compare and Report actions on bot,
-  server, pack and team pages are now matching small buttons in one row
-  that wraps cleanly on phones, instead of mixed text links in different
-  sizes. Report sits last, and the labels are shorter ("Report", "Vote
-  reminder" / "Reminder on").
 
 ## [1.6.0] - 2026-10-25
 

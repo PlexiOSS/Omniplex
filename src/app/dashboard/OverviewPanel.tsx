@@ -88,7 +88,7 @@ function Panel({
   action?: ReactNode;
 }) {
   return (
-    <section className="min-w-0 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 font-semibold text-zinc-950 dark:text-zinc-50">
           <span className="text-accent">{icon}</span>

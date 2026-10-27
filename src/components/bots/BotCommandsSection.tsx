@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { commandLabel } from "@/components/commands/commandLabel";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { bots as botsApi } from "@/lib/api";
@@ -54,11 +55,12 @@ export function BotCommandsSection({
 
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-          Commands
-        </h2>
-        {canEdit && (
+      {canEdit && (
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            Slash commands shown on your bot's page and in the Command
+            Directory.
+          </p>
           <Button
             variant="secondary"
             size="sm"
@@ -67,19 +69,11 @@ export function BotCommandsSection({
             <Pencil size={12} />
             Edit Commands
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {commands.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Terminal
-            size={28}
-            className="mb-3 text-zinc-300 dark:text-zinc-700"
-          />
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No commands documented yet.
-          </p>
-        </div>
+        <EmptyState icon={Terminal} title="No commands documented yet" />
       ) : (
         <>
           {commands.length > 8 && (
@@ -94,23 +88,26 @@ export function BotCommandsSection({
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder={`Filter ${commands.length} commands`}
                 aria-label="Filter commands"
-                className="w-full rounded-lg border border-zinc-200 bg-white py-2 pr-3 pl-9 text-sm text-zinc-950 placeholder:text-zinc-400 focus:border-accent/50 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
+                className="h-10 w-full rounded-xl border border-zinc-200 bg-white pr-3 pl-9 text-sm text-zinc-950 placeholder:text-zinc-400 focus:border-accent/50 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
               />
             </div>
           )}
 
           {visible.length === 0 ? (
-            <p className="py-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-              No commands match &ldquo;{filter.trim()}&rdquo;.
-            </p>
+            <EmptyState icon={Search} title="No matching commands">
+              Nothing matches &ldquo;{filter.trim()}&rdquo;.
+            </EmptyState>
           ) : (
             <div className="space-y-6">
               {Array.from(groups.entries()).map(([category, cmds]) => (
                 <div key={category}>
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600">
+                  <p className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                     {category}
+                    <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[11px] tabular-nums normal-case tracking-normal dark:bg-zinc-800">
+                      {cmds.length}
+                    </span>
                   </p>
-                  <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
                     {cmds.map((cmd) => {
                       const label = commandLabel(cmd.name);
                       const usage = cmd.usage?.trim();
@@ -121,18 +118,20 @@ export function BotCommandsSection({
                       return (
                         <div
                           key={cmd.id}
-                          className="min-w-0 rounded-lg border border-zinc-200 px-3 py-2.5 dark:border-zinc-800"
+                          className="min-w-0 px-4 py-3 sm:flex sm:items-baseline sm:gap-4"
                         >
-                          <code className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                            {label}
-                          </code>
-                          {showUsage && (
-                            <p className="mt-0.5 truncate font-mono text-xs text-zinc-400 dark:text-zinc-500">
-                              {usage}
-                            </p>
-                          )}
+                          <div className="min-w-0 sm:w-56 sm:shrink-0">
+                            <code className="inline-block rounded-md bg-accent/10 px-1.5 py-0.5 text-sm font-medium text-accent">
+                              {label}
+                            </code>
+                            {showUsage && (
+                              <p className="mt-1 truncate font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                                {usage}
+                              </p>
+                            )}
+                          </div>
                           {cmd.description && (
-                            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                            <p className="mt-1 min-w-0 text-sm text-zinc-600 sm:mt-0 dark:text-zinc-300">
                               {cmd.description}
                             </p>
                           )}

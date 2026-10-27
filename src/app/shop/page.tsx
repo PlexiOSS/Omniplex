@@ -22,6 +22,7 @@ import {
   serverOption,
 } from "@/components/billing/ListingPicker";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Pagination } from "@/components/search/Pagination";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -277,22 +278,21 @@ function ShopPageInner() {
   const hasListing = signedIn && !meLoading && options.length > 0;
 
   return (
-    <Container className="py-16">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <ShoppingBag size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Shop
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          The votes your bot or server earns convert into credits. Spend them on
-          boosts, a featured homepage slot, bonus premium days and more, with no
-          card needed.
-        </p>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={ShoppingBag}
+        title="Shop"
+        description={
+          <>
+            The votes your bot or server earns convert into credits. Spend them
+            on boosts, a featured homepage slot, bonus premium days and more,
+            with no card needed.
+          </>
+        }
+      />
 
-      <div className="mx-auto mt-10 grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 space-y-10">
           <section>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -628,7 +628,7 @@ function ShopPageInner() {
           </div>
 
           {tiers && tiers.length > 0 && (
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
               <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 How votes become credits
               </h2>

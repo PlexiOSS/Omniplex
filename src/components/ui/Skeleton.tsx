@@ -15,7 +15,7 @@ export function Skeleton({ className = "" }: SkeletonProps) {
 
 export function BotCardSkeleton() {
   return (
-    <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
         <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
         <div className="flex-1 space-y-2">

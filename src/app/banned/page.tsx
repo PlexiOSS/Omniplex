@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { StatusCard } from "@/components/ui/StatusCard";
 import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
 import { useOAuthMeta } from "@/hooks/useOAuthMeta";
@@ -38,20 +39,13 @@ export default function BannedPage() {
   }
 
   return (
-    <Container className="flex flex-1 flex-col items-center justify-center py-24">
-      <div className="w-full max-w-md text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/10">
-          <ShieldAlert size={22} className="text-red-500" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Your account is banned
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          You can still sign in to submit a ban appeal. That's the only part of
-          the site available to you right now. If you think this is a mistake,
-          explain why in your appeal.
-        </p>
-
+    <Container className="flex flex-1 items-center py-24">
+      <StatusCard
+        icon={ShieldAlert}
+        tone="danger"
+        title="Your account is banned"
+        description="You can still sign in to submit a ban appeal. That's the only part of the site available to you right now. If you think this is a mistake, explain why in your appeal."
+      >
         {loading ? null : !isAuthenticated ? (
           <div className="mt-8">
             <p className="mb-3 text-sm text-zinc-500 dark:text-zinc-400">
@@ -66,9 +60,11 @@ export default function BannedPage() {
             </Button>
           </div>
         ) : appsLoading ? (
-          <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" /></div>
+          <div className="mt-8 flex justify-center">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-50" />
+          </div>
         ) : existingAppeal ? (
-          <div className="mt-8 rounded-2xl border border-zinc-200 p-6 text-left dark:border-zinc-800">
+          <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-left dark:border-zinc-800 dark:bg-zinc-950">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
                 Your appeal
@@ -102,7 +98,7 @@ export default function BannedPage() {
             </Button>
           </Link>
         )}
-      </div>
+      </StatusCard>
     </Container>
   );
 }

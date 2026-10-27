@@ -1,6 +1,6 @@
 "use client";
 
-import { Terminal } from "lucide-react";
+import { SquareTerminal, Terminal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
 import { CommandBotList } from "@/components/commands/CommandBotList";
@@ -10,6 +10,7 @@ import { CommandsCta } from "@/components/commands/CommandsCta";
 import { commandLabel } from "@/components/commands/commandLabel";
 import { DirectoryFilters } from "@/components/filters/DirectoryFilters";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Pagination } from "@/components/search/Pagination";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCommandBots, useCommandSearch } from "@/hooks/useBots";
@@ -109,18 +110,19 @@ function CommandsView() {
 
   return (
     <Container className="py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Command Directory
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Search every bot's documented slash commands. Find out who has a{" "}
-          <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs dark:bg-zinc-800">
-            /giveaway
-          </code>
-          , for example.
-        </p>
-      </div>
+      <PageHeader
+        icon={SquareTerminal}
+        title="Command Directory"
+        description={
+          <>
+            Search every bot's documented slash commands. Find out who has a{" "}
+            <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs dark:bg-zinc-800">
+              /giveaway
+            </code>
+            , for example.
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <aside className="min-w-0 space-y-8 lg:sticky lg:top-24 lg:order-last lg:self-start">
@@ -175,7 +177,7 @@ function CommandsView() {
                   {SKELETON_KEYS.map((k) => (
                     <div
                       key={k}
-                      className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+                      className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900"
                     >
                       <div className="flex items-center gap-2.5">
                         <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
@@ -222,7 +224,7 @@ function CommandsView() {
               {SKELETON_KEYS.map((k) => (
                 <div
                   key={k}
-                  className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+                  className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900"
                 >
                   <div className="flex items-center gap-2.5">
                     <Skeleton className="h-7 w-7 shrink-0 rounded-full" />

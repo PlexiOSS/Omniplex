@@ -2,9 +2,9 @@
 
 import { AlertTriangle, Pencil, Plus, Send, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Pagination } from "@/components/search/Pagination";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Pagination } from "@/components/search/Pagination";
 import { webhooks } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type {
@@ -109,9 +109,7 @@ export function WebhookManager({
       .delete(targetType, targetId, id, authToken)
       .then(load)
       .catch((err) =>
-        setError(
-          err instanceof ApiError ? err.message : "Failed to delete.",
-        ),
+        setError(err instanceof ApiError ? err.message : "Failed to delete."),
       )
       .finally(() => setDeletingId(null));
   }
@@ -145,9 +143,7 @@ export function WebhookManager({
           )}
 
           {list === null && !error ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Loading…
-            </p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading…</p>
           ) : (
             <div className="space-y-3">
               {list?.length === 0 && (
@@ -158,7 +154,7 @@ export function WebhookManager({
               {list?.map((w) => (
                 <div
                   key={w.id}
-                  className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+                  className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -214,7 +210,9 @@ export function WebhookManager({
                         </Button>
                         <Button
                           type="button"
-                          variant={confirmDeleteId === w.id ? "danger" : "ghost"}
+                          variant={
+                            confirmDeleteId === w.id ? "danger" : "ghost"
+                          }
                           size="sm"
                           loading={deletingId === w.id}
                           onClick={() => handleDeleteClick(w.id)}
@@ -260,9 +258,7 @@ export function WebhookManager({
             </p>
           )}
           {logs === null && !logsError ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Loading…
-            </p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading…</p>
           ) : (
             <div className="space-y-2">
               {logs?.length === 0 && (

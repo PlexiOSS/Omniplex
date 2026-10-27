@@ -102,7 +102,7 @@ export function TagDirectory({ tags }: TagDirectoryProps) {
             <Link
               key={t.tag}
               href={`/tags/${encodeURIComponent(t.tag)}`}
-              className="min-w-0 rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
+              className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
             >
               <p className="truncate font-semibold text-zinc-950 dark:text-zinc-50">
                 {t.tag}

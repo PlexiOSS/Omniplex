@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   Bot,
+  Clock,
   Music,
   Server,
   Smile,
@@ -23,6 +24,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import { ENTITY_ACTION_ROW } from "@/components/ui/entityAction";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
+import { StatRow } from "@/components/ui/StatRow";
 import { WidgetShare } from "@/components/widget/WidgetShare";
 import { packs } from "@/lib/api";
 import { shortLinkUrl } from "@/lib/shortLinks";
@@ -115,7 +117,7 @@ export default async function PackPage({ params }: Props) {
             : "Emojis";
 
   const actionsCard = (
-    <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900">
       <PackVoteButton
         packUrl={pack.url}
         currentVotes={pack.votes}
@@ -272,6 +274,10 @@ export default async function PackPage({ params }: Props) {
 
           <div className={ENTITY_ACTION_ROW}>
             {shortLink && <ShortLinkButton url={shortLink} />}
+            <WidgetShare
+              widgetPath={`/packs/${pack.url}/widget`}
+              stats={getPackWidgetStats(pack)}
+            />
             <ReportModal
               targetType="pack"
               targetId={pack.url}
@@ -391,9 +397,9 @@ export default async function PackPage({ params }: Props) {
           {/* Actions (desktop only — mobile version renders above the pack contents) */}
           <div className="hidden lg:block">{actionsCard}</div>
 
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-              Stats
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+              Details
             </h3>
             <dl className="space-y-2.5">
               <StatRow
@@ -407,60 +413,32 @@ export default async function PackPage({ params }: Props) {
                 value={String(itemCount)}
               />
               <StatRow
-                icon={null}
+                icon={<Clock size={14} />}
                 label="Created"
                 value={formatRelativeTime(pack.created_at)}
               />
             </dl>
-          </div>
-
-          <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-              Owner
-            </h3>
             <Link
               href={`/user/${pack.owner.id}`}
-              className="flex items-center gap-2.5"
+              className="mt-4 flex items-center gap-2.5 border-t border-zinc-100 pt-4 dark:border-zinc-800"
             >
               <Avatar
                 src={pack.owner.avatar}
                 alt={pack.owner.username}
-                size={32}
+                size={28}
               />
-              <span className="truncate text-sm font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
-                {pack.owner.display_name || pack.owner.username}
+              <span className="min-w-0 text-sm">
+                <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                  Created by
+                </span>
+                <span className="block truncate font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
+                  {pack.owner.display_name || pack.owner.username}
+                </span>
               </span>
             </Link>
           </div>
-
-          <WidgetShare
-            widgetPath={`/packs/${pack.url}/widget`}
-            stats={getPackWidgetStats(pack)}
-          />
         </aside>
       </div>
     </Container>
-  );
-}
-
-function StatRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2 text-sm">
-      <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-        {icon}
-        {label}
-      </span>
-      <span className="font-medium text-zinc-950 dark:text-zinc-50">
-        {value}
-      </span>
-    </div>
   );
 }

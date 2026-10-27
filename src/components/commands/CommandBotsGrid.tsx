@@ -21,7 +21,7 @@ export function CommandBotsGrid({ bots, onSelect }: CommandBotsGridProps) {
             key={bot.bot_id}
             type="button"
             onClick={() => onSelect(bot.bot_id)}
-            className="min-w-0 rounded-xl border border-zinc-200 bg-white p-4 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900"
+            className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 text-left transition-colors hover:border-accent/40 hover:bg-accent/5 dark:border-zinc-800 dark:bg-zinc-900"
           >
             <div className="flex min-w-0 items-center gap-2.5">
               <Avatar

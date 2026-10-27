@@ -41,7 +41,7 @@ export function FeedEntry({
   const collapsed = overflowing && !expanded;
 
   return (
-    <article className="min-w-0 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <article className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between gap-3">
         <Link
           href={`/bots/${entry.bot_id}`}

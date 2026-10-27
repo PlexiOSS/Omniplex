@@ -2,6 +2,7 @@ import { ArrowRight, Scale } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { getLegalDocuments } from "@/lib/legal/content";
 
 export const metadata: Metadata = {
@@ -15,24 +16,21 @@ export default function LegalPage() {
 
   return (
     <Container className="py-10">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <Scale size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Legal
-        </h1>
-        <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-          Omniplex's Terms of Service, Privacy Policy, and other policies.
-        </p>
-      </div>
+      <PageHeader
+        centered
+        icon={Scale}
+        title="Legal"
+        description={
+          <>Omniplex's Terms of Service, Privacy Policy, and other policies.</>
+        }
+      />
 
-      <div className="mx-auto mt-12 max-w-2xl space-y-3">
+      <div className="mx-auto max-w-2xl space-y-3">
         {documents.map((doc) => (
           <Link
             key={doc.slug}
             href={`/legal/${encodeURIComponent(doc.slug)}`}
-            className="group flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
           >
             <div>
               <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">

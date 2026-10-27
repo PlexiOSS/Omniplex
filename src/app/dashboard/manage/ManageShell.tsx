@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar } from "@/components/ui/Avatar";
 import { DashboardNav, type DashboardNavGroup } from "../DashboardNav";
 
@@ -49,8 +50,9 @@ export function ManageShell<K extends string>({
   children,
   onSelect,
 }: ManageShellProps<K> & { onSelect: (key: K) => void }) {
-  const activeLabel =
-    groups.flatMap((g) => g.items).find((i) => i.key === active)?.label ?? "";
+  const activeItem = groups
+    .flatMap((g) => g.items)
+    .find((i) => i.key === active);
 
   return (
     <Container className="py-10">
@@ -85,9 +87,9 @@ export function ManageShell<K extends string>({
         </aside>
 
         <div className="min-w-0">
-          <h1 className="mb-6 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            {activeLabel}
-          </h1>
+          {activeItem && (
+            <PageHeader icon={activeItem.icon} title={activeItem.label} />
+          )}
           {children}
         </div>
       </div>
@@ -111,16 +113,16 @@ export function SettingsCard({
   return (
     <section
       className={[
-        "overflow-hidden rounded-xl border bg-white dark:bg-zinc-900",
+        "overflow-hidden rounded-2xl border bg-white dark:bg-zinc-900",
         tone === "danger"
           ? "border-red-200 dark:border-red-900/60"
           : "border-zinc-200 dark:border-zinc-800",
       ].join(" ")}
     >
-      <div className="p-5">
+      <div className="p-5 sm:p-6">
         <h2
           className={[
-            "font-semibold",
+            "text-sm font-semibold",
             tone === "danger"
               ? "text-red-600 dark:text-red-400"
               : "text-zinc-950 dark:text-zinc-50",
@@ -129,14 +131,14 @@ export function SettingsCard({
           {title}
         </h2>
         {description && (
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
             {description}
           </p>
         )}
-        {children && <div className="mt-4 space-y-5">{children}</div>}
+        {children && <div className="mt-5 space-y-5">{children}</div>}
       </div>
       {footer && (
-        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-zinc-100 bg-zinc-50/60 px-5 py-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-zinc-100 bg-zinc-50/60 px-5 py-3 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/40">
           {footer}
         </div>
       )}
@@ -165,12 +167,20 @@ export function TextArea({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label
-        htmlFor={id}
-        className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-      >
-        {label}
-      </label>
+      <div className="flex items-baseline justify-between gap-2">
+        <label
+          htmlFor={id}
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+        >
+          {label}
+          {required && <span className="text-red-500"> *</span>}
+        </label>
+        {maxLength && (
+          <span className="shrink-0 text-xs tabular-nums text-zinc-400">
+            {value.length}/{maxLength}
+          </span>
+        )}
+      </div>
       <textarea
         id={id}
         rows={rows}
@@ -180,15 +190,8 @@ export function TextArea({
         required={required}
         className="w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
       />
-      {(hint || maxLength) && (
-        <p className="flex justify-between gap-2 text-xs text-zinc-400 dark:text-zinc-500">
-          <span>{hint}</span>
-          {maxLength && (
-            <span className="tabular-nums">
-              {value.length}/{maxLength}
-            </span>
-          )}
-        </p>
+      {hint && (
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">{hint}</p>
       )}
     </div>
   );
@@ -206,7 +209,14 @@ export function Toggle({
   description?: string;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-3">
+    <label
+      className={[
+        "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors",
+        checked
+          ? "border-accent/40 bg-accent/5"
+          : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700",
+      ].join(" ")}
+    >
       <input
         type="checkbox"
         checked={checked}
@@ -214,7 +224,7 @@ export function Toggle({
         className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
       />
       <span>
-        <span className="block text-sm text-zinc-800 dark:text-zinc-200">
+        <span className="block text-sm font-medium text-zinc-800 dark:text-zinc-200">
           {label}
         </span>
         {description && (
@@ -259,7 +269,7 @@ export function StatGrid({
       {stats.map((s) => (
         <div
           key={s.label}
-          className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+          className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
         >
           <dd className="text-xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
             {s.value}

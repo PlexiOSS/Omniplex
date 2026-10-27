@@ -24,7 +24,7 @@ function ApplicationItem({ app }: { app: AppResponse }) {
   const badge = STATE_BADGE[app.state];
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-semibold text-zinc-950 dark:text-zinc-50">
           {positionName}

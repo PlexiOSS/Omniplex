@@ -1,9 +1,10 @@
-import { Users } from "lucide-react";
+import { CloudOff, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { staff } from "@/lib/api";
 import type { PublicStaffMember } from "@/lib/api/types";
 import { mirroredAvatarUrl } from "@/lib/utils/assets";
@@ -36,44 +37,46 @@ function groupByTopPosition(team: PublicStaffMember[]): TeamGroup[] {
 
 function MemberCard({ member }: { member: PublicStaffMember }) {
   const name = member.display_name || member.username;
-  const [top, ...rest] = member.positions;
-  const shown = rest.slice(0, EXTRA_ROLES_SHOWN).map((p) => p.name);
+  const rest = member.positions.slice(1);
+  const shown = rest.slice(0, EXTRA_ROLES_SHOWN);
   const hidden = rest.length - shown.length;
 
   return (
     <Link
       href={`/user/${member.user_id}`}
-      className="group flex min-w-0 items-center gap-3 rounded-xl border border-zinc-200 p-4 transition-colors hover:border-accent/40 dark:border-zinc-800"
+      className="group flex h-full min-w-0 flex-col items-center rounded-2xl border border-zinc-200 bg-white p-5 text-center transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
     >
       <Avatar
         src={mirroredAvatarUrl("users", member.user_id, member.avatar)}
         alt={name}
-        size={44}
+        size={64}
       />
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <p className="truncate font-medium text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
-            {name}
-          </p>
-          {top && (
-            <Badge variant="info" className="shrink-0">
-              {top.name}
-            </Badge>
+      <p className="mt-3 w-full truncate font-semibold text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
+        {name}
+      </p>
+      <p className="w-full truncate text-xs text-zinc-500 dark:text-zinc-400">
+        @{member.username}
+      </p>
+      {rest.length > 0 && (
+        <div
+          className="mt-3 flex flex-wrap justify-center gap-1"
+          title={rest.map((p) => p.name).join(", ")}
+        >
+          {shown.map((p) => (
+            <span
+              key={p.name}
+              className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              {p.name}
+            </span>
+          ))}
+          {hidden > 0 && (
+            <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+              +{hidden}
+            </span>
           )}
         </div>
-        <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-          @{member.username}
-        </p>
-        {rest.length > 0 && (
-          <p
-            className="mt-1 truncate text-xs text-zinc-400 dark:text-zinc-500"
-            title={rest.map((p) => p.name).join(", ")}
-          >
-            Also: {shown.join(", ")}
-            {hidden > 0 && ` +${hidden}`}
-          </p>
-        )}
-      </div>
+      )}
     </Link>
   );
 }
@@ -83,39 +86,36 @@ export default async function TeamPage() {
   const groups = team ? groupByTopPosition(team) : [];
 
   return (
-    <Container className="py-16">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <Users size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Team
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          The people who review listings, handle reports, and keep Omniplex
-          running.
-        </p>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={Users}
+        title="Team"
+        description={
+          <>
+            The people who review listings, handle reports, and keep Omniplex
+            running.
+          </>
+        }
+      />
 
       {!team ? (
-        <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Couldn't load the team roster right now. Check back shortly.
-        </p>
+        <EmptyState icon={CloudOff} title="Couldn't load the team">
+          Check back shortly.
+        </EmptyState>
       ) : team.length === 0 ? (
-        <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          No team members to show.
-        </p>
+        <EmptyState icon={Users} title="No team members to show" />
       ) : (
-        <div className="mx-auto mt-12 max-w-3xl space-y-10">
+        <div className="mx-auto max-w-5xl space-y-12">
           {groups.map((group) => (
             <section key={group.title}>
-              <h2 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+              <h2 className="mb-4 flex items-center justify-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 {group.title}
-                <span className="ml-1.5 font-normal text-zinc-400 dark:text-zinc-500">
-                  · {group.members.length}
+                <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-xs font-medium tabular-nums text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                  {group.members.length}
                 </span>
               </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {group.members.map((member) => (
                   <MemberCard key={member.user_id} member={member} />
                 ))}

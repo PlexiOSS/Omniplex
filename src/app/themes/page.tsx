@@ -26,15 +26,13 @@ export default function ThemesPage() {
         title="Themes"
         description="Two-color Discord profile theme combinations, submitted by the community. Click one to copy its colors."
         actions={
-          <>
-            <Link
-              href="/themes/add"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent/90"
-            >
-              <Plus size={14} />
-              Submit a Theme
-            </Link>
-          </>
+          <Link
+            href="/themes/add"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent/90"
+          >
+            <Plus size={14} />
+            Submit a Theme
+          </Link>
         }
       />
 

@@ -43,7 +43,7 @@ export default function KbPage() {
           <Link
             key={category.slug}
             href={`/kb/${category.slug}`}
-            className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+            className="group flex flex-col rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
           >
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">

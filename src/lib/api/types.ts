@@ -265,6 +265,8 @@ export interface IndexServer {
 }
 
 export interface Server extends IndexServer {
+  premium_tier?: number;
+  boost_count?: number;
   long: string;
   extra_links: Link[];
   team_owner: Team | null;
@@ -1209,6 +1211,8 @@ export interface PaymentPlan {
 
 export interface PlanList {
   plans: PaymentPlan[];
+  credits_per_cent?: number;
+  max_credit_share?: number;
 }
 
 export interface PaypalMeta {

@@ -1,6 +1,18 @@
 "use client";
 
-import { ArrowRight, Search, X } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  Check,
+  LayoutList,
+  Package,
+  Search,
+  SearchX,
+  Server,
+  SquareTerminal,
+  Tag,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -11,11 +23,54 @@ import { ServerCard } from "@/components/cards/ServerCard";
 import { TeamCard } from "@/components/cards/TeamCard";
 import { Container } from "@/components/layout/Container";
 import { Pagination } from "@/components/search/Pagination";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/PageStates";
 import { BotCardSkeleton } from "@/components/ui/Skeleton";
 import { search } from "@/lib/api";
 import type { SearchResponse } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
 import { formatCount, formatCountLabel } from "@/lib/utils/format";
+
+const EXAMPLES = ["moderation", "music", "giveaways", "economy"];
+
+const EXPLORE = [
+  {
+    href: "/bots",
+    title: "Browse bots",
+    body: "Sort by votes, trending, newest or size.",
+    icon: Bot,
+  },
+  {
+    href: "/servers",
+    title: "Browse servers",
+    body: "Find a community to join.",
+    icon: Server,
+  },
+  {
+    href: "/packs",
+    title: "Packs",
+    body: "Bundles of bots, servers, emojis and more.",
+    icon: Package,
+  },
+  {
+    href: "/collections",
+    title: "Collections",
+    body: "Best-of lists by tag, ranked by votes.",
+    icon: LayoutList,
+  },
+  {
+    href: "/commands",
+    title: "Command Directory",
+    body: "Search every bot's commands at once.",
+    icon: SquareTerminal,
+  },
+  {
+    href: "/tags",
+    title: "All tags",
+    body: "Every tag in use and how popular it is.",
+    icon: Tag,
+  },
+];
 
 const QUICK_LINKS: {
   keywords: string[];
@@ -206,73 +261,127 @@ function SearchPageInner() {
 
   return (
     <Container className="py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Search
+      <div className="mx-auto max-w-3xl text-center">
+        <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl dark:text-zinc-50">
+          Search Omniplex
         </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Find bots, servers, teams, and packs by name, description, or tags.
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          Bots, servers, teams and packs by name, description, ID or tag.
         </p>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            update({ q: input.trim() });
+          }}
+          className="relative mt-6"
+        >
+          <Search
+            size={18}
+            className="pointer-events-none absolute top-1/2 left-5 -translate-y-1/2 text-zinc-400"
+          />
+          <input
+            type="search"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Search by name, description, ID or vanity URL"
+            aria-label="Search"
+            // biome-ignore lint/a11y/noAutofocus: the page exists to search
+            autoFocus
+            className="h-14 w-full rounded-2xl border border-zinc-200 bg-white pr-28 pl-13 text-base text-zinc-950 shadow-sm transition-colors placeholder:text-zinc-400 focus:border-accent/50 focus:ring-4 focus:ring-accent/10 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50 [&::-webkit-search-cancel-button]:hidden"
+          />
+          <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
+            {input && (
+              <button
+                type="button"
+                onClick={() => {
+                  setInput("");
+                  update({ q: "" });
+                }}
+                aria-label="Clear search"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+              >
+                <X size={16} />
+              </button>
+            )}
+            <button
+              type="submit"
+              className="h-10 rounded-xl bg-accent px-4 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90"
+            >
+              Search
+            </button>
+          </div>
+        </form>
+
+        {!active && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm">
+            <span className="text-zinc-400 dark:text-zinc-500">Try</span>
+            {EXAMPLES.map((ex) => (
+              <button
+                key={ex}
+                type="button"
+                onClick={() => {
+                  setInput(ex);
+                  update({ q: ex });
+                }}
+                className="text-zinc-600 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent dark:text-zinc-300 dark:decoration-zinc-700"
+              >
+                {ex}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          update({ q: input.trim() });
-        }}
-        className="relative"
-      >
-        <Search
-          size={16}
-          className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-zinc-400"
-        />
-        <input
-          type="search"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Search by name, description, ID or vanity URL"
-          aria-label="Search"
-          // biome-ignore lint/a11y/noAutofocus: the page exists to search
-          autoFocus
-          className="w-full rounded-xl border border-zinc-200 bg-white py-3 pr-4 pl-11 text-base text-zinc-950 placeholder:text-zinc-400 focus:border-accent/50 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </form>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        {BOT_TAGS.map((tag) => {
-          const on = tags.some((t) => t.toLowerCase() === tag.toLowerCase());
-          return (
+      <div className="mx-auto mt-8 max-w-4xl">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Filter by tag
+          </p>
+          <Link
+            href="/tags"
+            className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
+          >
+            All tags <ArrowRight size={12} />
+          </Link>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {BOT_TAGS.map((tag) => {
+            const on = tags.some((t) => t.toLowerCase() === tag.toLowerCase());
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                aria-pressed={on}
+                className={[
+                  "inline-flex h-8 items-center gap-1 rounded-lg border px-3 text-xs font-medium transition-colors",
+                  on
+                    ? "border-accent/40 bg-accent/10 text-accent"
+                    : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-50",
+                ].join(" ")}
+              >
+                {on && <Check size={12} />}
+                {tag}
+              </button>
+            );
+          })}
+          {unknownTags.map((tag) => (
             <button
               key={tag}
               type="button"
               onClick={() => toggleTag(tag)}
-              aria-pressed={on}
-              className={[
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                on
-                  ? "border-accent/40 bg-accent/10 text-accent"
-                  : "border-zinc-200 bg-white text-zinc-600 hover:border-accent/40 hover:text-accent dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300",
-              ].join(" ")}
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-accent/40 bg-accent/10 px-3 text-xs font-medium text-accent"
             >
               {tag}
+              <X size={12} />
             </button>
-          );
-        })}
-        {unknownTags.map((tag) => (
-          <button
-            key={tag}
-            type="button"
-            onClick={() => toggleTag(tag)}
-            className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-medium text-accent"
-          >
-            {tag}
-            <X size={12} />
-          </button>
-        ))}
+          ))}
+        </div>
       </div>
 
       {matchedQuickLinks.length > 0 && (
-        <div className="mt-6 space-y-2">
+        <div className="mx-auto mt-6 max-w-4xl space-y-2">
           {matchedQuickLinks.map((link) => (
             <Link
               key={link.href}
@@ -294,46 +403,39 @@ function SearchPageInner() {
       )}
 
       {!active ? (
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              href: "/bots",
-              title: "Browse bots",
-              body: "Sort by votes, trending, newest or size.",
-            },
-            {
-              href: "/servers",
-              title: "Browse servers",
-              body: "Find a community to join.",
-            },
-            {
-              href: "/collections",
-              title: "Collections",
-              body: "Best-of lists by tag, ranked by votes.",
-            },
-            {
-              href: "/commands",
-              title: "Command Directory",
-              body: "Search every bot's commands at once.",
-            },
-          ].map((card) => (
-            <Link
-              key={card.href}
-              href={card.href}
-              className="group rounded-xl border border-zinc-200 bg-white p-5 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
-            >
-              <p className="font-semibold text-zinc-950 transition-colors group-hover:text-accent dark:text-zinc-50">
-                {card.title}
-              </p>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                {card.body}
-              </p>
-            </Link>
-          ))}
-        </div>
+        <section className="mx-auto mt-14 max-w-4xl">
+          <h2 className="mb-4 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+            Explore
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {EXPLORE.map(({ href, title, body, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group flex items-start gap-3.5 rounded-2xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/15">
+                  <Icon size={18} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center justify-between gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                    {title}
+                    <ArrowRight
+                      size={14}
+                      className="shrink-0 text-zinc-300 transition-all group-hover:translate-x-0.5 group-hover:text-accent dark:text-zinc-600"
+                    />
+                  </span>
+                  <span className="mt-0.5 block text-sm text-zinc-500 dark:text-zinc-400">
+                    {body}
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
       ) : (
         <div className="mt-8">
-          <div className="mb-6 flex overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
+          <div className="mb-6 flex gap-1.5 overflow-x-auto overflow-y-hidden pb-1">
             {[{ key: "all" as Tab, label: "All" }, ...TYPES].map((t) => {
               const count =
                 t.key === "all"
@@ -348,16 +450,17 @@ function SearchPageInner() {
                   key={t.key}
                   type="button"
                   onClick={() => update({ type: t.key === "all" ? "" : t.key })}
+                  aria-pressed={tab === t.key}
                   className={[
-                    "-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 pb-3 text-sm font-medium transition-colors",
+                    "flex h-9 shrink-0 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium transition-colors",
                     tab === t.key
-                      ? "border-accent text-accent"
-                      : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
+                      ? "border-accent/40 bg-accent/10 text-accent"
+                      : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-50",
                   ].join(" ")}
                 >
                   {t.label}
                   {count !== null && data && (
-                    <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-xs dark:bg-zinc-800">
+                    <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-xs tabular-nums text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
                       {formatCount(count)}
                     </span>
                   )}
@@ -367,9 +470,7 @@ function SearchPageInner() {
           </div>
 
           {error ? (
-            <p className="py-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
-              Search isn&apos;t working right now. Try again in a moment.
-            </p>
+            <ErrorState message="Search isn't working right now. Try again in a moment." />
           ) : isLoading && !data ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {["a", "b", "c", "d", "e", "f"].map((k) => (
@@ -377,18 +478,18 @@ function SearchPageInner() {
               ))}
             </div>
           ) : !data || total === 0 ? (
-            <div className="py-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
-              <p>No results. Try different keywords or fewer tags.</p>
+            <EmptyState icon={SearchX} title="No results">
+              Try different keywords or fewer tags.
               {tags.length > 0 && (
                 <button
                   type="button"
                   onClick={() => update({ tags: "" })}
-                  className="mt-3 font-medium text-accent hover:underline"
+                  className="mt-3 block w-full font-medium text-accent hover:underline"
                 >
                   Clear tags
                 </button>
               )}
-            </div>
+            </EmptyState>
           ) : tab === "all" ? (
             <div
               className={[

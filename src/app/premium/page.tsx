@@ -21,12 +21,13 @@ import {
   serverOption,
 } from "@/components/billing/ListingPicker";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { payments } from "@/lib/api";
+import { payments, votes } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { BoosterStatus, BotType, PaymentPlan } from "@/lib/api/types";
 
@@ -81,6 +82,9 @@ function PremiumPageInner() {
   const { me, loading: meLoading } = useMe(session);
 
   const [plans, setPlans] = useState<PaymentPlan[] | null>(null);
+  const [creditRules, setCreditRules] = useState({ perCent: 0, share: 0 });
+  const [availableCredits, setAvailableCredits] = useState(0);
+  const [useCredits, setUseCredits] = useState(false);
   const [paypalAvailable, setPaypalAvailable] = useState(false);
   const [stripeAvailable, setStripeAvailable] = useState(false);
   const [booster, setBooster] = useState<BoosterStatus | null>(null);
@@ -99,6 +103,10 @@ function PremiumPageInner() {
   useEffect(() => {
     payments.getPlans().then((res) => {
       setPlans(res.plans);
+      setCreditRules({
+        perCent: res.credits_per_cent ?? 0,
+        share: res.max_credit_share ?? 0,
+      });
       setPlanId((current) => current || (res.plans[0]?.id ?? ""));
     });
     payments
@@ -152,6 +160,29 @@ function PremiumPageInner() {
   const targetId = entity === "bot" ? botId : serverId;
   const target = eligible.find((o) => o.id === targetId);
   const plan = plans?.find((p) => p.id === planId);
+
+  useEffect(() => {
+    setUseCredits(false);
+    if (!targetId) {
+      setAvailableCredits(0);
+      return;
+    }
+    votes
+      .getRedeemLogs(entity, targetId)
+      .then((summary) => setAvailableCredits(summary.available_credits ?? 0))
+      .catch(() => setAvailableCredits(0));
+  }, [entity, targetId]);
+
+  const priceCents = plan ? Math.round(plan.price * 100) : 0;
+  const discountCents =
+    creditRules.perCent > 0
+      ? Math.min(
+          Math.floor(availableCredits / creditRules.perCent),
+          Math.floor(priceCents * creditRules.share),
+        )
+      : 0;
+  const creditsToUse = discountCents * creditRules.perCent;
+  const appliedDiscount = useCredits ? discountCents : 0;
   const bestValueId =
     plans && plans.length > 1
       ? [...plans].sort(
@@ -174,6 +205,7 @@ function PremiumPageInner() {
               entity,
               target.id,
               session.token,
+              useCredits ? creditsToUse : 0,
             )
           : await payments.createPaypalOrder(
               session.user_id,
@@ -181,6 +213,7 @@ function PremiumPageInner() {
               entity,
               target.id,
               session.token,
+              useCredits ? creditsToUse : 0,
             );
       window.location.href = url;
     } catch (err) {
@@ -218,25 +251,24 @@ function PremiumPageInner() {
   const ready = !!target && !!plan && submitting === null;
 
   return (
-    <Container className="py-16">
-      <div className="mx-auto max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <Sparkles size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Premium
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          Upgrade one of your bots or servers. Every plan includes the same
-          perks; longer plans just cost less per month.
-        </p>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={Sparkles}
+        title="Premium"
+        description={
+          <>
+            Upgrade one of your bots or servers. Every plan includes the same
+            perks; longer plans just cost less per month.
+          </>
+        }
+      />
 
-      <div className="mx-auto mt-8 grid max-w-5xl gap-3 sm:grid-cols-3">
+      <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-3">
         {PERKS.map(({ icon: Icon, title, body }) => (
           <div
             key={title}
-            className="flex gap-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+            className="flex gap-3 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
           >
             <Icon size={18} className="mt-0.5 shrink-0 text-accent" />
             <div>
@@ -395,13 +427,60 @@ function PremiumPageInner() {
                     {plan ? durationLabel(plan.time_period) : "None"}
                   </dd>
                 </div>
+                {appliedDiscount > 0 && (
+                  <div className="flex justify-between gap-2 text-emerald-600 dark:text-emerald-400">
+                    <dt>Credits ({creditsToUse})</dt>
+                    <dd>-${(appliedDiscount / 100).toFixed(2)}</dd>
+                  </div>
+                )}
                 <div className="flex justify-between gap-2 pt-1.5 font-semibold">
                   <dt className="text-zinc-950 dark:text-zinc-50">Total</dt>
                   <dd className="text-zinc-950 dark:text-zinc-50">
-                    {plan ? `$${plan.price.toFixed(2)}` : "None"}
+                    {plan ? (
+                      <>
+                        {appliedDiscount > 0 && (
+                          <span className="mr-1.5 font-normal text-zinc-400 line-through">
+                            ${plan.price.toFixed(2)}
+                          </span>
+                        )}
+                        ${((priceCents - appliedDiscount) / 100).toFixed(2)}
+                      </>
+                    ) : (
+                      "None"
+                    )}
                   </dd>
                 </div>
               </dl>
+
+              {target && plan && discountCents > 0 && (
+                <label
+                  className={[
+                    "flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm transition-colors",
+                    useCredits
+                      ? "border-accent/40 bg-accent/5"
+                      : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700",
+                  ].join(" ")}
+                >
+                  <input
+                    type="checkbox"
+                    checked={useCredits}
+                    onChange={(e) => setUseCredits(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+                  />
+                  <span className="min-w-0">
+                    <span className="block font-medium text-zinc-900 dark:text-zinc-100">
+                      Use {creditsToUse} credits for $
+                      {(discountCents / 100).toFixed(2)} off
+                    </span>
+                    <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                      {target.name} has {availableCredits} credits. Credits can
+                      cover up to {Math.round(creditRules.share * 100)}% of the
+                      price. They&apos;re returned if you don&apos;t finish
+                      paying.
+                    </span>
+                  </span>
+                </label>
+              )}
 
               {canRedeemBooster && (
                 <div className="flex items-start gap-2.5 rounded-lg bg-accent/5 p-3 text-xs text-zinc-700 dark:text-zinc-300">

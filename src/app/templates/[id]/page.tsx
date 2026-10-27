@@ -49,7 +49,7 @@ export default async function TemplatePage({ params }: Props) {
     .catch(() => ({ reviews: [] }));
 
   const actionsCard = (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex flex-col gap-2">
         <TemplateDetailActions
           templateId={template.id}
@@ -129,9 +129,9 @@ export default async function TemplatePage({ params }: Props) {
           {/* Actions (desktop only — mobile version renders above) */}
           <div className="hidden lg:block">{actionsCard}</div>
 
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-              Stats
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+              Details
             </h3>
             <dl className="space-y-2.5">
               <StatRow
@@ -142,24 +142,31 @@ export default async function TemplatePage({ params }: Props) {
                 label="Submitted"
                 value={formatRelativeTime(template.created_at)}
               />
+              <StatRow
+                label="Channels"
+                value={String(template.channels?.length ?? 0)}
+              />
+              <StatRow
+                label="Roles"
+                value={String(template.roles?.length ?? 0)}
+              />
             </dl>
-          </div>
-
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-3 text-sm font-medium text-zinc-950 dark:text-zinc-50">
-              Submitted by
-            </h3>
             <Link
               href={`/user/${template.owner.id}`}
-              className="flex items-center gap-2.5"
+              className="mt-4 flex items-center gap-2.5 border-t border-zinc-100 pt-4 dark:border-zinc-800"
             >
               <Avatar
                 src={template.owner.avatar}
                 alt={template.owner.username}
-                size={32}
+                size={28}
               />
-              <span className="truncate text-sm font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
-                {template.owner.display_name || template.owner.username}
+              <span className="min-w-0 text-sm">
+                <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                  Submitted by
+                </span>
+                <span className="block truncate font-medium text-zinc-950 transition-colors hover:text-accent dark:text-zinc-50">
+                  {template.owner.display_name || template.owner.username}
+                </span>
               </span>
             </Link>
           </div>

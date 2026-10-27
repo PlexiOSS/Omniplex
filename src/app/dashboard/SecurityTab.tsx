@@ -142,8 +142,8 @@ export function SecurityTab({ userId, username, token }: SecurityTabProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Data export */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
           Download your data
         </h2>
         <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
@@ -228,8 +228,8 @@ export function SecurityTab({ userId, username, token }: SecurityTabProps) {
       </div>
 
       {/* Danger zone */}
-      <div className="rounded-xl border border-red-200 bg-white p-5 dark:border-red-900/50 dark:bg-zinc-900">
-        <h2 className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400">
+      <div className="rounded-2xl border border-red-200 bg-white p-5 sm:p-6 dark:border-red-900/50 dark:bg-zinc-900">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-red-600 dark:text-red-400">
           <ShieldAlert size={16} />
           Danger zone
         </h2>

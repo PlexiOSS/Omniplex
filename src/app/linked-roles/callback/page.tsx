@@ -1,10 +1,12 @@
 "use client";
 
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, Link2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Container } from "@/components/layout/Container";
+import { Button } from "@/components/ui/Button";
+import { StatusCard } from "@/components/ui/StatusCard";
 import { linkedRoles } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { LinkedRolesResult } from "@/lib/api/types";
@@ -48,47 +50,46 @@ function Callback() {
   }, [params]);
 
   return (
-    <Container className="py-24">
-      <div className="mx-auto max-w-md rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-        {!result && !error && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Connecting your Discord account…
-          </p>
-        )}
-        {result && (
-          <>
-            <CheckCircle2 size={32} className="mx-auto text-emerald-500" />
-            <h1 className="mt-3 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-              You&apos;re connected, {result.username}
-            </h1>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              {result.badges.length > 0
-                ? `Servers can now give you roles for: ${result.badges.join(", ")}.`
-                : "You don't have any linked-role badges yet. Your roles will update on their own when you earn one."}
-            </p>
-            <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-400">
-              You can close this tab and go back to Discord.
-            </p>
-          </>
-        )}
-        {error && (
-          <>
-            <XCircle size={32} className="mx-auto text-red-500" />
-            <h1 className="mt-3 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-              Couldn&apos;t connect
-            </h1>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              {error}
-            </p>
-            <Link
-              href="/linked-roles"
-              className="mt-4 inline-block text-sm font-medium text-accent hover:underline"
-            >
-              Try again
+    <Container className="flex flex-1 items-center py-24">
+      {result ? (
+        <StatusCard
+          icon={CheckCircle2}
+          tone="success"
+          title={`You're connected, ${result.username}`}
+          description={
+            <>
+              <p>
+                {result.badges.length > 0
+                  ? `Servers can now give you roles for: ${result.badges.join(", ")}.`
+                  : "You don't have any linked-role badges yet. Your roles will update on their own when you earn one."}
+              </p>
+              <p className="mt-3 text-xs">
+                You can close this tab and go back to Discord.
+              </p>
+            </>
+          }
+        />
+      ) : error ? (
+        <StatusCard
+          icon={XCircle}
+          tone="danger"
+          title="Couldn't connect"
+          description={error}
+          actions={
+            <Link href="/linked-roles">
+              <Button variant="primary" size="sm">
+                Try again
+              </Button>
             </Link>
-          </>
-        )}
-      </div>
+          }
+        />
+      ) : (
+        <StatusCard
+          icon={Link2}
+          title="Connecting your Discord account…"
+          description="This only takes a moment."
+        />
+      )}
     </Container>
   );
 }

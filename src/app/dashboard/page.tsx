@@ -29,6 +29,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { TokenManager } from "@/components/sessions/TokenManager";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -61,6 +62,12 @@ import {
   type OwnershipFilter,
   type StatusFilter,
 } from "./ListingFilters";
+import {
+  FormMessage,
+  SettingsCard,
+  TextArea,
+  Toggle,
+} from "./manage/ManageShell";
 import { NotificationsTab } from "./NotificationsTab";
 import { OverviewPanel } from "./OverviewPanel";
 import { PacksTab } from "./PacksTab";
@@ -194,80 +201,61 @@ function EditProfileTab({
 
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
-      <div className="max-w-2xl space-y-5">
-        <div className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-          <div>
-            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Discord username or avatar out of date?
-            </p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-600">
-              Refreshes the cached copy we show across the site.
-            </p>
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={refreshingDiscord}
-            onClick={handleRefreshDiscord}
-          >
-            {discordRefreshed ? "Refreshed!" : "Refresh"}
-          </Button>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="about"
-            className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Bio
-          </label>
-          <textarea
+      <div className="min-w-0 space-y-4">
+        <SettingsCard
+          title="Profile"
+          description="What people see on your public profile."
+          footer={
+            <>
+              <FormMessage error={error} success={saved ? "Saved." : null} />
+              <Button variant="primary" loading={saving} onClick={handleSave}>
+                Save changes
+              </Button>
+            </>
+          }
+        >
+          <TextArea
             id="about"
+            label="Bio"
             rows={3}
             value={about}
-            onChange={(e) => setAbout(e.target.value)}
-            placeholder="Tell the community a bit about yourself…"
-            className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600"
+            onChange={setAbout}
           />
-        </div>
-
-        <div>
-          <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Links
-          </p>
-          <LinksEditor links={links} onChange={setLinks} />
-        </div>
-
-        <label className="flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox"
+          <div>
+            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Links
+            </p>
+            <LinksEditor links={links} onChange={setLinks} />
+          </div>
+          <Toggle
             checked={captchaSponsorEnabled}
-            onChange={(e) => setCaptchaSponsorEnabled(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+            onChange={setCaptchaSponsorEnabled}
+            label="Sponsor captchas"
+            description="Show a captcha before voting even on bots and servers that have opted out of them."
           />
-          <span className="text-sm text-zinc-700 dark:text-zinc-300">
-            Sponsor captchas
-            <span className="block text-xs text-zinc-400">
-              Show a captcha before voting even on bots and servers that have
-              opted out of them.
-            </span>
-          </span>
-        </label>
+        </SettingsCard>
 
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
-
-        <Button variant="primary" loading={saving} onClick={handleSave}>
-          {saved ? "Saved!" : "Save Changes"}
-        </Button>
+        <SettingsCard
+          title="Discord profile"
+          description="Username or avatar out of date? This refreshes the copy we show across the site."
+          footer={
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={refreshingDiscord}
+              onClick={handleRefreshDiscord}
+            >
+              {discordRefreshed ? "Refreshed" : "Refresh from Discord"}
+            </Button>
+          }
+        />
       </div>
 
       <aside className="xl:sticky xl:top-24 xl:self-start">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
           Preview
         </p>
-        <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center gap-3">
             <Avatar
               src={mirroredAvatarUrl(
@@ -353,7 +341,7 @@ function BotItem({
   }
 
   return (
-    <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
         <Avatar
           src={mirroredAvatarUrl("bots", bot.bot_id, bot.user.avatar)}
@@ -392,7 +380,8 @@ function BotItem({
         </div>
       )}
 
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="min-h-4 flex-1" />
+      <div className="-mx-4 -mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
         <span className="whitespace-nowrap">
           {formatCountLabel(bot.approximate_votes, "vote")}
         </span>
@@ -678,7 +667,7 @@ function ServerItem({
   }
 
   return (
-    <div className="flex flex-col p-4 bg-white border rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
         <Avatar src={avatarSrc} alt={server.name} size={44} />
         <div className="flex-1 min-w-0">
@@ -713,7 +702,8 @@ function ServerItem({
         </div>
       )}
 
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="min-h-4 flex-1" />
+      <div className="-mx-4 -mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
         <span className="whitespace-nowrap">
           {formatCountLabel(server.approximate_votes, "vote")}
         </span>
@@ -931,7 +921,7 @@ function TeamsTab({ teams, userId }: { teams: Team[]; userId: string }) {
             return (
               <div
                 key={team.id}
-                className="flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+                className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="flex items-center gap-3">
                   <Avatar
@@ -961,17 +951,20 @@ function TeamsTab({ teams, userId }: { teams: Team[]; userId: string }) {
                     ),
                   ].join(" · ")}
                 </p>
-                <div className="mt-3 flex gap-4 border-t border-zinc-100 pt-3 text-sm dark:border-zinc-800">
+                <div className="min-h-4 flex-1" />
+                <div className="-mx-4 -mb-4 flex items-center justify-between gap-3 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
                   <Link
                     href={`/teams/${team.vanity || team.id}`}
-                    className="text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
+                    className="inline-flex items-center gap-1 transition-colors hover:text-zinc-900 dark:hover:text-zinc-50"
                   >
                     View
+                    <ArrowUpRight size={11} />
                   </Link>
                   <Link
                     href={`/teams/${team.id}/settings`}
-                    className="text-zinc-500 transition-colors hover:text-accent dark:text-zinc-400"
+                    className="inline-flex h-7 items-center gap-1 rounded-lg px-2 font-medium transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
                   >
+                    <Settings size={12} />
                     Settings
                   </Link>
                 </div>
@@ -1156,7 +1149,9 @@ function DashboardPageInner() {
     ...group,
     items: group.items.map((item) => ({ ...item, count: counts[item.key] })),
   }));
-  const activeLabel = TABS.find((t) => t.key === tab)?.label ?? "Overview";
+  const activeItem = NAV_GROUPS.flatMap((g) => g.items).find(
+    (i) => i.key === tab,
+  );
 
   return (
     <Container className="py-10">
@@ -1184,9 +1179,10 @@ function DashboardPageInner() {
         </aside>
 
         <div className="min-w-0">
-          <h1 className="mb-6 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-            {activeLabel}
-          </h1>
+          <PageHeader
+            icon={activeItem?.icon ?? LayoutDashboard}
+            title={activeItem?.label ?? "Overview"}
+          />
 
           {tab === "overview" && (
             <OverviewPanel

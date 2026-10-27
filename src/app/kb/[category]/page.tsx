@@ -55,7 +55,7 @@ export default async function KbCategoryPage({ params }: Props) {
               <Link
                 key={article.slug}
                 href={`/kb/${category.slug}/${article.slug}`}
-                className="group flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+                className="group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
               >
                 <div className="min-w-0">
                   <p className="font-medium text-zinc-950 dark:text-zinc-50">

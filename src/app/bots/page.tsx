@@ -1,8 +1,10 @@
+import { Bot } from "lucide-react";
 import Link from "next/link";
 import { BrowseControls, browseHref } from "@/components/browse/BrowseControls";
 import { UrlPagination } from "@/components/browse/UrlPagination";
 import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { bots } from "@/lib/api";
 import type { BotBrowseSort, IndexBot, PagedResult } from "@/lib/api/types";
@@ -49,16 +51,17 @@ export default async function BotsPage({ searchParams }: Props) {
 
   return (
     <Container className="py-10">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          All Bots
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Browse every bot listed on Omniplex.{" "}
-          {formatCountLabel(data.count, "bot")}
-          {filtered ? " match these filters." : " in total."}
-        </p>
-      </div>
+      <PageHeader
+        icon={Bot}
+        title="All Bots"
+        description={
+          <>
+            Browse every bot listed on Omniplex.{" "}
+            {formatCountLabel(data.count, "bot")}
+            {filtered ? " match these filters." : " in total."}
+          </>
+        }
+      />
 
       <BrowseControls
         basePath="/bots"

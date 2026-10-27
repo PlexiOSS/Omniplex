@@ -2,6 +2,7 @@ import { Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Avatar } from "@/components/ui/Avatar";
 import { votes } from "@/lib/api";
@@ -201,21 +202,20 @@ export default async function LeaderboardPage({ searchParams }: Props) {
   const rest = entries.filter((e) => e.rank > 3);
 
   return (
-    <Container className="py-16">
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <Trophy size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Voter Leaderboard
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          {period === "month"
-            ? "The most active voters since the last monthly vote reset."
-            : "The most active voters on Omniplex of all time."}{" "}
-          Upvotes for bots, servers, teams and packs all count.
-        </p>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={Trophy}
+        title="Voter Leaderboard"
+        description={
+          <>
+            {period === "month"
+              ? "The most active voters since the last monthly vote reset."
+              : "The most active voters on Omniplex of all time."}{" "}
+            Upvotes for bots, servers, teams and packs all count.
+          </>
+        }
+      />
 
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 flex justify-center">

@@ -1,9 +1,11 @@
-import { ArrowRight, ExternalLink, Handshake } from "lucide-react";
+import { ArrowRight, CloudOff, ExternalLink, Handshake } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BsDiscord } from "react-icons/bs";
 import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar } from "@/components/ui/Avatar";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { list } from "@/lib/api";
 import type { Partner, PartnerList } from "@/lib/api/types";
 import { partnerLogoUrl } from "@/lib/utils/assets";
@@ -23,7 +25,7 @@ function PartnerCard({ partner }: { partner: Partner }) {
   const isListedBot = !!partner.bot_id && !!partner.bot;
 
   return (
-    <div className="flex min-w-0 flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center gap-3">
         <Avatar src={partnerLogoUrl(partner)} alt={partner.name} size={48} />
         <div className="min-w-0 flex-1">
@@ -114,28 +116,25 @@ export default async function PartnersPage() {
   );
 
   return (
-    <Container className="py-16">
-      <div className="mx-auto mb-12 max-w-2xl text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-          <Handshake size={22} className="text-accent" />
-        </div>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Partners
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          The bots, communities and services we work with. Bots are the heart of
-          Omniplex, so our bot partners come first.
-        </p>
-      </div>
+    <Container className="py-10">
+      <PageHeader
+        centered
+        icon={Handshake}
+        title="Partners"
+        description={
+          <>
+            The bots, communities and services we work with. Bots are the heart
+            of Omniplex, so our bot partners come first.
+          </>
+        }
+      />
 
       {failed ? (
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Couldn&apos;t load our partners right now. Check back shortly.
-        </p>
+        <EmptyState icon={CloudOff} title="Couldn't load our partners">
+          Check back shortly.
+        </EmptyState>
       ) : partners.length === 0 ? (
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
-          No partners listed right now.
-        </p>
+        <EmptyState icon={Handshake} title="No partners listed right now" />
       ) : (
         <div className="space-y-12">
           {groups.map(({ type, partners: typePartners }) => (

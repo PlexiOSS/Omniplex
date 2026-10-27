@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ReactNode, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FormSection } from "@/components/forms/FormSection";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -220,6 +220,9 @@ function AddPackForm() {
     if (!form.name.trim()) return setError("Pack name is required.");
     if (!form.url.trim()) return setError("Pack URL is required.");
     if (!form.short.trim()) return setError("Short description is required.");
+    if (form.short.trim().length < 10)
+      return setError("Short description must be at least 10 characters.");
+    if (form.tags.length === 0) return setError("Pick at least one tag.");
     if (packType === "bot" && activeCount === 0)
       return setError("Add at least one bot.");
     if (packType === "server" && activeCount === 0)
@@ -377,8 +380,12 @@ function AddPackForm() {
                     placeholder="moderation-essentials"
                     value={form.url}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, url: e.target.value.trim() }))
+                      setForm((f) => ({
+                        ...f,
+                        url: e.target.value.replace(/[^A-Za-z0-9-]/g, ""),
+                      }))
                     }
+                    maxLength={20}
                     disabled={hasUploadedItems}
                     required
                     className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-zinc-950 outline-none placeholder:text-zinc-400 disabled:cursor-not-allowed dark:text-zinc-50 dark:placeholder:text-zinc-600"
@@ -390,8 +397,8 @@ function AddPackForm() {
                     : packType === "emoji" ||
                         packType === "sticker" ||
                         packType === "sound"
-                      ? "Pick this before uploading. It locks after your first upload."
-                      : "Lowercase letters, numbers and dashes work best."}
+                      ? "3 to 20 letters, numbers or dashes. Pick it before uploading, since it locks after your first upload."
+                      : "3 to 20 letters, numbers or dashes."}
                 </p>
               </div>
 
@@ -423,7 +430,10 @@ function AddPackForm() {
 
               <div>
                 <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Tags
+                  Tags <span className="text-red-500">*</span>
+                  <span className="ml-1.5 text-xs font-normal text-zinc-400">
+                    1 to 5
+                  </span>
                 </p>
                 <TagPicker
                   available={BOT_TAGS}
