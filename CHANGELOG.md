@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A `Publish Docker Image` workflow builds the `Dockerfile` and pushes it
+  to `ghcr.io/plexioss/omniplex` on every `v*` tag or when run by hand.
+  The `NEXT_PUBLIC_*` build arguments come from the repository's Actions
+  variables of the same name, so set those before the first run.
 - A `Dockerfile` for running the site in a container. It builds on
   `node:24.22.1-trixie-slim` (the Node 24 security release from
   2026-10-20), installs dependencies with Bun from `bun.lock`, and runs

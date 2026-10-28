@@ -68,6 +68,8 @@ docker run -p 3000:3000 -e SHORT_LINK_DOMAINS=botlist.site omniplex
 
 The `NEXT_PUBLIC_*` variables are inlined when the site is built, so pass them with `--build-arg`. Setting them on the running container does nothing, and changing one means rebuilding the image. Any you leave out fall back to the defaults above. Runtime settings like `SHORT_LINK_DOMAINS` and the `S3_*` values go on the container.
 
+Tagged releases are also published to `ghcr.io/plexioss/omniplex` by the `Publish Docker Image` workflow, built with the `NEXT_PUBLIC_*` values set as repository Actions variables.
+
 ---
 
 ## Project structure
