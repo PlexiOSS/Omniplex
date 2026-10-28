@@ -13,6 +13,7 @@ import { ASSET_VERSION_METADATA_KEY } from "@/lib/s3/config";
 import { headObject, putObject, S3UnavailableError } from "@/lib/s3/objects";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+const SAFE_ID = /^[A-Za-z0-9_-]{1,100}$/;
 const ALLOWED_TYPES = new Set([
   "image/webp",
   "image/png",
@@ -135,6 +136,9 @@ export async function POST(req: Request) {
   if (typeof targetId !== "string" || !targetId) {
     return NextResponse.json({ error: "Missing targetId" }, { status: 400 });
   }
+  if (!SAFE_ID.test(targetId)) {
+    return NextResponse.json({ error: "Invalid targetId" }, { status: 400 });
+  }
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
@@ -165,18 +169,18 @@ export async function POST(req: Request) {
 
   if (kind === "pack-sound") {
     const rawAssetId = form.get("assetId");
-    if (typeof rawAssetId !== "string" || !rawAssetId) {
+    if (typeof rawAssetId !== "string" || !SAFE_ID.test(rawAssetId)) {
       return NextResponse.json(
-        { error: "Missing assetId for pack-sound upload" },
+        { error: "Missing or invalid assetId for pack-sound upload" },
         { status: 400 },
       );
     }
     assetId = `${rawAssetId}.${AUDIO_EXTENSION}`;
   } else if (isPackAssetKind(kind)) {
     const rawAssetId = form.get("assetId");
-    if (typeof rawAssetId !== "string" || !rawAssetId) {
+    if (typeof rawAssetId !== "string" || !SAFE_ID.test(rawAssetId)) {
       return NextResponse.json(
-        { error: `Missing assetId for ${kind} upload` },
+        { error: `Missing or invalid assetId for ${kind} upload` },
         { status: 400 },
       );
     }

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.8.0] - 2026-10-27
+## [1.8.1] - 2026-10-27
 
 ### Added
 
@@ -15,6 +15,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to `ghcr.io/plexioss/omniplex` on every `v*` tag or when run by hand.
   The `NEXT_PUBLIC_*` build arguments come from the repository's Actions
   variables of the same name, so set those before the first run.
+
+### Fixed
+
+- Security: short-link domains could redirect off-site. A path starting
+  with `//` (such as `https://botlist.site//example.com/x`) was resolved
+  as a different host. Redirects now always stay on the main site.
+- Uploads only accept letters, digits, `-` and `_` in their target and
+  asset IDs.
+- The add-template form takes a full `discord.new/...` or
+  `discord.com/template/...` link as well as a bare code, and rejects
+  anything else before sending it.
+
+## [1.8.0] - 2026-10-27
+
+### Added
+
 - A `Dockerfile` for running the site in a container. It builds on
   `node:24.22.1-trixie-slim` (the Node 24 security release from
   2026-10-20), installs dependencies with Bun from `bun.lock`, and runs

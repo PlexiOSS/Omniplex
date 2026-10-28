@@ -22,6 +22,16 @@ import { serverTemplates } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { SERVER_TAGS } from "@/lib/constants/tags";
 
+function templateCode(input: string) {
+  return input
+    .trim()
+    .replace(
+      /^(https?:\/\/)?(www\.)?(discord\.new|discord(app)?\.com\/template)\//i,
+      "",
+    )
+    .replace(/[/?#].*$/, "");
+}
+
 export default function AddServerTemplatePage() {
   const router = useRouter();
   const { session, isAuthenticated, loading } = useAuth();
@@ -46,7 +56,12 @@ export default function AddServerTemplatePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!session) return;
-    if (!form.code.trim()) return setError("Template code is required.");
+    const code = templateCode(form.code);
+    if (!code) return setError("Template code is required.");
+    if (!/^[A-Za-z0-9]+$/.test(code))
+      return setError(
+        "That doesn't look like a template code. Paste the link or just the part after discord.new/.",
+      );
     if (!form.short.trim()) return setError("A description is required.");
     if (form.tags.length === 0) return setError("Pick at least one tag.");
 
@@ -57,7 +72,7 @@ export default function AddServerTemplatePage() {
       const res = await serverTemplates.create(
         session.user_id,
         {
-          code: form.code.trim(),
+          code,
           short: form.short.trim(),
           tags: form.tags,
           nsfw: form.nsfw,

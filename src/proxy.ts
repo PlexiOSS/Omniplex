@@ -47,7 +47,10 @@ export async function proxy(request: NextRequest) {
   const segments = pathname.split("/").filter(Boolean);
 
   if (segments.length !== 1) {
-    return NextResponse.redirect(new URL(`${pathname}${search}`, site), 308);
+    const target = new URL(site);
+    target.pathname = `/${segments.join("/")}`;
+    target.search = search;
+    return NextResponse.redirect(target, 308);
   }
 
   const code = decodeURIComponent(segments[0]);
