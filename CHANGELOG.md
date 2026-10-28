@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The "On this page" outline's heading cleanup now removes any `<` or
+  `>` left after stripping tags, clearing a CodeQL "incomplete
+  multi-character sanitization" alert. The text was never rendered as
+  HTML, so this wasn't exploitable.
+
 ## [1.8.1] - 2026-10-27
 
 ### Added
