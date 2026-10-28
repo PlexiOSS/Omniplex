@@ -42,6 +42,7 @@ import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
 import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 import { requestsAdministrator } from "@/lib/utils/invitePermissions";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
+import { AnalyticsPanel } from "../../manage/AnalyticsPanel";
 import {
   FormMessage,
   ManageShell,
@@ -425,7 +426,7 @@ function AppearanceSection({ bot, userId, token, onSaved }: SectionProps) {
   );
 }
 
-function StatsSection({ bot }: { bot: Bot }) {
+function StatsSection({ bot, token }: { bot: Bot; token: string }) {
   const uptime =
     bot.total_uptime > 0
       ? `${Math.round((bot.uptime / bot.total_uptime) * 1000) / 10}%`
@@ -470,6 +471,7 @@ function StatsSection({ bot }: { bot: Bot }) {
         </Link>
         .
       </p>
+      <AnalyticsPanel kind="bot" id={bot.bot_id} token={token} />
     </div>
   );
 }
@@ -802,7 +804,7 @@ function BotSettings() {
         ) : (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading…</p>
         ))}
-      {section === "stats" && <StatsSection bot={bot} />}
+      {section === "stats" && <StatsSection bot={bot} token={session.token} />}
       {section === "sessions" && (
         <TokenManager
           targetType="bot"

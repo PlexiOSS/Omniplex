@@ -16,6 +16,7 @@ import type {
   CaptchaSolution,
   CreateBotChangelogPayload,
   DiscordBotMeta,
+  EntityAnalytics,
   IndexBot,
   ListIndexBot,
   PagedResult,
@@ -34,6 +35,12 @@ export const botsResource = {
 
   getSeo: (id: string) =>
     client.get<SEO>(`/bots/${id}/seo`, { cache: "no-store" }),
+
+  getAnalytics: (id: string, days: number, token: string) =>
+    client.get<EntityAnalytics>(`/bots/${id}/analytics?days=${days}`, {
+      token,
+      cache: "no-store",
+    }),
 
   getAll: (page = 1, filters: BrowseFilters<BotBrowseSort> = {}) => {
     const params = new URLSearchParams({ page: String(page) });

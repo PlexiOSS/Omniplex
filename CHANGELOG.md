@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-28
+
+### Added
+
+- Recently bumped: a Bumped tab in the home page's server lists and a
+  "Recently bumped" sort when browsing servers, driven by the new `/bump`
+  command.
+- Server pages show a Bumps card with when the server was last bumped,
+  its bumps in the last 30 days and its top bumpers, and mention `/bump`
+  and `/vote`.
+- A "Bumping and Voting from Discord" knowledge base guide.
+- Owner analytics. The Statistics section of the bot and server dashboards
+  now has an "Over time" view with daily charts for votes (manual and
+  automatic), page views, invite clicks, and servers or members, over 7
+  days, 30 days, 90 days or a year, with totals for the range. Hover a
+  day for its numbers.
+
 ### Fixed
 
 - The "On this page" outline's heading cleanup now removes any `<` or

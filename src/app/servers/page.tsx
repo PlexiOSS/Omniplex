@@ -32,6 +32,7 @@ const SORTS: { value: ServerBrowseSort; label: string }[] = [
   { value: "votes", label: "Top voted" },
   { value: "trending", label: "Trending" },
   { value: "members", label: "Most members" },
+  { value: "bumped", label: "Recently bumped" },
 ];
 
 export default async function ServersPage({ searchParams }: Props) {

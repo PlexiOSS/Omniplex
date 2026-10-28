@@ -33,6 +33,7 @@ import { SERVER_TAGS } from "@/lib/constants/tags";
 import { bannerUrl, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
 import { formatCount } from "@/lib/utils/format";
 import { UploadError, uploadAsset } from "@/lib/utils/upload";
+import { AnalyticsPanel } from "../../manage/AnalyticsPanel";
 import {
   FormMessage,
   ManageShell,
@@ -671,6 +672,13 @@ function ServerSettings() {
               value: formatCount(server.invite_clicks),
             },
           ]}
+        />
+      )}
+      {section === "stats" && (
+        <AnalyticsPanel
+          kind="server"
+          id={server.server_id}
+          token={session.token}
         />
       )}
       {section === "sessions" && (

@@ -109,6 +109,12 @@ export default async function HomePage() {
       bots: botIndex?.recently_added ?? [],
       servers: serverIndex?.recently_added ?? [],
     },
+    {
+      key: "recently_bumped",
+      label: "Bumped",
+      bots: [],
+      servers: serverIndex?.recently_bumped ?? [],
+    },
   ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
   const shownBotIds = new Set(topVotedBots.slice(0, 9).map((b) => b.bot_id));

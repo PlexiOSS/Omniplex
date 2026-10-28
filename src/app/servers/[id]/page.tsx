@@ -19,6 +19,7 @@ import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { isListed, UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
 import { ReportModal } from "@/components/reports/ReportModal";
+import { ServerBumpsCard } from "@/components/servers/ServerBumpsCard";
 import { ServerPageTabs } from "@/components/servers/ServerPageTabs";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -123,7 +124,7 @@ export default async function ServerPage({ params }: Props) {
       `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`,
   );
 
-  const [reviewList, similarServers, voterList] = await Promise.all([
+  const [reviewList, similarServers, voterList, bumpInfo] = await Promise.all([
     reviews
       .getAll(
         "server",
@@ -140,6 +141,7 @@ export default async function ServerPage({ params }: Props) {
         isListed(server.type) ? undefined : token,
       )
       .catch(() => null),
+    servers.getBumps(server.server_id).catch(() => null),
   ]);
 
   const voteBlitzActive =
@@ -343,6 +345,10 @@ export default async function ServerPage({ params }: Props) {
               )}
             </dl>
           </div>
+
+          {bumpInfo && isListed(server.type) && (
+            <ServerBumpsCard info={bumpInfo} />
+          )}
 
           {(server.team_owner || owner?.user) && (
             <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">

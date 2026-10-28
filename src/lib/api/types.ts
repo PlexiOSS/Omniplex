@@ -299,6 +299,7 @@ export interface Server extends IndexServer {
   /** Null if never synced (e.g. the tracking bot has never been in this server). */
   emojis_synced_at: string | null;
   vote_blitz_until: string | null;
+  bumped_at?: string | null;
 }
 
 export interface ServerEmoji {
@@ -803,7 +804,12 @@ export interface EntityVoterList {
 }
 
 export type BotBrowseSort = "new" | "trending" | "votes" | "servers";
-export type ServerBrowseSort = "new" | "trending" | "votes" | "members";
+export type ServerBrowseSort =
+  | "new"
+  | "trending"
+  | "votes"
+  | "members"
+  | "bumped";
 
 export interface BrowseFilters<S extends string> {
   sort?: S;
@@ -1133,6 +1139,7 @@ export interface ListIndexServer {
   top_voted: IndexServer[];
   featured: IndexServer[];
   spotlight: IndexServer[];
+  recently_bumped?: IndexServer[];
 }
 
 // ---------------------------------------------------------------------------
@@ -1925,4 +1932,33 @@ export interface ListTags {
 
 export interface MainServerStatus {
   member: boolean;
+}
+
+export interface ServerBumper {
+  user: PlatformUser;
+  bumps: number;
+}
+
+export interface ServerBumpInfo {
+  bumped_at: string | null;
+  next_bump_at: string | null;
+  bumps_30d: number;
+  top_bumpers: ServerBumper[];
+}
+
+export interface EntityAnalyticsDay {
+  day: string;
+  votes: number;
+  auto_votes: number;
+  views: number | null;
+  invite_clicks: number | null;
+  servers?: number | null;
+  users?: number | null;
+  total_members?: number | null;
+  online_members?: number | null;
+}
+
+export interface EntityAnalytics {
+  tracked_since: string | null;
+  days: EntityAnalyticsDay[];
 }

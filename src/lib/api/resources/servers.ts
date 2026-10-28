@@ -3,6 +3,7 @@ import type {
   BrowseFilters,
   CaptchaSolution,
   DiscordServerMeta,
+  EntityAnalytics,
   IndexServer,
   ListIndexServer,
   PagedResult,
@@ -10,6 +11,7 @@ import type {
   SEO,
   Server,
   ServerBrowseSort,
+  ServerBumpInfo,
   ServerEmojiPreview,
   ServerSettingsUpdate,
   UserVote,
@@ -23,6 +25,15 @@ export const serversResource = {
 
   getSeo: (id: string) =>
     client.get<SEO>(`/servers/${id}/seo`, { cache: "no-store" }),
+
+  getBumps: (id: string) =>
+    client.get<ServerBumpInfo>(`/servers/${id}/bumps`, { cache: "no-store" }),
+
+  getAnalytics: (id: string, days: number, token: string) =>
+    client.get<EntityAnalytics>(`/servers/${id}/analytics?days=${days}`, {
+      token,
+      cache: "no-store",
+    }),
 
   getAll: (page = 1, filters: BrowseFilters<ServerBrowseSort> = {}) => {
     const params = new URLSearchParams({ page: String(page) });
