@@ -39,8 +39,10 @@ import { shortLinkUrl } from "@/lib/shortLinks";
 import {
   bannerUrl,
   mirroredAvatarUrl,
+  serverPath,
   teamAvatarUrl,
 } from "@/lib/utils/assets";
+import { headerTint } from "@/lib/utils/cardCosmetics";
 import {
   isApiUnavailable,
   isNotFoundError,
@@ -90,6 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: seo.name,
     description: seo.short,
+    alternates: { canonical: serverPath(seo.id, seo.vanity) },
   };
 }
 
@@ -105,6 +108,7 @@ export default async function ServerPage({ params }: Props) {
     throw err;
   }
   if (!server) notFound();
+  const tint = headerTint(server.card_color);
 
   const owner = server.team_owner
     ? null
@@ -171,6 +175,7 @@ export default async function ServerPage({ params }: Props) {
           currentVotes={server.approximate_votes}
           premium={server.premium}
           captchaOptOut={server.captcha_opt_out}
+          acceptsAutoVotes={!server.auto_votes_opt_out}
         />
       </div>
     </div>
@@ -205,7 +210,10 @@ export default async function ServerPage({ params }: Props) {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main */}
         <div className="min-w-0">
-          <div className="flex items-start gap-4">
+          <div
+            className={`flex items-start gap-4 ${tint.className}`}
+            style={tint.style}
+          >
             <Avatar src={avatarSrc} alt={server.name} size={64} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">

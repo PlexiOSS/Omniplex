@@ -1,4 +1,11 @@
-import { ArrowUpRight, Server, Star } from "lucide-react";
+import {
+  ArrowUpRight,
+  Eye,
+  Layers,
+  MousePointerClick,
+  Server,
+  Star,
+} from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -11,6 +18,7 @@ import {
   discordDefaultAvatar,
   mirroredAvatarUrl,
 } from "@/lib/utils/assets";
+import { cardCosmetics } from "@/lib/utils/cardCosmetics";
 import { formatCountLabel } from "@/lib/utils/format";
 
 interface BotCardProps {
@@ -27,11 +35,15 @@ export function BotCard({ bot }: BotCardProps) {
   const isStandout =
     bot.premium || bot.type === "certified" || bot.supporter_badge;
 
+  const cosmetics = cardCosmetics(bot);
+
   return (
     <Link
       href={href}
       data-nsfw={bot.nsfw || undefined}
+      style={cosmetics.style}
       className={[
+        cosmetics.className,
         "group flex min-w-0 flex-col overflow-hidden rounded-xl border transition-all hover:shadow-sm",
         isStandout
           ? "border-accent/25 bg-linear-to-br from-accent/7 via-white to-white hover:border-accent/50 dark:border-accent/25 dark:from-accent/10 dark:via-zinc-900 dark:to-zinc-900"
@@ -86,15 +98,29 @@ export function BotCard({ bot }: BotCardProps) {
         )}
 
         {/* Stats */}
-        <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
-          <span className="flex items-center gap-1">
+        <div className="mt-auto flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+          <span data-stat="votes" className="flex items-center gap-1">
             <Star size={12} />
             {formatCountLabel(bot.approximate_votes, "vote")}
           </span>
-          <span className="flex items-center gap-1">
+          <span data-stat="size" className="flex items-center gap-1">
             <Server size={12} />
             {formatCountLabel(bot.servers, "server")}
           </span>
+          <span data-stat="views" className="flex items-center gap-1">
+            <Eye size={12} />
+            {formatCountLabel(bot.clicks, "view")}
+          </span>
+          <span data-stat="invites" className="flex items-center gap-1">
+            <MousePointerClick size={12} />
+            {formatCountLabel(bot.invite_clicks, "invite")}
+          </span>
+          {bot.shards > 0 && (
+            <span data-stat="shards" className="flex items-center gap-1">
+              <Layers size={12} />
+              {formatCountLabel(bot.shards, "shard")}
+            </span>
+          )}
         </div>
       </div>
     </Link>

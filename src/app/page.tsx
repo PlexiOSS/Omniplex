@@ -36,6 +36,8 @@ const POPULAR_TAGS = [
   "Anti-Raid",
 ];
 
+const MIN_TOP_VOTED = 6;
+
 export default async function HomePage() {
   let botIndex = null;
   let serverIndex = null;
@@ -78,12 +80,22 @@ export default async function HomePage() {
     return <ServiceUnavailable />;
   }
 
+  const votedBots = (botIndex?.top_voted ?? []).filter(
+    (b) => b.approximate_votes > 0,
+  );
+  const votedServers = (serverIndex?.top_voted ?? []).filter(
+    (sv) => sv.approximate_votes > 0,
+  );
+  const topVotedBots = votedBots.length >= MIN_TOP_VOTED ? votedBots : [];
+  const topVotedServers =
+    votedServers.length >= MIN_TOP_VOTED ? votedServers : [];
+
   const tabs = [
     {
       key: "top_voted",
       label: "Top Voted",
-      bots: botIndex?.top_voted ?? [],
-      servers: serverIndex?.top_voted ?? [],
+      bots: topVotedBots,
+      servers: topVotedServers,
     },
     {
       key: "most_viewed",
@@ -99,11 +111,9 @@ export default async function HomePage() {
     },
   ].filter((t) => t.bots.length > 0 || t.servers.length > 0);
 
-  const shownBotIds = new Set(
-    (botIndex?.top_voted ?? []).slice(0, 9).map((b) => b.bot_id),
-  );
+  const shownBotIds = new Set(topVotedBots.slice(0, 9).map((b) => b.bot_id));
   const shownServerIds = new Set(
-    (serverIndex?.top_voted ?? []).slice(0, 9).map((s) => s.server_id),
+    topVotedServers.slice(0, 9).map((s) => s.server_id),
   );
 
   const highlightsTabs = [

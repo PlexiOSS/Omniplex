@@ -5,7 +5,11 @@ import {
   Award,
   Check,
   Coins,
+  Flashlight,
+  Highlighter,
   Megaphone,
+  Package,
+  Palette,
   ShoppingBag,
   Sparkles,
   Star,
@@ -54,6 +58,9 @@ const BENEFIT_ICONS: Record<string, typeof Sparkles> = {
   featured_slot: Megaphone,
   supporter_badge: Award,
   vote_blitz: Sparkles,
+  highlight: Highlighter,
+  spotlight_slot: Flashlight,
+  card_theme: Palette,
 };
 
 type VoteHistoryEntry =
@@ -318,7 +325,9 @@ function ShopPageInner() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {visibleItems.map((item) => {
                   const Icon =
-                    BENEFIT_ICONS[item.benefits[0] ?? ""] ?? ShoppingBag;
+                    item.benefits.length > 1
+                      ? Package
+                      : (BENEFIT_ICONS[item.benefits[0] ?? ""] ?? ShoppingBag);
                   const affordable =
                     hasCoupon || availableCredits >= Math.round(item.cents);
                   const extraBenefits =

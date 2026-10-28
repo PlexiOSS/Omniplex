@@ -49,13 +49,24 @@ The frontend is decoupled from both backends it talks to Popplio (`src/lib/api/`
 | Variable | Default | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:3000` | Canonical URL of this instance used in metadata, sitemaps, and as the OAuth redirect URI. Must exactly match what's registered in the Discord Developer Portal and in Popplio/Arcadia's own redirect allowlists. |
-| `NEXT_PUBLIC_API_URL` | `https://spider-staging.omniplex.gg` | Popplio API base URL |
+| `NEXT_PUBLIC_API_URL` | `https://spider.omniplex.gg` | Popplio API base URL |
 | `NEXT_PUBLIC_CDN_URL` | `https://cdn.omniplex.gg` | Asset CDN base URL |
 | `NEXT_PUBLIC_ARCADIA_URL` | `https://staging--panel-api.omniplex.gg` | Arcadia panel API base URL, which powers `/admin` |
 | `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` | `infinity-list` | Arcadia's configured `panel_scope` for this instance. Must match Arcadia's own config exactly or staff login fails |
-| `SHORT_LINK_DOMAINS` | (none) | Comma-separated short-link domains, such as `botlist.site`. `<domain>/<id or vanity>` redirects to that listing, other paths redirect to the same path on `NEXT_PUBLIC_BASE_URL`, and the first domain is used by the "Short link" button. Read at runtime, so adding a domain needs a restart, not a rebuild. Point the domain's DNS at this deployment and add it in Railpack first. |
+| `SHORT_LINK_DOMAINS` | (none) | Comma-separated short-link domains, such as `botlist.site`. `<domain>/<id or vanity>` redirects to that listing, other paths redirect to the same path on `NEXT_PUBLIC_BASE_URL`, and the first domain is used by the "Short link" button. Read at runtime, so adding a domain needs a restart, not a rebuild. Point the domain's DNS at this deployment and add it to your host first. |
 
 Copy `.env.template` to `.env.local` to override any of these for local development. None are required to run the app against staging; the defaults point there already.
+
+## Deployment
+
+Build and run the `Dockerfile`:
+
+```bash
+docker build -t omniplex   --build-arg NEXT_PUBLIC_BASE_URL=https://omniplex.gg   --build-arg NEXT_PUBLIC_API_URL=https://spider.omniplex.gg .
+docker run -p 3000:3000 -e SHORT_LINK_DOMAINS=botlist.site omniplex
+```
+
+The `NEXT_PUBLIC_*` variables are inlined when the site is built, so pass them with `--build-arg`. Setting them on the running container does nothing, and changing one means rebuilding the image. Any you leave out fall back to the defaults above. Runtime settings like `SHORT_LINK_DOMAINS` and the `S3_*` values go on the container.
 
 ---
 

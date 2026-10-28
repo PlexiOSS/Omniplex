@@ -10,7 +10,7 @@ A webhook lets Omniplex call your own server (or post to a Discord channel) when
 
 | Event | Sent when |
 |---|---|
-| `NEW_VOTE` | Someone votes for the bot, server or team. Includes the new vote count, how many votes this counted as (2 on a double-vote weekend) and whether it was a downvote. |
+| `NEW_VOTE` | Someone votes for the bot, server or team. Includes the new vote count, how many votes this counted as (2 on a double-vote weekend), whether it was a downvote, and `auto`, which is `true` when the vote came from [Auto-vote](/kb/voting/auto-voting). |
 | `NEW_REVIEW` | Someone reviews it. |
 | `EDIT_REVIEW` | A review is edited. |
 | `DELETE_REVIEW` | A review is deleted. |

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 interface StatRowProps {
   icon: ReactNode;
   label: string;
-  value: string;
+  value: ReactNode;
 }
 
 /** A single "label ... value" row inside a stats `dl` — used on bot/server

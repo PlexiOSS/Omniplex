@@ -23,6 +23,7 @@ import { ServerCard } from "@/components/cards/ServerCard";
 import { TeamCard } from "@/components/cards/TeamCard";
 import { Container } from "@/components/layout/Container";
 import { Pagination } from "@/components/search/Pagination";
+import { SearchDiscover } from "@/components/search/SearchDiscover";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/PageStates";
 import { BotCardSkeleton } from "@/components/ui/Skeleton";
@@ -403,36 +404,39 @@ function SearchPageInner() {
       )}
 
       {!active ? (
-        <section className="mx-auto mt-14 max-w-4xl">
-          <h2 className="mb-4 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
-            Explore
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {EXPLORE.map(({ href, title, body, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="group flex items-start gap-3.5 rounded-2xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/15">
-                  <Icon size={18} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center justify-between gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
-                    {title}
-                    <ArrowRight
-                      size={14}
-                      className="shrink-0 text-zinc-300 transition-all group-hover:translate-x-0.5 group-hover:text-accent dark:text-zinc-600"
-                    />
+        <>
+          <SearchDiscover />
+          <section className="mx-auto mt-14 max-w-4xl">
+            <h2 className="mb-4 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+              Explore
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {EXPLORE.map(({ href, title, body, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="group flex items-start gap-3.5 rounded-2xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/15">
+                    <Icon size={18} />
                   </span>
-                  <span className="mt-0.5 block text-sm text-zinc-500 dark:text-zinc-400">
-                    {body}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center justify-between gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                      {title}
+                      <ArrowRight
+                        size={14}
+                        className="shrink-0 text-zinc-300 transition-all group-hover:translate-x-0.5 group-hover:text-accent dark:text-zinc-600"
+                      />
+                    </span>
+                    <span className="mt-0.5 block text-sm text-zinc-500 dark:text-zinc-400">
+                      {body}
+                    </span>
                   </span>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </>
       ) : (
         <div className="mt-8">
           <div className="mb-6 flex gap-1.5 overflow-x-auto overflow-y-hidden pb-1">

@@ -17,7 +17,7 @@ When you vote, your browser solves a short verification check first (you'll see 
 - On **weekends** (Friday through Sunday, **UTC**), non-premium bots, servers, packs, and teams get a **double-vote weekend bonus**: each vote counts for 2, and the cooldown is halved to **6 hours**. The boundary is UTC regardless of your own timezone, so the bonus may start or end a few hours earlier or later than local Friday/Sunday depending on where you are. Premium listings already have the shorter 4-hour cooldown and don't additionally get the weekend bonus.
 - A listing with an active **Vote Blitz** (bought in the [Shop](/kb/premium/shop)) has its cooldown halved for as long as the blitz lasts.
 
-If you try to vote again before your cooldown ends, you'll see how long you need to wait. You can also have Omniplex [remind you](/kb/account/reminders) when you're able to vote again.
+If you try to vote again before your cooldown ends, you'll see how long you need to wait. You can also have Omniplex [remind you](/kb/account/reminders) when you're able to vote again, or let [Auto-vote](/kb/voting/auto-voting) vote for you.
 
 ## Upvotes and downvotes
 
@@ -33,7 +33,7 @@ Vote counts reset once a month, so every listing starts the month on an even foo
 
 ## The voter leaderboard
 
-The [Voter Leaderboard](/leaderboard) ranks the most active voters, both **this month** (since the last reset) and **all time**. It counts upvotes for bots, servers, teams and packs. Votes that staff removed because of abuse, and votes from vote-banned or banned accounts, don't count. If you're signed in, the leaderboard and your profile both show your own rank.
+The [Voter Leaderboard](/leaderboard) ranks the most active voters, both **this month** (since the last reset) and **all time**. It counts upvotes for bots, servers, teams and packs. Automatic votes from [Auto-vote](/kb/voting/auto-voting) don't count. Votes that staff removed because of abuse, and votes from vote-banned or banned accounts, don't count. If you're signed in, the leaderboard and your profile both show your own rank.
 
 ## Vote credits
 

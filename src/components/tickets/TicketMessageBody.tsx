@@ -185,11 +185,7 @@ export function TicketMessageBody({ message, lookup }: TicketMessageBodyProps) {
   const text = message.content.trim();
 
   if (!text && embeds.length === 0 && attachments.length === 0) {
-    return (
-      <p className="mt-1 text-sm italic text-zinc-400 dark:text-zinc-500">
-        No text content
-      </p>
-    );
+    return null;
   }
 
   return (

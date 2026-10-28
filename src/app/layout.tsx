@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import {
+  Atkinson_Hyperlegible,
+  DM_Sans,
   Geist,
   Geist_Mono,
+  IBM_Plex_Sans,
   Inter,
   Lora,
+  Manrope,
+  Nunito,
+  Outfit,
   Plus_Jakarta_Sans,
   Space_Grotesk,
 } from "next/font/google";
@@ -24,19 +30,60 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-const lora = Lora({ variable: "--font-lora", subsets: ["latin"] });
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  preload: false,
+});
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
+  preload: false,
 });
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  preload: false,
+});
 const grotesk = Space_Grotesk({
   variable: "--font-grotesk",
   subsets: ["latin"],
+  preload: false,
+});
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  preload: false,
+});
+const dmSans = DM_Sans({
+  variable: "--font-dmsans",
+  subsets: ["latin"],
+  preload: false,
+});
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  preload: false,
+});
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+  preload: false,
+});
+const plex = IBM_Plex_Sans({
+  variable: "--font-plex",
+  subsets: ["latin"],
+  preload: false,
+});
+const atkinson = Atkinson_Hyperlegible({
+  variable: "--font-atkinson",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  preload: false,
 });
 
 // Runs before React hydrates to prevent accent/font flash
-const INIT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('omniplex-prefs')||'{}');var el=document.documentElement;if(p.accent)el.dataset.accent=p.accent;if(p.font)el.dataset.font=p.font;if(p.layout)el.dataset.layout=p.layout;el.dataset.hideNsfw=String(!!p.hideNsfw);var blur=p.blurNsfw===undefined?true:p.blurNsfw;el.dataset.blurNsfw=String(blur&&!p.hideNsfw);}catch(e){}})()`;
+const INIT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('omniplex-prefs')||'{}');var el=document.documentElement;if(p.accent)el.dataset.accent=p.accent;if(p.font)el.dataset.font=p.font;if(p.layout)el.dataset.layout=p.layout;if(p.radius)el.dataset.radius=p.radius;el.dataset.hiddenStats=(Array.isArray(p.hiddenStats)?p.hiddenStats:['invites','shards']).join(' ');el.dataset.hideNsfw=String(!!p.hideNsfw);var blur=p.blurNsfw===undefined?true:p.blurNsfw;el.dataset.blurNsfw=String(blur&&!p.hideNsfw);}catch(e){}})()`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -76,7 +123,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${lora.variable} ${jakarta.variable} ${inter.variable} ${grotesk.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${lora.variable} ${jakarta.variable} ${inter.variable} ${grotesk.variable} ${outfit.variable} ${dmSans.variable} ${manrope.variable} ${nunito.variable} ${plex.variable} ${atkinson.variable}`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >

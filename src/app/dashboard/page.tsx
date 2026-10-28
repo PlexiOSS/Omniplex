@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   Package,
   Palette,
+  Repeat,
   Server as ServerIcon,
   Settings,
   ShieldCheck,
@@ -54,6 +55,7 @@ import { hasAnyPermString, hasPermString } from "@/lib/permissions";
 import { mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { formatCount, formatCountLabel } from "@/lib/utils/format";
 import { ApplicationsTab } from "./ApplicationsTab";
+import { AutoVoteTab } from "./AutoVoteTab";
 import { DashboardNav } from "./DashboardNav";
 import {
   ListingFilters,
@@ -77,6 +79,7 @@ import { ThemesTab } from "./ThemesTab";
 
 type Tab =
   | "overview"
+  | "auto-vote"
   | "profile"
   | "bots"
   | "servers"
@@ -145,6 +148,27 @@ function EditProfileTab({
   const [captchaSponsorEnabled, setCaptchaSponsorEnabled] = useState(
     me.captcha_sponsor_enabled,
   );
+  const pinOptions = [
+    ...me.user_bots.map((b) => ({
+      key: `bot:${b.bot_id}`,
+      label: `${b.user?.username ?? b.bot_id} (bot)`,
+    })),
+    ...me.user_teams.flatMap((t) =>
+      (t.entities?.bots ?? []).map((b) => ({
+        key: `bot:${b.bot_id}`,
+        label: `${b.user?.username ?? b.bot_id} (bot, ${t.name})`,
+      })),
+    ),
+    ...me.user_servers.map((sv) => ({
+      key: `server:${sv.server_id}`,
+      label: `${sv.name} (server)`,
+    })),
+  ].filter((o, i, all) => all.findIndex((x) => x.key === o.key) === i);
+  const [pinned, setPinned] = useState(
+    me.pinned_target_type && me.pinned_target_id
+      ? `${me.pinned_target_type}:${me.pinned_target_id}`
+      : "",
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -183,6 +207,12 @@ function EditProfileTab({
           about: about || null,
           extra_links,
           captcha_sponsor_enabled: captchaSponsorEnabled,
+          pinned_listing: pinned
+            ? {
+                target_type: pinned.split(":")[0] as "bot" | "server",
+                target_id: pinned.split(":")[1] ?? "",
+              }
+            : { target_type: "", target_id: "" },
         },
         token,
       );
@@ -216,11 +246,37 @@ function EditProfileTab({
         >
           <TextArea
             id="about"
-            label="Bio"
+            label="Bio (Markdown supported)"
             rows={3}
             value={about}
             onChange={setAbout}
           />
+          {pinOptions.length > 0 && (
+            <div>
+              <label
+                htmlFor="pinned-listing"
+                className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Pinned listing
+              </label>
+              <select
+                id="pinned-listing"
+                value={pinned}
+                onChange={(e) => setPinned(e.target.value)}
+                className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-950 outline-none focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+              >
+                <option value="">None</option>
+                {pinOptions.map((o) => (
+                  <option key={o.key} value={o.key}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                Shown at the top of your public profile.
+              </p>
+            </div>
+          )}
           <div>
             <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Links
@@ -1005,6 +1061,7 @@ const NAV_GROUPS: {
   {
     label: "Activity",
     items: [
+      { key: "auto-vote", label: "Auto-vote", icon: Repeat },
       { key: "applications", label: "Applications", icon: ClipboardList },
     ],
   },
@@ -1228,6 +1285,9 @@ function DashboardPageInner() {
               token={session.token}
               mutate={mutateThemes}
             />
+          )}
+          {tab === "auto-vote" && (
+            <AutoVoteTab userId={session.user_id} token={session.token} />
           )}
           {tab === "applications" && <ApplicationsTab apps={myApplications} />}
           {tab === "teams" && (

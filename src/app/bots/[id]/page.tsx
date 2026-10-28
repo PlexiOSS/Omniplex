@@ -42,10 +42,12 @@ import { BASE_URL } from "@/lib/api/config";
 import { shortLinkUrl } from "@/lib/shortLinks";
 import {
   bannerUrl,
+  botPath,
   discordBannerUrl,
   mirroredAvatarUrl,
   teamAvatarUrl,
 } from "@/lib/utils/assets";
+import { headerTint } from "@/lib/utils/cardCosmetics";
 import {
   isApiUnavailable,
   isNotFoundError,
@@ -95,6 +97,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: seo.name,
     description: seo.short,
+    alternates: { canonical: botPath(seo.id, seo.vanity) },
   };
 }
 
@@ -110,6 +113,7 @@ export default async function BotPage({ params }: Props) {
     throw err;
   }
   if (!bot) notFound();
+  const tint = headerTint(bot.card_color);
 
   const listedToken = isListed(bot.type) ? undefined : token;
 
@@ -170,6 +174,7 @@ export default async function BotPage({ params }: Props) {
           currentVotes={bot.approximate_votes}
           premium={bot.premium}
           captchaOptOut={bot.captcha_opt_out}
+          acceptsAutoVotes={!bot.auto_votes_opt_out}
         />
       </div>
     </div>
@@ -203,7 +208,10 @@ export default async function BotPage({ params }: Props) {
         {/* Main */}
         <div className="min-w-0">
           {/* Bot header */}
-          <div className="flex items-start gap-4">
+          <div
+            className={`flex items-start gap-4 ${tint.className}`}
+            style={tint.style}
+          >
             <Avatar
               src={avatarSrc}
               alt={bot.user.username}

@@ -24,6 +24,11 @@ If none of these has an answer, your bot shows as offline.
 
 ## Uptime
 
-Every 5 minutes we check whether each listed bot is online, using our Discord connection and japi.rest. The **Uptime** percentage on your bot's page is the share of those checks where it was online, since we started tracking it.
+Every 5 minutes we check whether each listed bot is online, using the same sources as the status dot, in this order:
 
-The status your bot posts itself doesn't count towards uptime, so uptime reflects what we could actually observe. A bot that's new to the list, or that we can't see through either source, can show a lower uptime than it really has until more checks have run.
+1. The status your bot reports when it [posts stats](/kb/developers/posting-stats), as long as it posted in the last 24 hours.
+2. Our own Discord connection, for bots in the Omniplex server.
+3. japi.rest.
+4. A stats post with a server count in the last 24 hours, which counts as online.
+
+The **Uptime** percentage on your bot's page is the share of those checks where it was online. If none of these sources has anything to say about your bot at the time of a check, that check is skipped instead of counted as offline, so missing data can't drag your uptime down. Posting stats regularly, with a status, is the most reliable way to keep your uptime accurate.

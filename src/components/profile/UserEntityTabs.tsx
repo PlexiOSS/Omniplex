@@ -67,7 +67,7 @@ export function UserEntityTabs({
   if (tabs.length === 0) return null;
 
   return (
-    <section className="mt-12">
+    <section className="mt-6">
       <div className="overflow-x-auto overflow-y-hidden border-b border-zinc-200 dark:border-zinc-800">
         <div className="flex flex-nowrap items-center gap-4">
           {tabs.map(({ key, label, count, icon: Icon }) => (
@@ -98,7 +98,7 @@ export function UserEntityTabs({
 
       <div
         className={[
-          "mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3",
+          "mt-6 grid gap-4 sm:grid-cols-2",
           active === "activity" ? "hidden" : "",
         ].join(" ")}
       >

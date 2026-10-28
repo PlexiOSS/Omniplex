@@ -36,6 +36,7 @@ const FOOTER_LINKS = [
       { href: "/feed", label: "Bot Updates" },
       { href: "/commands", label: "Command Directory" },
       { href: "/leaderboard", label: "Voter Leaderboard" },
+      { href: "/badges", label: "Badges" },
       { href: "/kb", label: "Knowledge Base" },
     ],
   },
@@ -62,6 +63,7 @@ const FOOTER_LINKS = [
     heading: "Company",
     links: [
       { href: "/about", label: "About Us" },
+      { href: "/alternatives", label: "Compare Bot Lists" },
       { href: "https://status.omniplex.gg", label: "System Status" },
       { href: "/about/moderation", label: "Moderation Stats" },
       { href: "/partners", label: "Our Partners" },

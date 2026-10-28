@@ -35,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: seo.name,
     description: seo.short || `${seo.name} on Omniplex`,
+    alternates: { canonical: `/teams/${seo.id}` },
   };
 }
 

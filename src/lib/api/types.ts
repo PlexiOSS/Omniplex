@@ -9,6 +9,7 @@ export interface SEO {
   id: string;
   avatar: string;
   short: string;
+  vanity?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,6 +60,8 @@ export interface AssetVersions {
 
 export interface IndexBot {
   asset_versions?: AssetVersions;
+  highlighted?: boolean;
+  card_color?: string;
   bot_id: string;
   /** Full platform user resolved by dovewing — avatar is a full URL */
   user: PlatformUser;
@@ -124,6 +127,12 @@ export interface Bot {
   tags: string[];
   cert_reason: string | null;
   captcha_opt_out: boolean;
+  auto_votes_opt_out?: boolean;
+  auto_votes?: number;
+  highlighted?: boolean;
+  card_color?: string;
+  card_theme?: boolean;
+  highlighted_until?: string | null;
   created_at: string;
   updated_at: string;
   supporter_badge: boolean;
@@ -238,6 +247,8 @@ export type ServerState = "public" | "private" | "unlisted" | "defunct";
 
 export interface IndexServer {
   asset_versions?: AssetVersions;
+  highlighted?: boolean;
+  card_color?: string;
   server_id: string;
   name: string;
   /** Fully resolved icon URL, synced from Infernoplex's gateway cache. Empty
@@ -275,6 +286,10 @@ export interface Server extends IndexServer {
   /** The user ID who claimed management of this server listing, if any */
   claimed_by: string | null;
   captcha_opt_out: boolean;
+  auto_votes_opt_out?: boolean;
+  auto_votes?: number;
+  card_theme?: boolean;
+  highlighted_until?: string | null;
   login_required_for_invite: boolean;
   /** Whether the owner has opted in to showing this server's emojis/stickers below. */
   show_emojis: boolean;
@@ -702,6 +717,8 @@ export interface User {
   created_at: string;
   updated_at: string;
   last_booster_claim: string | null;
+  pinned_target_type?: "bot" | "server" | null;
+  pinned_target_id?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -1063,6 +1080,7 @@ export interface UpdateUserPayload {
   about?: string | null;
   captcha_sponsor_enabled?: boolean | null;
   extra_links?: Link[];
+  pinned_listing?: { target_type: "bot" | "server" | ""; target_id: string };
 }
 
 // ---------------------------------------------------------------------------
@@ -1207,6 +1225,32 @@ export interface PaymentPlan {
   time_period: number;
   /** USD. */
   price: number;
+}
+
+export interface AutoVoteTargetInput {
+  target_type: "bot" | "server";
+  target_id: string;
+  days: number[];
+  start_minute: number;
+  end_minute: number;
+  timezone: string;
+}
+
+export interface AutoVoteTarget extends AutoVoteTargetInput {
+  name: string;
+  avatar: string;
+  last_voted_at: string | null;
+  last_skip_reason: string | null;
+}
+
+export interface AutoVoteStatus {
+  subscribed: boolean;
+  status: string;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  price_cents: number;
+  max_targets: number;
+  targets: AutoVoteTarget[];
 }
 
 export interface PlanList {
@@ -1435,6 +1479,17 @@ export interface EntityBadge {
 
 export interface EntityBadgeList {
   badges: EntityBadge[];
+}
+
+export interface PublicBadge extends BadgeCatalog {
+  automatic: boolean;
+  how_to_earn: string;
+  linked_role: boolean;
+  holders: number;
+}
+
+export interface PublicBadgeList {
+  badges: PublicBadge[];
 }
 
 // ---------------------------------------------------------------------------
@@ -1730,6 +1785,8 @@ export interface BotSettingsUpdate {
   tags: string[];
   nsfw: boolean;
   captcha_opt_out: boolean;
+  auto_votes_opt_out?: boolean;
+  card_color?: string;
 }
 
 export interface ServerSettingsUpdate {
@@ -1740,6 +1797,8 @@ export interface ServerSettingsUpdate {
   tags: string[];
   nsfw: boolean;
   captcha_opt_out: boolean;
+  auto_votes_opt_out?: boolean;
+  card_color?: string;
   login_required_for_invite: boolean;
   show_emojis: boolean;
 }

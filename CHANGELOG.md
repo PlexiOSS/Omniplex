@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-10-27
+
 ### Added
 
 - A `Dockerfile` for running the site in a container. It builds on
@@ -17,6 +19,170 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   them at build time; any left empty fall back to the defaults instead of
   becoming blank. Runtime settings (`S3_*`, `SHORT_LINK_DOMAINS`) are
   passed when the container starts.
+- Auto-vote, a $2.99/month subscription that votes for up to 3 bots or
+  servers as soon as your cooldown ends:
+  - A new Auto-vote tab in the dashboard to subscribe, manage billing,
+    and pick listings. Each listing votes whenever possible or on a
+    schedule of weekdays and a time window in your own timezone, and
+    shows when it last voted or why it was skipped.
+  - Bot and server settings have an "Accept automatic votes" option under
+    Options, on by default.
+  - A new Auto-vote knowledge base guide. Voting Rules and Vote Webhooks
+    mention it, including the webhook's new `auto` field.
+  - After a manual upvote, bots and servers that accept automatic votes
+    show a small "Never miss a vote" link to the Auto-vote tab.
+  - Bot and server stats in the dashboard show how many of this month's
+    votes were automatic.
+
+- New shop items for bots and servers:
+  - Highlighted Card gives the card an accent glow everywhere it's shown.
+  - Spotlight puts the listing in the home page Spotlight section.
+  - Card Theme lets the owner tint the card with their own colour, set
+    from a new Card theme section in the dashboard settings. The same
+    colour tints the header (avatar, name and badges) on the bot or
+    server's page.
+  - The Launch Bundle combines Featured, Priority Boost and Vote Blitz
+    for less, and bundles get their own shop icon.
+  - The Shop guide lists them.
+
+- Pin one of your bots or servers to the top of your profile from the
+  new Pinned listing option in the dashboard's profile editor.
+
+- A `/badges` page lists every badge, grouped into profile, bot and
+  server, and team badges. Each shows what it means, how to earn it
+  (worked out from its automatic rule, or "Awarded by Omniplex staff"),
+  how many holders it has, what it can be shown on and whether it's also
+  a Discord linked role. It's linked from the Community menu, the footer,
+  profiles and the sitemap.
+
+- An `/alternatives` page, "Omniplex vs other bot lists", for people
+  coming from top.gg, Discord Bot List and similar directories. It covers
+  what Omniplex does differently and four steps to bring a bot or server
+  over, with links to the matching guides. It's in the footer and the
+  sitemap.
+
+### Changed
+
+- Support tickets match the rest of the site:
+  - The ticket list is one card with open tickets first, a status icon on
+    each row and closed tickets dimmed, plus proper loading, empty and
+    signed-out states.
+  - A ticket opens with a header card showing who opened it and when,
+    the message count, and who closed it.
+  - Staff replies are tinted and tagged "Staff", so they stand out from
+    yours.
+  - The reply box is a card with a character count, Send, and Close
+    ticket in its footer, and a closed ticket says so in a clear banner.
+  - The not-found and sign-in screens use the shared status card.
+- The ticket thread was reworked again:
+  - Messages sit in one conversation card, with consecutive messages from
+    the same person grouped under one name, and day dividers.
+  - Bots are tagged "Bot" rather than "Staff", and your own messages are
+    marked "You".
+  - Empty messages (such as a bot's component-only message) are hidden
+    instead of showing "No text content".
+  - Discord **bold**, *italic*, __underline__ and ~~strikethrough~~ render
+    in messages and embeds.
+  - A sidebar in the same style as bot and server pages has Close or
+    Reopen, a Ticket card (status, topic, created, last activity, message
+    count and a copyable ID) and a People card listing everyone involved
+    with what they did and how many messages they sent, linking to their
+    profiles.
+  - The reply box sits at the bottom of the conversation and sends with
+    Ctrl+Enter.
+- The search page opens with a Discover section above Explore: popular,
+  top voted, certified and new bots or servers, switchable in place, with
+  a link to browse them all.
+
+- Profiles use the same layout as bot and server pages:
+  - The bio renders as Markdown, in its own About card.
+  - A sidebar holds a Stats card (bots, servers, packs, teams, votes this
+    month and all time, and join date), a Badges card and a Links card.
+  - Each badge in the Badges card is a row with a coloured icon tile, its
+    name and its description, instead of a pill with the text squeezed
+    beside it, with a link to all badges.
+  - Bots and servers on a profile show two per row so cards have room.
+
+- Bot, server, team and profile pages declare a canonical URL, so a
+  listing reachable by both its ID and its vanity is indexed once, at the
+  vanity address the site and sitemap already link to.
+
+- The header menus are richer:
+  - Browse is split into Listings and Assets, Community into What's new,
+    Explore and Help, and Create lists each option, all with an icon and
+    a one-line description.
+  - External links (Documentation, Status) open in a new tab and are
+    marked as such.
+- The Customize panel was redesigned and has more options:
+  - A Theme tab with light, dark and system mode, eight presets
+    (Classic, Discord, Terminal, Editorial, Bubblegum, Ocean, Neon and
+    Forest) that set the accent, font and corners together, and a larger
+    accent grid.
+  - Five more accent colours: Blurple, Violet, Fuchsia, Sky and Green.
+    They also work in embed widgets.
+  - Six more fonts: DM Sans, Manrope, Nunito, Outfit, IBM Plex Sans and
+    Atkinson Hyperlegible. Each font option previews itself.
+  - The Layout tab shows page widths as small diagrams and adds a Corners
+    setting (sharp, default or round) that changes the rounding of cards,
+    buttons and inputs across the site.
+  - Fonts other than the default are no longer preloaded on every page.
+    They load only when chosen or previewed.
+  - Light and dark mode are chosen only in the Customize panel. The
+    separate sun and moon toggle in the header and mobile menu is gone.
+  - A "Reset to defaults" button at the bottom of the panel restores
+    every setting, including light, dark or system mode.
+- Bot and server cards show more stats: page views and invite clicks on
+  both, members online on servers, and shards on bots, alongside votes
+  and servers or members. The stats wrap onto a second line when there
+  isn't room. A new Card stats section in Customize, under Content,
+  picks which ones appear. Invite clicks and shards are off by default.
+- The mobile menu scrolls inside its own panel and stops the page behind
+  it from scrolling, so long sections like Customize are fully reachable
+  on small screens.
+
+- The blog was redesigned:
+  - The list leads with the latest post as a large featured card, then
+    shows the rest as a two-column grid of cards with tags, a summary,
+    author and date.
+  - Tag filters along the top narrow the list (`/blog?tag=...`), and the
+    tags on a post link to them.
+  - A post has a centred header with author, date and reading time, an
+    "On this page" outline that follows your scroll on wide screens, and
+    "More from the blog" at the end.
+- The knowledge base was redesigned:
+  - The landing page has a "How can we help?" search banner, category
+    cards with an icon and their first few articles, and a "Still stuck?"
+    prompt to open a ticket.
+  - The sidebar shows each category with an icon and expands only the
+    one you're in.
+  - Category pages list articles in one card with reading times.
+  - Articles show a breadcrumb, reading time, an "On this page" outline,
+    previous and next links within the category, and a link to open a
+    ticket.
+- Blog posts and knowledge base categories and articles declare canonical
+  URLs.
+
+- The home page's Top Voted tab only lists bots and servers that have at
+  least one vote this month, and stays hidden until at least six bots or
+  six servers qualify. Until then the section opens on Most Viewed, so a
+  fresh monthly reset no longer shows a wall of "0 votes". Tabs with
+  nothing to show for the selected Bots or Servers toggle are hidden.
+  The search page's Top voted shelf skips listings without votes too.
+
+- On phones, the home page's tabbed sections show their lists (Most
+  Viewed, New, Random, Certified and so on) as a dropdown, with the Bots
+  and Servers switch beside it on the same row. Sections without lists,
+  like Spotlight, show only the switch in the same place, so every
+  section lines up. The tabs no longer show a scrollbar or cut off
+  Random. Desktop keeps the tab row.
+
+- The Bot Status & Uptime guide explains the order uptime checks use and
+  that checks with no data are skipped rather than counted as offline.
+
+### Removed
+
+- `railpack.json`. The site deploys from the `Dockerfile`, and the README
+  has a new Deployment section on building it.
 
 ## [1.7.0] - 2026-10-27
 

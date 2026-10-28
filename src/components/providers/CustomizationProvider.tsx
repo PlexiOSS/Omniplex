@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import {
-  CustomizationContext,
-  CUSTOMIZATION_DEFAULTS,
-  STORAGE_KEY,
   type AccentColor,
+  type CardStat,
+  CUSTOMIZATION_DEFAULTS,
+  CustomizationContext,
   type CustomizationPrefs,
   type FontOption,
   type LayoutOption,
+  type RadiusOption,
+  STORAGE_KEY,
+  type ThemePreset,
 } from "@/hooks/useCustomization";
 
 function readPrefs(): CustomizationPrefs {
@@ -26,6 +29,8 @@ function applyPrefs(prefs: CustomizationPrefs) {
   el.dataset.accent = prefs.accent;
   el.dataset.font = prefs.font;
   el.dataset.layout = prefs.layout;
+  el.dataset.radius = prefs.radius;
+  el.dataset.hiddenStats = prefs.hiddenStats.join(" ");
   el.dataset.hideNsfw = String(prefs.hideNsfw);
   // Blurring is meaningless once nsfw content is hidden outright — collapse
   // both prefs into one applied flag so the CSS rule doesn't need to know
@@ -39,8 +44,14 @@ function savePrefs(prefs: CustomizationPrefs) {
   } catch {}
 }
 
-export function CustomizationProvider({ children }: { children: React.ReactNode }) {
-  const [prefs, setPrefs] = useState<CustomizationPrefs>(CUSTOMIZATION_DEFAULTS);
+export function CustomizationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [prefs, setPrefs] = useState<CustomizationPrefs>(
+    CUSTOMIZATION_DEFAULTS,
+  );
 
   // Sync from localStorage on mount
   useEffect(() => {
@@ -70,6 +81,43 @@ export function CustomizationProvider({ children }: { children: React.ReactNode 
     savePrefs(next);
   }
 
+  function setRadius(radius: RadiusOption) {
+    const next = { ...prefs, radius };
+    setPrefs(next);
+    applyPrefs(next);
+    savePrefs(next);
+  }
+
+  function applyPreset(preset: ThemePreset) {
+    const next = {
+      ...prefs,
+      accent: preset.accent,
+      font: preset.font,
+      radius: preset.radius,
+    };
+    setPrefs(next);
+    applyPrefs(next);
+    savePrefs(next);
+  }
+
+  function toggleStat(stat: CardStat) {
+    const hiddenStats = prefs.hiddenStats.includes(stat)
+      ? prefs.hiddenStats.filter((s) => s !== stat)
+      : [...prefs.hiddenStats, stat];
+    const next = { ...prefs, hiddenStats };
+    setPrefs(next);
+    applyPrefs(next);
+    savePrefs(next);
+  }
+
+  function resetPrefs() {
+    setPrefs(CUSTOMIZATION_DEFAULTS);
+    applyPrefs(CUSTOMIZATION_DEFAULTS);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  }
+
   function setHideNsfw(hideNsfw: boolean) {
     const next = { ...prefs, hideNsfw };
     setPrefs(next);
@@ -91,6 +139,10 @@ export function CustomizationProvider({ children }: { children: React.ReactNode 
         setAccent,
         setFont,
         setLayout,
+        setRadius,
+        applyPreset,
+        toggleStat,
+        resetPrefs,
         setHideNsfw,
         setBlurNsfw,
       }}

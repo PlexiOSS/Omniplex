@@ -82,6 +82,8 @@ function DetailsSection({ bot, token, onSaved }: SectionProps) {
     tags: bot.tags,
     nsfw: bot.nsfw,
     captchaOptOut: bot.captcha_opt_out,
+    acceptAutoVotes: !bot.auto_votes_opt_out,
+    cardColor: bot.card_color ?? "",
   });
   const [links, setLinks] = useState<ApiLink[]>(bot.extra_links ?? []);
   const [saving, setSaving] = useState(false);
@@ -122,6 +124,8 @@ function DetailsSection({ bot, token, onSaved }: SectionProps) {
           tags: form.tags,
           nsfw: form.nsfw,
           captcha_opt_out: form.captchaOptOut,
+          auto_votes_opt_out: !form.acceptAutoVotes,
+          ...(bot.card_theme ? { card_color: form.cardColor } : {}),
         },
         token,
       );
@@ -238,6 +242,54 @@ function DetailsSection({ bot, token, onSaved }: SectionProps) {
           label="Opt out of captchas"
           description="Voters won't see a captcha for this bot, unless they've chosen to always sponsor captchas."
         />
+        <Toggle
+          checked={form.acceptAutoVotes}
+          onChange={(v) => update("acceptAutoVotes", v)}
+          label="Accept automatic votes"
+          description="Auto-vote subscribers can vote for this bot automatically. Automatic votes never earn vote credits."
+        />
+      </SettingsCard>
+
+      <SettingsCard
+        title="Card theme"
+        description={
+          bot.card_theme
+            ? "Tints this bot's card everywhere it appears. Leave it empty for the default look."
+            : "Buy Card Theme in the shop to tint this bot's card with a colour of your choice."
+        }
+        footer={bot.card_theme ? footer : undefined}
+      >
+        {bot.card_theme ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="color"
+              value={form.cardColor || "#5865f2"}
+              onChange={(e) => update("cardColor", e.target.value)}
+              aria-label="Card colour"
+              className="h-10 w-14 cursor-pointer rounded-lg border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-zinc-950"
+            />
+            <span className="font-mono text-sm text-zinc-600 dark:text-zinc-300">
+              {form.cardColor || "Default"}
+            </span>
+            {form.cardColor && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => update("cardColor", "")}
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        ) : (
+          <Link
+            href="/shop"
+            className="text-sm font-medium text-accent hover:underline"
+          >
+            Open the shop
+          </Link>
+        )}
       </SettingsCard>
     </form>
   );
@@ -383,6 +435,10 @@ function StatsSection({ bot }: { bot: Bot }) {
       <StatGrid
         stats={[
           { label: "Votes this month", value: formatCount(bot.votes) },
+          {
+            label: "Automatic votes",
+            value: formatCount(bot.auto_votes ?? 0),
+          },
           { label: "Servers", value: formatCount(bot.servers) },
           { label: "Shards", value: formatCount(bot.shards) },
           { label: "Page views", value: formatCount(bot.clicks) },

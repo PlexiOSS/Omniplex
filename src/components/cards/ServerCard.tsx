@@ -1,11 +1,18 @@
-import { ArrowUpRight, Star, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  Eye,
+  MousePointerClick,
+  Star,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import type { IndexServer } from "@/lib/api/types";
 import { bannerUrl, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
-import { formatCountLabel } from "@/lib/utils/format";
+import { cardCosmetics } from "@/lib/utils/cardCosmetics";
+import { formatCount, formatCountLabel } from "@/lib/utils/format";
 
 interface ServerCardProps {
   server: IndexServer;
@@ -21,11 +28,15 @@ export function ServerCard({ server }: ServerCardProps) {
   );
   const isStandout = server.premium || server.type === "certified";
 
+  const cosmetics = cardCosmetics(server);
+
   return (
     <Link
       href={href}
       data-nsfw={server.nsfw || undefined}
+      style={cosmetics.style}
       className={[
+        cosmetics.className,
         "group flex min-w-0 flex-col overflow-hidden rounded-xl border transition-all hover:shadow-sm",
         isStandout
           ? "border-accent/25 bg-linear-to-br from-accent/7 via-white to-white hover:border-accent/50 dark:border-accent/25 dark:from-accent/10 dark:via-zinc-900 dark:to-zinc-900"
@@ -80,14 +91,28 @@ export function ServerCard({ server }: ServerCardProps) {
         )}
 
         {/* Stats */}
-        <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
-          <span className="flex items-center gap-1">
+        <div className="mt-auto flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-3 text-xs text-zinc-500 dark:text-zinc-400">
+          <span data-stat="votes" className="flex items-center gap-1">
             <Star size={12} />
             {formatCountLabel(server.approximate_votes, "vote")}
           </span>
-          <span className="flex items-center gap-1">
+          <span data-stat="size" className="flex items-center gap-1">
             <Users size={12} />
             {formatCountLabel(server.total_members, "member")}
+          </span>
+          {server.online_members > 0 && (
+            <span data-stat="online" className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              {formatCount(server.online_members)} online
+            </span>
+          )}
+          <span data-stat="views" className="flex items-center gap-1">
+            <Eye size={12} />
+            {formatCountLabel(server.clicks, "view")}
+          </span>
+          <span data-stat="invites" className="flex items-center gap-1">
+            <MousePointerClick size={12} />
+            {formatCountLabel(server.invite_clicks, "invite")}
           </span>
         </div>
       </div>

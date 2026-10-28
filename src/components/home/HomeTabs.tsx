@@ -1,6 +1,6 @@
 "use client";
 
-import { Shuffle } from "lucide-react";
+import { ChevronDown, Shuffle } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
@@ -93,7 +93,15 @@ export function HomeTabs({
     if (isRandom) shuffle();
   }, [isRandom, entity]);
 
-  const current = tabs.find((t) => t.key === active);
+  const visibleTabs = tabs.filter(
+    (t) => (entity === "bots" ? t.bots : t.servers).length > 0,
+  );
+  const activeKey = isRandom
+    ? RANDOM_KEY
+    : visibleTabs.some((t) => t.key === active)
+      ? active
+      : (visibleTabs[0]?.key ?? "");
+  const current = visibleTabs.find((t) => t.key === activeKey);
   const items = isRandom
     ? entity === "bots"
       ? (randomBots ?? [])
@@ -104,49 +112,63 @@ export function HomeTabs({
 
   return (
     <div>
-      {/* Tab bar + entity toggle — one row, always. The tab strip scrolls
-          horizontally inside its own flexible region when it doesn't fit;
-          the toggle stays shrink-0 pinned to the right on the same line
-          instead of ever dropping to a second row. */}
       <div className="flex items-center gap-3 border-b border-zinc-200 pb-3 dark:border-zinc-800">
-        <div className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
-          <div
-            className={[
-              "flex flex-nowrap items-center gap-1",
-              showTabStrip ? "" : "hidden",
-            ].join(" ")}
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActive(tab.key)}
-                className={[
-                  "shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
-                  active === tab.key
-                    ? "bg-accent/10 text-accent"
-                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
-                ].join(" ")}
-              >
-                {tab.label}
-              </button>
-            ))}
-            {showRandom && (
-              <button
-                type="button"
-                onClick={() => setActive(RANDOM_KEY)}
-                className={[
-                  "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
-                  isRandom
-                    ? "bg-accent/10 text-accent"
-                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
-                ].join(" ")}
-              >
-                <Shuffle size={13} />
-                Random
-              </button>
-            )}
-          </div>
+        <div className="min-w-0 flex-1">
+          {showTabStrip && (
+            <>
+              <div className="relative w-full max-w-48 sm:hidden">
+                <select
+                  value={activeKey}
+                  onChange={(e) => setActive(e.target.value)}
+                  aria-label="Choose a list"
+                  className="h-8 w-full appearance-none truncate rounded-lg border border-zinc-200 bg-white py-0 pr-8 pl-3 text-sm font-medium text-zinc-900 outline-none focus:border-accent/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
+                >
+                  {visibleTabs.map((tab) => (
+                    <option key={tab.key} value={tab.key}>
+                      {tab.label}
+                    </option>
+                  ))}
+                  {showRandom && <option value={RANDOM_KEY}>Random</option>}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-400"
+                />
+              </div>
+              <div className="hidden flex-nowrap items-center gap-1 overflow-x-auto overflow-y-hidden [scrollbar-width:none] sm:flex [&::-webkit-scrollbar]:hidden">
+                {visibleTabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActive(tab.key)}
+                    className={[
+                      "shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
+                      activeKey === tab.key
+                        ? "bg-accent/10 text-accent"
+                        : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
+                    ].join(" ")}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+                {showRandom && (
+                  <button
+                    type="button"
+                    onClick={() => setActive(RANDOM_KEY)}
+                    className={[
+                      "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
+                      isRandom
+                        ? "bg-accent/10 text-accent"
+                        : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
+                    ].join(" ")}
+                  >
+                    <Shuffle size={13} />
+                    Random
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2">

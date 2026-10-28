@@ -1,6 +1,9 @@
 import { client } from "../client";
 import type {
+  AutoVoteStatus,
+  AutoVoteTargetInput,
   MainServerStatus,
+  RedirectUser,
   SEO,
   UpdateUserPayload,
   User,
@@ -9,6 +12,33 @@ import type {
 } from "../types";
 
 export const usersResource = {
+  getAutoVote: (userId: string, token: string) =>
+    client.get<AutoVoteStatus>(`/users/${userId}/auto-vote`, {
+      token,
+      cache: "no-store",
+    }),
+
+  updateAutoVoteTargets: (
+    userId: string,
+    targets: AutoVoteTargetInput[],
+    token: string,
+  ) =>
+    client.put<void>(
+      `/users/${userId}/auto-vote/targets`,
+      { targets },
+      { token },
+    ),
+
+  startAutoVoteCheckout: (userId: string, token: string) =>
+    client.post<RedirectUser>(`/users/${userId}/auto-vote/checkout`, {}, {
+      token,
+    }),
+
+  openAutoVotePortal: (userId: string, token: string) =>
+    client.post<RedirectUser>(`/users/${userId}/auto-vote/portal`, {}, {
+      token,
+    }),
+
   getMainServerStatus: (userId: string, token: string) =>
     client.get<MainServerStatus>(`/users/${userId}/main-server`, {
       token,

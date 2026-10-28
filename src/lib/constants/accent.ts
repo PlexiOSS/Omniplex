@@ -1,12 +1,17 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 export type AccentColor =
   | "indigo"
+  | "blurple"
+  | "violet"
   | "purple"
+  | "fuchsia"
   | "blue"
+  | "sky"
   | "cyan"
   | "teal"
   | "emerald"
+  | "green"
   | "lime"
   | "amber"
   | "orange"
@@ -16,11 +21,16 @@ export type AccentColor =
 
 export const ACCENT_COLORS: Record<AccentColor, string> = {
   indigo: "#6366f1",
+  blurple: "#5865f2",
+  violet: "#8b5cf6",
   purple: "#a855f7",
+  fuchsia: "#d946ef",
   blue: "#3b82f6",
+  sky: "#0ea5e9",
   cyan: "#06b6d4",
   teal: "#14b8a6",
   emerald: "#10b981",
+  green: "#22c55e",
   lime: "#84cc16",
   amber: "#eab308",
   orange: "#f97316",
@@ -31,11 +41,16 @@ export const ACCENT_COLORS: Record<AccentColor, string> = {
 
 export const ACCENT_LABELS: Record<AccentColor, string> = {
   indigo: "Indigo",
+  blurple: "Blurple",
+  violet: "Violet",
   purple: "Purple",
+  fuchsia: "Fuchsia",
   blue: "Blue",
+  sky: "Sky",
   cyan: "Cyan",
   teal: "Teal",
   emerald: "Emerald",
+  green: "Green",
   lime: "Lime",
   amber: "Amber",
   orange: "Orange",

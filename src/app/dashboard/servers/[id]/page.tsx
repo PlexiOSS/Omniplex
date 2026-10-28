@@ -96,6 +96,8 @@ function DetailsSection({ server, token, onSaved }: SectionProps) {
     tags: server.tags,
     nsfw: server.nsfw,
     captchaOptOut: server.captcha_opt_out,
+    acceptAutoVotes: !server.auto_votes_opt_out,
+    cardColor: server.card_color ?? "",
     loginRequiredForInvite: server.login_required_for_invite,
     showEmojis: server.show_emojis,
   });
@@ -127,6 +129,8 @@ function DetailsSection({ server, token, onSaved }: SectionProps) {
           tags: form.tags,
           nsfw: form.nsfw,
           captcha_opt_out: form.captchaOptOut,
+          auto_votes_opt_out: !form.acceptAutoVotes,
+          ...(server.card_theme ? { card_color: form.cardColor } : {}),
           login_required_for_invite: form.loginRequiredForInvite,
           show_emojis: form.showEmojis,
         },
@@ -256,10 +260,70 @@ function DetailsSection({ server, token, onSaved }: SectionProps) {
           label="Opt out of captchas"
         />
         <Toggle
+          checked={form.acceptAutoVotes}
+          onChange={(v) => update("acceptAutoVotes", v)}
+          label="Accept automatic votes"
+          description="Auto-vote subscribers can vote for this server automatically. Automatic votes never earn vote credits."
+        />
+        <Toggle
           checked={form.nsfw}
           onChange={(v) => update("nsfw", v)}
           label="This server contains NSFW content"
         />
+      </SettingsCard>
+
+      <SettingsCard
+        title="Card theme"
+        description={
+          server.card_theme
+            ? "Tints this server's card everywhere it appears. Leave it empty for the default look."
+            : "Buy Card Theme in the shop to tint this server's card with a colour of your choice."
+        }
+        footer={
+          server.card_theme ? (
+            <>
+              <FormMessage
+                error={error}
+                success={saved ? "Changes saved." : null}
+              />
+              <Button type="submit" variant="primary" loading={saving}>
+                Save changes
+              </Button>
+            </>
+          ) : undefined
+        }
+      >
+        {server.card_theme ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="color"
+              value={form.cardColor || "#5865f2"}
+              onChange={(e) => update("cardColor", e.target.value)}
+              aria-label="Card colour"
+              className="h-10 w-14 cursor-pointer rounded-lg border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-zinc-950"
+            />
+            <span className="font-mono text-sm text-zinc-600 dark:text-zinc-300">
+              {form.cardColor || "Default"}
+            </span>
+            {form.cardColor && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => update("cardColor", "")}
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        ) : (
+          <Link
+            href="/shop"
+            className="text-sm font-medium text-accent hover:underline"
+          >
+            Open the shop
+          </Link>
+        )}
       </SettingsCard>
     </form>
   );
@@ -593,6 +657,10 @@ function ServerSettings() {
             { label: "Members", value: formatCount(server.total_members) },
             { label: "Online now", value: formatCount(server.online_members) },
             { label: "Votes this month", value: formatCount(server.votes) },
+            {
+              label: "Automatic votes",
+              value: formatCount(server.auto_votes ?? 0),
+            },
             { label: "Page views", value: formatCount(server.clicks) },
             {
               label: "Unique page views",

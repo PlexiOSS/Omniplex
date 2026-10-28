@@ -13,6 +13,36 @@
   --accent-fg: #ffffff;
 }
 
+[data-accent="blurple"] {
+  --accent: #5865f2;
+  --accent-muted: #4752c4;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="violet"] {
+  --accent: #8b5cf6;
+  --accent-muted: #7c3aed;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="fuchsia"] {
+  --accent: #d946ef;
+  --accent-muted: #c026d3;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="sky"] {
+  --accent: #0ea5e9;
+  --accent-muted: #0284c7;
+  --accent-fg: #ffffff;
+}
+
+[data-accent="green"] {
+  --accent: #22c55e;
+  --accent-muted: #16a34a;
+  --accent-fg: #000000;
+}
+
 [data-accent="purple"] {
   --accent: #a855f7;
   --accent-muted: #9333ea;
@@ -106,6 +136,30 @@
   --font-body: var(--font-grotesk);
 }
 
+[data-font="outfit"] {
+  --font-body: var(--font-outfit);
+}
+
+[data-font="dmsans"] {
+  --font-body: var(--font-dmsans);
+}
+
+[data-font="manrope"] {
+  --font-body: var(--font-manrope);
+}
+
+[data-font="nunito"] {
+  --font-body: var(--font-nunito);
+}
+
+[data-font="plex"] {
+  --font-body: var(--font-plex);
+}
+
+[data-font="atkinson"] {
+  --font-body: var(--font-atkinson);
+}
+
 /* --------------------------------------------------------------------------
    Layout width — swapped via data-layout on <html>, consumed by Container
    -------------------------------------------------------------------------- */
@@ -122,6 +176,20 @@
   --container-max: 96rem;
 }
 
+[data-radius="sharp"] {
+  --radius-md: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+}
+
+[data-radius="round"] {
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+}
+
 /* --------------------------------------------------------------------------
    Content preferences — "Hide NSFW" swapped via data-hide-nsfw on <html>,
    pure CSS so it applies even to server-rendered listing pages. Cards opt in
@@ -136,6 +204,15 @@
    Blurs only the thumbnail images (banner/avatar), not the surrounding text. */
 [data-blur-nsfw="true"] [data-nsfw="true"] img {
   filter: blur(20px);
+}
+
+[data-hidden-stats~="votes"] [data-stat="votes"],
+[data-hidden-stats~="size"] [data-stat="size"],
+[data-hidden-stats~="online"] [data-stat="online"],
+[data-hidden-stats~="views"] [data-stat="views"],
+[data-hidden-stats~="invites"] [data-stat="invites"],
+[data-hidden-stats~="shards"] [data-stat="shards"] {
+  display: none;
 }
 
 @theme inline {

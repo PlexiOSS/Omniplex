@@ -1,18 +1,38 @@
 "use client";
 
 import {
+  Activity,
+  Award,
+  BookOpen,
+  Bot,
   ChevronDown,
+  FileCode,
+  History,
+  LayoutList,
+  LayoutTemplate,
   LogOut,
   Menu,
+  Newspaper,
+  Package,
+  Palette,
   Plus,
+  Rss,
+  Server,
   Settings2,
   Shield,
+  Smile,
+  SquareTerminal,
+  Sticker,
+  Tag,
+  Trophy,
+  Users,
+  Volume2,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
+import { BsDiscord } from "react-icons/bs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { SearchPalette } from "@/components/search/SearchPalette";
 import { Avatar } from "@/components/ui/Avatar";
@@ -25,8 +45,7 @@ import { useMe } from "@/hooks/useMe";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { Container } from "./Container";
-import { NavGroupMenu } from "./NavGroupMenu";
-import { ThemeToggle } from "./ThemeToggle";
+import { NavGroupMenu, type NavMenuSection } from "./NavGroupMenu";
 import { UserMenu } from "./UserMenu";
 
 interface NavLink {
@@ -37,50 +56,199 @@ interface NavLink {
 interface NavGroup {
   label: string;
   items: NavLink[];
+  sections: NavMenuSection[];
 }
 
 const ICON_BUTTON =
   "flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";
 
+function group(label: string, sections: NavMenuSection[]): NavGroup {
+  return { label, sections, items: sections.flatMap((s) => s.items) };
+}
+
 const NAV_LINKS: (NavLink | NavGroup)[] = [
   { href: "/", label: "Home" },
-  {
-    label: "Browse",
-    items: [
-      { href: "/bots", label: "Bots" },
-      { href: "/servers", label: "Servers" },
-      { href: "/packs", label: "Packs" },
-      { href: "/emojis", label: "Emojis" },
-      { href: "/stickers", label: "Stickers" },
-      { href: "/sounds", label: "Sounds" },
-      { href: "/templates", label: "Templates" },
-      { href: "/themes", label: "Themes" },
-      { href: "/collections", label: "Collections" },
-      { href: "/tags", label: "Tags" },
-    ],
-  },
-  {
-    label: "Community",
-    items: [
-      { href: "/blog", label: "Blog Posts" },
-      { href: "/changelog", label: "Changelog" },
-      { href: "/feed", label: "Bot Updates" },
-      { href: "/commands", label: "Command Directory" },
-      { href: "/leaderboard", label: "Voter Leaderboard" },
-      { href: "/kb", label: "Knowledge Base" },
-      { href: "https://docs.omniplex.gg", label: "Documentation" },
-      { href: "https://status.omniplex.gg", label: "System Status" },
-    ],
-  },
+  group("Browse", [
+    {
+      title: "Listings",
+      items: [
+        {
+          href: "/bots",
+          label: "Bots",
+          description: "Discord bots for every server",
+          icon: Bot,
+        },
+        {
+          href: "/servers",
+          label: "Servers",
+          description: "Communities to join",
+          icon: Server,
+        },
+        {
+          href: "/packs",
+          label: "Packs",
+          description: "Curated bundles",
+          icon: Package,
+        },
+        {
+          href: "/collections",
+          label: "Collections",
+          description: "Best-of lists by votes",
+          icon: LayoutList,
+        },
+        {
+          href: "/tags",
+          label: "Tags",
+          description: "Browse by category",
+          icon: Tag,
+        },
+      ],
+    },
+    {
+      title: "Assets",
+      items: [
+        {
+          href: "/emojis",
+          label: "Emojis",
+          description: "Custom emojis to grab",
+          icon: Smile,
+        },
+        {
+          href: "/stickers",
+          label: "Stickers",
+          description: "Sticker packs",
+          icon: Sticker,
+        },
+        {
+          href: "/sounds",
+          label: "Sounds",
+          description: "Soundboard clips",
+          icon: Volume2,
+        },
+        {
+          href: "/templates",
+          label: "Templates",
+          description: "Ready-made server setups",
+          icon: LayoutTemplate,
+        },
+        {
+          href: "/themes",
+          label: "Themes",
+          description: "Discord profile colours",
+          icon: Palette,
+        },
+      ],
+    },
+  ]),
+  group("Community", [
+    {
+      title: "What's new",
+      items: [
+        {
+          href: "/blog",
+          label: "Blog",
+          description: "News and announcements",
+          icon: Newspaper,
+        },
+        {
+          href: "/changelog",
+          label: "Changelog",
+          description: "Every site update",
+          icon: History,
+        },
+        {
+          href: "/feed",
+          label: "Bot Updates",
+          description: "Changelogs from bots",
+          icon: Rss,
+        },
+      ],
+    },
+    {
+      title: "Explore",
+      items: [
+        {
+          href: "/commands",
+          label: "Commands",
+          description: "Search every bot command",
+          icon: SquareTerminal,
+        },
+        {
+          href: "/leaderboard",
+          label: "Leaderboard",
+          description: "Top voters",
+          icon: Trophy,
+        },
+        {
+          href: "/badges",
+          label: "Badges",
+          description: "What they mean",
+          icon: Award,
+        },
+      ],
+    },
+    {
+      title: "Help",
+      items: [
+        {
+          href: "/kb",
+          label: "Knowledge Base",
+          description: "Guides and FAQs",
+          icon: BookOpen,
+        },
+        {
+          href: "https://docs.omniplex.gg",
+          label: "Documentation",
+          description: "API and developer docs",
+          icon: FileCode,
+        },
+        {
+          href: "https://status.omniplex.gg",
+          label: "Status",
+          description: "Uptime and incidents",
+          icon: Activity,
+        },
+      ],
+    },
+  ]),
   { href: "/search", label: "Search" },
 ];
 
-const CREATE_LINKS = [
-  { href: "/bots/add", label: "Add a Bot" },
-  { href: "/servers/add", label: "Add a Server" },
-  { href: "/packs/add", label: "Add a Pack" },
-  { href: "/themes/add", label: "Submit a Theme" },
-  { href: "/teams/add", label: "Create a Team" },
+const CREATE_SECTIONS: NavMenuSection[] = [
+  {
+    items: [
+      {
+        href: "/bots/add",
+        label: "Add a Bot",
+        description: "List your Discord bot",
+        icon: Bot,
+      },
+      {
+        href: "/servers/add",
+        label: "Add a Server",
+        description: "List your community",
+        icon: Server,
+      },
+      {
+        href: "/packs/add",
+        label: "Add a Pack",
+        description: "Bundle bots, emojis or sounds",
+        icon: Package,
+      },
+      {
+        href: "/themes/add",
+        label: "Submit a Theme",
+        description: "Share a profile theme",
+        icon: Palette,
+      },
+      {
+        href: "/teams/add",
+        label: "Create a Team",
+        description: "Manage listings together",
+        icon: Users,
+      },
+    ],
+  },
 ];
 
 function AdminHeaderWrap({ children }: { children: React.ReactNode }) {
@@ -123,7 +291,7 @@ export function Header() {
   const links = isAdminSection ? [] : NAV_LINKS;
   const mobileLinks: (NavLink | NavGroup)[] = isAdminSection
     ? links
-    : [...links, { label: "Create", items: CREATE_LINKS }];
+    : [...links, group("Create", CREATE_SECTIONS)];
   const isActiveLink = (href: string) => {
     if (isAdminSection) return pathname === href;
     if (href === "/") return pathname === "/";
@@ -135,6 +303,15 @@ export function Header() {
   function exitStaffPanel() {
     router.push("/");
   }
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileNavOpen]);
 
   // Close the mobile nav whenever the route changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is a trigger, not read in the body
@@ -172,7 +349,8 @@ export function Header() {
                   <NavGroupMenu
                     key={item.label}
                     label={item.label}
-                    items={item.items}
+                    sections={item.sections}
+                    align="center"
                     active={item.items.some((i) => isActiveLink(i.href))}
                   />
                 ) : (
@@ -203,7 +381,7 @@ export function Header() {
                   <NavGroupMenu
                     label="Create"
                     icon={Plus}
-                    items={CREATE_LINKS}
+                    sections={CREATE_SECTIONS}
                   />
                 </div>
               )}
@@ -271,10 +449,6 @@ export function Header() {
 
               <NotificationBell />
 
-              <div className="hidden md:block">
-                <ThemeToggle />
-              </div>
-
               {isAuthenticated && session ? (
                 <div className="hidden ml-1 md:block">
                   <UserMenu
@@ -294,7 +468,7 @@ export function Header() {
 
         {/* Mobile nav panel */}
         {mobileNavOpen && (
-          <nav className="border-t border-zinc-200 md:hidden dark:border-zinc-800">
+          <nav className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-zinc-200 md:hidden dark:border-zinc-800">
             <Container className="flex flex-col gap-1 py-3">
               {mobileLinks.map((item) =>
                 isNavGroup(item) ? (
@@ -383,7 +557,6 @@ export function Header() {
                     }
                   />
                 </button>
-                <ThemeToggle />
               </div>
               {mobileCustomizeOpen && (
                 <div className="-mx-2">

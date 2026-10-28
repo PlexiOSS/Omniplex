@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { SignInLink } from "@/components/ui/SignInLink";
+import { AutoVotePrompt } from "@/components/votes/AutoVotePrompt";
 import { useAuth } from "@/hooks/useAuth";
 import { useVote } from "@/hooks/useVote";
 import {
@@ -19,6 +20,7 @@ interface ServerVoteButtonProps {
   currentVotes: number;
   premium?: boolean;
   captchaOptOut?: boolean;
+  acceptsAutoVotes?: boolean;
 }
 
 export function ServerVoteButton({
@@ -26,6 +28,7 @@ export function ServerVoteButton({
   currentVotes,
   premium = false,
   captchaOptOut = false,
+  acceptsAutoVotes = true,
 }: ServerVoteButtonProps) {
   const router = useRouter();
   const { session, isAuthenticated } = useAuth();
@@ -118,6 +121,7 @@ export function ServerVoteButton({
           />
         </Button>
       </div>
+      {votedDirection === "up" && acceptsAutoVotes && <AutoVotePrompt />}
       {error && (
         <p className="text-center text-xs text-red-600 dark:text-red-400">
           {error}

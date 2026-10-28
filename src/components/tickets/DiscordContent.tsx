@@ -56,6 +56,34 @@ function relative(date: Date): string {
   return rtf.format(Math.round(diff), "second");
 }
 
+const FORMAT =
+  /\*\*([^*\n]+?)\*\*|__([^_\n]+?)__|~~([^~\n]+?)~~|\*([^*\s][^*\n]*?)\*/g;
+
+function formatText(text: string, keyPrefix: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(FORMAT)) {
+    const index = m.index ?? 0;
+    if (index > last) out.push(text.slice(last, index));
+    last = index + m[0].length;
+    const key = `${keyPrefix}-f${index}`;
+    if (m[1] !== undefined)
+      out.push(
+        <strong
+          key={key}
+          className="font-semibold text-zinc-900 dark:text-zinc-100"
+        >
+          {m[1]}
+        </strong>,
+      );
+    else if (m[2] !== undefined) out.push(<u key={key}>{m[2]}</u>);
+    else if (m[3] !== undefined) out.push(<s key={key}>{m[3]}</s>);
+    else out.push(<em key={key}>{m[4]}</em>);
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
 const chip =
   "mx-px inline-flex max-w-full items-baseline rounded bg-accent/15 px-1 font-medium text-accent wrap-anywhere";
 
@@ -65,7 +93,8 @@ export function DiscordContent({ content, lookup }: DiscordContentProps) {
 
   for (const match of content.matchAll(TOKEN)) {
     const index = match.index ?? 0;
-    if (index > last) nodes.push(content.slice(last, index));
+    if (index > last)
+      nodes.push(...formatText(content.slice(last, index), `t${last}`));
     last = index + match[0].length;
     const g = match.groups ?? {};
     const key = `${index}-${match[0]}`;
@@ -167,7 +196,8 @@ export function DiscordContent({ content, lookup }: DiscordContentProps) {
       );
     }
   }
-  if (last < content.length) nodes.push(content.slice(last));
+  if (last < content.length)
+    nodes.push(...formatText(content.slice(last), `t${last}`));
 
   return (
     <div className="whitespace-pre-wrap text-sm text-zinc-700 wrap-anywhere dark:text-zinc-300">
