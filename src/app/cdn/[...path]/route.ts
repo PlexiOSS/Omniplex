@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cdnHeaders } from "@/lib/cdn/safety";
 import { ASSET_VERSION_METADATA_KEY } from "@/lib/s3/config";
 import { getObject, S3UnavailableError } from "@/lib/s3/objects";
 
@@ -61,7 +62,7 @@ export async function GET(req: Request, { params }: Params) {
     (!!version && object.metadata[ASSET_VERSION_METADATA_KEY] === version);
 
   const headers: Record<string, string> = {
-    "Content-Type": object.contentType,
+    ...cdnHeaders(object.contentType),
     "Cache-Control": versionMatches ? IMMUTABLE : REVALIDATE,
   };
   if (object.contentLength) {

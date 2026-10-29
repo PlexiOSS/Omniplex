@@ -8,6 +8,7 @@ import type {
 } from "@/lib/api/resources/assets";
 import type { BotPack } from "@/lib/api/types";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
+import { matchesDeclaredType } from "@/lib/cdn/safety";
 import { hasPermString } from "@/lib/permissions";
 import { ASSET_VERSION_METADATA_KEY } from "@/lib/s3/config";
 import { headObject, putObject, S3UnavailableError } from "@/lib/s3/objects";
@@ -277,6 +278,13 @@ export async function POST(req: Request) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (!matchesDeclaredType(buffer, file.type)) {
+    return NextResponse.json(
+      { error: "The file's contents don't match its type." },
+      { status: 400 },
+    );
+  }
   const key = config.key(targetId, assetId);
   const version = createHash("sha256")
     .update(buffer)

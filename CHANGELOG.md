@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-10-29
+
+### Security
+
+- Fixed a stored cross-site scripting issue in the avatar mirror
+  (`/cdn/avatar-mirror/...`). Its `src` parameter accepted any file on
+  `cdn.discordapp.com`, including uploaded attachments, and served it from
+  omniplex.gg with the upstream content type. A crafted SVG or HTML
+  attachment could therefore run script on omniplex.gg, and because the
+  result was cached under the listing's avatar key, later visitors could
+  get it with no `src` at all. `src` must now be that bot's or user's own
+  `/avatars/{id}/...` image, that server's own `/icons/{id}/...` image or a
+  default avatar, and only PNG, JPEG, GIF, WebP and AVIF responses are
+  accepted from Discord. Cached avatars that fail these checks are
+  ignored and replaced. Reported by Ran.
+- Every `/cdn/` response now sends `X-Content-Type-Options: nosniff` and
+  `Content-Security-Policy: default-src 'none'; sandbox`. Anything that
+  isn't an image, audio or video type is served as a download.
+- A site-wide `Permissions-Policy` blocks the camera, microphone,
+  location, screen capture, USB, serial, HID, Bluetooth, MIDI, payment,
+  passkey, wake lock, XR and clipboard-read features, for the site and
+  every frame it embeds. Iframes in user Markdown could previously ask
+  for these with their `allow` attribute, and the prompt named
+  omniplex.gg. Fullscreen, autoplay, picture-in-picture and DRM stay
+  allowed so video and music embeds keep working, and only omniplex.gg
+  itself can write to the clipboard.
+- The Open Graph and widget image fetcher only loads HTTPS images from
+  Discord's CDN and our own CDN, with a 4 second timeout, no redirects
+  and only PNG, JPEG, GIF, WebP and AVIF responses. Avatars only came from
+  Discord syncs, so this wasn't reachable, but any future user-set image
+  URL would otherwise have let the server fetch arbitrary URLs.
+- Uploads are checked against the file's real contents, not just the
+  type the browser reports. A PNG, JPEG, GIF, WebP or MP3 upload whose
+  bytes are something else is rejected.
+
+### Changed
+
+- Team member avatars on team pages link to each member's profile, and
+  the About > Team cards are centred in a wrapping row.
+- The header's logo, navigation and actions sit in a centred three-column
+  layout.
+- The search shortcut hint shows ⌘ K on Apple devices instead of always
+  showing Ctrl K.
+- Rate limit links point to the new `docs.omniplex.gg/docs/developer/`
+  docs path.
+- Vote captchas now use Cloudflare Turnstile instead of the in-browser
+  proof-of-work puzzle. Bot and server vote buttons show the Turnstile
+  check when the listing uses captchas, and the vote buttons appear
+  once it passes. Owners can still turn captchas off in the listing's settings,
+  and they're on by default. Needs the new
+  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` build variable, which is also passed
+  through the Dockerfile and the Docker publishing workflow.
+
+### Fixed
+
+- Tables in articles and descriptions no longer squeeze columns down to a
+  single character, and inline code in table cells stays on one line.
+- The "Sponsor captchas" setting did nothing: vote buttons only checked
+  whether the listing had opted out. Voters who turn it on now get the
+  captcha on every bot and server.
+
 ## [1.9.0] - 2026-10-28
 
 ### Added

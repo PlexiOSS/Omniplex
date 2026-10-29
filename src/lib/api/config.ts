@@ -8,5 +8,8 @@ export const DISCORD_CDN_URL = "https://cdn.discordapp.com";
 
 export const JAPI_URL = "https://japi.rest/discord/v1";
 
+export const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
 export const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";

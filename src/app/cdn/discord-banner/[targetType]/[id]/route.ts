@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cdnHeaders } from "@/lib/cdn/safety";
 import {
   fetchDiscordImage,
   isSnowflake,
@@ -110,7 +111,7 @@ function serveCached(
     return notFound(missingCache);
   }
   const headers: Record<string, string> = {
-    "Content-Type": cached.contentType,
+    ...cdnHeaders(cached.contentType),
     "Cache-Control": foundCache,
   };
   if (cached.contentLength) {
@@ -125,7 +126,7 @@ function imageResponse(
   cacheControl: string,
 ) {
   return new NextResponse(Buffer.from(body), {
-    headers: { "Content-Type": contentType, "Cache-Control": cacheControl },
+    headers: { ...cdnHeaders(contentType), "Cache-Control": cacheControl },
   });
 }
 

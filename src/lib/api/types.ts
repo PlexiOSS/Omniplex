@@ -1012,17 +1012,8 @@ export interface CreatedTicket {
   id: string;
 }
 
-/** A proof-of-work vote captcha challenge, issued by GET /votes/captcha/challenge. */
-export interface CaptchaChallenge {
-  salt: string;
-  difficulty: number;
-  expires: number;
-  signature: string;
-}
-
-/** A solved CaptchaChallenge, submitted as the body of a vote request. */
-export interface CaptchaSolution extends CaptchaChallenge {
-  nonce: string;
+export interface CaptchaSolution {
+  token: string;
 }
 
 // ---------------------------------------------------------------------------

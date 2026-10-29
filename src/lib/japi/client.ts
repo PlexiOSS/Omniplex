@@ -1,6 +1,7 @@
 // Copyright (C) 2026 NodeByte LTD
 
 import { DISCORD_CDN_URL, JAPI_URL } from "@/lib/api/config";
+import { isSafeImageType } from "@/lib/cdn/safety";
 
 const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
 const USER_AGENT = "Omniplex (+https://omniplex.gg)";
@@ -43,17 +44,19 @@ export async function fetchDiscordImage(
     });
     if (viaJapi && isUpstreamFailure(res.status)) markJapiDown();
     const finalUrl = new URL(res.url || url);
+    const contentType = res.headers.get("content-type");
     if (
       !res.ok ||
       finalUrl.protocol !== "https:" ||
-      finalUrl.hostname !== DISCORD_CDN_HOST
+      finalUrl.hostname !== DISCORD_CDN_HOST ||
+      !isSafeImageType(contentType)
     ) {
       await res.body?.cancel();
       return null;
     }
     return {
       body: new Uint8Array(await res.arrayBuffer()),
-      contentType: res.headers.get("content-type") ?? "image/png",
+      contentType: contentType ?? "image/png",
       sourceUrl: finalUrl.href,
     };
   } catch {

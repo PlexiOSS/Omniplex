@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { AutoVotePrompt } from "@/components/votes/AutoVotePrompt";
+import { TurnstileWidget } from "@/components/votes/TurnstileWidget";
 import { useAuth } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
 import { useVote } from "@/hooks/useVote";
 import {
   formatCount,
@@ -32,7 +34,10 @@ export function VoteButton({
 }: VoteButtonProps) {
   const router = useRouter();
   const { session, isAuthenticated } = useAuth();
-  const { vote, loading, verifying, error } = useVote("bot", botId);
+  const { me } = useMe(session);
+  const { vote, loading, error } = useVote("bot", botId);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [localVotes, setLocalVotes] = useState(currentVotes);
   const [votedDirection, setVotedDirection] = useState<"up" | "down" | null>(
     null,
@@ -50,18 +55,23 @@ export function VoteButton({
   }
 
   const voted = votedDirection !== null;
+  const needsCaptcha = !captchaOptOut || !!me?.captcha_sponsor_enabled;
+  const waitingForCaptcha = needsCaptcha && !captchaToken;
 
   const handleVote = async (upvote: boolean) => {
-    if (!session || voted) return;
+    if (!session || voted || waitingForCaptcha) return;
     setPendingDir(upvote ? "up" : "down");
     try {
       const ok = await vote(
         session.user_id,
         session.token,
         upvote,
-        !captchaOptOut,
+        needsCaptcha ? captchaToken : null,
       );
-      if (!ok) return;
+      if (!ok) {
+        if (needsCaptcha) setCaptchaKey((k) => k + 1);
+        return;
+      }
       setLocalVotes((v) => v + (upvote ? 1 : -1));
       setVotedDirection(upvote ? "up" : "down");
       router.refresh();
@@ -82,37 +92,44 @@ export function VoteButton({
           🎉 Double-vote weekend: all votes count 2x with a reduced 6h cooldown
         </p>
       )}
-      <div className="flex items-center gap-2">
-        <Button
-          variant={votedDirection === "up" ? "secondary" : "primary"}
-          onClick={() => handleVote(true)}
-          loading={loading && pendingDir === "up"}
-          disabled={voted || loading}
-          className="flex-1"
-        >
-          <ThumbsUp
-            size={14}
-            className={votedDirection === "up" ? "fill-current" : undefined}
-          />
-          {votedDirection === "up"
-            ? "Voted!"
-            : verifying
-              ? "Verifying…"
+      {needsCaptcha && !voted && (
+        <TurnstileWidget
+          key={captchaKey}
+          action="vote"
+          onToken={setCaptchaToken}
+        />
+      )}
+      {(voted || !waitingForCaptcha) && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant={votedDirection === "up" ? "secondary" : "primary"}
+            onClick={() => handleVote(true)}
+            loading={loading && pendingDir === "up"}
+            disabled={voted || loading || waitingForCaptcha}
+            className="flex-1"
+          >
+            <ThumbsUp
+              size={14}
+              className={votedDirection === "up" ? "fill-current" : undefined}
+            />
+            {votedDirection === "up"
+              ? "Voted!"
               : `Upvote · ${formatCount(localVotes)}`}
-        </Button>
-        <Button
-          variant={votedDirection === "down" ? "danger" : "secondary"}
-          onClick={() => setConfirmingDownvote(true)}
-          loading={loading && pendingDir === "down"}
-          disabled={voted || loading}
-          aria-label="Downvote this bot"
-        >
-          <ThumbsDown
-            size={14}
-            className={votedDirection === "down" ? "fill-current" : undefined}
-          />
-        </Button>
-      </div>
+          </Button>
+          <Button
+            variant={votedDirection === "down" ? "danger" : "secondary"}
+            onClick={() => setConfirmingDownvote(true)}
+            loading={loading && pendingDir === "down"}
+            disabled={voted || loading || waitingForCaptcha}
+            aria-label="Downvote this bot"
+          >
+            <ThumbsDown
+              size={14}
+              className={votedDirection === "down" ? "fill-current" : undefined}
+            />
+          </Button>
+        </div>
+      )}
       {votedDirection === "up" && acceptsAutoVotes && <AutoVotePrompt />}
       {error && (
         <p className="text-center text-xs text-red-600 dark:text-red-400">
@@ -140,6 +157,7 @@ export function VoteButton({
             variant="danger"
             onClick={confirmDownvote}
             loading={loading && pendingDir === "down"}
+            disabled={waitingForCaptcha}
           >
             Downvote
           </Button>

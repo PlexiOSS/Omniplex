@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { DISCORD_CDN_URL } from "@/lib/api/config";
+import { cdnHeaders, isSafeImageType } from "@/lib/cdn/safety";
 import { fetchCurrentAvatar, fetchDiscordImage } from "@/lib/japi/client";
 import { MIRROR_SOURCE_METADATA_KEY } from "@/lib/s3/config";
 import {
@@ -19,6 +20,13 @@ interface Params {
 const VALID_TARGET_TYPES = new Set(["bots", "servers", "users"]);
 const MATCHED = "public, max-age=31536000, immutable";
 const FALLBACK = "public, max-age=300";
+const IMAGE_FILE = /[A-Za-z0-9_]+\.(?:png|jpe?g|gif|webp)/.source;
+const DEFAULT_AVATAR = /^\/embed\/avatars\/[0-9]\.png$/;
+const OWN_IMAGE: Record<string, RegExp> = {
+  bots: new RegExp(`^/avatars/([0-9]{16,20})/${IMAGE_FILE}$`),
+  users: new RegExp(`^/avatars/([0-9]{16,20})/${IMAGE_FILE}$`),
+  servers: new RegExp(`^/icons/([0-9]{16,20})/${IMAGE_FILE}$`),
+};
 
 export async function GET(req: Request, { params }: Params) {
   const { targetType, id } = await params;
@@ -27,7 +35,11 @@ export async function GET(req: Request, { params }: Params) {
   }
 
   const key = `avatars/${targetType}/${id}`;
-  const src = parseDiscordSrc(new URL(req.url).searchParams.get("src"));
+  const src = parseDiscordSrc(
+    new URL(req.url).searchParams.get("src"),
+    targetType,
+    id,
+  );
 
   let s3Down = false;
   let cached: FetchedObject | null = null;
@@ -38,6 +50,11 @@ export async function GET(req: Request, { params }: Params) {
     if (!(err instanceof S3UnavailableError)) throw err;
     console.error(err, err.cause);
     s3Down = true;
+  }
+
+  if (cached && !isTrustedCache(cached, targetType, id)) {
+    discardObject(cached);
+    cached = null;
   }
 
   const cachedSource = cached?.metadata[MIRROR_SOURCE_METADATA_KEY];
@@ -57,7 +74,7 @@ export async function GET(req: Request, { params }: Params) {
       }
       return new NextResponse(Buffer.from(mirrored.body), {
         headers: {
-          "Content-Type": mirrored.contentType,
+          ...cdnHeaders(mirrored.contentType),
           "Cache-Control": MATCHED,
         },
       });
@@ -75,7 +92,7 @@ export async function GET(req: Request, { params }: Params) {
       }
       return new NextResponse(Buffer.from(current.body), {
         headers: {
-          "Content-Type": current.contentType,
+          ...cdnHeaders(current.contentType),
           "Cache-Control": FALLBACK,
         },
       });
@@ -88,7 +105,10 @@ export async function GET(req: Request, { params }: Params) {
     try {
       const legacy = await getObject(`${key}.webp`);
       if (legacy.status === "found") {
-        return streamResponse(legacy.object, FALLBACK);
+        if (isSafeImageType(legacy.object.contentType)) {
+          return streamResponse(legacy.object, FALLBACK);
+        }
+        discardObject(legacy.object);
       }
     } catch (err) {
       if (!(err instanceof S3UnavailableError)) throw err;
@@ -111,7 +131,7 @@ export async function GET(req: Request, { params }: Params) {
 
 function streamResponse(object: FetchedObject, cacheControl: string) {
   const headers: Record<string, string> = {
-    "Content-Type": object.contentType,
+    ...cdnHeaders(object.contentType),
     "Cache-Control": cacheControl,
   };
   if (object.contentLength) {
@@ -120,13 +140,31 @@ function streamResponse(object: FetchedObject, cacheControl: string) {
   return new NextResponse(object.stream, { headers });
 }
 
-function parseDiscordSrc(rawSrc: string | null): URL | null {
+function isTrustedCache(object: FetchedObject, targetType: string, id: string) {
+  if (!isSafeImageType(object.contentType)) return false;
+  const source = object.metadata[MIRROR_SOURCE_METADATA_KEY];
+  return !source || parseDiscordSrc(source, targetType, id) !== null;
+}
+
+function parseDiscordSrc(
+  rawSrc: string | null,
+  targetType: string,
+  id: string,
+): URL | null {
   if (!rawSrc) return null;
   try {
     const url = new URL(rawSrc);
     if (url.protocol !== "https:" || url.hostname !== DISCORD_CDN_HOST) {
       return null;
     }
+    if (!DEFAULT_AVATAR.test(url.pathname)) {
+      const owner = OWN_IMAGE[targetType]?.exec(url.pathname)?.[1];
+      if (owner !== id) return null;
+    }
+    const size = url.searchParams.get("size");
+    url.search = "";
+    url.hash = "";
+    if (size && /^[0-9]{2,4}$/.test(size)) url.searchParams.set("size", size);
     return url;
   } catch {
     return null;

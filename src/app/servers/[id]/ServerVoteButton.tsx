@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { AutoVotePrompt } from "@/components/votes/AutoVotePrompt";
+import { TurnstileWidget } from "@/components/votes/TurnstileWidget";
 import { useAuth } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
 import { useVote } from "@/hooks/useVote";
 import {
   formatCount,
@@ -32,7 +34,10 @@ export function ServerVoteButton({
 }: ServerVoteButtonProps) {
   const router = useRouter();
   const { session, isAuthenticated } = useAuth();
-  const { vote, loading, verifying, error } = useVote("server", serverId);
+  const { me } = useMe(session);
+  const { vote, loading, error } = useVote("server", serverId);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [localVotes, setLocalVotes] = useState(currentVotes);
   const [votedDirection, setVotedDirection] = useState<"up" | "down" | null>(
     null,
@@ -54,18 +59,23 @@ export function ServerVoteButton({
   // rejected server-side the same as voting again in the same direction, so
   // once either button succeeds both are disabled until the next window.
   const voted = votedDirection !== null;
+  const needsCaptcha = !captchaOptOut || !!me?.captcha_sponsor_enabled;
+  const waitingForCaptcha = needsCaptcha && !captchaToken;
 
   const handleVote = async (upvote: boolean) => {
-    if (!session || voted) return;
+    if (!session || voted || waitingForCaptcha) return;
     setPendingDir(upvote ? "up" : "down");
     try {
       const ok = await vote(
         session.user_id,
         session.token,
         upvote,
-        !captchaOptOut,
+        needsCaptcha ? captchaToken : null,
       );
-      if (!ok) return;
+      if (!ok) {
+        if (needsCaptcha) setCaptchaKey((k) => k + 1);
+        return;
+      }
       setLocalVotes((v) => v + (upvote ? 1 : -1));
       setVotedDirection(upvote ? "up" : "down");
       // approximate_votes updates synchronously on the backend, but this page's
@@ -90,37 +100,44 @@ export function ServerVoteButton({
           🎉 Double-vote weekend: all votes count 2x with a reduced 6h cooldown
         </p>
       )}
-      <div className="flex items-center gap-2">
-        <Button
-          variant={votedDirection === "up" ? "secondary" : "primary"}
-          onClick={() => handleVote(true)}
-          loading={loading && pendingDir === "up"}
-          disabled={voted || loading}
-          className="flex-1"
-        >
-          <ThumbsUp
-            size={14}
-            className={votedDirection === "up" ? "fill-current" : undefined}
-          />
-          {votedDirection === "up"
-            ? "Voted!"
-            : verifying
-              ? "Verifying…"
+      {needsCaptcha && !voted && (
+        <TurnstileWidget
+          key={captchaKey}
+          action="vote"
+          onToken={setCaptchaToken}
+        />
+      )}
+      {(voted || !waitingForCaptcha) && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant={votedDirection === "up" ? "secondary" : "primary"}
+            onClick={() => handleVote(true)}
+            loading={loading && pendingDir === "up"}
+            disabled={voted || loading || waitingForCaptcha}
+            className="flex-1"
+          >
+            <ThumbsUp
+              size={14}
+              className={votedDirection === "up" ? "fill-current" : undefined}
+            />
+            {votedDirection === "up"
+              ? "Voted!"
               : `Upvote · ${formatCount(localVotes)}`}
-        </Button>
-        <Button
-          variant={votedDirection === "down" ? "danger" : "secondary"}
-          onClick={() => setConfirmingDownvote(true)}
-          loading={loading && pendingDir === "down"}
-          disabled={voted || loading}
-          aria-label="Downvote this server"
-        >
-          <ThumbsDown
-            size={14}
-            className={votedDirection === "down" ? "fill-current" : undefined}
-          />
-        </Button>
-      </div>
+          </Button>
+          <Button
+            variant={votedDirection === "down" ? "danger" : "secondary"}
+            onClick={() => setConfirmingDownvote(true)}
+            loading={loading && pendingDir === "down"}
+            disabled={voted || loading || waitingForCaptcha}
+            aria-label="Downvote this server"
+          >
+            <ThumbsDown
+              size={14}
+              className={votedDirection === "down" ? "fill-current" : undefined}
+            />
+          </Button>
+        </div>
+      )}
       {votedDirection === "up" && acceptsAutoVotes && <AutoVotePrompt />}
       {error && (
         <p className="text-center text-xs text-red-600 dark:text-red-400">
@@ -148,6 +165,7 @@ export function ServerVoteButton({
             variant="danger"
             onClick={confirmDownvote}
             loading={loading && pendingDir === "down"}
+            disabled={waitingForCaptcha}
           >
             Downvote
           </Button>

@@ -1,18 +1,15 @@
 "use client";
 
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import { useState } from "react";
-import { bots, captcha, packs, servers, teams } from "@/lib/api";
+import { bots, packs, servers, teams } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import type { CaptchaSolution } from "@/lib/api/types";
-import { solveCaptcha } from "@/lib/captcha/pow";
 
 type EntityType = "bot" | "server" | "team" | "pack";
 
 export function useVote(type: EntityType, id: string) {
   const [loading, setLoading] = useState(false);
-  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -20,25 +17,14 @@ export function useVote(type: EntityType, id: string) {
     userId: string,
     token: string,
     upvote = true,
-    requiresCaptcha = false,
+    captchaToken?: string | null,
   ): Promise<boolean> => {
     setLoading(true);
-    setVerifying(false);
     setError(null);
     setSuccess(false);
 
     try {
-      let solution: CaptchaSolution | undefined;
-
-      if (requiresCaptcha) {
-        setVerifying(true);
-        try {
-          const challenge = await captcha.getVoteChallenge();
-          solution = await solveCaptcha(challenge);
-        } finally {
-          setVerifying(false);
-        }
-      }
+      const solution = captchaToken ? { token: captchaToken } : undefined;
 
       switch (type) {
         case "bot":
@@ -66,5 +52,5 @@ export function useVote(type: EntityType, id: string) {
     }
   };
 
-  return { vote, loading, verifying, error, success };
+  return { vote, loading, error, success };
 }
