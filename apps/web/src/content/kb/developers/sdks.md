@@ -62,4 +62,4 @@ from omniplex import WebhookVerificationError, verify_webhook
 event = verify_webhook(raw_body, headers, secret)  # raises WebhookVerificationError
 ```
 
-Each package's page has the full guide, including framework examples. Both SDKs are open source in our [GitHub repository](https://github.com/PlexiOSS/Orbiplex/tree/master/packages), where you can also report problems.
+Each package's page has the full guide, including framework examples. Both SDKs are open source in our [GitHub repository](https://github.com/PlexiOSS/Omniplex/tree/master/packages), where you can also report problems.

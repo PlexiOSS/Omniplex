@@ -7,7 +7,7 @@ name = "omniplex-sdk"
 dynamic = ["version"]
 description = "Official Python SDK for the Omniplex API: post bot and server stats, check votes and verify webhooks."
 readme = "README.md"
-license = "AGPL-3.0-or-later"
+license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 authors = [{ name = "NodeByte LTD" }]
@@ -30,9 +30,9 @@ test = ["pytest>=8", "pytest-asyncio>=0.23"]
 
 [project.urls]
 Homepage = "https://omniplex.gg/kb/developers"
-Source = "https://github.com/PlexiOSS/Orbiplex/tree/master/packages/sdk-python"
-Issues = "https://github.com/PlexiOSS/Orbiplex/issues"
-Changelog = "https://github.com/PlexiOSS/Orbiplex/blob/master/packages/sdk-python/CHANGELOG.md"
+Source = "https://github.com/PlexiOSS/Omniplex/tree/master/packages/sdk-python"
+Issues = "https://github.com/PlexiOSS/Omniplex/issues"
+Changelog = "https://github.com/PlexiOSS/Omniplex/blob/master/packages/sdk-python/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "src/omniplex/__init__.py"

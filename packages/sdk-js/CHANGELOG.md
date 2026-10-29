@@ -21,3 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `verifyWebhookRequest` and `createWebhookHandler`, plus typed events.
 - Retries for rate-limited requests (using `Retry-After`) and for failed
   `GET` requests, and an `OmniplexError` carrying the API's message.
+- Licensed under MIT, unlike the AGPL-3.0 website, so bots and other
+  projects can depend on it under any licence.

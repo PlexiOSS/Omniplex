@@ -2,7 +2,7 @@
   "name": "@omniplex/api-types",
   "version": "0.1.0",
   "description": "TypeScript types for the Omniplex API (Popplio).",
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -17,7 +17,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PlexiOSS/Orbiplex.git",
+    "url": "git+https://github.com/PlexiOSS/Omniplex.git",
     "directory": "packages/api-types"
   },
   "homepage": "https://omniplex.gg",

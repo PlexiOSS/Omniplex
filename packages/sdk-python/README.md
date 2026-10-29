@@ -121,4 +121,4 @@ Omniplex(
 
 - [Developer docs](https://omniplex.gg/kb/developers)
 - [JavaScript SDK](https://www.npmjs.com/package/@omniplex/sdk)
-- [Report a bug](https://github.com/PlexiOSS/Orbiplex/issues)
+- [Report a bug](https://github.com/PlexiOSS/Omniplex/issues)

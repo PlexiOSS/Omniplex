@@ -2,7 +2,7 @@
   "name": "@omniplex/sdk",
   "version": "0.1.0",
   "description": "Official JavaScript and TypeScript SDK for the Omniplex API: post bot and server stats, check votes and verify webhooks.",
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -28,11 +28,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PlexiOSS/Orbiplex.git",
+    "url": "git+https://github.com/PlexiOSS/Omniplex.git",
     "directory": "packages/sdk-js"
   },
   "homepage": "https://omniplex.gg/kb/developers",
-  "bugs": "https://github.com/PlexiOSS/Orbiplex/issues",
+  "bugs": "https://github.com/PlexiOSS/Omniplex/issues",
   "publishConfig": {
     "access": "public"
   },

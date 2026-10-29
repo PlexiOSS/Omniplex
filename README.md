@@ -97,7 +97,7 @@ See `AGENTS.md` at the root of the wider plexicore workspace (outside this repo)
 
 ## Releasing
 
-The website is released by tagging `v<version>`, as before. Each package is released with its own tag, such as `sdk-js@v0.1.0`, `api-types@v0.1.0` or `sdk-python@v0.1.0`, which publishes it to npm or PyPI through trusted publishing. See [RELEASING.md](RELEASING.md) for the one-time registry setup and the full steps.
+The website is released by tagging `v<version>`, as before. Each package is released with its own tag, such as `sdk-js@v0.1.0`, `api-types@v0.1.0` or `sdk-python@v0.1.0`, which publishes it to npm or PyPI through trusted publishing.
 
 ---
 
@@ -114,5 +114,7 @@ If you find a security vulnerability, please do not open a public issue. See [SE
 ---
 
 ## License
+
+The website is licensed under AGPL-3.0-or-later (see [LICENSE](LICENSE)). The packages in `packages/` (`@omniplex/api-types`, `@omniplex/sdk` and `omniplex-sdk`) are licensed under MIT, so they can be used in projects under any licence.
 
 Omniplex is developed by [NodeByte LTD](https://nodebyte.co.uk). Not affiliated with Discord.
