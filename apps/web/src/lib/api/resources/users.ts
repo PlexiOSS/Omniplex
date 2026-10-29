@@ -30,14 +30,22 @@ export const usersResource = {
     ),
 
   startAutoVoteCheckout: (userId: string, token: string) =>
-    client.post<RedirectUser>(`/users/${userId}/auto-vote/checkout`, {}, {
-      token,
-    }),
+    client.post<RedirectUser>(
+      `/users/${userId}/auto-vote/checkout`,
+      {},
+      {
+        token,
+      },
+    ),
 
   openAutoVotePortal: (userId: string, token: string) =>
-    client.post<RedirectUser>(`/users/${userId}/auto-vote/portal`, {}, {
-      token,
-    }),
+    client.post<RedirectUser>(
+      `/users/${userId}/auto-vote/portal`,
+      {},
+      {
+        token,
+      },
+    ),
 
   getMainServerStatus: (userId: string, token: string) =>
     client.get<MainServerStatus>(`/users/${userId}/main-server`, {

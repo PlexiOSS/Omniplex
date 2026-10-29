@@ -1,8 +1,7 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 export const ARCADIA_URL = (
-  process.env.NEXT_PUBLIC_ARCADIA_URL ??
-  "https://prod--panel-api.omniplex.gg"
+  process.env.NEXT_PUBLIC_ARCADIA_URL ?? "https://prod--panel-api.omniplex.gg"
 ).replace(/\/+$/, "");
 
 export const ARCADIA_PANEL_SCOPE =

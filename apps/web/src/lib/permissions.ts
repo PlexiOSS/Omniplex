@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 const SUPER_PERMS = ["owner", "administrator"];
 
@@ -10,7 +10,10 @@ export function hasPermString(perms: string[], target: string): boolean {
   return perms.some((p) => SUPER_PERMS.includes(p)) || perms.includes(target);
 }
 
-export function hasAllPermStrings(perms: string[], required: string[]): boolean {
+export function hasAllPermStrings(
+  perms: string[],
+  required: string[],
+): boolean {
   return required.every((r) => hasPermString(perms, r));
 }
 

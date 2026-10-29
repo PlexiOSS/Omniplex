@@ -46,8 +46,7 @@ export const sessionsResource = {
     sessionId: string,
     token: string,
   ) =>
-    client.delete<void>(
-      `/${targetType}/${targetId}/sessions/${sessionId}`,
-      { token },
-    ),
+    client.delete<void>(`/${targetType}/${targetId}/sessions/${sessionId}`, {
+      token,
+    }),
 };

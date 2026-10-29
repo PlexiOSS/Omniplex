@@ -28,8 +28,7 @@ export const alertsResource = {
     userId: string,
     token: string,
     patches: { itag: string; patch: AlertPatchAction }[],
-  ) =>
-    client.patch<void>(`/users/${userId}/alerts`, { patches }, { token }),
+  ) => client.patch<void>(`/users/${userId}/alerts`, { patches }, { token }),
 
   deleteAll: (userId: string, token: string) =>
     client.delete<void>(`/users/${userId}/alerts`, { token }),

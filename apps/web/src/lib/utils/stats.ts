@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import type { ListStats } from "@/lib/api/types";
 

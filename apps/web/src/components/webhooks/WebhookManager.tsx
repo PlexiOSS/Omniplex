@@ -74,11 +74,12 @@ export function WebhookManager({
       .catch(() => setTestMeta(null));
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reload only when the target changes, not on every render or token refresh
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetType, targetId]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a refreshed auth token doesn't need the logs refetched
   useEffect(() => {
     if (view !== "logs") return;
     setLogsError(null);

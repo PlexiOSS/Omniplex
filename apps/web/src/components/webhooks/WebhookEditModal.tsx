@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 import { webhooks } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Webhook, WebhookTestMeta } from "@/lib/api/types";
@@ -48,9 +48,7 @@ export function WebhookEditModal({
 
   function toggleEvent(event: string) {
     setEventWhitelist((prev) =>
-      prev.includes(event)
-        ? prev.filter((e) => e !== event)
-        : [...prev, event],
+      prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event],
     );
   }
 
@@ -77,7 +75,13 @@ export function WebhookEditModal({
         event_whitelist: eventWhitelist,
       };
       if (isEdit) {
-        await webhooks.edit(targetType, targetId, webhook.id, payload, authToken);
+        await webhooks.edit(
+          targetType,
+          targetId,
+          webhook.id,
+          payload,
+          authToken,
+        );
       } else {
         await webhooks.create(targetType, targetId, payload, authToken);
       }
@@ -93,7 +97,11 @@ export function WebhookEditModal({
   }
 
   return (
-    <Modal open onClose={onClose} title={isEdit ? "Edit Webhook" : "New Webhook"}>
+    <Modal
+      open
+      onClose={onClose}
+      title={isEdit ? "Edit Webhook" : "New Webhook"}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Name"

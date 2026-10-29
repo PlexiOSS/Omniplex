@@ -4,7 +4,11 @@ import { Check, Copy, Sparkles } from "lucide-react";
 import { useState } from "react";
 import type { ServerEmoji, ServerSticker } from "@/lib/api/types";
 import { formatRelativeTime } from "@/lib/utils/format";
-import { EmojiImage, isAnimatedSticker, StickerMedia } from "./EmojiStickerMedia";
+import {
+  EmojiImage,
+  isAnimatedSticker,
+  StickerMedia,
+} from "./EmojiStickerMedia";
 
 interface EmojiStickerGalleryProps {
   emojis: ServerEmoji[];
@@ -133,7 +137,11 @@ function StickerTile({ sticker }: { sticker: ServerSticker }) {
           className="absolute right-1.5 top-1.5 text-accent"
         />
       )}
-      <StickerMedia url={sticker.url} name={sticker.name} format={sticker.format} />
+      <StickerMedia
+        url={sticker.url}
+        name={sticker.name}
+        format={sticker.format}
+      />
       <span className="flex w-full items-center justify-center gap-1 text-center text-[11px] text-zinc-500 dark:text-zinc-400">
         <span className="min-w-0 truncate">{sticker.name}</span>
         {copied ? (

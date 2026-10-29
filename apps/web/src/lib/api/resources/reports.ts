@@ -1,5 +1,9 @@
 import { client } from "../client";
-import type { CreateReportPayload, ReportStatCount, TargetType } from "../types";
+import type {
+  CreateReportPayload,
+  ReportStatCount,
+  TargetType,
+} from "../types";
 
 export const reportsResource = {
   /** Reporter identity is captured server-side from the session token —

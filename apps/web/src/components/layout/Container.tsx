@@ -8,7 +8,7 @@ interface ContainerProps {
 
 /**
  * Container component that wraps its children in a responsive container with optional narrow width.
- * 
+ *
  * @param {ReactNode} children - The content to be wrapped inside the container.
  * @param {string} [className] - Optional additional class names to apply to the container.
  * @param {boolean} [narrow=false] - If true, the container will have a narrower maximum width.

@@ -1,6 +1,6 @@
 "use client";
 
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 import { useCallback, useEffect, useState } from "react";
 import type { AuthSession } from "@/lib/api/types";

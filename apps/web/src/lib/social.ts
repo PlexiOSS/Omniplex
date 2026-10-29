@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 export const SOCIAL_LINKS = {
   instagram: "https://instagram.com/infinitybotlist",

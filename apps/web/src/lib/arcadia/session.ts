@@ -1,4 +1,4 @@
-// Copyright (C) 2026 NodeByte LTD 
+// Copyright (C) 2026 NodeByte LTD
 
 const STORAGE_KEY = "arcadia-session";
 const SESSION_LIFETIME_MS = 55 * 60 * 1000;

@@ -100,6 +100,7 @@ export function PartnersMarquee({ partners, rows = 2 }: PartnersMarqueeProps) {
     <div className="space-y-4">
       {partnerRows.map((rowPartners, rowIndex) => (
         <MarqueeRow
+          // biome-ignore lint/suspicious/noArrayIndexKey: rows are positional slices that never reorder
           key={rowIndex}
           partners={rowPartners}
           reverse={rowIndex % 2 === 1}

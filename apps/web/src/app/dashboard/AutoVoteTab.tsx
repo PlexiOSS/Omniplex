@@ -58,8 +58,7 @@ export function AutoVoteTab({
 }) {
   const searchParams = useSearchParams();
   const justSubscribed = searchParams.get("subscribed") === "1";
-  const timezone =
-    Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
   const [status, setStatus] = useState<AutoVoteStatus | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -104,7 +103,9 @@ export function AutoVoteTab({
   const full = targets.length >= status.max_targets;
 
   function update(i: number, patch: Partial<Draft>) {
-    setTargets((prev) => prev.map((t, j) => (j === i ? { ...t, ...patch } : t)));
+    setTargets((prev) =>
+      prev.map((t, j) => (j === i ? { ...t, ...patch } : t)),
+    );
     setDirty(true);
     setSaved(false);
   }
@@ -117,7 +118,12 @@ export function AutoVoteTab({
 
   function add(c: Candidate) {
     if (full) return;
-    if (targets.some((t) => t.target_type === c.target_type && t.target_id === c.target_id)) return;
+    if (
+      targets.some(
+        (t) => t.target_type === c.target_type && t.target_id === c.target_id,
+      )
+    )
+      return;
     setTargets((prev) => [
       ...prev,
       { ...c, days: [], start_minute: 0, end_minute: 1440, timezone },
@@ -243,9 +249,9 @@ export function AutoVoteTab({
                   Never miss a vote
                 </h2>
                 <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                  Auto-vote votes for up to {status.max_targets} bots or
-                  servers for you as soon as your cooldown ends, always or
-                  on a schedule you choose.
+                  Auto-vote votes for up to {status.max_targets} bots or servers
+                  for you as soon as your cooldown ends, always or on a schedule
+                  you choose.
                 </p>
               </div>
             </div>
@@ -376,7 +382,9 @@ export function AutoVoteTab({
                               : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
                           ].join(" ")}
                         >
-                          {mode === "Always" ? "Whenever possible" : "On a schedule"}
+                          {mode === "Always"
+                            ? "Whenever possible"
+                            : "On a schedule"}
                         </button>
                       );
                     })}

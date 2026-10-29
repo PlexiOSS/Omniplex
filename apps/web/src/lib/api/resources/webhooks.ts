@@ -44,10 +44,9 @@ export const webhooksResource = {
     webhookId: string,
     token: string,
   ) =>
-    client.delete<void>(
-      `/${targetType}/${targetId}/webhooks/${webhookId}`,
-      { token },
-    ),
+    client.delete<void>(`/${targetType}/${targetId}/webhooks/${webhookId}`, {
+      token,
+    }),
 
   /** No permission required — used to populate both the event-whitelist picker and the test-send form. */
   getTestMeta: (targetType: string, targetId: string) =>
@@ -69,7 +68,12 @@ export const webhooksResource = {
       { token },
     ),
 
-  getLogs: (targetType: string, targetId: string, page: number, token: string) =>
+  getLogs: (
+    targetType: string,
+    targetId: string,
+    page: number,
+    token: string,
+  ) =>
     client.get<PagedResult<WebhookLogEntry[]>>(
       `/${targetType}/${targetId}/webhooks/logs?page=${page}`,
       { token, cache: "no-store" },

@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { GiPaper } from "react-icons/gi";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import type { AuthSession } from "@/lib/api/types";
 import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { GiPaper } from "react-icons/gi";
 
 interface UserMenuProps {
   session: AuthSession;
@@ -82,10 +82,7 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
         >
           View Profile
         </DropdownItem>
-        <DropdownItem
-          icon={<GiPaper size={14} />}
-          onClick={() => go("/apps")}
-        >
+        <DropdownItem icon={<GiPaper size={14} />} onClick={() => go("/apps")}>
           Applications
         </DropdownItem>
         <DropdownItem
@@ -102,10 +99,7 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
             Staff Panel
           </DropdownItem>
         )}
-        <DropdownItem
-          icon={<Gift size={14} />}
-          onClick={() => go("/premium")}
-        >
+        <DropdownItem icon={<Gift size={14} />} onClick={() => go("/premium")}>
           Premium
         </DropdownItem>
         <DropdownItem
@@ -116,11 +110,7 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
         </DropdownItem>
       </div>
       <div className="border-t border-zinc-100 py-1 dark:border-zinc-800">
-        <DropdownItem
-          icon={<LogOut size={14} />}
-          onClick={handleLogout}
-          danger
-        >
+        <DropdownItem icon={<LogOut size={14} />} onClick={handleLogout} danger>
           Sign out
         </DropdownItem>
       </div>

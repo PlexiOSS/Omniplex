@@ -1,7 +1,7 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
 import { Lottie } from "lottie-react";
+import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 

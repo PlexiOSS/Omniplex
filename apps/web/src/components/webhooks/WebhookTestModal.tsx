@@ -2,9 +2,9 @@
 
 import { CircleCheck, CircleX } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 import { webhooks } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { WebhookTestMeta } from "@/lib/api/types";
