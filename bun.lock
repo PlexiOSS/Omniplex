@@ -49,6 +49,17 @@
         "typescript": "^5",
       },
     },
+    "packages/sdk-js": {
+      "name": "@omniplex/sdk",
+      "version": "0.1.0",
+      "dependencies": {
+        "@omniplex/api-types": "workspace:^",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.4.4",
+        "typescript": "^5",
+      },
+    },
   },
   "trustedDependencies": [
     "sharp",
@@ -203,6 +214,8 @@
 
     "@omniplex/api-types": ["@omniplex/api-types@workspace:packages/api-types"],
 
+    "@omniplex/sdk": ["@omniplex/sdk@workspace:packages/sdk-js"],
+
     "@omniplex/web": ["@omniplex/web@workspace:apps/web"],
 
     "@smithy/core": ["@smithy/core@3.31.1", "", { "dependencies": { "@smithy/types": "^4.16.1", "tslib": "^2.6.2" } }, "sha512-CyogUINxvi7C7LDsh8Syo6hVJOT9ckz4rG8dRZfTJ8r91HkMY59PnNooaj7WcHyxEkxPfBAmbgztZU+xTo76lg=="],
@@ -261,6 +274,8 @@
 
     "@turbo/windows-arm64": ["@turbo/windows-arm64@2.11.10", "", { "os": "win32", "cpu": "arm64" }, "sha512-xOkEjF3ws/b/YNlc+bvJHMYBn+vL+QbEISZFVi0qS+ImmhA1X3/gmNmBrjjIG3dg6aeN+n6gQitzSkXQ286qJQ=="],
 
+    "@types/bun": ["@types/bun@1.4.4", "", { "dependencies": { "bun-types": "1.4.4" } }, "sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ=="],
+
     "@types/debug": ["@types/debug@4.1.13", "", { "dependencies": { "@types/ms": "*" } }, "sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw=="],
 
     "@types/estree": ["@types/estree@1.0.9", "", {}, "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="],
@@ -290,6 +305,8 @@
     "baseline-browser-mapping": ["baseline-browser-mapping@2.11.32", "", { "bin": { "baseline-browser-mapping": "dist/cli.cjs" } }, "sha512-UvuxFU9P3hM29LrQdwu0cD6w6/+SFr+UlB9s/knI7+O2rK9xFxKUwSDWxGdbbqQ9/V7BJ5s0NI5nQAE4uJp3gQ=="],
 
     "bowser": ["bowser@2.14.1", "", {}, "sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg=="],
+
+    "bun-types": ["bun-types@1.4.4", "", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-yjrJh5oGX7mMPKGd19YXyIjmEuj4G4zNC30bs7PM9Az7NQ3ndF3j6hbeRdvJTRQEhJ/FYQwW0a2moweEi2hMxQ=="],
 
     "caniuse-lite": ["caniuse-lite@1.0.30001799", "", {}, "sha512-hG1bReV+OUU+MOqK4t/ZWI0tZOyz3rqS9XuhOUz1cIcbwBKjOyJEJuw9ER5JuNyqxNk8u/JUVbGibBOL1yrjFw=="],
 
