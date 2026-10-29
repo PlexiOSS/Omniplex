@@ -1416,17 +1416,6 @@ export type AlertCategory =
   | "reports"
   | "account_security";
 
-export const ALERT_CATEGORY_LABELS: Record<AlertCategory, string> = {
-  votes: "Votes & Reminders",
-  bot_server_reviews: "Bot & Server Reviews",
-  payments: "Payments & Premium",
-  shop: "Shop",
-  webhooks: "Webhooks",
-  staff_applications: "Staff Applications",
-  reports: "Reports",
-  account_security: "Account & Security",
-};
-
 export type NotificationPrefs = Partial<Record<AlertCategory, boolean>>;
 
 // ---------------------------------------------------------------------------

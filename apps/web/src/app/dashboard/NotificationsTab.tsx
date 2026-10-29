@@ -34,7 +34,7 @@ import type {
   AlertType,
   NotificationPrefs,
 } from "@/lib/api/types";
-import { ALERT_CATEGORY_LABELS } from "@/lib/api/types";
+import { ALERT_CATEGORY_LABELS } from "@/lib/constants/alertCategories";
 import { alertLink } from "@/lib/utils/alerts";
 import { formatRelativeTime } from "@/lib/utils/format";
 

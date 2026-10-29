@@ -1,0 +1,33 @@
+{
+  "name": "@omniplex/api-types",
+  "version": "0.1.0",
+  "description": "TypeScript types for the Omniplex API (Popplio).",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PlexiOSS/Orbiplex.git",
+    "directory": "packages/api-types"
+  },
+  "homepage": "https://omniplex.gg",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check ."
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
