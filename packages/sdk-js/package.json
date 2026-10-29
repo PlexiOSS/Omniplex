@@ -1,6 +1,6 @@
 {
   "name": "@omniplex/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official JavaScript and TypeScript SDK for the Omniplex API: post bot and server stats, check votes and verify webhooks.",
   "license": "MIT",
   "type": "module",
