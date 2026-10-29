@@ -119,18 +119,32 @@ export default async function TeamPage({ params }: Props) {
           {members.length > 0 && (
             <div className="mt-4 flex items-center gap-3">
               <div className="flex -space-x-2">
-                {members.slice(0, 6).map((m) => (
-                  <span
-                    key={m.itag}
-                    className="rounded-full ring-2 ring-white dark:ring-zinc-900"
-                  >
-                    <Avatar
-                      src={m.user?.avatar ?? ""}
-                      alt={m.user?.username ?? "Member"}
-                      size={28}
-                    />
-                  </span>
-                ))}
+                {members.slice(0, 6).map((m) => {
+                  const ring =
+                    "rounded-full ring-2 ring-white transition-transform dark:ring-zinc-900";
+                  return m.user?.id ? (
+                    <Link
+                      key={m.itag}
+                      href={`/user/${m.user.id}`}
+                      title={m.user.username}
+                      className={`${ring} relative hover:z-10 hover:scale-110 focus-visible:z-10 focus-visible:scale-110`}
+                    >
+                      <Avatar
+                        src={m.user.avatar ?? ""}
+                        alt={m.user.username ?? "Member"}
+                        size={28}
+                      />
+                    </Link>
+                  ) : (
+                    <span key={m.itag} className={ring}>
+                      <Avatar
+                        src={m.user?.avatar ?? ""}
+                        alt={m.user?.username ?? "Member"}
+                        size={28}
+                      />
+                    </span>
+                  );
+                })}
               </div>
               <span className="text-sm text-zinc-500 dark:text-zinc-400">
                 {members.length === 1

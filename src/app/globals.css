@@ -458,12 +458,23 @@ html {
   font-size: 0.9em;
   display: block;
   overflow-x: auto;
+  /* `.prose` inherits `overflow-wrap: anywhere`, which lets browsers break
+     identifiers like NEW_VOTE mid-word and squeezes columns down to a single
+     character. `break-word` only breaks when a word truly can't fit. */
+  overflow-wrap: break-word;
 }
 .prose th,
 .prose td {
   border: 1px solid rgba(0 0 0 / 0.1);
   padding: 0.5em 0.85em;
   text-align: left;
+  overflow-wrap: break-word;
+}
+/* Keep inline code (event names, option keys, etc.) on one line so the
+   column is sized to fit the whole token instead of wrapping it. */
+.prose th code,
+.prose td code {
+  white-space: nowrap;
 }
 .dark .prose th,
 .dark .prose td {

@@ -324,11 +324,11 @@ export function Header() {
     <>
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
         <HeaderWrap>
-          <div className="flex items-center justify-between gap-4 h-14">
+          <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
             {/* Logo */}
             <Link
               href={isAdminSection ? "/admin" : "/"}
-              className="flex items-center gap-2 text-zinc-950 dark:text-zinc-50"
+              className="flex items-center gap-2 justify-self-start text-zinc-950 dark:text-zinc-50"
             >
               <OmniplexLogo size={26} />
               <span className="text-base font-semibold tracking-tight">
@@ -374,7 +374,7 @@ export function Header() {
             </nav>
 
             {/* Right side */}
-            <div className="flex items-center gap-1">
+            <div className="col-start-3 flex items-center gap-1 justify-self-end">
               {/* Create menu */}
               {!isAdminSection && (
                 <div className="hidden md:block">

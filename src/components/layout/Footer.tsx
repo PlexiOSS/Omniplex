@@ -50,7 +50,7 @@ const FOOTER_LINKS = [
       { href: "https://docs.omniplex.gg/docs#faq", label: "Frequently Asked" },
       { href: "https://docs.omniplex.gg/docs/guides", label: "User Guides" },
       {
-        href: "https://docs.omniplex.gg/docs/api-reference/rate-limits",
+        href: "https://docs.omniplex.gg/docs/developer/rate-limits",
         label: "Rate Limits",
       },
       {
