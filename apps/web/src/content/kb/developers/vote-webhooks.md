@@ -33,7 +33,7 @@ With HMAC signing, each request is a `POST` with a JSON body and these headers:
 - `X-Webhook-Signature: sha256=<hex>`: an HMAC-SHA256 of the raw request body, using your secret as the key.
 - `X-Webhook-Protocol: hmac-sha256`
 
-Compute the same HMAC over the raw body, compare it to the header using a constant-time comparison, and reject the request if they don't match. This is the same scheme GitHub and Stripe use.
+Compute the same HMAC over the raw body, compare it to the header using a constant-time comparison, and reject the request if they don't match. This is the same scheme GitHub and Stripe use. The [official SDKs](/kb/developers/sdks) do this for you.
 
 **Your endpoint should reject requests with a bad signature** by returning `401` or `403`. Omniplex occasionally sends a request signed with the wrong secret to check this. If your endpoint accepts it, you get a notification warning you that anyone could send it fake events. Your webhook keeps working, but fix the check: without it, anyone who finds your URL can fake votes.
 

@@ -109,11 +109,11 @@ Failed requests raise `OmniplexError` with the HTTP `status`, the API's `message
 
 ```python
 Omniplex(
-    token=None,                            # needed for posting stats
-    base_url="https://spider.omniplex.gg", # the default
-    max_retries=2,                         # retries for rate limits and failed GETs
+    token=None,                         # needed for posting stats
+    base_url="https://api.omniplex.gg", # the default
+    max_retries=2,                      # retries for rate limits and failed GETs
     timeout=10.0,
-    http_client=None,                      # bring your own httpx.Client
+    http_client=None,                   # bring your own httpx.Client
 )
 ```
 

@@ -35,6 +35,8 @@ Every field is optional:
 
 A field you leave out, or send as `0`, keeps its previous value. A successful request returns `204 No Content`.
 
+The [official SDKs](/kb/developers/sdks) for JavaScript and Python can post this for you on a timer.
+
 ## How often to post
 
 There's no rate limit on this endpoint. Posting when your bot becomes ready and then every 15 to 30 minutes is plenty. If you send `status`, it stays at whatever you posted last, so post `offline` when your bot shuts down cleanly.

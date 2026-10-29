@@ -134,10 +134,10 @@ try {
 
 ```ts
 new Omniplex({
-  token: "…",                            // needed for posting stats
-  baseUrl: "https://spider.omniplex.gg", // the default
-  maxRetries: 2,                         // retries for rate limits and failed GETs
-  fetch: customFetch,                    // bring your own fetch
+  token: "…",                         // needed for posting stats
+  baseUrl: "https://api.omniplex.gg", // the default
+  maxRetries: 2,                      // retries for rate limits and failed GETs
+  fetch: customFetch,                 // bring your own fetch
 });
 ```
 

@@ -46,7 +46,7 @@ describe("stats", () => {
     });
     expect(calls).toHaveLength(1);
     const call = calls[0];
-    expect(call?.url).toBe("https://spider.omniplex.gg/bots/stats");
+    expect(call?.url).toBe("https://api.omniplex.gg/bots/stats");
     expect(call?.method).toBe("POST");
     expect(call?.headers.get("authorization")).toBe("tok");
     expect(call?.body).toEqual({
@@ -63,7 +63,7 @@ describe("stats", () => {
       totalMembers: 120,
       onlineMembers: 40,
     });
-    expect(calls[0]?.url).toBe("https://spider.omniplex.gg/servers/stats");
+    expect(calls[0]?.url).toBe("https://api.omniplex.gg/servers/stats");
     expect(calls[0]?.body).toEqual({ total_members: 120, online_members: 40 });
   });
 

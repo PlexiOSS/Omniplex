@@ -36,7 +36,7 @@ def test_post_bot_stats_sends_token_and_drops_unset_fields():
     )
     req = rec.requests[0]
     assert req.method == "POST"
-    assert str(req.url) == "https://spider.omniplex.gg/bots/stats"
+    assert str(req.url) == "https://api.omniplex.gg/bots/stats"
     assert req.headers["authorization"] == "tok"
     assert json.loads(req.content) == {
         "servers": 213,
@@ -50,7 +50,7 @@ def test_post_server_stats():
     sync_client(rec, token="tok").post_server_stats(
         total_members=120, online_members=40
     )
-    assert str(rec.requests[0].url) == "https://spider.omniplex.gg/servers/stats"
+    assert str(rec.requests[0].url) == "https://api.omniplex.gg/servers/stats"
     assert json.loads(rec.requests[0].content) == {
         "total_members": 120,
         "online_members": 40,
@@ -132,9 +132,7 @@ async def test_async_client_posts_and_checks_votes():
     async with async_client(rec, token="tok") as client:
         await client.post_bot_stats(servers=3)
         assert await client.has_voted_for_server("9", "8") is False
-    assert (
-        str(rec.requests[1].url) == "https://spider.omniplex.gg/users/8/servers/9/votes"
-    )
+    assert str(rec.requests[1].url) == "https://api.omniplex.gg/users/8/servers/9/votes"
 
 
 async def test_auto_post_posts_immediately_and_cancels():

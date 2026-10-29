@@ -2,7 +2,7 @@ import type { Bot, Server, User, UserVote } from "@omniplex/api-types";
 import { OmniplexError, retryAfterSeconds } from "./errors.js";
 import type { BotStats, ServerStats } from "./types.js";
 
-export const DEFAULT_BASE_URL = "https://spider.omniplex.gg";
+export const DEFAULT_BASE_URL = "https://api.omniplex.gg";
 
 const MAX_RETRY_WAIT_MS = 60_000;
 const MIN_AUTOPOST_INTERVAL_MS = 60_000;

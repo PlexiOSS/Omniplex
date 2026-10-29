@@ -12,7 +12,7 @@ import httpx
 from .errors import OmniplexError, retry_after_seconds
 from .types import PresenceStatus, UserVote
 
-DEFAULT_BASE_URL = "https://spider.omniplex.gg"
+DEFAULT_BASE_URL = "https://api.omniplex.gg"
 USER_AGENT = "omniplex-sdk-python (+https://omniplex.gg)"
 MAX_RETRY_WAIT = 60.0
 MIN_AUTOPOST_INTERVAL = 60.0

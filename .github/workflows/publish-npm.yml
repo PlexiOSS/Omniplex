@@ -1,0 +1,58 @@
+name: Publish npm package
+
+on:
+  push:
+    tags:
+      - "sdk-js@v*"
+      - "api-types@v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: pkg
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          name="${tag%@v*}"
+          version="${tag##*@v}"
+          case "$name" in
+            sdk-js|api-types) ;;
+            *) echo "::error::Unknown package in tag $tag"; exit 1 ;;
+          esac
+          dir="packages/$name"
+          actual=$(node -p "require('./$dir/package.json').version")
+          if [ "$actual" != "$version" ]; then
+            echo "::error::Tag $tag says $version but $dir/package.json is $actual"
+            exit 1
+          fi
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+          echo "filter=$(node -p "require('./$dir/package.json').name")" >> "$GITHUB_OUTPUT"
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - run: npm install -g npm@latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: node_modules/.bin/turbo run lint typecheck test build --filter=${{ steps.pkg.outputs.filter }}
+
+      - name: Pack
+        working-directory: ${{ steps.pkg.outputs.dir }}
+        run: bun pm pack --destination "$RUNNER_TEMP/pack"
+
+      - name: Publish with trusted publishing
+        run: npm publish "$RUNNER_TEMP"/pack/*.tgz --access public --provenance

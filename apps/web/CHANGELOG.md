@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- An "Official SDKs" knowledge base article for the new JavaScript and
+  Python SDKs.
+
+### Changed
+
+- The repo is now a Turborepo monorepo. The website lives in `apps/web`
+  as `@omniplex/web`, and its API types moved into the shared
+  `@omniplex/api-types` package, which the JS SDK also uses. Run scripts
+  such as `bun dev` and `bun run build` from the repo root. The
+  `Dockerfile` still builds from the repo root, so deployments don't need
+  new settings, and local overrides now go in `apps/web/.env.local`.
+- `.dockerignore` matches nested paths, so `apps/web/.env.local` and
+  nested `node_modules` or `.next` folders are never copied into the image.
+- Cleared the existing Biome errors so linting can run in CI.
+
 ## [1.10.0] - 2026-10-29
 
 ### Security

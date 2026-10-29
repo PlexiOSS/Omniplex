@@ -1,8 +1,8 @@
 # Omniplex
 
-Omniplex is a Discord bot and server listing platform. This repository contains the frontend, built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the Rust-based staff panel API that powers `/admin`.
+Omniplex is a Discord bot and server listing platform. This repository is a monorepo containing the website and the official API SDKs. The website is built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the staff panel API that powers `/admin`.
 
-* See [CHANGELOG.md](CHANGELOG.md) for what's actually shipped.
+* See [apps/web/CHANGELOG.md](apps/web/CHANGELOG.md) for what's shipped on the website, and each package's own `CHANGELOG.md` for the SDKs.
 * Production runs at [omniplex.gg](https://omniplex.gg).
 
 ---
@@ -15,14 +15,15 @@ Omniplex is a Discord bot and server listing platform. This repository contains 
 | Styling | Tailwind CSS v4 |
 | Language | TypeScript |
 | Data fetching | SWR (client), native `fetch` (server components) |
-| Linting and formatting | Biome |
-| Package manager | Bun |
+| Linting and formatting | Biome (TypeScript), Ruff (Python) |
+| Package manager | Bun workspaces |
+| Monorepo tasks | Turborepo |
 
 ---
 
 ## Getting started
 
-Install dependencies and start the dev server:
+Install dependencies and start the website's dev server from the repo root:
 
 ```bash
 bun install
@@ -31,20 +32,23 @@ bun dev
 
 The app runs at [http://localhost:3000](http://localhost:3000).
 
-Other scripts:
+Other scripts, also run from the root, go through Turborepo and cover every package:
 
 ```bash
-bun run build   # production build
-bun run start   # run a production build locally
-bun run lint    # Biome lint and format check
-bun run format  # Biome format, writes changes
+bun run build      # build everything
+bun run lint       # Biome lint and format check
+bun run typecheck  # TypeScript checks
+bun run test       # package tests
+bun run format     # Biome format, writes changes
 ```
+
+To run one package's task, use `bunx turbo run <task> --filter=<package name>`, for example `--filter=@omniplex/sdk`. To run the built website locally, run `bun run start` in `apps/web`.
 
 ---
 
 ## Configuration
 
-The frontend is decoupled from both backends it talks to Popplio (`src/lib/api/`) and Arcadia, the staff panel API (`src/lib/arcadia/`). These environment variables control them:
+The website is decoupled from both backends it talks to: Popplio (`apps/web/src/lib/api/`) and Arcadia, the staff panel API (`apps/web/src/lib/arcadia/`). These environment variables control them:
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -56,11 +60,11 @@ The frontend is decoupled from both backends it talks to Popplio (`src/lib/api/`
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | (none) | Cloudflare Turnstile site key for vote captchas. Its secret key goes in Popplio's `captcha.turnstile_secret`. Without it, votes on listings that use captchas can't be cast |
 | `SHORT_LINK_DOMAINS` | (none) | Comma-separated short-link domains, such as `botlist.site`. `<domain>/<id or vanity>` redirects to that listing, other paths redirect to the same path on `NEXT_PUBLIC_BASE_URL`, and the first domain is used by the "Short link" button. Read at runtime, so adding a domain needs a restart, not a rebuild. Point the domain's DNS at this deployment and add it to your host first. |
 
-Copy `.env.template` to `.env.local` to override any of these for local development. None are required to run the app against staging; the defaults point there already.
+Copy `apps/web/.env.template` to `apps/web/.env.local` to override any of these for local development. None are required to run the app against staging; the defaults point there already.
 
 ## Deployment
 
-Build and run the `Dockerfile`:
+Build and run the `Dockerfile` from the repo root. The build context is the whole repo, and the image runs the website from `apps/web`:
 
 ```bash
 docker build -t omniplex   --build-arg NEXT_PUBLIC_BASE_URL=https://omniplex.gg   --build-arg NEXT_PUBLIC_API_URL=https://spider.omniplex.gg .
@@ -75,15 +79,25 @@ Tagged releases are also published to `ghcr.io/plexioss/omniplex` by the `Publis
 
 ## Project structure
 
-See `AGENTS.md` at the root of the wider plexicore workspace (outside this repo) for a full breakdown of the codebase layout, API layer conventions, and styling rules. In short:
+```
+apps/
+└── web/                 omniplex.gg (Next.js), @omniplex/web
+    └── src/
+        ├── app/         App Router pages, layouts, and route handlers
+        ├── components/  UI primitives, cards, layout, and feature components
+        ├── hooks/       Client-side data and state hooks
+        └── lib/         API client and shared utilities
+packages/
+├── api-types/           @omniplex/api-types: TypeScript types for the API, used by the website and the JS SDK
+├── sdk-js/              @omniplex/sdk: the JavaScript and TypeScript SDK (npm)
+└── sdk-python/          omniplex-sdk: the Python SDK (PyPI)
+```
 
-```
-src/
-├── app/          App Router pages, layouts, and route handlers
-├── components/   UI primitives, cards, layout, and feature components
-├── hooks/        Client-side data and state hooks
-└── lib/          API client, types, and shared utilities
-```
+See `AGENTS.md` at the root of the wider plexicore workspace (outside this repo) for a full breakdown of the codebase layout, API layer conventions, and styling rules.
+
+## Releasing
+
+The website is released by tagging `v<version>`, as before. Each package is released with its own tag, such as `sdk-js@v0.1.0`, `api-types@v0.1.0` or `sdk-python@v0.1.0`, which publishes it to npm or PyPI through trusted publishing. See [RELEASING.md](RELEASING.md) for the one-time registry setup and the full steps.
 
 ---
 
