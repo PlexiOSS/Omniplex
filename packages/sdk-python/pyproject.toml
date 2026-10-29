@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "omniplex-sdk"
+dynamic = ["version"]
+description = "Official Python SDK for the Omniplex API: post bot and server stats, check votes and verify webhooks."
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "NodeByte LTD" }]
+keywords = ["omniplex", "discord", "discord-bot", "bot-list", "votes", "webhooks"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Framework :: AsyncIO",
+  "Typing :: Typed",
+]
+dependencies = [
+  "httpx>=0.25,<1",
+  "cryptography>=41",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[project.urls]
+Homepage = "https://omniplex.gg/kb/developers"
+Source = "https://github.com/PlexiOSS/Orbiplex/tree/master/packages/sdk-python"
+Issues = "https://github.com/PlexiOSS/Orbiplex/issues"
+Changelog = "https://github.com/PlexiOSS/Orbiplex/blob/master/packages/sdk-python/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/omniplex/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/omniplex"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "CHANGELOG.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
