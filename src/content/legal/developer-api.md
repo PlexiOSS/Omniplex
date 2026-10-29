@@ -15,7 +15,7 @@ API tokens are tied to your account (or your bot's account, for bot-stats endpoi
 
 - Use the API to build real integrations: a bot posting its own guild count, a dashboard for a server you run, a tool that looks up a handful of listings, that kind of thing.
 - Don't scrape the full directory to build a competing listing site, or resell raw API data as a standalone product. The data is for building something with an individual bot/server/pack, not for republishing the catalog itself.
-- Respect the documented [rate limits](https://docs.omniplex.gg/docs/api-reference/rate-limits). Spreading requests across multiple tokens or IPs specifically to get around them is treated as abuse, not clever engineering.
+- Respect the documented [rate limits](https://docs.omniplex.gg/docs/developer/rate-limits). Spreading requests across multiple tokens or IPs specifically to get around them is treated as abuse, not clever engineering.
 - [Webhooks](https://docs.omniplex.gg/docs/api-reference/webhooks) are for receiving events about your own listings. Pointing one at an endpoint designed to cause harm, or using webhook delivery to attack a third party, gets the webhook disabled and can affect your account.
 
 ## When we throttle or revoke access

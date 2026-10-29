@@ -163,8 +163,8 @@ export function ChangelogList({ entries, activeProject }: ChangelogListProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_14rem]">
-        <div className="min-w-0 max-w-3xl space-y-6">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_14rem]">
+        <div className="min-w-0 space-y-6">
           {filtered.map((entry) => (
             <ReleaseCard
               key={entry.itag}

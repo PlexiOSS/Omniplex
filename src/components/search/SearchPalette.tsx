@@ -23,6 +23,15 @@ const DEBOUNCE_MS = 200;
 const BOT_LIMIT = 5;
 const SERVER_LIMIT = 3;
 
+/** Shows the platform's real modifier key instead of always "Ctrl K". */
+function useShortcutLabel() {
+  const [isMac, setIsMac] = useState(false);
+  useEffect(() => {
+    setIsMac(/mac|iphone|ipad|ipod/i.test(navigator.userAgent));
+  }, []);
+  return isMac ? "⌘ K" : "Ctrl K";
+}
+
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
   return (
@@ -34,6 +43,7 @@ function isTypingTarget(target: EventTarget | null) {
 export function SearchPalette() {
   const router = useRouter();
   const pathname = usePathname();
+  const shortcut = useShortcutLabel();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
@@ -179,7 +189,7 @@ export function SearchPalette() {
       >
         <Search size={16} />
         <kbd className="hidden rounded border border-zinc-200 px-1.5 py-0.5 font-sans text-[10px] font-medium text-zinc-400 lg:inline dark:border-zinc-700 dark:text-zinc-500">
-          Ctrl K
+          {shortcut}
         </kbd>
       </button>
 
@@ -283,7 +293,7 @@ export function SearchPalette() {
                   </kbd>{" "}
                   or{" "}
                   <kbd className="rounded border border-zinc-200 px-1 text-xs dark:border-zinc-700">
-                    Ctrl K
+                    {shortcut}
                   </kbd>{" "}
                   anywhere to open this.
                 </span>

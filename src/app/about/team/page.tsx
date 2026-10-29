@@ -44,7 +44,7 @@ function MemberCard({ member }: { member: PublicStaffMember }) {
   return (
     <Link
       href={`/user/${member.user_id}`}
-      className="group flex h-full min-w-0 flex-col items-center rounded-2xl border border-zinc-200 bg-white p-5 text-center transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
+      className="group flex h-full w-[calc(50%-0.375rem)] min-w-0 flex-col items-center rounded-2xl border border-zinc-200 bg-white p-5 text-center transition-colors hover:border-accent/40 sm:w-[calc(33.333%-0.5rem)] lg:w-[calc(25%-0.5625rem)] dark:border-zinc-800 dark:bg-zinc-900"
     >
       <Avatar
         src={mirroredAvatarUrl("users", member.user_id, member.avatar)}
@@ -115,7 +115,7 @@ export default async function TeamPage() {
                   {group.members.length}
                 </span>
               </h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="flex flex-wrap justify-center gap-3">
                 {group.members.map((member) => (
                   <MemberCard key={member.user_id} member={member} />
                 ))}
