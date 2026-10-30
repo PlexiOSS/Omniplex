@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { assets, auth, teams } from "@/lib/api";
 import { ApiError, client } from "@/lib/api/client";
+import { BASE_URL } from "@/lib/api/config";
 import type {
   VersionedAssetKind,
   VersionedAssetTarget,
@@ -118,6 +119,16 @@ function isKind(value: unknown): value is Kind {
   return typeof value === "string" && value in KIND_CONFIG;
 }
 
+function fromSite(req: Request): boolean {
+  const origin = req.headers.get("origin");
+  if (!origin) return req.headers.get("sec-fetch-site") === "same-origin";
+  try {
+    return new URL(origin).host === new URL(BASE_URL).host;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
   let form: FormData;
   try {
@@ -230,6 +241,12 @@ export async function POST(req: Request) {
   } else {
     const userId = form.get("userId");
     const formToken = form.get("token");
+    if (formToken === COOKIE_TOKEN && !fromSite(req)) {
+      return NextResponse.json(
+        { error: "Uploads must come from this site." },
+        { status: 403 },
+      );
+    }
     const token =
       formToken === COOKIE_TOKEN ? await getServerToken() : formToken;
     if (

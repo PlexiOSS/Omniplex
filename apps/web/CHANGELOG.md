@@ -21,7 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   path. Server-side rendering still calls `NEXT_PUBLIC_API_URL` directly.
 - Signing out now ends the session on the server too, through Popplio's new
   `POST /auth/logout`. Before, it only forgot the session in your browser,
-  and the token kept working until it expired.
+  and the token kept working until it expired. If that request fails twice,
+  you stay signed in on the site, so it never shows you signed out while
+  the session still works.
+- Uploads made with the session cookie are only accepted from the site
+  itself. Pages on other `omniplex.gg` subdomains count as the same site
+  for the cookie, so without this check they could have uploaded images as
+  you.
 - Every page sends a strict Content-Security-Policy. Only scripts carrying
   that request's nonce can run, so injected scripts are blocked. Styles,
   images, media and iframes stay open to any source, since listings rely on

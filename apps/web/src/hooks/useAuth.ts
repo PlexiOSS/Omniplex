@@ -21,11 +21,21 @@ export function useAuth() {
     setSession(s);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     const current = getSession();
-    if (current) auth.logout(current.token).catch(() => {});
+    if (current) {
+      const ended = await auth
+        .logout(current.token)
+        .catch(() => auth.logout(current.token))
+        .then(
+          () => true,
+          () => false,
+        );
+      if (!ended) return false;
+    }
     clearSession();
     setSession(null);
+    return true;
   }, []);
 
   return {
