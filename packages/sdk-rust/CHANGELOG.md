@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-10-30
+## [0.1.1] - 2026-10-30
 
 ### Security
 
 - Printing an `Omniplex` client or `OmniplexBuilder` with `{:?}` shows the
   token as `[redacted]` instead of the token itself, so logging the client
   can't leak it.
+
+## [0.1.0] - 2026-10-30
 
 ### Added
 
