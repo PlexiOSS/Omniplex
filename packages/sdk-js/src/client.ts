@@ -38,6 +38,28 @@ function trimTrailingSlashes(url: string): string {
   return url.slice(0, end);
 }
 
+function resolveUrl(baseUrl: string, path: string): string {
+  const invalid = () =>
+    new OmniplexError(
+      0,
+      `Request path "${path}" must start with a single / and stay on the API host.`,
+    );
+  if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) {
+    throw invalid();
+  }
+  const base = new URL(baseUrl);
+  const target = new URL(baseUrl + path);
+  if (
+    target.protocol !== base.protocol ||
+    target.host !== base.host ||
+    target.username ||
+    target.password
+  ) {
+    throw invalid();
+  }
+  return baseUrl + path;
+}
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const backoff = (attempt: number) => Math.min(500 * 2 ** attempt, 8_000);
 const isBrowser =
@@ -77,7 +99,7 @@ export class Omniplex {
 
     if (body !== undefined) headers.set("Content-Type", "application/json");
 
-    const url = `${this.baseUrl}${path}`;
+    const url = resolveUrl(this.baseUrl, path);
 
     for (let attempt = 0; ; attempt++) {
       const canRetry = attempt < this.#maxRetries;

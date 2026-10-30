@@ -1,0 +1,114 @@
+---
+title: Authentication
+description: API tokens for bots and servers, user sessions, and scoped sessions.
+---
+
+Most read endpoints are public. Anything that changes data, or posts stats,
+needs a token in the `Authorization` header:
+
+```
+Authorization: <token>
+```
+
+You can also prefix the token with what it belongs to, which makes requests
+easier to read in logs. If you do, the prefix has to match the token:
+
+```
+Authorization: Bot <token>
+Authorization: Server <token>
+Authorization: Team <token>
+Authorization: User <token>
+```
+
+The older `Bot-Auth: <token>` and `User-Auth: <token>` headers still work the
+same way. There's no `Server-Auth` or `Team-Auth` header; use `Authorization`.
+
+## Which token to use
+
+| You're building | Use |
+|---|---|
+| A bot posting its stats | An API token for the bot |
+| A server posting its member counts | An API token for the server |
+| Anything acting as a person | Not possible from outside omniplex.gg (see below) |
+
+Create API tokens in your [dashboard](https://omniplex.gg/dashboard): pick the
+bot or server, then open **API sessions**. A token is shown once, when you
+create it, so store it somewhere safe straight away.
+
+Our [SDKs](/docs/sdks) take the token once and send it for you.
+
+## User sessions
+
+A user session is what you get by signing in to omniplex.gg. It's only accepted
+from omniplex.gg itself: Popplio rejects a user session sent from any other
+origin (with an exception for Bug Hunters testing preview builds), and the login
+endpoint only works with the official site. Third-party apps can't sign users in
+or act on their behalf, so build integrations on bot or server tokens.
+
+On omniplex.gg, the session lives in an HttpOnly `popplio_session` cookie that
+page scripts can't read, and the site calls the API through its own host. Signing
+out calls `POST /auth/logout`, which ends the session on the server and clears
+the cookie.
+
+## Scoped sessions
+
+To hand a token to something that should do less than you can, create a scoped
+session with only the permissions it needs:
+
+```
+POST /{target_type}/{target_id}/sessions
+```
+
+Requires the `Manage API Sessions` permission on the target (bot, server, team or
+pack). Body:
+
+```json
+{
+  "name": "My integration",
+  "type": "api",
+  "perm_limits": ["edit_bots"],
+  "expiry": 604800
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | A label so you can recognise the session later. |
+| `type` | string | Must be `api`. Login sessions can't be created here. |
+| `perm_limits` | string[] | The permissions the session may use. Empty is only allowed if you hold the `owner` permission on the target, in which case the session gets full access. |
+| `expiry` | number | How long the session lasts, in seconds. |
+
+The response includes the session's `token`. It's only shown once; there's no
+way to read it back afterwards.
+
+```json
+{
+  "target_id": "1234567890",
+  "token": "...",
+  "session_id": "..."
+}
+```
+
+## Managing sessions
+
+```
+GET    /{target_type}/{target_id}/sessions
+DELETE /{target_type}/{target_id}/sessions/{session_id}
+```
+
+Listing needs `View API Sessions` and revoking needs `Manage API Sessions`. A
+listed session never includes its token, only its name, type, permission limits
+and expiry, so if you lose a token, revoke it and create a new one.
+
+## Testing a token
+
+```
+POST /auth/test
+```
+
+```json
+{ "auth_type": "bot", "target_id": "1234567890123456789", "token": "..." }
+```
+
+Returns whether the token is valid for that bot, server, team or user, without
+using it on a real request.

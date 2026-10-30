@@ -5,7 +5,7 @@ import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { changelogs } from "@/lib/api";
-import type { ChangelogProject } from "@/lib/api/types";
+import { trackKey } from "@/lib/changelog";
 import { isApiUnavailable } from "@/lib/utils/errors";
 
 export const metadata: Metadata = {
@@ -18,17 +18,13 @@ export const metadata: Metadata = {
   },
 };
 
-const PROJECTS: ChangelogProject[] = ["popplio", "omniplex", "keel"];
-
 interface Props {
-  searchParams: Promise<{ project?: string }>;
+  searchParams: Promise<{ project?: string; package?: string }>;
 }
 
 export default async function ChangelogPage({ searchParams }: Props) {
-  const { project } = await searchParams;
-  const activeProject = PROJECTS.includes(project as ChangelogProject)
-    ? (project as ChangelogProject)
-    : null;
+  const { project, package: pkg } = await searchParams;
+  const activeTrack = project ? trackKey({ project, package: pkg }) : null;
 
   let entries: Awaited<ReturnType<typeof changelogs.getAll>>["entries"];
   try {
@@ -55,7 +51,7 @@ export default async function ChangelogPage({ searchParams }: Props) {
         }
       />
 
-      <ChangelogList entries={entries} activeProject={activeProject} />
+      <ChangelogList entries={entries} activeTrack={activeTrack} />
     </Container>
   );
 }

@@ -1,0 +1,108 @@
+---
+title: Posting Bot Stats
+description: Keeping your bot's server count and presence up to date.
+---
+
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+Your bot should periodically post its stats so its server count, shard
+count, and presence stay accurate on its listing.
+
+## Endpoint
+
+```
+POST /bots/stats
+```
+
+Send an API token for your bot in `Authorization`, as `<token>` or
+`Bot <token>`. Create one under **API sessions** in the bot's dashboard (see
+[Authentication](/docs/developer/authentication)). There's no rate limit on this
+endpoint, so post as often as makes sense for your bot: on every `READY` or shard
+reconnect, and periodically after that.
+
+## Body
+
+Every field is optional. Only send what you actually have, omitted fields
+keep whatever value was last posted rather than being reset to zero.
+
+```json
+{
+  "servers": 1234,
+  "shards": 4,
+  "users": 56789,
+  "shard_list": [0, 1, 2, 3],
+  "status": "online"
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `servers` | number | Server count. |
+| `shards` | number | Shard count. |
+| `users` | number | User count. Not currently shown on the site. |
+| `shard_list` | number[] | The shard IDs this process handles. |
+| `status` | string | One of `online`, `idle`, `dnd`, `offline`. See below. |
+
+## Self-reported presence
+
+Most bots don't share a guild with Omniplex's own Discord client, so there's
+usually no real gateway presence to read for your bot. `status` lets you
+report it yourself instead, post it periodically to keep it fresh, it
+otherwise keeps showing the last value you sent.
+
+If you never send `status` at all, but you do post stats regularly with a
+nonzero `servers` count, your bot is still shown as online rather than
+falling back to an (almost always stale) gateway-derived status, a recent
+stats post is treated as evidence the bot is actually running.
+
+## Using an SDK
+
+Every [SDK](/docs/sdks) can post stats once, or keep posting them on an interval
+(30 minutes by default, at least a minute) while your bot runs:
+
+<Tabs items={["JavaScript", "Python", "Go", "Rust"]}>
+  <Tab value="JavaScript">
+    ```ts
+    import { Omniplex } from "@omniplex/sdk";
+
+    const omniplex = new Omniplex({ token: process.env.OMNIPLEX_TOKEN });
+
+    omniplex.autoPostBotStats(() => ({
+      servers: client.guilds.cache.size,
+      shards: client.shard?.count ?? 1,
+    }));
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    from omniplex import AsyncOmniplex
+
+    omniplex = AsyncOmniplex(os.environ["OMNIPLEX_TOKEN"])
+
+    omniplex.auto_post_bot_stats(
+        lambda: {"servers": len(bot.guilds), "shards": bot.shard_count or 1}
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    client := omniplex.New(os.Getenv("OMNIPLEX_TOKEN"))
+
+    go client.AutoPostBotStats(ctx, 30*time.Minute,
+    	func(ctx context.Context) (omniplex.BotStats, error) {
+    		return omniplex.BotStats{Servers: omniplex.Int(len(session.State.Guilds))}, nil
+    	},
+    	nil,
+    )
+    ```
+  </Tab>
+  <Tab value="Rust">
+    ```rust
+    let omniplex = Omniplex::with_token(std::env::var("OMNIPLEX_TOKEN")?);
+
+    omniplex.auto_post_bot_stats(Duration::from_secs(30 * 60), move || async move {
+        BotStats { servers: Some(guild_count()), ..Default::default() }
+    });
+    ```
+  </Tab>
+</Tabs>

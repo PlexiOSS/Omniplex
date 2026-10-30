@@ -6,6 +6,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 FROM base AS manifests
 COPY package.json bun.lock bunfig.toml ./
 COPY apps/web/package.json apps/web/
+COPY apps/docs/package.json apps/docs/
 COPY packages/api-types/package.json packages/api-types/
 COPY packages/sdk-js/package.json packages/sdk-js/
 

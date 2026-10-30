@@ -1,0 +1,27 @@
+# Changelog
+
+All notable changes to this package will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Security
+
+- Printing an `Omniplex` client or `OmniplexBuilder` with `{:?}` shows the
+  token as `[redacted]` instead of the token itself, so logging the client
+  can't leak it.
+
+## [0.1.0] - 2026-10-30
+
+### Added
+
+- First release of the official Rust SDK.
+- Posting bot and server stats, once or automatically on an interval.
+- Checking votes for bots and servers, and reading bots, servers and users.
+- Verifying webhooks for all three of Omniplex's signing methods
+  (`hmac-sha256`, `splashtail` and `simple-auth`), with typed events.
+- Retries for rate-limited requests (using `Retry-After`) and for failed
+  `GET` requests.
+- Licensed under MIT.

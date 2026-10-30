@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- `request()` refuses a path that doesn't start with a single `/`, or that
+  would point the request at a different host, before sending anything. A
+  path such as `@attacker.example/` used to turn the base URL into
+  `https://api.omniplex.gg@attacker.example/` and send your token there.
+
+## [0.1.2] - 2026-10-30
+
 ### Fixed
+
+- `UserVote.valid_votes` entries are typed with the fields the API really
+  sends, through the corrected `Vote` type in `@omniplex/api-types`.
 
 - Trailing slashes are removed from `baseUrl` with a simple loop instead of
   a regular expression, which took quadratic time on a URL ending in many

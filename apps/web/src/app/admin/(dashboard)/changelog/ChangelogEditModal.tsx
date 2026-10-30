@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ChangelogEntry, ChangelogProject } from "@/lib/arcadia/types";
+import { packageLabel } from "@/lib/changelog";
 import { EditorPage } from "../EditorPage";
 
 interface ChangelogEditModalProps {
@@ -41,6 +42,7 @@ export function ChangelogEditModal({
   const [project, setProject] = useState<ChangelogProject>(
     entry?.project ?? "popplio",
   );
+  const [pkg, setPkg] = useState(entry?.package ?? "");
   const [version, setVersion] = useState(entry?.version ?? "");
   const [releaseDate, setReleaseDate] = useState(
     entry?.created_at ? isoToDatetimeLocal(entry.created_at) : "",
@@ -57,7 +59,7 @@ export function ChangelogEditModal({
   const [published, setPublished] = useState(entry?.published ?? false);
   const [pingRoles, setPingRoles] = useState<boolean | null>(null);
   const willAnnounce = published && !entry?.published;
-  const ping = pingRoles ?? project === "omniplex";
+  const ping = pingRoles ?? (project === "omniplex" && !pkg.trim());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,6 +105,7 @@ export function ChangelogEditModal({
     try {
       const payload = {
         project,
+        package: pkg.trim(),
         version: version.trim(),
         extra_description: extraDescription.trim(),
         prerelease,
@@ -169,6 +172,31 @@ export function ChangelogEditModal({
               required
             />
           </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Input
+            id="changelog-package"
+            label="Package"
+            value={pkg}
+            onChange={(e) => setPkg(e.target.value.toLowerCase())}
+            placeholder="Leave blank for the project itself"
+            list="changelog-packages"
+          />
+          <datalist id="changelog-packages">
+            {["sdk-js", "sdk-python", "sdk-go", "sdk-rust", "api-types"].map(
+              (name) => (
+                <option key={name} value={name}>
+                  {packageLabel(name)}
+                </option>
+              ),
+            )}
+          </datalist>
+          <p className="text-xs text-zinc-400 dark:text-zinc-600">
+            The folder name under the project&apos;s <code>packages/</code>,
+            such as <code>sdk-js</code>. Package releases don&apos;t ping roles
+            by default.
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">

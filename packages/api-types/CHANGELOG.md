@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-30
+
+### Added
+
+- `ChangelogEntry.package`: the package within the project an entry is for,
+  such as `"sdk-js"`, or `null` for the project itself.
+
+### Fixed
+
+- `Vote`, the type of `UserVote.valid_votes`, now matches what the API
+  sends: `author`, `upvote`, `void`, `void_reason`, `voided_at`,
+  `vote_num`, `credit_redeem`, `immutable`, `auto` and the target. It used
+  to describe `user_id` and `created_at`, and `user_id` never existed.
+
 ## [0.1.1] - 2026-10-29
 
 ### Fixed

@@ -149,3 +149,34 @@ async def test_auto_post_posts_immediately_and_cancels():
         await task
     assert json.loads(rec.requests[0].content) == {"servers": 7}
     await client.aclose()
+
+
+BAD_PATHS = [
+    "@attacker.example/",
+    "attacker.example/x",
+    "//attacker.example/x",
+    "/\\attacker.example",
+    "",
+]
+
+
+@pytest.mark.parametrize("path", BAD_PATHS)
+def test_request_refuses_paths_that_leave_the_api_host(path):
+    rec = Recorder()
+    with pytest.raises(OmniplexError):
+        sync_client(rec, token="tok").request("POST", path, auth=True)
+    assert rec.requests == []
+
+
+@pytest.mark.parametrize("path", BAD_PATHS)
+def test_async_request_refuses_paths_that_leave_the_api_host(path):
+    rec = Recorder()
+    with pytest.raises(OmniplexError):
+        asyncio.run(async_client(rec, token="tok").request("POST", path, auth=True))
+    assert rec.requests == []
+
+
+def test_request_allows_at_inside_a_path():
+    rec = Recorder(httpx.Response(200, json=[]))
+    sync_client(rec).request("GET", "/bots/@all")
+    assert str(rec.requests[0].url) == "https://api.omniplex.gg/bots/@all"

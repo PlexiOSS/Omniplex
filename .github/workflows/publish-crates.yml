@@ -1,0 +1,66 @@
+name: Publish Rust crate
+
+on:
+  push:
+    tags:
+      - "sdk-rust@v*"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/sdk-rust
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Check the tag matches the crate version
+        run: |
+          version="${GITHUB_REF_NAME##*@v}"
+          actual=$(cargo metadata --no-deps --format-version 1 | python3 -c "import json,sys; print(json.load(sys.stdin)['packages'][0]['version'])")
+          if [ "$actual" != "$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME says $version but Cargo.toml is $actual"
+            exit 1
+          fi
+
+      - run: cargo fmt --check && cargo clippy --all-targets --locked -- -D warnings && cargo test --locked
+
+      - run: cargo package --locked
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: crates
+      url: https://crates.io/crates/omniplex
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: packages/sdk-rust
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: stable
+
+      - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9
+        id: auth
+
+      - run: cargo publish --locked --no-verify
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

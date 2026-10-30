@@ -1,0 +1,40 @@
+---
+title: Overview
+description: The Popplio REST API powering Omniplex
+---
+
+Popplio is the REST API behind Omniplex. Everything the site does (listing
+bots and servers, votes, teams, webhooks) goes through it, and it's open for
+anyone to build against.
+
+## Base URL
+
+```
+https://api.omniplex.gg
+```
+
+## Authentication
+
+Authenticated requests send a token in the `Authorization` header, either on
+its own or prefixed with what it belongs to:
+
+```
+Authorization: Bot <token>
+```
+
+Each endpoint below says which kinds of token it accepts. See
+[Authentication](/docs/developer/authentication) for which token to use, and
+the [SDKs](/docs/sdks) if you'd rather not make these requests yourself.
+
+## In this section
+
+<Cards>
+  <Card
+    title="Endpoint Reference"
+    description="Every endpoint, generated from the API's OpenAPI schema."
+    href="/docs/api-reference/bots"
+  />
+</Cards>
+
+Rate limits, posting stats, and webhooks have moved to the
+[Developer](/docs/developer/rate-limits) section.

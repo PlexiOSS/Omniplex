@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- `request()` on both clients refuses a path that doesn't start with a
+  single `/`, or that would point the request at a different host, before
+  sending anything. A path such as `@attacker.example/` used to turn the
+  base URL into `https://api.omniplex.gg@attacker.example/` and send your
+  token there.
+
 ## [0.1.0] - 2026-10-29
 
 ### Added

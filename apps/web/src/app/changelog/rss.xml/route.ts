@@ -1,11 +1,6 @@
 import { changelogs } from "@/lib/api";
 import { BASE_URL } from "@/lib/api/config";
-
-const PROJECT_LABEL: Record<string, string> = {
-  popplio: "Popplio",
-  omniplex: "Omniplex",
-  keel: "Keel",
-};
+import { changelogLabel } from "@/lib/changelog";
 
 function escapeXml(value: string): string {
   return value
@@ -22,7 +17,7 @@ export async function GET() {
   const items = entries
     .map((entry) => {
       const title = escapeXml(
-        `${PROJECT_LABEL[entry.project] ?? entry.project}: ${entry.version}`,
+        `${changelogLabel(entry.project, entry.package)}: ${entry.version}`,
       );
       const link = `${BASE_URL}/changelog`;
       const pubDate = new Date(entry.created_at).toUTCString();

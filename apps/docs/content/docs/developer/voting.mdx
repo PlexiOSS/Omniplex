@@ -1,0 +1,92 @@
+---
+title: Votes
+description: Checking whether someone voted, getting told when they do, and how votes are cast.
+---
+
+For cooldowns, the weekend bonus and vote credits, see the
+[Voting Rules & FAQ](https://omniplex.gg/kb/voting/voting-rules) on the main
+site. This page covers what your bot or integration can do with votes.
+
+## Checking a vote
+
+```
+GET /users/{uid}/{target_type}/{target_id}/votes
+```
+
+`target_type` is `bot` or `server`. This endpoint is public and needs no token,
+so it's the simplest way to reward voters: when a user runs a command, check
+whether they've voted.
+
+```json
+{
+  "has_voted": true,
+  "valid_votes": [
+    {
+      "itag": "0b6a9c2e-...",
+      "target_type": "bot",
+      "target_id": "1234567890123456789",
+      "author": "510065483693817867",
+      "upvote": true,
+      "void": false,
+      "void_reason": null,
+      "voided_at": null,
+      "created_at": "2026-10-29T12:00:00Z",
+      "vote_num": 1,
+      "credit_redeem": null,
+      "immutable": false,
+      "auto": false
+    }
+  ],
+  "vote_info": {
+    "per_user": 1,
+    "vote_time": 12,
+    "vote_credits": true,
+    "multiple_votes": true,
+    "supports_upvotes": true,
+    "supports_downvotes": false,
+    "supports_partial_vote_credits_redeem": true,
+    "weekend_bonus": false
+  },
+  "wait": { "hours": 11, "minutes": 59, "seconds": 3 }
+}
+```
+
+| Field | Notes |
+|---|---|
+| `has_voted` | For listings that allow repeat votes, whether the user voted within the current vote window. Otherwise, whether they've ever voted. |
+| `valid_votes` | The user's votes that haven't been voided. `vote_num` is 2 for the second vote of a double vote. `auto` is `true` for votes cast by an Auto-vote subscription. |
+| `vote_info.vote_time` | Hours between votes. |
+| `vote_info.per_user` | How many votes one vote counts as. It's 2 on a double-vote weekend. |
+| `wait` | How long until the user can vote again, or `null` if they can vote now. |
+
+Every [SDK](/docs/sdks) wraps this as `hasVoted` / `has_voted` and
+`getBotVote` / `get_bot_vote`, with server versions too.
+
+## Getting told about votes
+
+To react to a vote the moment it happens, instead of when the user next runs a
+command, set up a [webhook](/docs/developer/webhooks). Each vote sends a
+`NEW_VOTE` event with the voter, the vote count and whether it was an upvote or
+an Auto-vote.
+
+## Casting a vote
+
+```
+PUT /users/{uid}/{target_type}/{target_id}/votes?upvote=true
+```
+
+This needs a **user** session, and user sessions are only accepted from
+omniplex.gg itself, so a third-party app or bot can't cast votes on a user's
+behalf. It's documented here so you know how votes reach your listing.
+
+`upvote` is required and must be `true` or `false`. Bots and servers ask for a
+[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) captcha
+unless the owner has turned captchas off. When one is needed, the body is:
+
+```json
+{ "token": "..." }
+```
+
+where `token` comes from a Turnstile widget rendered with the action `vote`.
+Each token works once. A missing, expired or invalid token gets a `400` asking
+the user to complete the captcha again. Packs and teams never need one.

@@ -1,0 +1,58 @@
+name: CI (Rust SDK)
+
+on:
+  push:
+    branches: [master, development]
+    paths:
+      - "packages/sdk-rust/**"
+      - ".github/workflows/ci-rust.yml"
+  pull_request:
+    paths:
+      - "packages/sdk-rust/**"
+      - ".github/workflows/ci-rust.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-rust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust SDK (${{ matrix.toolchain }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: ["1.85", "stable"]
+    defaults:
+      run:
+        working-directory: packages/sdk-rust
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
+        with:
+          workspaces: packages/sdk-rust
+
+      - run: cargo fmt --check
+
+      - name: Lint the library on the minimum Rust version
+        if: matrix.toolchain == '1.85'
+        run: cargo clippy --lib --locked -- -D warnings
+
+      - name: Lint everything
+        if: matrix.toolchain != '1.85'
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test
+        if: matrix.toolchain != '1.85'
+        run: cargo test --locked

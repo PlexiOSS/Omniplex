@@ -1,0 +1,126 @@
+---
+title: Python
+description: Post stats, check votes and verify webhooks with omniplex-sdk.
+---
+
+`omniplex-sdk` needs Python 3.11 or newer and is built on
+[httpx](https://www.python-httpx.org/). It has a sync client, `Omniplex`, and an
+async client, `AsyncOmniplex`, with the same methods. It works with discord.py,
+nextcord, disnake, hikari and anything else.
+
+```sh
+pip install omniplex-sdk
+```
+
+The package installs as `omniplex-sdk` and imports as `omniplex`.
+
+## Posting stats
+
+```python
+import os
+from omniplex import AsyncOmniplex
+
+omniplex = AsyncOmniplex(os.environ["OMNIPLEX_TOKEN"])
+
+await omniplex.post_bot_stats(servers=len(bot.guilds), shards=bot.shard_count or 1, status="online")
+```
+
+Or let the SDK post for you. `auto_post_bot_stats` posts once straight away, then
+every 30 minutes (or `interval` seconds, at least 60), in an `asyncio.Task` you
+can cancel:
+
+```python
+import discord
+from omniplex import AsyncOmniplex
+
+class Bot(discord.Client):
+    async def setup_hook(self):
+        self.omniplex = AsyncOmniplex(os.environ["OMNIPLEX_TOKEN"])
+        self.stats_task = self.omniplex.auto_post_bot_stats(
+            lambda: {"servers": len(self.guilds), "shards": self.shard_count or 1},
+            interval=15 * 60,
+        )
+```
+
+The function you pass can be a normal function or a coroutine function. Failed
+posts are logged on the `omniplex` logger, or passed to `on_error=` if you give
+one.
+
+`status` reports your bot's presence: `online`, `idle`, `dnd` or `offline`.
+Omniplex keeps showing the last value you posted, so post it regularly if you
+use it. See [Posting Bot Stats](/docs/developer/bot-stats).
+
+For a server, use a server token and
+`post_server_stats(total_members=..., online_members=...)`.
+
+## Checking votes
+
+Checking votes doesn't need a token.
+
+```python
+from omniplex import Omniplex
+
+with Omniplex() as omniplex:
+    if omniplex.has_voted(bot_id, user_id):
+        ...  # reward them
+
+    vote = omniplex.get_bot_vote(bot_id, user_id)
+    print(vote["wait"])  # how long until they can vote again
+```
+
+`has_voted_for_server` and `get_server_vote` do the same for servers.
+`get_bot`, `get_server` and `get_user` read public data; pass
+`include_long=True` to include the long description. Every method exists on both
+clients, with `await` on `AsyncOmniplex`.
+
+## Webhooks
+
+Set a secret on your webhook in the dashboard and choose **HMAC signature**.
+The SDK also verifies the older `splashtail` and `simple-auth` methods.
+
+Always verify the request using the **raw** body. Omniplex occasionally sends one
+signed with the wrong secret to check that your endpoint rejects it, so return
+`401` when verification fails.
+
+```python
+from fastapi import FastAPI, Request, Response
+from omniplex import WebhookVerificationError, verify_webhook
+
+app = FastAPI()
+
+@app.post("/omniplex")
+async def omniplex_webhook(request: Request):
+    try:
+        event = verify_webhook(await request.body(), request.headers, SECRET)
+    except WebhookVerificationError:
+        return Response(status_code=401)
+
+    if event["type"] == "NEW_VOTE" and not event["data"]["downvote"] and not event["data"]["auto"]:
+        await reward_voter(event["creator"]["id"])
+    return Response(status_code=204)
+```
+
+With Flask, pass `request.get_data()` and `request.headers`. Events are
+`TypedDict`s; the [webhooks page](/docs/developer/webhooks#events) lists every
+event and its fields.
+
+## Errors
+
+Failed requests raise `OmniplexError` with the HTTP `status`, the API's
+`message`, any validation `context`, and `retry_after` in seconds when you're
+rate limited. Posting without a token raises before any request is made.
+
+## Options
+
+```python
+Omniplex(
+    token=None,                         # needed for posting stats
+    base_url="https://api.omniplex.gg", # the default
+    max_retries=2,                      # retries for rate limits and failed GETs
+    timeout=10.0,
+    http_client=None,                   # bring your own httpx.Client
+)
+```
+
+`AsyncOmniplex` takes the same options, with an `httpx.AsyncClient`. Close
+clients you create with `close()` / `aclose()`, or use them as context managers.
