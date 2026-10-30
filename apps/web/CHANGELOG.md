@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Your login session is now kept in an HttpOnly cookie set by the API,
+  instead of in `localStorage` and a cookie page scripts could read. A
+  script injected into the site can no longer steal your session. Everyone
+  is signed out once when this ships and needs to sign in again.
+- The browser now calls the API at `/api/v1` on the site's own host, so the
+  session cookie belongs to `omniplex.gg` alone and no other subdomain ever
+  receives it. Production needs a reverse-proxy route sending `/api/v1/*`
+  to Popplio with the prefix removed. `bun dev` rewrites `/api/v1` to
+  `NEXT_PUBLIC_API_URL` itself. `NEXT_PUBLIC_BROWSER_API_URL` overrides the
+  path. Server-side rendering still calls `NEXT_PUBLIC_API_URL` directly.
+- Signing out now ends the session on the server too, through Popplio's new
+  `POST /auth/logout`. Before, it only forgot the session in your browser,
+  and the token kept working until it expired.
+- Every page sends a strict Content-Security-Policy. Only scripts carrying
+  that request's nonce can run, so injected scripts are blocked. Styles,
+  images, media and iframes stay open to any source, since listings rely on
+  them. Pages are now rendered on each request, because the nonce changes
+  every time.
+- `NEXT_PUBLIC_SESSION_MODE=header` keeps the old behaviour for setups where
+  the site and the API don't share a parent domain, such as running on
+  localhost against the production API. Leave it unset in production.
+
 ### Fixed
 
 - The "More actions" menu on bot and server cards in the dashboard opens

@@ -13,6 +13,7 @@ import {
   Plus_Jakarta_Sans,
   Space_Grotesk,
 } from "next/font/google";
+import { headers } from "next/headers";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { HideOnAdmin } from "@/components/layout/HideOnAdmin";
@@ -117,9 +118,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html
       lang="en"
@@ -130,8 +133,12 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col bg-white text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
         {/* Prevent accent/font flash before hydration */}
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static first-paint preferences script */}
-        <script dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }} />
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }}
+        />
         <JsonLd
+          nonce={nonce}
           data={{
             "@context": "https://schema.org",
             "@graph": [
@@ -164,7 +171,7 @@ export default function RootLayout({
             ],
           }}
         />
-        <ThemeProvider>
+        <ThemeProvider nonce={nonce}>
           <CustomizationProvider>
             <SoundPlayerProvider>
               <Header />

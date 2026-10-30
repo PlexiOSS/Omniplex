@@ -12,6 +12,8 @@ import { matchesDeclaredType } from "@/lib/cdn/safety";
 import { hasPermString } from "@/lib/permissions";
 import { ASSET_VERSION_METADATA_KEY } from "@/lib/s3/config";
 import { headObject, putObject, S3UnavailableError } from "@/lib/s3/objects";
+import { COOKIE_TOKEN } from "@/lib/utils/auth";
+import { getServerToken } from "@/lib/utils/serverSession";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 const SAFE_ID = /^[A-Za-z0-9_-]{1,100}$/;
@@ -227,7 +229,9 @@ export async function POST(req: Request) {
     }
   } else {
     const userId = form.get("userId");
-    const token = form.get("token");
+    const formToken = form.get("token");
+    const token =
+      formToken === COOKIE_TOKEN ? await getServerToken() : formToken;
     if (
       typeof userId !== "string" ||
       typeof token !== "string" ||

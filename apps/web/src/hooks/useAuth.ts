@@ -3,6 +3,7 @@
 // Copyright (C) 2026 NodeByte LTD
 
 import { useCallback, useEffect, useState } from "react";
+import { auth } from "@/lib/api";
 import type { AuthSession } from "@/lib/api/types";
 import { clearSession, getSession, saveSession } from "@/lib/utils/auth";
 
@@ -21,6 +22,8 @@ export function useAuth() {
   }, []);
 
   const logout = useCallback(() => {
+    const current = getSession();
+    if (current) auth.logout(current.token).catch(() => {});
     clearSession();
     setSession(null);
   }, []);

@@ -1,5 +1,5 @@
-import { clearSession } from "@/lib/utils/auth";
-import { API_URL, BASE_URL } from "./config";
+import { COOKIE_TOKEN, clearSession, HEADER_SESSIONS } from "@/lib/utils/auth";
+import { API_URL, BASE_URL, BROWSER_API_URL } from "./config";
 import type { ApiErrorBody } from "./types";
 
 export class ApiError extends Error {
@@ -37,18 +37,24 @@ async function request<T>(
 ): Promise<T> {
   const { token, cache, next, ...rest } = init;
 
+  const browser = typeof window !== "undefined";
+  const sendToken = token && token !== COOKIE_TOKEN;
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `User ${token}` } : {}),
-    ...(token && typeof window === "undefined" ? { Origin: BASE_URL } : {}),
+    ...(sendToken ? { Authorization: `User ${token}` } : {}),
+    ...(sendToken && !browser ? { Origin: BASE_URL } : {}),
     ...(rest.headers as Record<string, string>),
   };
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const base = browser && !HEADER_SESSIONS ? BROWSER_API_URL : API_URL;
+
+  const res = await fetch(`${base}${path}`, {
     ...rest,
     headers,
     cache,
     next,
+    ...(browser && !HEADER_SESSIONS ? { credentials: "include" } : {}),
   });
 
   if (!res.ok) {

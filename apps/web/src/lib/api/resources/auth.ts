@@ -1,3 +1,4 @@
+import { COOKIE_TOKEN, HEADER_SESSIONS } from "@/lib/utils/auth";
 import { client } from "../client";
 import type { AuthSession, TestAuthResult, User } from "../types";
 
@@ -34,13 +35,15 @@ export const authResource = {
       { cache: "no-store" },
     );
 
+    const token = HEADER_SESSIONS ? res.token : COOKIE_TOKEN;
+
     const user = await client.get<User>(`/users/${res.target_id}`, {
-      token: res.token,
+      token,
       cache: "no-store",
     });
 
     return {
-      token: res.token,
+      token,
       user_id: res.target_id,
       session_id: res.session_id,
       expires_at: Date.now() + 30 * 24 * 60 * 60 * 1000,
@@ -49,6 +52,9 @@ export const authResource = {
       display_name: user.user?.display_name ?? "",
     };
   },
+
+  logout: (token: string) =>
+    client.post<void>("/auth/logout", {}, { token, cache: "no-store" }),
 
   /** Checks whether a token is currently valid for a given target, without spending it on a real request. */
   testAuth: (authType: string, targetId: string, token: string) =>

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, staging]
+    branches: [master, development]
     paths-ignore:
       - "packages/sdk-python/**"
       - ".github/workflows/ci-python.yml"
