@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-30
+
 ### Security
 
 - `Client.Do` refuses a path that doesn't start with a single `/`, or that
@@ -16,8 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Printing a `*Client` with `fmt` (`%v`, `%+v` or `%#v`) shows the token as
   `[redacted]` instead of the token itself, so logging the client can't leak
   it.
-
-## [0.1.0] - 2026-10-30
 
 ### Added
 
