@@ -15,23 +15,23 @@ https://api.omniplex.gg
 
 ## Authentication
 
-Authenticated requests send a token in one of two headers, depending on
-whether you're acting as a user or a bot:
+Authenticated requests send a token in the `Authorization` header, either on
+its own or prefixed with what it belongs to:
 
 ```
-User-Auth: <token>
-Bot-Auth: <token>
+Authorization: Bot <token>
 ```
 
-The specific auth requirement (if any) is called out on each endpoint in
-the reference below.
+Each endpoint below says which kinds of token it accepts. See
+[Authentication](/docs/developer/authentication) for which token to use, and
+the [SDKs](/docs/sdks) if you'd rather not make these requests yourself.
 
 ## In this section
 
 <Cards>
   <Card
     title="Endpoint Reference"
-    description="Every endpoint, generated from the live OpenAPI schema."
+    description="Every endpoint, generated from the API's OpenAPI schema."
     href="/docs/api-reference/bots"
   />
 </Cards>

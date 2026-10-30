@@ -29,6 +29,18 @@ type Client struct {
 	userAgent  string
 }
 
+func (c *Client) String() string {
+	token := "none"
+	if c.token != "" {
+		token = "[redacted]"
+	}
+	return fmt.Sprintf("omniplex.Client{baseURL: %q, token: %s, maxRetries: %d}", c.baseURL, token, c.maxRetries)
+}
+
+func (c *Client) GoString() string {
+	return c.String()
+}
+
 type Option func(*Client)
 
 func WithBaseURL(baseURL string) Option {

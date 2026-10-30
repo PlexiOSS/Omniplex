@@ -45,6 +45,14 @@ jobs:
 
       - run: cargo fmt --check
 
-      - run: cargo clippy --all-targets --locked -- -D warnings
+      - name: Lint the library on the minimum Rust version
+        if: matrix.toolchain == '1.85'
+        run: cargo clippy --lib --locked -- -D warnings
 
-      - run: cargo test --locked
+      - name: Lint everything
+        if: matrix.toolchain != '1.85'
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test
+        if: matrix.toolchain != '1.85'
+        run: cargo test --locked

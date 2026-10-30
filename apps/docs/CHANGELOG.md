@@ -23,8 +23,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   systemd service.
 - Upgraded to Fumadocs 16 on Next.js 16, React 19 and Tailwind CSS 4, the
   same versions as the website.
-- The API reference is generated from a committed `openapi.json` snapshot
-  instead of the live API, so builds don't depend on the API being up.
+- The API reference is built from a committed `openapi.json` snapshot
+  instead of the live API, so builds don't depend on the API being up. Its
+  pages are created from the schema at build time by `fumadocs-openapi` 12,
+  so there are no generated MDX files to keep in sync; `bun run openapi`
+  only refreshes the snapshot.
+- Upgraded to `fumadocs-core` and `fumadocs-ui` 16.17.9 and
+  `fumadocs-openapi` 12.5.7, which fixes an open-proxy issue in the OpenAPI
+  package's `createProxy()`. The docs never used it, so the site wasn't
+  exposed.
 - The Votes page is about checking votes and receiving vote webhooks. It
   explains that votes are cast from omniplex.gg with a Cloudflare Turnstile
   captcha, replacing the old proof-of-work captcha steps.

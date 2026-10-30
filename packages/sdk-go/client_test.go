@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"sync/atomic"
+	"sync"
 	"testing"
 	"time"
 )
@@ -18,20 +19,28 @@ type recorded struct {
 	body               map[string]any
 }
 
-func server(t *testing.T, handler func(w http.ResponseWriter, r *http.Request, n int)) (*Client, *[]recorded) {
+func server(t *testing.T, handler func(w http.ResponseWriter, r *http.Request, n int)) (*Client, func() []recorded) {
 	t.Helper()
+	var mu sync.Mutex
 	var calls []recorded
-	var n int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := recorded{method: r.Method, path: r.URL.RequestURI(), auth: r.Header.Get("Authorization")}
 		if b, _ := io.ReadAll(r.Body); len(b) > 0 {
 			json.Unmarshal(b, &rec.body)
 		}
+		mu.Lock()
 		calls = append(calls, rec)
-		handler(w, r, int(atomic.AddInt32(&n, 1)))
+		n := len(calls)
+		mu.Unlock()
+		handler(w, r, n)
 	}))
 	t.Cleanup(srv.Close)
-	return New("tok", WithBaseURL(srv.URL+"/")), &calls
+	snapshot := func() []recorded {
+		mu.Lock()
+		defer mu.Unlock()
+		return append([]recorded(nil), calls...)
+	}
+	return New("tok", WithBaseURL(srv.URL+"/")), snapshot
 }
 
 func TestPostBotStatsSendsTokenAndSnakeCase(t *testing.T) {
@@ -42,7 +51,7 @@ func TestPostBotStatsSendsTokenAndSnakeCase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := (*calls)[0]
+	got := calls()[0]
 	if got.method != "POST" || got.path != "/bots/stats" || got.auth != "tok" {
 		t.Fatalf("unexpected request %+v", got)
 	}
@@ -69,7 +78,7 @@ func TestPostServerStats(t *testing.T) {
 	if err := c.PostServerStats(context.Background(), ServerStats{TotalMembers: Int(120), OnlineMembers: Int(40)}); err != nil {
 		t.Fatal(err)
 	}
-	got := (*calls)[0]
+	got := calls()[0]
 	if got.path != "/servers/stats" || got.body["total_members"] != 120.0 || got.body["online_members"] != 40.0 {
 		t.Fatalf("unexpected request %+v", got)
 	}
@@ -81,7 +90,7 @@ func TestPostingWithoutTokenFailsBeforeRequest(t *testing.T) {
 	if !errors.Is(err, ErrMissingToken) {
 		t.Fatalf("err = %v, want ErrMissingToken", err)
 	}
-	if len(*calls) != 0 {
+	if len(calls()) != 0 {
 		t.Fatal("a request was made")
 	}
 }
@@ -100,8 +109,8 @@ func TestHasVotedUsesPublicEndpoint(t *testing.T) {
 	if vote.Wait.Duration() != 11*time.Hour+59*time.Minute+3*time.Second {
 		t.Fatalf("wait = %v", vote.Wait.Duration())
 	}
-	if (*calls)[0].path != "/users/222/bots/111/votes" || (*calls)[0].auth != "" {
-		t.Fatalf("unexpected request %+v", (*calls)[0])
+	if calls()[0].path != "/users/222/bots/111/votes" || calls()[0].auth != "" {
+		t.Fatalf("unexpected request %+v", calls()[0])
 	}
 }
 
@@ -132,8 +141,8 @@ func TestRetriesAfter429(t *testing.T) {
 	if err := c.PostBotStats(context.Background(), BotStats{Servers: Int(5)}); err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 2 {
-		t.Fatalf("calls = %d, want 2", len(*calls))
+	if len(calls()) != 2 {
+		t.Fatalf("calls = %d, want 2", len(calls()))
 	}
 }
 
@@ -148,13 +157,13 @@ func TestRetriesGetsOnServerErrorsButNotPosts(t *testing.T) {
 	if _, err := c.GetUser(context.Background(), "1"); err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 2 {
-		t.Fatalf("GET calls = %d, want 2", len(*calls))
+	if len(calls()) != 2 {
+		t.Fatalf("GET calls = %d, want 2", len(calls()))
 	}
 	err := c.PostBotStats(context.Background(), BotStats{Servers: Int(1)})
 	var apiErr *APIError
-	if !errors.As(err, &apiErr) || apiErr.Status != 503 || len(*calls) != 3 {
-		t.Fatalf("err = %v, calls = %d", err, len(*calls))
+	if !errors.As(err, &apiErr) || apiErr.Status != 503 || len(calls()) != 3 {
+		t.Fatalf("err = %v, calls = %d", err, len(calls()))
 	}
 }
 
@@ -179,7 +188,7 @@ func TestAutoPostPostsImmediatelyAndStopsWithContext(t *testing.T) {
 		close(done)
 	}()
 	deadline := time.Now().Add(2 * time.Second)
-	for len(*calls) == 0 && time.Now().Before(deadline) {
+	for len(calls()) == 0 && time.Now().Before(deadline) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	cancel()
@@ -188,7 +197,16 @@ func TestAutoPostPostsImmediatelyAndStopsWithContext(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("AutoPostBotStats didn't stop")
 	}
-	if len(*calls) != 1 || (*calls)[0].body["servers"] != 7.0 {
-		t.Fatalf("calls = %+v", *calls)
+	if len(calls()) != 1 || calls()[0].body["servers"] != 7.0 {
+		t.Fatalf("calls = %+v", calls())
+	}
+}
+
+func TestPrintingTheClientNeverShowsTheToken(t *testing.T) {
+	c := New("super-secret-token")
+	for _, printed := range []string{fmt.Sprint(c), fmt.Sprintf("%v", c), fmt.Sprintf("%+v", c), fmt.Sprintf("%#v", c)} {
+		if strings.Contains(printed, "super-secret-token") || !strings.Contains(printed, "[redacted]") {
+			t.Fatalf("printed %q", printed)
+		}
 	}
 }

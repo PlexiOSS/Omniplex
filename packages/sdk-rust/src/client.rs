@@ -1,3 +1,4 @@
+use std::fmt;
 use std::future::Future;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
@@ -76,7 +77,7 @@ async fn api_error(res: Response) -> Error {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Omniplex {
     http: reqwest::Client,
     base_url: Arc<str>,
@@ -85,13 +86,39 @@ pub struct Omniplex {
     user_agent: Arc<str>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct OmniplexBuilder {
     http: Option<reqwest::Client>,
     base_url: String,
     token: Option<String>,
     max_retries: u32,
     user_agent: String,
+}
+
+fn redacted(token: Option<&str>) -> Option<&'static str> {
+    token.map(|_| "[redacted]")
+}
+
+impl fmt::Debug for Omniplex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Omniplex")
+            .field("base_url", &self.base_url)
+            .field("token", &redacted(self.token.as_deref()))
+            .field("max_retries", &self.max_retries)
+            .field("user_agent", &self.user_agent)
+            .finish_non_exhaustive()
+    }
+}
+
+impl fmt::Debug for OmniplexBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("OmniplexBuilder")
+            .field("base_url", &self.base_url)
+            .field("token", &redacted(self.token.as_deref()))
+            .field("max_retries", &self.max_retries)
+            .field("user_agent", &self.user_agent)
+            .finish_non_exhaustive()
+    }
 }
 
 impl Default for OmniplexBuilder {

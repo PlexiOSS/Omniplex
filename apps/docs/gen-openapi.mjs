@@ -1,6 +1,4 @@
 import { writeFile } from "node:fs/promises";
-import { generateFiles } from "fumadocs-openapi";
-import { createOpenAPI } from "fumadocs-openapi/server";
 
 const SPEC_URL = process.env.OPENAPI_URL ?? "https://api.omniplex.gg/openapi";
 const SCHEMA_REF = "#/components/schemas/";
@@ -39,14 +37,8 @@ fixRefs(spec);
 
 await writeFile("./openapi.json", `${JSON.stringify(spec, null, 2)}\n`);
 
-await generateFiles({
-  input: createOpenAPI({ input: ["./openapi.json"] }),
-  output: "./content/docs/api-reference",
-  per: "tag",
-});
-
 console.log(
-  `Generated the API reference from ${SPEC_URL}` +
+  `Saved the OpenAPI schema from ${SPEC_URL}` +
     (renamed.size
       ? ` (renamed ${renamed.size} schemas with "/" in their name)`
       : ""),

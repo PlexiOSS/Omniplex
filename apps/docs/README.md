@@ -19,14 +19,14 @@ Pages are MDX files under `content/docs/`. Each folder has a `meta.json` that se
 
 ## API reference
 
-`content/docs/api-reference/` is generated from Popplio's OpenAPI schema. Don't edit those pages by hand. To update them:
+The endpoint pages under `/docs/api-reference` are built from `openapi.json`, a snapshot of Popplio's OpenAPI schema, when the site builds. Only `content/docs/api-reference/index.mdx` and `meta.json` are real files. To update the schema:
 
 ```bash
 cd apps/docs
 bun run openapi
 ```
 
-This downloads the schema from `https://api.omniplex.gg/openapi` (set `OPENAPI_URL` to use another instance), saves it as `openapi.json`, and regenerates the pages. Commit both, so the docs always build from a known schema instead of whatever the live API returns at build time.
+This downloads the schema from `https://api.omniplex.gg/openapi` (set `OPENAPI_URL` to use another instance) and saves it as `openapi.json`. Commit it, so the docs always build from a known schema instead of whatever the live API returns at build time.
 
 The script renames schemas whose names contain `/`, such as `types.ItemList[popplio/types.ShopCoupon]`. Popplio's generator produces those for Go generic types, and they aren't valid in a JSON reference.
 

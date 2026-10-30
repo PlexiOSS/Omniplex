@@ -235,3 +235,18 @@ async fn auto_post_posts_straight_away_and_stops() {
     assert_eq!(*posted.lock().unwrap(), vec![Some(7)]);
     assert_eq!(server.received_requests().await.unwrap().len(), 1);
 }
+
+#[test]
+fn debug_output_never_includes_the_token() {
+    let builder = Omniplex::builder().token("super-secret-token");
+    let client = builder.clone().build();
+    for printed in [
+        format!("{builder:?}"),
+        format!("{client:?}"),
+        format!("{client:#?}"),
+    ] {
+        assert!(!printed.contains("super-secret-token"), "{printed}");
+        assert!(printed.contains("[redacted]"), "{printed}");
+    }
+    assert!(format!("{:?}", Omniplex::new()).contains("token: None"));
+}
