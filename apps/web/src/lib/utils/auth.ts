@@ -3,15 +3,19 @@
 import type { AuthSession } from "../api/types";
 
 const STORAGE_KEY = "wistala";
-export const SESSION_COOKIE = "omniplex_session";
+const LEGACY_COOKIE = "omniplex_session";
+export const SESSION_COOKIE = "popplio_session";
+export const COOKIE_TOKEN = "cookie";
+export const HEADER_SESSIONS =
+  process.env.NEXT_PUBLIC_SESSION_MODE === "header";
 
 function writeSessionCookie(session: AuthSession): void {
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(session.token)}; Path=/; Expires=${new Date(session.expires_at).toUTCString()}; SameSite=Lax${secure}`;
 }
 
-function removeSessionCookie(): void {
-  document.cookie = `${SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+function removeCookie(name: string): void {
+  document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
 }
 
 function hasSessionCookie(): boolean {
@@ -22,12 +26,17 @@ function hasSessionCookie(): boolean {
 
 export function getSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
+  removeCookie(LEGACY_COOKIE);
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return null;
   try {
     const session = JSON.parse(raw) as AuthSession;
+    if ((session.token === COOKIE_TOKEN) === HEADER_SESSIONS) {
+      clearSession();
+      return null;
+    }
     if (session.expires_at > Date.now()) {
-      if (!hasSessionCookie()) writeSessionCookie(session);
+      if (HEADER_SESSIONS && !hasSessionCookie()) writeSessionCookie(session);
       return session;
     }
     clearSession();
@@ -40,11 +49,12 @@ export function getSession(): AuthSession | null {
 
 export function saveSession(session: AuthSession): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-  writeSessionCookie(session);
+  if (HEADER_SESSIONS) writeSessionCookie(session);
 }
 
 export function clearSession(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEY);
-  removeSessionCookie();
+  removeCookie(LEGACY_COOKIE);
+  if (HEADER_SESSIONS) removeCookie(SESSION_COOKIE);
 }

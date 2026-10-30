@@ -43,22 +43,28 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+function linkHostIs(url: string, domains: string[]) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return domains.some((d) => host === d || host.endsWith(`.${d}`));
+  } catch {
+    return false;
+  }
+}
+
 function getLinkIcon(link: ApiLink) {
   const name = link.name.toLowerCase();
-  const url = link.value.toLowerCase();
-  if (name === "github" || url.includes("github.com")) return BsGithub;
+  const url = link.value;
+  if (name === "github" || linkHostIs(url, ["github.com"])) return BsGithub;
   if (
     name === "twitter" ||
     name === "x" ||
-    url.includes("twitter.com") ||
-    url.includes("x.com")
+    linkHostIs(url, ["twitter.com", "x.com"])
   )
     return BsTwitter;
   if (
     name === "discord" ||
-    url.includes("discord.gg") ||
-    url.includes("discord.com") ||
-    url.includes("discordapp.com")
+    linkHostIs(url, ["discord.gg", "discord.com", "discordapp.com"])
   )
     return BsDiscord;
   if (name === "website") return Globe;

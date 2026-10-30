@@ -4,6 +4,8 @@ import { DISCORD_CDN_URL, JAPI_URL } from "@/lib/api/config";
 import { isSafeImageType } from "@/lib/cdn/safety";
 
 const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
+const JAPI_HOST = new URL(JAPI_URL).hostname;
+const MAX_REDIRECTS = 3;
 const USER_AGENT = "Omniplex (+https://omniplex.gg)";
 const SNOWFLAKE = /^[0-9]{16,20}$/;
 const JAPI_BACKOFF_MS = 60_000;
@@ -32,18 +34,55 @@ export function isSnowflake(id: string): boolean {
   return SNOWFLAKE.test(id);
 }
 
+function allowedImageRequest(url: URL): URL | null {
+  if (url.protocol !== "https:" || url.port !== "") return null;
+  const base =
+    url.hostname === DISCORD_CDN_HOST
+      ? "https://cdn.discordapp.com"
+      : url.hostname === JAPI_HOST
+        ? "https://japi.rest"
+        : null;
+  if (!base) return null;
+  const out = new URL(base);
+  out.pathname = url.pathname;
+  out.search = url.search;
+  return out;
+}
+
+async function fetchFromAllowedHosts(
+  url: string,
+  timeoutMs: number,
+): Promise<{ res: Response; finalUrl: URL } | null> {
+  const signal = AbortSignal.timeout(timeoutMs);
+  let current = new URL(url);
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const target = allowedImageRequest(current);
+    if (!target) return null;
+    const res = await fetch(target, {
+      headers: { "User-Agent": USER_AGENT },
+      signal,
+      redirect: "manual",
+    });
+    const location = res.headers.get("location");
+    if (res.status < 300 || res.status >= 400 || !location) {
+      return { res, finalUrl: current };
+    }
+    await res.body?.cancel();
+    current = new URL(location, current);
+  }
+  return null;
+}
+
 export async function fetchDiscordImage(
   url: string,
   timeoutMs = 4000,
   viaJapi = false,
 ): Promise<DiscordImage | null> {
   try {
-    const res = await fetch(url, {
-      headers: { "User-Agent": USER_AGENT },
-      signal: AbortSignal.timeout(timeoutMs),
-    });
+    const fetched = await fetchFromAllowedHosts(url, timeoutMs);
+    if (!fetched) return null;
+    const { res, finalUrl } = fetched;
     if (viaJapi && isUpstreamFailure(res.status)) markJapiDown();
-    const finalUrl = new URL(res.url || url);
     const contentType = res.headers.get("content-type");
     if (
       !res.ok ||
@@ -90,6 +129,7 @@ export async function lookupBanner(userId: string): Promise<BannerLookup> {
       headers: { "User-Agent": USER_AGENT },
       signal: AbortSignal.timeout(3000),
       cache: "no-store",
+      redirect: "manual",
     });
     if (res.status === 400 || res.status === 404) {
       await res.body?.cancel();

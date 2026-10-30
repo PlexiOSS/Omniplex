@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Trailing slashes are removed from `baseUrl` with a simple loop instead of
+  a regular expression, which took quadratic time on a URL ending in many
+  slashes.
+
 ## [0.1.1] - 2026-10-29
 
 ### Fixed
