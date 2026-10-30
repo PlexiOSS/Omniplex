@@ -132,9 +132,9 @@ export default async function RootLayout({
     >
       <body className="flex min-h-screen flex-col bg-white text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
         {/* Prevent accent/font flash before hydration */}
-        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static first-paint preferences script */}
         <script
           nonce={nonce}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: static first-paint preferences script
           dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }}
         />
         <JsonLd
