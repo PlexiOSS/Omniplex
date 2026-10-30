@@ -1,0 +1,52 @@
+{
+  "name": "@omniplex/sdk",
+  "version": "0.1.1",
+  "description": "Official JavaScript and TypeScript SDK for the Omniplex API: post bot and server stats, check votes and verify webhooks.",
+  "license": "MIT",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "omniplex",
+    "discord",
+    "discord-bot",
+    "bot-list",
+    "votes",
+    "webhooks"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PlexiOSS/Omniplex.git",
+    "directory": "packages/sdk-js"
+  },
+  "homepage": "https://omniplex.gg/kb/developers",
+  "bugs": "https://github.com/PlexiOSS/Omniplex/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@omniplex/api-types": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "typescript": "^5"
+  }
+}

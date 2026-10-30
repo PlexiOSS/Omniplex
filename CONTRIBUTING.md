@@ -31,7 +31,7 @@ For anything beyond a small fix, open an issue first to discuss the change. This
 - Create a branch off `main` with a descriptive name, for example `fix/server-vote-count` or `feat/pack-editing`.
 - Keep pull requests focused on a single change. Unrelated fixes should be their own PR.
 - Match the existing code style. Run `bun run lint` before committing; `bun run format` will fix most issues automatically.
-- Follow the conventions documented in [AGENTS.md](AGENTS.md): component structure, the `zinc` color scale for neutrals, dark mode via the `dark:` prefix, and the API layer's separation between `src/lib/api/` and the rest of the app.
+- Follow the conventions documented in [AGENTS.md](AGENTS.md): component structure, the `zinc` color scale for neutrals, dark mode via the `dark:` prefix, and the API layer's separation between `apps/web/src/lib/api/` and the rest of the app. Python SDK changes should pass `ruff check`, `ruff format --check`, `mypy src` and `pytest` in `packages/sdk-python`.
 - Prefer server components unless a component needs hooks, event handlers, or browser APIs.
 - Don't introduce new dependencies for something a few lines of code can handle.
 
@@ -43,7 +43,7 @@ Write commit messages that explain why a change was made, not just what changed.
 
 1. Push your branch and open a pull request against `main`.
 2. Describe what the PR does and why. Link any related issues.
-3. Make sure `bun run lint` and `bun run build` both pass.
+3. Make sure `bun run lint`, `bun run typecheck`, `bun run test` and `bun run build` all pass from the repo root.
 4. Be responsive to review feedback. We may ask for changes before merging.
 
 ## Reporting bugs

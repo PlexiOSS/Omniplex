@@ -1,0 +1,43 @@
+{
+  "name": "@omniplex/api-types",
+  "version": "0.1.1",
+  "description": "TypeScript types for the Omniplex API (Popplio).",
+  "license": "MIT",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "omniplex",
+    "discord",
+    "discord-bot",
+    "bot-list",
+    "types"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PlexiOSS/Omniplex.git",
+    "directory": "packages/api-types"
+  },
+  "homepage": "https://omniplex.gg",
+  "bugs": "https://github.com/PlexiOSS/Omniplex/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check ."
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "hmac": {
+    "body": "{\"creator\":{\"id\":\"510065483693817867\",\"username\":\"sleepy\",\"display_name\":\"Sleepy\",\"avatar\":\"https://cdn.discordapp.com/embed/avatars/0.png\",\"bot\":false,\"status\":\"online\",\"extra_data\":{}},\"type\":\"NEW_VOTE\",\"data\":{\"votes\":12,\"per_user\":2,\"downvote\":false,\"auto\":false},\"targets\":{\"bot\":{\"id\":\"1234567890123456789\",\"username\":\"Mellow\",\"display_name\":\"Mellow\",\"avatar\":\"https://cdn.discordapp.com/embed/avatars/1.png\",\"bot\":true,\"status\":\"online\",\"extra_data\":{}}},\"metadata\":{\"created_at\":1761700000,\"test\":false}}",
+    "signature": "sha256=1807f189539ff993b13891981b02cbf699b354f1bd2841e818bde36d41eefaf3"
+  },
+  "payload": "{\"creator\":{\"id\":\"510065483693817867\",\"username\":\"sleepy\",\"display_name\":\"Sleepy\",\"avatar\":\"https://cdn.discordapp.com/embed/avatars/0.png\",\"bot\":false,\"status\":\"online\",\"extra_data\":{}},\"type\":\"NEW_VOTE\",\"data\":{\"votes\":12,\"per_user\":2,\"downvote\":false,\"auto\":false},\"targets\":{\"bot\":{\"id\":\"1234567890123456789\",\"username\":\"Mellow\",\"display_name\":\"Mellow\",\"avatar\":\"https://cdn.discordapp.com/embed/avatars/1.png\",\"bot\":true,\"status\":\"online\",\"extra_data\":{}}},\"metadata\":{\"created_at\":1761700000,\"test\":false}}",
+  "secret": "sdk-fixture-secret-0123456789",
+  "splashtail": {
+    "body": "1cb5f35d7a798c7f2c02084832c430685c1c3043fe4f2dd5fb249f09ca0c791d1a541727ad14c759e506ed5da7bea4fcd2b6893b6031222e9215749a72614953e36b6f4a6222f7b020f9ab958736676f18a36981913fa4449e03b29d153a683d7480115e65816570826c5d09bcbe2c4586be8b7ed64046980eb505f72d6a66b40f1eef2d1ab4132cd75528df75c602125778d7051aeda03b09c440d90a07dfe076094ba75f061d58a6071a30e2a10a2ab2583f8b3e8a91722bf9233303dc4aa44d7ef0c56b6238616fe228046f25d276df9de8ab241b4419cdbf16864b56fcd875c61975e7c2b5ee3dfe7b72a833f6e89a888fb91f356d759a860f34ddbe44441a6e9a7091fa7d01f3c4d3d70562b48c080350fe915ea0864b0a2838e03bde483347ffd82cb048a7dc899594aac67d40b31b54740a577ccc3bffd1391b497714a4d04bdef19ef7d03d5928b612df96b994a3d5b3592b5939f8fad0ff728eff5067fac3621dbcddb32a771a488f99c07e162a7b01b8648759979d664b0c73c231e1cf291d5e5b139179b7a782de3ed8020fe7dd1f06f8833b6542bcbe95cc82369620cff4fd3a6d804c82f9ebff2b0cdefacce244f9386cc1d1767d1e40a1c1a62b39da627625e8fcfd0e43196d8623505ce286a7ecd038fdd3e32ee5505119d1377aa737b62fbfe58d697ea658db625db43e6c23a5225d47a8933bd22d5ea7085dad58d47e051f028442406a65b21974ee25f5ff01a183cf55fdca9d",
+    "nonce": "eKBAmidbjiWSKsvB",
+    "signature": "7f1d0c8f889232b0396b67bedf39a66bd2fbd8da14c4beac4ba818fe4ebc885018a38057b5280a8e24e1bb643c84edde487d5672fd51943019ba5e5c5f772a0d"
+  }
+}
