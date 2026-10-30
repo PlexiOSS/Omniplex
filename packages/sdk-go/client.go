@@ -109,7 +109,10 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, auth boo
 		return ErrMissingToken
 	}
 
-	target := c.baseURL + path
+	target, err := c.resolve(path)
+	if err != nil {
+		return err
+	}
 
 	for attempt := 0; ; attempt++ {
 		canRetry := attempt < c.maxRetries
@@ -176,6 +179,24 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, auth boo
 		}
 		return nil
 	}
+}
+
+func (c *Client) resolve(path string) (string, error) {
+	if !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") || strings.ContainsRune(path, '\\') {
+		return "", fmt.Errorf("omniplex: request path %q must start with a single / and stay on the API host", path)
+	}
+	base, err := url.Parse(c.baseURL)
+	if err != nil {
+		return "", fmt.Errorf("omniplex: invalid base URL: %w", err)
+	}
+	target, err := url.Parse(c.baseURL + path)
+	if err != nil {
+		return "", fmt.Errorf("omniplex: invalid request path %q: %w", path, err)
+	}
+	if target.Scheme != base.Scheme || target.Host != base.Host || target.User != nil {
+		return "", fmt.Errorf("omniplex: request path %q must stay on the API host", path)
+	}
+	return target.String(), nil
 }
 
 func drain(res *http.Response) {

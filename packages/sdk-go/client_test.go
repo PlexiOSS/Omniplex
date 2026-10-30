@@ -210,3 +210,27 @@ func TestPrintingTheClientNeverShowsTheToken(t *testing.T) {
 		}
 	}
 }
+
+func TestDoRefusesPathsThatLeaveTheAPIHost(t *testing.T) {
+	c, calls := server(t, func(w http.ResponseWriter, r *http.Request, n int) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+	for _, path := range []string{"@attacker.example/", "attacker.example/x", "//attacker.example/x", "/\\attacker.example", ""} {
+		if err := c.Do(context.Background(), http.MethodPost, path, nil, true, nil); err == nil {
+			t.Fatalf("Do(%q) was allowed", path)
+		}
+	}
+	if len(calls()) != 0 {
+		t.Fatalf("a request was sent: %+v", calls())
+	}
+	for _, path := range []string{"/users/1?x=y", "/bots/@all", "/users/1/bots/2@x/votes"} {
+		if err := c.Do(context.Background(), http.MethodGet, path, nil, false, nil); err != nil {
+			t.Fatalf("Do(%q) failed: %v", path, err)
+		}
+	}
+	for _, got := range calls() {
+		if !strings.HasPrefix(got.path, "/") {
+			t.Fatalf("unexpected request path %q", got.path)
+		}
+	}
+}

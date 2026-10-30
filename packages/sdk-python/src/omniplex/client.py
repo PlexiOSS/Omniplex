@@ -5,7 +5,7 @@ import logging
 import time
 from collections.abc import Awaitable, Callable
 from typing import Any, cast
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 import httpx
 
@@ -52,6 +52,24 @@ def _server_stats_body(
 ) -> dict[str, Any]:
     body = {"total_members": total_members, "online_members": online_members}
     return {k: v for k, v in body.items() if v is not None}
+
+
+def _resolve_url(base_url: str, path: str) -> str:
+    error = OmniplexError(
+        0, f"Request path {path!r} must start with a single / and stay on the API host."
+    )
+    if not path.startswith("/") or path.startswith("//") or "\\" in path:
+        raise error
+    base = urlsplit(base_url)
+    target = urlsplit(base_url + path)
+    if (
+        target.scheme != base.scheme
+        or target.netloc != base.netloc
+        or target.username is not None
+        or target.password is not None
+    ):
+        raise error
+    return base_url + path
 
 
 def _missing_token() -> OmniplexError:
@@ -140,7 +158,7 @@ class Omniplex(_Base):
         auth: bool = False,
     ) -> Any:
         headers = self._request_headers(auth)
-        url = f"{self.base_url}{path}"
+        url = _resolve_url(self.base_url, path)
         attempt = 0
         while True:
             try:
@@ -258,7 +276,7 @@ class AsyncOmniplex(_Base):
         auth: bool = False,
     ) -> Any:
         headers = self._request_headers(auth)
-        url = f"{self.base_url}{path}"
+        url = _resolve_url(self.base_url, path)
         attempt = 0
         while True:
             try:

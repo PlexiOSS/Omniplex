@@ -164,3 +164,26 @@ test("autoPostBotStats posts straight away and stops cleanly", async () => {
   expect(calls).toHaveLength(1);
   expect(posted).toEqual([7]);
 });
+
+test("request refuses paths that leave the API host", async () => {
+  const { fetch, calls } = mockFetch([]);
+  const client = new Omniplex({ token: "t", fetch });
+  for (const path of [
+    "@attacker.example/",
+    "attacker.example/x",
+    "//attacker.example/x",
+    "/\\attacker.example",
+    "",
+  ]) {
+    await expect(client.request(path, { auth: true })).rejects.toBeInstanceOf(
+      OmniplexError,
+    );
+  }
+  expect(calls).toHaveLength(0);
+});
+
+test("request allows @ inside a path", async () => {
+  const { fetch, calls } = mockFetch([json(200, [])]);
+  await new Omniplex({ fetch }).request("/bots/@all");
+  expect(calls[0]?.url).toBe("https://api.omniplex.gg/bots/@all");
+});
