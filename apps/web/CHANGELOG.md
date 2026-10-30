@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The "More actions" menu on bot and server cards in the dashboard opens
+  in full instead of being cut off by the card.
+
 ## [1.11.0] - 2026-10-29
 
 ### Added

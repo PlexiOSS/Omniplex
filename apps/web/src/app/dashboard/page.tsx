@@ -397,7 +397,7 @@ function BotItem({
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
         <Avatar
           src={mirroredAvatarUrl("bots", bot.bot_id, bot.user.avatar)}
@@ -437,7 +437,7 @@ function BotItem({
       )}
 
       <div className="min-h-4 flex-1" />
-      <div className="-mx-4 -mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
+      <div className="-mx-4 -mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-b-[15px] border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
         <span className="whitespace-nowrap">
           {formatCountLabel(bot.approximate_votes, "vote")}
         </span>
@@ -723,7 +723,7 @@ function ServerItem({
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start gap-3">
         <Avatar src={avatarSrc} alt={server.name} size={44} />
         <div className="flex-1 min-w-0">
@@ -759,7 +759,7 @@ function ServerItem({
       )}
 
       <div className="min-h-4 flex-1" />
-      <div className="-mx-4 -mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
+      <div className="-mx-4 -mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-b-[15px] border-t border-zinc-100 bg-zinc-50/60 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
         <span className="whitespace-nowrap">
           {formatCountLabel(server.approximate_votes, "vote")}
         </span>
