@@ -32,6 +32,12 @@ export interface AutoPostOptions {
   onError?: (error: unknown) => void;
 }
 
+function trimTrailingSlashes(url: string): string {
+  let end = url.length;
+  while (end > 0 && url[end - 1] === "/") end--;
+  return url.slice(0, end);
+}
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const backoff = (attempt: number) => Math.min(500 * 2 ** attempt, 8_000);
 const isBrowser =
@@ -45,7 +51,7 @@ export class Omniplex {
   readonly #userAgent: string;
 
   constructor(options: OmniplexOptions = {}) {
-    this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
+    this.baseUrl = trimTrailingSlashes(options.baseUrl ?? DEFAULT_BASE_URL);
     this.#token = options.token;
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
     this.#maxRetries = Math.max(0, options.maxRetries ?? 2);

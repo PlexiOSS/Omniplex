@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the token kept working until it expired. If that request fails twice,
   you stay signed in on the site, so it never shows you signed out while
   the session still works.
+- The Discord avatar and banner mirrors only fetch from `cdn.discordapp.com`
+  and japi.rest. They check every redirect before following it, instead of
+  following redirects anywhere and checking only where they ended up. A
+  bad japi.rest response could otherwise have made the server request
+  internal addresses.
 - Uploads made with the session cookie are only accepted from the site
   itself. Pages on other `omniplex.gg` subdomains count as the same site
   for the cookie, so without this check they could have uploaded images as
@@ -39,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Link icons on profiles match the link's real domain. A link such as
+  `example.com/?github.com` showed the GitHub icon.
 - The "More actions" menu on bot and server cards in the dashboard opens
   in full instead of being cut off by the card.
 

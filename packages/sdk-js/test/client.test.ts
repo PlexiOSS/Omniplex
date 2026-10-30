@@ -76,6 +76,21 @@ describe("stats", () => {
   });
 });
 
+describe("baseUrl", () => {
+  test("trailing slashes are removed quickly, however many there are", async () => {
+    const { fetch, calls } = mockFetch([json(200, { id: "1" })]);
+    const started = performance.now();
+    const client = new Omniplex({
+      fetch,
+      baseUrl: `https://api.example${"/".repeat(100_000)}`,
+    });
+    expect(performance.now() - started).toBeLessThan(100);
+    expect(client.baseUrl).toBe("https://api.example");
+    await client.getUser("1");
+    expect(calls[0]?.url).toBe("https://api.example/users/1");
+  });
+});
+
 describe("votes", () => {
   test("hasVoted reads has_voted from the public vote endpoint", async () => {
     const { fetch, calls } = mockFetch([
