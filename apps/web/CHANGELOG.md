@@ -7,20 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- The "Official SDKs" knowledge base article is a short overview that links
-  to each SDK's guide on docs.omniplex.gg, now that the developer docs live
-  in this repo and cover the SDKs in full.
-- The developer articles say **API sessions**, the dashboard's real label,
-  instead of **Tokens**, and mention all four SDKs.
-
-### Fixed
-
-- The API Tokens article no longer suggests a personal token can be used from
-  a script. Your own sessions only work on omniplex.gg, so it now says to use
-  a bot or server token.
-
 ## [1.12.0] - 2026-10-30
 
 ### Added
@@ -33,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Staff can set a package on a changelog entry in the admin panel. It
   accepts any package name, with the known ones suggested.
 - The "Official SDKs" article covers the new Go and Rust SDKs.
+
+### Changed
+
+- The "Official SDKs" knowledge base article is a short overview that links
+  to each SDK's guide on docs.omniplex.gg, now that the developer docs live
+  in this repo and cover the SDKs in full.
+- The developer articles say **API sessions**, the dashboard's real label,
+  instead of **Tokens**, and mention all four SDKs.
 
 ### Security
 
@@ -72,6 +66,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The API Tokens article no longer suggests a personal token can be used from
+  a script. Your own sessions only work on omniplex.gg, so it now says to use
+  a bot or server token.
 - Link icons on profiles match the link's real domain. A link such as
   `example.com/?github.com` showed the GitHub icon.
 - The "More actions" menu on bot and server cards in the dashboard opens
