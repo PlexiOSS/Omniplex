@@ -1,0 +1,54 @@
+---
+title: Rate Limits
+description: How Popplio's rate limiting works and how to handle it.
+---
+
+Most endpoints are rate limited. Limits are scoped per endpoint (or a group
+of related endpoints sharing a "bucket") and, by default, per IP address,
+some endpoints key on something else instead, such as the authenticated
+user, where that makes more sense.
+
+## Response
+
+When you exceed a limit, you get back:
+
+- **Status**: `429 Too Many Requests`
+- **Body**: a JSON error message telling you how long to wait.
+
+Every rate-limited response, whether or not you've hit the limit, carries
+these headers:
+
+| Header | Meaning |
+|---|---|
+| `Req-Made` | Requests made so far in the current window. |
+| `Req-Limit` | The maximum allowed in that window. |
+| `Bucket` | Which rate-limit bucket this endpoint belongs to. |
+| `Retry-After` | Only sent once exceeded: seconds until the window resets. |
+
+Check `Retry-After` and back off rather than polling in a tight loop, a
+request made while still rate limited just extends how long you're stuck
+waiting.
+
+## Typical limits
+
+Limits vary per endpoint and can change, the values below are examples to
+give you a sense of scale, not a complete or guaranteed list:
+
+| Bucket | Limit |
+|---|---|
+| Logging in | 2 requests / minute |
+| Adding a bot | 5 requests / minute |
+| Adding a server | 5 requests / minute |
+| Testing a webhook | 3 requests / minute |
+
+[Posting bot stats](/docs/developer/bot-stats) is a notable exception,
+it isn't rate limited at all, post as often as you need to.
+
+## Practical advice
+
+- Cache responses where you can instead of re-fetching on every action.
+- If you're building something that calls the API on behalf of many users
+  (a bot command, for example), be mindful that you may be sharing a bucket
+  across all of them if you're all coming from the same IP.
+- Treat a 429 as routine, not exceptional, back off and retry after the
+  time `Retry-After` gives you.

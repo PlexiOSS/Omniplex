@@ -1,0 +1,59 @@
+---
+title: Teams & Permissions
+description: How the flat permission model works, and how to check what a user can do.
+---
+
+Bots, servers, and packs can be owned directly by a user or by a team.
+Teams let multiple people share management of a listing, each with their
+own, separately scoped set of permissions.
+
+## The permission model
+
+Permissions are flat strings, `edit_bots`, `manage_webhooks`,
+`view_sessions`, and so on. There are no namespaces, wildcards, or
+negation, a member either holds a permission or doesn't. One permission,
+`owner`, is a super-permission that implies every other one on that team.
+
+## Checking what a user can do
+
+```
+GET /users/{id}/{target_type}/{target_id}/perms
+```
+
+Returns the resolved permissions a user has on any bot, server, team, or
+pack, whether they hold it directly or through team membership:
+
+```json
+{
+  "perms": ["edit_bots", "view_sessions"]
+}
+```
+
+An empty list means the user has no access to that entity at all.
+
+## Team membership
+
+Team members are added and edited with a flat list of permission strings
+per member:
+
+```json
+{
+  "user_id": "1234567890",
+  "perms": ["edit_bots", "manage_webhooks"]
+}
+```
+
+There's no concept of roles or groups, permissions are assigned directly
+to each member. A member with `owner` has full control, including adding
+and removing other members.
+
+## The full permission catalogue
+
+```
+GET /teams/meta/permissions
+```
+
+Returns every permission that exists in the entity domain, with its
+category and description, this is the same list a permission picker in a
+UI would use to build its options from, rather than hardcoding permission
+names on the client.

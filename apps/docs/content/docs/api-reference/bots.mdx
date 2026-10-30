@@ -1,0 +1,173 @@
+---
+title: Bots
+description: These API endpoints are related to bots on IBL
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get All Bots
+      url: '#get-all-bots'
+    - depth: 2
+      title: Get Random Bots
+      url: '#get-random-bots'
+    - depth: 2
+      title: Get Bots Index
+      url: '#get-bots-index'
+    - depth: 2
+      title: Get Bot
+      url: '#get-bot'
+    - depth: 2
+      title: Delete Bot
+      url: '#delete-bot'
+    - depth: 2
+      title: Get Bot Metadata
+      url: '#get-bot-metadata'
+    - depth: 2
+      title: Get Bot SEO Info
+      url: '#get-bot-seo-info'
+    - depth: 2
+      title: Post Bot Stats
+      url: '#post-bot-stats'
+    - depth: 2
+      title: Add Bot
+      url: '#add-bot'
+    - depth: 2
+      title: Update Bot Settings
+      url: '#update-bot-settings'
+    - depth: 2
+      title: Get Bot Commands
+      url: '#get-bot-commands'
+    - depth: 2
+      title: Update Bot Commands
+      url: '#update-bot-commands'
+    - depth: 2
+      title: Get Bot Changelogs
+      url: '#get-bot-changelogs'
+    - depth: 2
+      title: Create Bot Changelog
+      url: '#create-bot-changelog'
+    - depth: 2
+      title: Delete Bot Changelog
+      url: '#delete-bot-changelog'
+    - depth: 2
+      title: Patch Bot Team
+      url: '#patch-bot-team'
+  structuredData:
+    headings:
+      - content: Get All Bots
+        id: get-all-bots
+      - content: Get Random Bots
+        id: get-random-bots
+      - content: Get Bots Index
+        id: get-bots-index
+      - content: Get Bot
+        id: get-bot
+      - content: Delete Bot
+        id: delete-bot
+      - content: Get Bot Metadata
+        id: get-bot-metadata
+      - content: Get Bot SEO Info
+        id: get-bot-seo-info
+      - content: Post Bot Stats
+        id: post-bot-stats
+      - content: Add Bot
+        id: add-bot
+      - content: Update Bot Settings
+        id: update-bot-settings
+      - content: Get Bot Commands
+        id: get-bot-commands
+      - content: Update Bot Commands
+        id: update-bot-commands
+      - content: Get Bot Changelogs
+        id: get-bot-changelogs
+      - content: Create Bot Changelog
+        id: create-bot-changelog
+      - content: Delete Bot Changelog
+        id: delete-bot-changelog
+      - content: Patch Bot Team
+        id: patch-bot-team
+    contents:
+      - content: >-
+          Gets all bots on the list. Returns a set of paginated ``IndexBot``
+          objects
+        heading: get-all-bots
+      - content: Returns a list of bots from the database in random order
+        heading: get-random-bots
+      - content: >-
+          Gets the index of the bot-side of the list. Returns a ``ListIndexBot``
+          object
+        heading: get-bots-index
+      - content: Gets a bot by id
+        heading: get-bot
+      - content: >-
+          Deletes a bot from the list. This is *irreversible*. You must have
+          'Delete Bots' in the team if the bot is in a team. Returns 204 on
+          success.
+        heading: delete-bot
+      - content: >-
+          Gets the metadata of a bot such as whether it is already in the
+          database/bot id checks
+        heading: get-bot-metadata
+      - content: >-
+          Gets the minimal SEO information about a bot for embed/search
+          purposes. Used by v4 website for meta tags
+        heading: get-bot-seo-info
+      - content: >-
+          This endpoint posts the stats of a bot. `status` is optional and
+          self-reports the bot's presence (online/idle/dnd/offline) — post it
+          periodically to keep it fresh, it will otherwise keep showing the last
+          value posted.
+        heading: post-bot-stats
+      - content: Adds a bot to the database. Returns 204 on success
+        heading: add-bot
+      - content: >-
+          Updates a bots settings. You must have 'Edit Bot Settings' in the team
+          if the bot is in a team. Returns 204 on success
+        heading: update-bot-settings
+      - content: Gets the commands a bot's owner/team has documented for it.
+        heading: get-bot-commands
+      - content: >-
+          Replaces the whole list of documented commands for a bot. You must
+          have 'Edit Bot Settings' in the team if the bot is in a team.
+        heading: update-bot-commands
+      - content: Gets the changelog/announcement entries a bot's owner/team has posted.
+        heading: get-bot-changelogs
+      - content: >-
+          Posts a new changelog/announcement entry for a bot. You must have
+          'Edit Bot Settings' in the team if the bot is in a team.
+        heading: create-bot-changelog
+      - content: >-
+          Removes a changelog/announcement entry. You must have 'Edit Bot
+          Settings' in the team if the bot is in a team.
+        heading: delete-bot-changelog
+      - content: >-
+          Transfers a bot to another team. 
+
+
+          Semantically equivalent to:
+
+          - Remove bot in question from list
+
+          - Readd bot to list with same data
+
+          - Transfer bot ownership to team
+
+
+          The below are the requirements for this due to the above:
+
+
+          - The user must have the "Delete Bots" permission in the team they are
+          transferring the bot from
+
+          - The user must have the "Add New Bots" permission in the team they
+          are transferring the bot to
+
+
+          The bots ownership will be transferred to the new team.
+
+
+          Returns a 204 on success
+        heading: patch-bot-team
+---
+
+<APIPage document={"https://api.omniplex.gg/openapi"} operations={[{"method":"get","path":"/bots/@all"},{"method":"get","path":"/bots/@random"},{"method":"get","path":"/bots/@index"},{"method":"get","path":"/bots/{id}"},{"method":"delete","path":"/bots/{id}"},{"method":"get","path":"/bots/{client_id}/meta"},{"method":"get","path":"/bots/{id}/seo"},{"method":"post","path":"/bots/stats"},{"method":"put","path":"/bots"},{"method":"patch","path":"/bots/{id}/settings"},{"method":"get","path":"/bots/{id}/commands"},{"method":"put","path":"/bots/{id}/commands"},{"method":"get","path":"/bots/{id}/changelogs"},{"method":"post","path":"/bots/{id}/changelogs"},{"method":"delete","path":"/bots/{id}/changelogs/{changelog_id}"},{"method":"patch","path":"/users/{uid}/bots/{bid}/teams"}]} hasHead={true} />

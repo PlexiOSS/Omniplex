@@ -1,0 +1,26 @@
+---
+title: Reports
+description: These API endpoints let a user file a report against any votable entity
+full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Report Stats
+      url: '#get-report-stats'
+    - depth: 2
+      title: Create Report
+      url: '#create-report'
+  structuredData:
+    headings:
+      - content: Get Report Stats
+        id: get-report-stats
+      - content: Create Report
+        id: create-report
+    contents:
+      - content: Returns anonymized counts of reports grouped by reason and status
+        heading: get-report-stats
+      - content: Files a report against any votable entity. Returns 204 on success
+        heading: create-report
+---
+
+<APIPage document={"https://api.omniplex.gg/openapi"} operations={[{"method":"get","path":"/reports/stats"},{"method":"put","path":"/users/{uid}/{target_type}/{target_id}/reports"}]} hasHead={true} />

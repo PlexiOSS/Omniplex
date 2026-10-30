@@ -1,0 +1,34 @@
+---
+title: Posting Server Stats
+description: Self-reporting your server's member count instead of waiting on the automatic sync.
+---
+
+Every listed server's member/online counts are normally kept in sync automatically Infernoplex (the tracking bot) polls Discord every 30 minutes and updates them for you, no setup required. If you want more control over when those numbers update, or your server doesn't have Infernoplex in it, you can post them yourself instead.
+
+## Endpoint
+
+```
+POST /servers/stats
+```
+
+Requires **Server-Auth** (a server-scoped API token, `Server-Auth: <token>`, or `Authorization: Server <token>`) issued from your server's dashboard, the same way a bot's own token is issued from its dashboard.
+
+## Body
+
+Every field is optional. Only send what you actually have an omitted field keeps whatever value was last posted rather than being reset to zero.
+
+```json
+{
+  "total_members": 1234,
+  "online_members": 456
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `total_members` | number | Total member count. |
+| `online_members` | number | Online member count. |
+
+## Self-managed stats
+
+Posting to this endpoint at all even with an empty body flips your server into **self-managed** mode: Infernoplex's automatic 30-minute sync stops overwriting `total_members`/`online_members` for your server from that point on (it still keeps your server's icon in sync either way). This is currently one-way: there's no endpoint to switch back to automatic syncing once you've posted your own stats even once. If you need that reversed, reach out rather than assuming it'll revert on its own.

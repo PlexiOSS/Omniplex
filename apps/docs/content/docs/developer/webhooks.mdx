@@ -1,0 +1,80 @@
+---
+title: Webhooks
+description: Getting notified about votes and other events in real time
+---
+
+Webhooks let your server get notified the moment something happens to a bot,
+server, or team you own, instead of polling the API. Create one from your
+entity's settings, or via `POST /{target_type}/{target_id}/webhooks`.
+
+## Auth modes
+
+A webhook has one of three auth modes, set on creation and changeable via
+`PATCH .../webhooks/{id}`. Pick `hmac_auth` for anything new.
+
+### `hmac_auth` (recommended)
+
+The body is the event, as plain JSON, exactly as sent, no encryption or
+encoding. The signature is an HMAC-SHA256 of the raw body bytes, keyed with
+your webhook's secret, hex-encoded, and sent in `X-Webhook-Signature` as
+`sha256=<hex>`. This is the same shape GitHub and Stripe webhooks use.
+
+```python
+import hashlib
+import hmac
+
+def verify(secret: str, raw_body: bytes, signature_header: str) -> bool:
+    expected = "sha256=" + hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, signature_header)
+```
+
+```js
+const crypto = require('crypto');
+
+function verify(secret, rawBody, signatureHeader) {
+  const expected =
+    'sha256=' +
+    crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(expected),
+    Buffer.from(signatureHeader),
+  );
+}
+```
+
+Two things matter for this to work:
+
+- Hash the raw request body bytes, before any JSON parsing. Re-serializing
+  parsed JSON before hashing will not reproduce the same bytes, and the
+  signature will not match.
+- Compare with a constant-time comparison (`hmac.compare_digest`,
+  `crypto.timingSafeEqual`, or equivalent), not `==`/`===`. A plain string
+  comparison leaks timing information an attacker can use to guess the
+  signature byte by byte.
+
+### `simple_auth` (legacy)
+
+The body is plain JSON, same as `hmac_auth`. The raw secret is sent as-is in
+the `Authorization` header, check for an exact match. No hashing involved.
+Only exists for endpoints that cannot implement a signature check at all;
+prefer `hmac_auth` if you can.
+
+### Default (legacy)
+
+Webhooks created before `hmac_auth` existed use this by default. The body is
+encrypted and the signing key is derived per request, so verifying it means
+implementing decryption, not just a signature check. If you're setting up a
+new integration, switch the webhook to `hmac_auth` instead
+(`PATCH .../webhooks/{id}` with `"hmac_auth": true`) rather than
+implementing this.
+
+## Every delivery
+
+Regardless of auth mode, every delivery sends `X-Webhook-Protocol` naming
+which mode was used, in case you ever need to accept more than one.
+
+Popplio also periodically sends a delivery signed with a throwaway secret,
+not your real one, to confirm your endpoint actually rejects invalid
+signatures. A correctly implemented verifier already rejects these; you do
+not need to special-case anything. An endpoint that accepts unsigned or
+incorrectly-signed payloads will eventually be marked broken and disabled.
