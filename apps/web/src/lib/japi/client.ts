@@ -34,11 +34,14 @@ export function isSnowflake(id: string): boolean {
   return SNOWFLAKE.test(id);
 }
 
-function isAllowedImageHost(url: URL): boolean {
-  return (
-    url.protocol === "https:" &&
-    (url.hostname === DISCORD_CDN_HOST || url.hostname === JAPI_HOST)
-  );
+function allowedImageRequest(url: URL): string | null {
+  if (url.protocol !== "https:" || url.port !== "") return null;
+  const rest = `${url.pathname.slice(1)}${url.search}`;
+  if (url.hostname === DISCORD_CDN_HOST) {
+    return `https://cdn.discordapp.com/${rest}`;
+  }
+  if (url.hostname === JAPI_HOST) return `https://japi.rest/${rest}`;
+  return null;
 }
 
 async function fetchFromAllowedHosts(
@@ -48,8 +51,9 @@ async function fetchFromAllowedHosts(
   const signal = AbortSignal.timeout(timeoutMs);
   let current = new URL(url);
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    if (!isAllowedImageHost(current)) return null;
-    const res = await fetch(current, {
+    const target = allowedImageRequest(current);
+    if (!target) return null;
+    const res = await fetch(target, {
       headers: { "User-Agent": USER_AGENT },
       signal,
       redirect: "manual",
@@ -120,6 +124,7 @@ export async function lookupBanner(userId: string): Promise<BannerLookup> {
       headers: { "User-Agent": USER_AGENT },
       signal: AbortSignal.timeout(3000),
       cache: "no-store",
+      redirect: "manual",
     });
     if (res.status === 400 || res.status === 404) {
       await res.body?.cancel();

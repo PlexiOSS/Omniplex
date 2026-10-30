@@ -26,9 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the session still works.
 - The Discord avatar and banner mirrors only fetch from `cdn.discordapp.com`
   and japi.rest. They check every redirect before following it, instead of
-  following redirects anywhere and checking only where they ended up. A
-  bad japi.rest response could otherwise have made the server request
-  internal addresses.
+  following redirects anywhere and checking only where they ended up. The
+  japi.rest user lookup behind banners doesn't follow redirects at all and
+  treats one as a failed lookup. A bad japi.rest response could otherwise
+  have made the server request internal addresses.
 - Uploads made with the session cookie are only accepted from the site
   itself. Pages on other `omniplex.gg` subdomains count as the same site
   for the cookie, so without this check they could have uploaded images as
