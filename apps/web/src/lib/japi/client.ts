@@ -34,14 +34,19 @@ export function isSnowflake(id: string): boolean {
   return SNOWFLAKE.test(id);
 }
 
-function allowedImageRequest(url: URL): string | null {
+function allowedImageRequest(url: URL): URL | null {
   if (url.protocol !== "https:" || url.port !== "") return null;
-  const rest = `${url.pathname.slice(1)}${url.search}`;
-  if (url.hostname === DISCORD_CDN_HOST) {
-    return `https://cdn.discordapp.com/${rest}`;
-  }
-  if (url.hostname === JAPI_HOST) return `https://japi.rest/${rest}`;
-  return null;
+  const base =
+    url.hostname === DISCORD_CDN_HOST
+      ? "https://cdn.discordapp.com"
+      : url.hostname === JAPI_HOST
+        ? "https://japi.rest"
+        : null;
+  if (!base) return null;
+  const out = new URL(base);
+  out.pathname = url.pathname;
+  out.search = url.search;
+  return out;
 }
 
 async function fetchFromAllowedHosts(
