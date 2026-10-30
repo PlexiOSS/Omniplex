@@ -55,3 +55,6 @@ next-env.d.ts
 
 # local planning notes, not for the repo
 ROADMAP.md
+
+# rust
+**/target/

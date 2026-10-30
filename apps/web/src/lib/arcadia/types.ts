@@ -526,6 +526,7 @@ export type ChangelogProject = "popplio" | "omniplex" | "keel";
 export interface ChangelogEntry {
   itag: string;
   project: ChangelogProject;
+  package?: string | null;
   version: string;
   added: string[];
   updated: string[];
@@ -541,6 +542,7 @@ export interface ChangelogEntry {
 
 export interface ChangelogCreateEntry {
   project: ChangelogProject;
+  package?: string | null;
   version: string;
   extra_description: string;
   prerelease: boolean;

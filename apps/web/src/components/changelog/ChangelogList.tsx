@@ -15,7 +15,14 @@ import { useEffect, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import type { ChangelogEntry, ChangelogProject } from "@/lib/api/types";
+import type { ChangelogEntry } from "@/lib/api/types";
+import {
+  CHANGELOG_PROJECTS,
+  type ChangelogTrack,
+  changelogLabel,
+  packageLabel,
+  trackKey,
+} from "@/lib/changelog";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 /**
@@ -32,16 +39,30 @@ function toBulletMarkdown(items: string[]): string {
 
 interface ChangelogListProps {
   entries: ChangelogEntry[];
-  activeProject: ChangelogProject | null;
+  activeTrack: string | null;
 }
 
-const PROJECT_LABEL: Record<ChangelogProject, string> = {
-  popplio: "Popplio",
-  omniplex: "Omniplex",
-  keel: "Keel",
-};
+function tracksIn(entries: ChangelogEntry[]): ChangelogTrack[] {
+  const seen = new Map<string, ChangelogTrack>();
+  for (const e of entries) {
+    seen.set(trackKey(e), { project: e.project, package: e.package ?? null });
+  }
+  return [...seen.values()].sort(
+    (a, b) =>
+      CHANGELOG_PROJECTS.indexOf(a.project) -
+        CHANGELOG_PROJECTS.indexOf(b.project) ||
+      (a.package === null ? -1 : b.package === null ? 1 : 0) ||
+      packageLabel(a.package ?? "").localeCompare(
+        packageLabel(b.package ?? ""),
+      ),
+  );
+}
 
-const PROJECTS: ChangelogProject[] = ["popplio", "omniplex", "keel"];
+function trackHref(track: ChangelogTrack): string {
+  const params = new URLSearchParams({ project: track.project });
+  if (track.package) params.set("package", track.package);
+  return `/changelog?${params}`;
+}
 
 const GROUPS = [
   {
@@ -81,7 +102,7 @@ function itemsFor(entry: ChangelogEntry, key: (typeof GROUPS)[number]["key"]) {
 }
 
 function releaseAnchor(entry: ChangelogEntry): string {
-  return `${entry.project}-${entry.version}`
+  return `${trackKey(entry)}-${entry.version}`
     .toLowerCase()
     .replace(/[^a-z0-9.-]+/g, "-");
 }
@@ -94,18 +115,21 @@ function formatDate(iso: string): string {
   });
 }
 
-export function ChangelogList({ entries, activeProject }: ChangelogListProps) {
-  const present = PROJECTS.filter((p) => entries.some((e) => e.project === p));
-  const filtered = activeProject
-    ? entries.filter((e) => e.project === activeProject)
+export function ChangelogList({ entries, activeTrack }: ChangelogListProps) {
+  const present = tracksIn(entries);
+  const active = present.some((t) => trackKey(t) === activeTrack)
+    ? activeTrack
+    : null;
+  const filtered = active
+    ? entries.filter((e) => trackKey(e) === active)
     : entries;
 
-  const latestPerProject = new Set(
-    PROJECTS.map((p) => filtered.find((e) => e.project === p)?.itag).filter(
-      (itag): itag is string => !!itag,
-    ),
+  const latestPerTrack = new Set(
+    present
+      .map((t) => filtered.find((e) => trackKey(e) === trackKey(t))?.itag)
+      .filter((itag): itag is string => !!itag),
   );
-  const [expanded, setExpanded] = useState<Set<string>>(latestPerProject);
+  const [expanded, setExpanded] = useState<Set<string>>(latestPerTrack);
 
   useEffect(() => {
     function openFromHash() {
@@ -148,16 +172,18 @@ export function ChangelogList({ entries, activeProject }: ChangelogListProps) {
     <div>
       {present.length > 1 && (
         <div className="mb-8 flex flex-wrap gap-1.5">
-          <FilterTab href="/changelog" active={activeProject === null}>
+          <FilterTab href="/changelog" active={active === null}>
             All
           </FilterTab>
-          {present.map((project) => (
+          {present.map((track) => (
             <FilterTab
-              key={project}
-              href={`/changelog?project=${project}`}
-              active={activeProject === project}
+              key={trackKey(track)}
+              href={trackHref(track)}
+              active={active === trackKey(track)}
             >
-              {PROJECT_LABEL[project]}
+              {track.package
+                ? packageLabel(track.package)
+                : changelogLabel(track.project)}
             </FilterTab>
           ))}
         </div>
@@ -177,15 +203,16 @@ export function ChangelogList({ entries, activeProject }: ChangelogListProps) {
 
         <aside className="hidden lg:block">
           <nav className="sticky top-24 max-h-[calc(100vh-8rem)] space-y-6 overflow-y-auto">
-            {PROJECTS.filter((p) => filtered.some((e) => e.project === p)).map(
-              (project) => (
-                <div key={project}>
+            {present
+              .filter((t) => filtered.some((e) => trackKey(e) === trackKey(t)))
+              .map((track) => (
+                <div key={trackKey(track)}>
                   <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                    {PROJECT_LABEL[project]}
+                    {changelogLabel(track.project, track.package)}
                   </p>
                   <ul className="space-y-0.5">
                     {filtered
-                      .filter((e) => e.project === project)
+                      .filter((e) => trackKey(e) === trackKey(track))
                       .map((entry) => (
                         <li key={entry.itag}>
                           <a
@@ -206,8 +233,7 @@ export function ChangelogList({ entries, activeProject }: ChangelogListProps) {
                       ))}
                   </ul>
                 </div>
-              ),
-            )}
+              ))}
           </nav>
         </aside>
       </div>
@@ -236,7 +262,9 @@ function ReleaseCard({
       className="scroll-mt-24 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800"
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-zinc-100 bg-zinc-50/60 px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-        <Badge variant="info">{PROJECT_LABEL[entry.project]}</Badge>
+        <Badge variant="info">
+          {changelogLabel(entry.project, entry.package)}
+        </Badge>
         <h2 className="min-w-0 flex-1 truncate text-base font-semibold text-zinc-950 dark:text-zinc-50">
           <a
             href={`#${anchor}`}

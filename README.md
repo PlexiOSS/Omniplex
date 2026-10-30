@@ -15,7 +15,7 @@ Omniplex is a Discord bot and server listing platform. This repository is a mono
 | Styling | Tailwind CSS v4 |
 | Language | TypeScript |
 | Data fetching | SWR (client), native `fetch` (server components) |
-| Linting and formatting | Biome (TypeScript), Ruff (Python) |
+| Linting and formatting | Biome (TypeScript), Ruff (Python), gofmt and go vet (Go), rustfmt and Clippy (Rust) |
 | Package manager | Bun workspaces |
 | Monorepo tasks | Turborepo |
 
@@ -89,15 +89,17 @@ apps/
         └── lib/         API client and shared utilities
 packages/
 ├── api-types/           @omniplex/api-types: TypeScript types for the API, used by the website and the JS SDK
+├── sdk-go/              github.com/PlexiOSS/Omniplex/packages/sdk-go: the Go SDK (Go module proxy)
 ├── sdk-js/              @omniplex/sdk: the JavaScript and TypeScript SDK (npm)
-└── sdk-python/          omniplex-sdk: the Python SDK (PyPI)
+├── sdk-python/          omniplex-sdk: the Python SDK (PyPI)
+└── sdk-rust/            omniplex: the Rust SDK (crates.io)
 ```
 
 See `AGENTS.md` at the root of the wider plexicore workspace (outside this repo) for a full breakdown of the codebase layout, API layer conventions, and styling rules.
 
 ## Releasing
 
-The website is released by tagging `v<version>`, as before. Each package is released with its own tag, such as `sdk-js@v0.1.0`, `api-types@v0.1.0` or `sdk-python@v0.1.0`, which publishes it to npm or PyPI through trusted publishing.
+The website is released by tagging `v<version>`, as before. Each package is released with its own tag, such as `sdk-js@v0.1.0`, `api-types@v0.1.0`, `sdk-python@v0.1.0` or `sdk-rust@v0.1.0`, which publishes it to npm, PyPI or crates.io through trusted publishing. The Go SDK is released by tagging `packages/sdk-go/v0.1.0`, the form Go requires for a module in a subfolder.
 
 ---
 
@@ -115,6 +117,6 @@ If you find a security vulnerability, please do not open a public issue. See [SE
 
 ## License
 
-The website is licensed under AGPL-3.0-or-later (see [LICENSE](LICENSE)). The packages in `packages/` (`@omniplex/api-types`, `@omniplex/sdk` and `omniplex-sdk`) are licensed under MIT, so they can be used in projects under any licence.
+The website is licensed under AGPL-3.0-or-later (see [LICENSE](LICENSE)). The packages in `packages/` (`@omniplex/api-types`, `@omniplex/sdk`, `omniplex-sdk`, the Go SDK and the `omniplex` crate) are licensed under MIT, so they can be used in projects under any licence.
 
 Omniplex is developed by [NodeByte LTD](https://nodebyte.co.uk). Not affiliated with Discord.

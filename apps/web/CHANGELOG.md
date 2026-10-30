@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-10-30
+
+### Added
+
+- The changelog shows releases of Omniplex's packages, such as the
+  JavaScript SDK, alongside the website's. Each package has its own filter
+  tab (for example `/changelog?project=omniplex&package=sdk-js`), and its
+  entries are labelled with the package name in the list, the sidebar and
+  the RSS feed.
+- Staff can set a package on a changelog entry in the admin panel. It
+  accepts any package name, with the known ones suggested.
+- The "Official SDKs" article covers the new Go and Rust SDKs.
+
 ### Security
 
 - Your login session is now kept in an HttpOnly cookie set by the API,

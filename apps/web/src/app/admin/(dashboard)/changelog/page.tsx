@@ -9,14 +9,9 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { ChangelogEntry } from "@/lib/arcadia/types";
+import { changelogLabel } from "@/lib/changelog";
 import { useAdmin } from "../../AdminContext";
 import { AdminPageHeader } from "../../AdminPageHeader";
-
-const PROJECT_LABEL: Record<string, string> = {
-  popplio: "Popplio",
-  omniplex: "Omniplex",
-  keel: "Keel",
-};
 
 export default function ChangelogAdminPage() {
   const router = useRouter();
@@ -142,7 +137,7 @@ export default function ChangelogAdminPage() {
           >
             <div className="flex flex-wrap items-center gap-1.5">
               <Badge variant="info">
-                {PROJECT_LABEL[entry.project] ?? entry.project}
+                {changelogLabel(entry.project, entry.package)}
               </Badge>
               <span className="font-semibold text-zinc-950 dark:text-zinc-50">
                 {entry.version}

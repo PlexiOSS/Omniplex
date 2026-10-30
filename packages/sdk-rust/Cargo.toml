@@ -1,0 +1,33 @@
+[package]
+name = "omniplex"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Official Rust SDK for the Omniplex API: post bot and server stats, check votes and verify webhooks."
+license = "MIT"
+repository = "https://github.com/PlexiOSS/Omniplex"
+homepage = "https://omniplex.gg/kb/developers/sdks"
+documentation = "https://docs.rs/omniplex"
+readme = "README.md"
+keywords = ["omniplex", "discord", "discord-bot", "bot-list", "webhooks"]
+categories = ["api-bindings", "web-programming::http-client"]
+include = ["src/**", "tests/**", "Cargo.toml", "README.md", "CHANGELOG.md", "LICENSE"]
+
+[dependencies]
+aes-gcm = "0.11"
+hex = "0.4"
+hmac = "0.13"
+http = "1"
+httpdate = "1"
+percent-encoding = "2"
+reqwest = "0.13"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.11"
+subtle = "2"
+thiserror = "2"
+tokio = { version = "1", features = ["rt", "time"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+wiremock = "0.6"

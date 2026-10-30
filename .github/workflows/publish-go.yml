@@ -1,0 +1,40 @@
+name: Publish Go module
+
+on:
+  push:
+    tags:
+      - "packages/sdk-go/v*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/sdk-go
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: packages/sdk-go/go.mod
+
+      - run: test -z "$(gofmt -l .)" && go vet ./... && go test ./...
+
+      - name: Ask the Go module proxy to fetch this version
+        run: |
+          version="${GITHUB_REF_NAME##*/}"
+          module="$(go list -m)"
+          cd "$(mktemp -d)" && go mod init probe >/dev/null 2>&1
+          for attempt in 1 2 3 4 5; do
+            if GOPROXY=https://proxy.golang.org go list -m "$module@$version"; then
+              echo "Indexed $module@$version. It appears on pkg.go.dev within a few minutes."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "::error::proxy.golang.org couldn't fetch $module@$version"
+          exit 1

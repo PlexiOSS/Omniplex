@@ -727,8 +727,19 @@ export interface User {
 // ---------------------------------------------------------------------------
 
 export interface Vote {
-  user_id: string;
+  itag: string | null;
+  target_type: string;
+  target_id: string;
+  author: string;
+  upvote: boolean;
+  void: boolean;
+  void_reason: string | null;
+  voided_at: string | null;
   created_at: string;
+  vote_num: number;
+  credit_redeem: string | null;
+  immutable: boolean;
+  auto: boolean;
 }
 
 export interface UserVote {
@@ -1670,6 +1681,7 @@ export type ChangelogProject = "popplio" | "omniplex" | "keel";
 export interface ChangelogEntry {
   itag: string;
   project: ChangelogProject;
+  package?: string | null;
   version: string;
   added: string[];
   updated: string[];

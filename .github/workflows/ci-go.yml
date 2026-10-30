@@ -1,0 +1,45 @@
+name: CI (Go SDK)
+
+on:
+  push:
+    branches: [master, development]
+    paths:
+      - "packages/sdk-go/**"
+      - ".github/workflows/ci-go.yml"
+  pull_request:
+    paths:
+      - "packages/sdk-go/**"
+      - ".github/workflows/ci-go.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-go-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go:
+    name: Go SDK (${{ matrix.go }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.22", "stable"]
+    defaults:
+      run:
+        working-directory: packages/sdk-go
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache-dependency-path: packages/sdk-go/go.mod
+
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+
+      - run: go vet ./...
+
+      - run: go test -race ./...

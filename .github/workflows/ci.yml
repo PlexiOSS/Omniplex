@@ -6,10 +6,18 @@ on:
     paths-ignore:
       - "packages/sdk-python/**"
       - ".github/workflows/ci-python.yml"
+      - "packages/sdk-go/**"
+      - ".github/workflows/ci-go.yml"
+      - "packages/sdk-rust/**"
+      - ".github/workflows/ci-rust.yml"
   pull_request:
     paths-ignore:
       - "packages/sdk-python/**"
       - ".github/workflows/ci-python.yml"
+      - "packages/sdk-go/**"
+      - ".github/workflows/ci-go.yml"
+      - "packages/sdk-rust/**"
+      - ".github/workflows/ci-rust.yml"
 
 permissions:
   contents: read

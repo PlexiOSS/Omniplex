@@ -12,7 +12,7 @@
     },
     "apps/web": {
       "name": "@omniplex/web",
-      "version": "1.10.0",
+      "version": "1.12.0",
       "dependencies": {
         "@aws-sdk/client-s3": "^3.1107.0",
         "@omniplex/api-types": "workspace:*",
@@ -44,14 +44,14 @@
     },
     "packages/api-types": {
       "name": "@omniplex/api-types",
-      "version": "0.1.0",
+      "version": "0.1.2",
       "devDependencies": {
         "typescript": "^5",
       },
     },
     "packages/sdk-js": {
       "name": "@omniplex/sdk",
-      "version": "0.1.0",
+      "version": "0.1.2",
       "dependencies": {
         "@omniplex/api-types": "workspace:^",
       },

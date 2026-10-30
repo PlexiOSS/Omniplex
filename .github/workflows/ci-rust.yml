@@ -1,0 +1,48 @@
+name: CI (Rust SDK)
+
+on:
+  push:
+    branches: [master, development]
+    paths:
+      - "packages/sdk-rust/**"
+      - ".github/workflows/ci-rust.yml"
+  pull_request:
+    paths:
+      - "packages/sdk-rust/**"
+      - ".github/workflows/ci-rust.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-rust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust SDK (${{ matrix.toolchain }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: ["1.85", "stable"]
+    defaults:
+      run:
+        working-directory: packages/sdk-rust
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/sdk-rust
+
+      - run: cargo fmt --check
+
+      - run: cargo clippy --all-targets --locked -- -D warnings
+
+      - run: cargo test --locked

@@ -31,7 +31,7 @@ For anything beyond a small fix, open an issue first to discuss the change. This
 - Create a branch off `main` with a descriptive name, for example `fix/server-vote-count` or `feat/pack-editing`.
 - Keep pull requests focused on a single change. Unrelated fixes should be their own PR.
 - Match the existing code style. Run `bun run lint` before committing; `bun run format` will fix most issues automatically.
-- Follow the conventions documented in [AGENTS.md](AGENTS.md): component structure, the `zinc` color scale for neutrals, dark mode via the `dark:` prefix, and the API layer's separation between `apps/web/src/lib/api/` and the rest of the app. Python SDK changes should pass `ruff check`, `ruff format --check`, `mypy src` and `pytest` in `packages/sdk-python`.
+- Follow the conventions documented in [AGENTS.md](AGENTS.md): component structure, the `zinc` color scale for neutrals, dark mode via the `dark:` prefix, and the API layer's separation between `apps/web/src/lib/api/` and the rest of the app. Python SDK changes should pass `ruff check`, `ruff format --check`, `mypy src` and `pytest` in `packages/sdk-python`. Go SDK changes should pass `gofmt -l .` (no output), `go vet ./...` and `go test ./...` in `packages/sdk-go`. Rust SDK changes should pass `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings` and `cargo test` in `packages/sdk-rust`.
 - Prefer server components unless a component needs hooks, event handlers, or browser APIs.
 - Don't introduce new dependencies for something a few lines of code can handle.
 
