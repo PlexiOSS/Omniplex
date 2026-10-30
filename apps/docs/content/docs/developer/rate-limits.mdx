@@ -50,5 +50,6 @@ it isn't rate limited at all, post as often as you need to.
 - If you're building something that calls the API on behalf of many users
   (a bot command, for example), be mindful that you may be sharing a bucket
   across all of them if you're all coming from the same IP.
-- Treat a 429 as routine, not exceptional, back off and retry after the
-  time `Retry-After` gives you.
+- Treat a 429 as routine, not exceptional: back off and retry after the
+  time `Retry-After` gives you. The [SDKs](/docs/sdks) do this for you, waiting
+  up to a minute before giving up.

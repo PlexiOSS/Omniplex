@@ -22,7 +22,7 @@ out/
 build/
 dist/
 .turbo/
-docs/
+/docs/
 
 # misc
 .DS_Store

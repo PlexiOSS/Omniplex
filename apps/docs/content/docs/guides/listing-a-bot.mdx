@@ -71,5 +71,7 @@ blocks submission, it just flags things for a human to look at.
   entry to your listing's page.
 - **Delete the listing**: `DELETE /bots/{id}`, requires `delete_bots`.
 
-Any of these can be called with a user token, a team token, or, for
-settings, the bot's own token.
+These take a user or team session rather than the bot's own API token, and
+user sessions only work on omniplex.gg itself, so in practice you manage your
+listing from the [dashboard](https://omniplex.gg/dashboard). The bot's token
+is for [posting stats](/docs/developer/bot-stats).

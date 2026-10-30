@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { OmniplexLogo } from '@/components/OmniplexLogo';
+import Link from "next/link";
+import { OmniplexLogo } from "@/components/OmniplexLogo";
 
 export default function NotFound() {
   return (

@@ -1,0 +1,6 @@
+{
+  "title": "SDKs",
+  "description": "Official libraries for JavaScript, Python, Go and Rust.",
+  "root": true,
+  "pages": ["index", "javascript", "python", "go", "rust"]
+}

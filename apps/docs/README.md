@@ -1,42 +1,39 @@
 # Omniplex Documentation
 
-The documentation site for Omniplex, built with [Fumadocs](https://fumadocs.vercel.app) on Next.js. Runs in production at [docs.omniplex.gg](https://docs.omniplex.gg).
+The developer documentation at [docs.omniplex.gg](https://docs.omniplex.gg), built with [Fumadocs](https://fumadocs.dev) on Next.js. It lives in the Omniplex monorepo as `@omniplex/docs`.
 
-## Getting started
+## Running it
+
+From the repo root:
 
 ```bash
 bun install
-bun dev
+bun run dev:docs
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see it.
+Open [http://localhost:3001](http://localhost:3001). The website runs on port 3000, so both can run at once.
 
-Other scripts:
+## Content
+
+Pages are MDX files under `content/docs/`. Each folder has a `meta.json` that sets its title and page order. The top-level folders (`developer`, `sdks`, `guides`, `api-reference`) are the sections in the sidebar.
+
+## API reference
+
+`content/docs/api-reference/` is generated from Popplio's OpenAPI schema. Don't edit those pages by hand. To update them:
 
 ```bash
-bun run build   # production build
-bun run start   # run a production build locally
+cd apps/docs
+bun run openapi
 ```
 
-`postinstall` runs `fumadocs-mdx`, which generates the content index from `content/` — this happens automatically on `bun install`.
+This downloads the schema from `https://api.omniplex.gg/openapi` (set `OPENAPI_URL` to use another instance), saves it as `openapi.json`, and regenerates the pages. Commit both, so the docs always build from a known schema instead of whatever the live API returns at build time.
+
+The script renames schemas whose names contain `/`, such as `types.ItemList[popplio/types.ShopCoupon]`. Popplio's generator produces those for Go generic types, and they aren't valid in a JSON reference.
+
+If the schema gains or loses a tag, update the page order in `content/docs/api-reference/meta.json`.
 
 ## Deployment
 
-Runs self-hosted on the same server as the main site and status page, behind nginx with a Cloudflare Origin CA certificate, as its own dedicated low-privilege systemd account (`docs`, `nologin` shell — every command against it goes through `sudo -u docs ...`, not `-i`, since `-i` tries to invoke the account's shell and fails against `nologin`).
+Deployed on Dokploy from `apps/docs/Dockerfile`, with the **repo root** as the build context so it can use the monorepo's lockfile. The image serves on port 3001 as the unprivileged `node` user. `NEXT_PUBLIC_BASE_URL` (default `https://docs.omniplex.gg`) is a build argument.
 
-```bash
-sudo -u docs scripts/deploy.sh
-```
-
-The script deliberately doesn't restart the service itself, since that account has no `sudo` rights — apply the build manually (or via CI):
-
-```bash
-sudo systemctl restart omniplex-docs
-```
-
-Repo access on the server is via a read-only SSH deploy key on this repo, not a personal GitHub credential.
-
-## Learn more
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Fumadocs](https://fumadocs.vercel.app)
+When you add a workspace package, add its `package.json` to the `manifests` stage of this Dockerfile and the website's, or `bun install --frozen-lockfile` fails.

@@ -1,16 +1,11 @@
-'use client';
+"use client";
 
-import './global.css';
+import "./global.css";
 
 // global-error replaces the root layout entirely when an error escapes it,
 // so it renders its own <html>/<body> and avoids depending on providers
 // (RootProvider, fonts, etc.) that could themselves be the failure.
-export default function GlobalError({
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function GlobalError({ retry }: { retry: () => void }) {
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col items-center justify-center bg-fd-background px-6 text-center font-sans text-fd-foreground">
@@ -23,7 +18,7 @@ export default function GlobalError({
         <div className="mt-8 flex items-center gap-3">
           <button
             type="button"
-            onClick={reset}
+            onClick={() => retry()}
             className="inline-flex h-11 items-center justify-center rounded-xl bg-fd-primary px-5 text-sm font-medium text-fd-primary-foreground transition-opacity hover:opacity-90"
           >
             Try again

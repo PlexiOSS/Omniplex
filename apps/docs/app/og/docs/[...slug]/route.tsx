@@ -1,6 +1,6 @@
-import { source, getPageImageUrl } from '@/lib/source';
-import { notFound } from 'next/navigation';
-import { generateOGImage } from 'fumadocs-ui/og';
+import { generateOGImage } from "fumadocs-ui/og";
+import { notFound } from "next/navigation";
+import { getPageImageUrl, source } from "@/lib/source";
 
 export const revalidate = false;
 
@@ -15,9 +15,9 @@ export async function GET(
   return generateOGImage({
     title: page.data.title,
     description: page.data.description,
-    site: 'Omniplex Docs',
-    primaryColor: '#6366f1',
-    primaryTextColor: '#ffffff',
+    site: "Omniplex Docs",
+    primaryColor: "#6366f1",
+    primaryTextColor: "#ffffff",
     width: 1200,
     height: 630,
   });
@@ -28,4 +28,3 @@ export function generateStaticParams() {
     slug: getPageImageUrl(page).segments,
   }));
 }
-

@@ -5,6 +5,9 @@ full: true
 _openapi:
   toc:
     - depth: 2
+      title: Put bot asset version
+      url: '#put-bot-asset-version'
+    - depth: 2
       title: Get All Bots
       url: '#get-all-bots'
     - depth: 2
@@ -13,6 +16,18 @@ _openapi:
     - depth: 2
       title: Get Bots Index
       url: '#get-bots-index'
+    - depth: 2
+      title: Get Bot Changelogs Feed
+      url: '#get-bot-changelogs-feed'
+    - depth: 2
+      title: Get Recently Updated Bots
+      url: '#get-recently-updated-bots'
+    - depth: 2
+      title: Search Bot Commands
+      url: '#search-bot-commands'
+    - depth: 2
+      title: Get Bots With Documented Commands
+      url: '#get-bots-with-documented-commands'
     - depth: 2
       title: Get Bot
       url: '#get-bot'
@@ -23,8 +38,14 @@ _openapi:
       title: Get Bot Metadata
       url: '#get-bot-metadata'
     - depth: 2
+      title: Get Bot Analytics
+      url: '#get-bot-analytics'
+    - depth: 2
       title: Get Bot SEO Info
       url: '#get-bot-seo-info'
+    - depth: 2
+      title: Get Similar Bots
+      url: '#get-similar-bots'
     - depth: 2
       title: Post Bot Stats
       url: '#post-bot-stats'
@@ -54,20 +75,34 @@ _openapi:
       url: '#patch-bot-team'
   structuredData:
     headings:
+      - content: Put bot asset version
+        id: put-bot-asset-version
       - content: Get All Bots
         id: get-all-bots
       - content: Get Random Bots
         id: get-random-bots
       - content: Get Bots Index
         id: get-bots-index
+      - content: Get Bot Changelogs Feed
+        id: get-bot-changelogs-feed
+      - content: Get Recently Updated Bots
+        id: get-recently-updated-bots
+      - content: Search Bot Commands
+        id: search-bot-commands
+      - content: Get Bots With Documented Commands
+        id: get-bots-with-documented-commands
       - content: Get Bot
         id: get-bot
       - content: Delete Bot
         id: delete-bot
       - content: Get Bot Metadata
         id: get-bot-metadata
+      - content: Get Bot Analytics
+        id: get-bot-analytics
       - content: Get Bot SEO Info
         id: get-bot-seo-info
+      - content: Get Similar Bots
+        id: get-similar-bots
       - content: Post Bot Stats
         id: post-bot-stats
       - content: Add Bot
@@ -88,8 +123,17 @@ _openapi:
         id: patch-bot-team
     contents:
       - content: >-
-          Gets all bots on the list. Returns a set of paginated ``IndexBot``
-          objects
+          Records the content version of a bot asset (avatar/banner) that was
+          just uploaded to the CDN, so it is returned in the entity's
+          `asset_versions`.
+
+
+          The file itself is uploaded through the frontend's upload gateway, not
+          here. Returns a 204 on success.
+        heading: put-bot-asset-version
+      - content: >-
+          Gets approved and certified bots, filtered and sorted. Returns a set
+          of paginated ``IndexBot`` objects
         heading: get-all-bots
       - content: Returns a list of bots from the database in random order
         heading: get-random-bots
@@ -97,6 +141,23 @@ _openapi:
           Gets the index of the bot-side of the list. Returns a ``ListIndexBot``
           object
         heading: get-bots-index
+      - content: >-
+          A chronological, sitewide feed of changelog entries from approved and
+          certified bots, newest first.
+        heading: get-bot-changelogs-feed
+      - content: >-
+          The approved and certified bots that most recently posted a changelog
+          entry, newest first.
+        heading: get-recently-updated-bots
+      - content: >-
+          Cross-bot command search across approved and certified bots. Matches
+          command names and descriptions; at least one of query, bot or tag is
+          required.
+        heading: search-bot-commands
+      - content: >-
+          Approved and certified bots that have documented commands, most-voted
+          first, with their command count and a preview of command names.
+        heading: get-bots-with-documented-commands
       - content: Gets a bot by id
         heading: get-bot
       - content: >-
@@ -109,9 +170,19 @@ _openapi:
           database/bot id checks
         heading: get-bot-metadata
       - content: >-
+          Returns the bot's daily votes, views, invite clicks and counts over
+          time. You must have 'Edit Bots' in the bot's team.
+        heading: get-bot-analytics
+      - content: >-
           Gets the minimal SEO information about a bot for embed/search
           purposes. Used by v4 website for meta tags
         heading: get-bot-seo-info
+      - content: >-
+          Returns up to 6 other approved/certified bots sharing at least one tag
+          with this bot (case-insensitive), ranked by shared tags with rarer
+          tags weighted higher, then votes. NSFW bots are only included when
+          this bot is NSFW.
+        heading: get-similar-bots
       - content: >-
           This endpoint posts the stats of a bot. `status` is optional and
           self-reports the bot's presence (online/idle/dnd/offline) — post it
@@ -170,4 +241,6 @@ _openapi:
         heading: patch-bot-team
 ---
 
-<APIPage document={"https://api.omniplex.gg/openapi"} operations={[{"method":"get","path":"/bots/@all"},{"method":"get","path":"/bots/@random"},{"method":"get","path":"/bots/@index"},{"method":"get","path":"/bots/{id}"},{"method":"delete","path":"/bots/{id}"},{"method":"get","path":"/bots/{client_id}/meta"},{"method":"get","path":"/bots/{id}/seo"},{"method":"post","path":"/bots/stats"},{"method":"put","path":"/bots"},{"method":"patch","path":"/bots/{id}/settings"},{"method":"get","path":"/bots/{id}/commands"},{"method":"put","path":"/bots/{id}/commands"},{"method":"get","path":"/bots/{id}/changelogs"},{"method":"post","path":"/bots/{id}/changelogs"},{"method":"delete","path":"/bots/{id}/changelogs/{changelog_id}"},{"method":"patch","path":"/users/{uid}/bots/{bid}/teams"}]} hasHead={true} />
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+<APIPage document={"./openapi.json"} webhooks={[]} operations={[{"path":"/bots/{id}/assets/{kind}","method":"put"},{"path":"/bots/@all","method":"get"},{"path":"/bots/@random","method":"get"},{"path":"/bots/@index","method":"get"},{"path":"/bots/@changelogs","method":"get"},{"path":"/bots/@changelogs/recent","method":"get"},{"path":"/bots/@commands","method":"get"},{"path":"/bots/@commands/bots","method":"get"},{"path":"/bots/{id}","method":"get"},{"path":"/bots/{id}","method":"delete"},{"path":"/bots/{client_id}/meta","method":"get"},{"path":"/bots/{id}/analytics","method":"get"},{"path":"/bots/{id}/seo","method":"get"},{"path":"/bots/{id}/similar","method":"get"},{"path":"/bots/stats","method":"post"},{"path":"/bots","method":"put"},{"path":"/bots/{id}/settings","method":"patch"},{"path":"/bots/{id}/commands","method":"get"},{"path":"/bots/{id}/commands","method":"put"},{"path":"/bots/{id}/changelogs","method":"get"},{"path":"/bots/{id}/changelogs","method":"post"},{"path":"/bots/{id}/changelogs/{changelog_id}","method":"delete"},{"path":"/users/{uid}/bots/{bid}/teams","method":"patch"}]} showTitle={true} />

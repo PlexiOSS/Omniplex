@@ -8,7 +8,7 @@ Omniplex can't see how many servers your bot is in, so your bot tells us. Postin
 
 ## 1. Get a token
 
-Open your [dashboard](/dashboard), find the bot, and click **Tokens**. Create a token for the bot and copy it straight away, because it's only shown once. See [API Tokens](/kb/developers/api-tokens) for how tokens work and how to keep them safe.
+Open your [dashboard](/dashboard), find the bot, and open **API sessions**. Create a token for the bot and copy it straight away, because it's only shown once. See [API Tokens](/kb/developers/api-tokens) for how tokens work and how to keep them safe.
 
 ## 2. Send a request
 
@@ -35,7 +35,7 @@ Every field is optional:
 
 A field you leave out, or send as `0`, keeps its previous value. A successful request returns `204 No Content`.
 
-The [official SDKs](/kb/developers/sdks) for JavaScript and Python can post this for you on a timer.
+The [official SDKs](/kb/developers/sdks) for JavaScript, Python, Go and Rust can post this for you on a timer.
 
 ## How often to post
 

@@ -1,17 +1,16 @@
-import { docs, meta } from '@/.source';
-import { createMDXSource } from 'fumadocs-mdx';
-import { loader } from 'fumadocs-core/source';
+import { loader } from "fumadocs-core/source";
+import { docs } from "@/.source/server";
 
 export const source = loader({
-  baseUrl: '/docs',
-  source: createMDXSource(docs, meta),
+  baseUrl: "/docs",
+  source: docs.toFumadocsSource(),
 });
 
 export function getPageImageUrl(page: { slugs: string[] }) {
-  const segments = [...page.slugs, 'image.png'];
+  const segments = [...page.slugs, "image.png"];
 
   return {
     segments,
-    url: '/og/docs/' + segments.join('/'),
+    url: `/og/docs/${segments.join("/")}`,
   };
 }

@@ -21,9 +21,12 @@ jobs:
         working-directory: packages/sdk-rust
     steps:
       - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
         with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: stable
           components: rustfmt, clippy
 
       - name: Check the tag matches the crate version
@@ -39,7 +42,7 @@ jobs:
 
       - run: cargo package --locked
 
-      - uses: rust-lang/crates-io-auth-action@v1
+      - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9
         id: auth
 
       - run: cargo publish --locked

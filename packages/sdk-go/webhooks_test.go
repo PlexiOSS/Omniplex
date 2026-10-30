@@ -37,6 +37,14 @@ func loadFixtures(t *testing.T) fixtures {
 	return f
 }
 
+func wrongSecret(f fixtures) string {
+	r := []rune(f.Secret)
+	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
+		r[i], r[j] = r[j], r[i]
+	}
+	return string(r)
+}
+
 func headers(kv ...string) http.Header {
 	h := http.Header{}
 	for i := 0; i < len(kv); i += 2 {
@@ -74,7 +82,7 @@ func TestHMACWebhook(t *testing.T) {
 func TestHMACRejectsWrongSecretAndTamperedBody(t *testing.T) {
 	f := loadFixtures(t)
 	h := headers("X-Webhook-Protocol", "hmac-sha256", "X-Webhook-Signature", f.HMAC.Signature)
-	if _, err := VerifyWebhook([]byte(f.HMAC.Body), h, "wrong"); !errors.Is(err, ErrInvalidWebhook) {
+	if _, err := VerifyWebhook([]byte(f.HMAC.Body), h, wrongSecret(f)); !errors.Is(err, ErrInvalidWebhook) {
 		t.Fatalf("wrong secret: err = %v", err)
 	}
 	tampered := strings.Replace(f.HMAC.Body, `"votes":12`, `"votes":99`, 1)
@@ -91,7 +99,7 @@ func TestSplashtailWebhook(t *testing.T) {
 		t.Fatal(err)
 	}
 	checkVote(t, e)
-	if _, err := VerifyWebhook([]byte(f.Splashtail.Body), h, "wrong"); !errors.Is(err, ErrInvalidWebhook) {
+	if _, err := VerifyWebhook([]byte(f.Splashtail.Body), h, wrongSecret(f)); !errors.Is(err, ErrInvalidWebhook) {
 		t.Fatalf("wrong secret: err = %v", err)
 	}
 	h.Set("X-Webhook-Nonce", "other")

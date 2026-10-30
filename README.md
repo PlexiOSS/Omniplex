@@ -1,9 +1,9 @@
 # Omniplex
 
-Omniplex is a Discord bot and server listing platform. This repository is a monorepo containing the website and the official API SDKs. The website is built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the staff panel API that powers `/admin`.
+Omniplex is a Discord bot and server listing platform. This repository is a monorepo containing the website, the developer documentation and the official API SDKs. The website is built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the staff panel API that powers `/admin`.
 
-* See [apps/web/CHANGELOG.md](apps/web/CHANGELOG.md) for what's shipped on the website, and each package's own `CHANGELOG.md` for the SDKs.
-* Production runs at [omniplex.gg](https://omniplex.gg).
+* See [apps/web/CHANGELOG.md](apps/web/CHANGELOG.md) for what's shipped on the website, [apps/docs/CHANGELOG.md](apps/docs/CHANGELOG.md) for the documentation, and each package's own `CHANGELOG.md` for the SDKs.
+* Production runs at [omniplex.gg](https://omniplex.gg), and the developer docs at [docs.omniplex.gg](https://docs.omniplex.gg).
 
 ---
 
@@ -30,7 +30,7 @@ bun install
 bun dev
 ```
 
-The app runs at [http://localhost:3000](http://localhost:3000).
+The app runs at [http://localhost:3000](http://localhost:3000). Run `bun run dev:docs` for the documentation site at [http://localhost:3001](http://localhost:3001).
 
 Other scripts, also run from the root, go through Turborepo and cover every package:
 
@@ -81,6 +81,7 @@ Tagged releases are also published to `ghcr.io/plexioss/omniplex` by the `Publis
 
 ```
 apps/
+├── docs/                docs.omniplex.gg (Fumadocs), @omniplex/docs
 └── web/                 omniplex.gg (Next.js), @omniplex/web
     └── src/
         ├── app/         App Router pages, layouts, and route handlers

@@ -1,13 +1,13 @@
-import { source, getPageImageUrl } from '@/lib/source';
-import { openapi } from '@/lib/openapi';
 import {
-  DocsPage,
   DocsBody,
   DocsDescription,
+  DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+} from "fumadocs-ui/layouts/docs/page";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getMDXComponents } from "@/components/mdx";
+import { getPageImageUrl, source } from "@/lib/source";
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -23,41 +23,29 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX
-          components={{
-            ...defaultMdxComponents,
-            APIPage: openapi.APIPage,
-          }}
-        />
+        <MDX components={getMDXComponents()} />
       </DocsBody>
     </DocsPage>
   );
 }
 
-export async function generateStaticParams() {
-  const params = await source.generateParams();
-
-  return params.filter(
-    (p) => !(p.slug?.[0] === 'api-reference' && p.slug?.[1] !== undefined),
-  );
+export function generateStaticParams() {
+  return source.generateParams();
 }
 
 export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
-}) {
+}): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const image = getPageImageUrl(page).url;
+
   return {
     title: page.data.title,
     description: page.data.description,
-    openGraph: {
-      images: getPageImageUrl(page).url,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      images: getPageImageUrl(page).url,
-    },
+    openGraph: { images: image },
+    twitter: { card: "summary_large_image", images: image },
   };
 }

@@ -1,0 +1,128 @@
+---
+title: Go
+description: Post stats, check votes and verify webhooks with the Omniplex Go SDK.
+---
+
+The Go SDK needs Go 1.22 or newer and uses only the standard library. It works
+with discordgo, disgo, arikawa and anything else.
+
+```sh
+go get github.com/PlexiOSS/Omniplex/packages/sdk-go
+```
+
+```go
+import "github.com/PlexiOSS/Omniplex/packages/sdk-go"
+```
+
+The package is named `omniplex`. Every method takes a `context.Context`.
+[Reference on pkg.go.dev](https://pkg.go.dev/github.com/PlexiOSS/Omniplex/packages/sdk-go).
+
+## Posting stats
+
+```go
+client := omniplex.New(os.Getenv("OMNIPLEX_TOKEN"))
+
+err := client.PostBotStats(ctx, omniplex.BotStats{
+	Servers: omniplex.Int(len(session.State.Guilds)),
+	Shards:  omniplex.Int(1),
+	Status:  omniplex.StatusOnline,
+})
+```
+
+Fields you leave `nil` aren't sent, so Omniplex keeps their last value.
+`omniplex.Int` makes the pointer for you.
+
+Or let the SDK post for you. `AutoPostBotStats` posts once straight away, then on
+the interval you choose (at least a minute, 30 minutes if you pass 0), until the
+context is cancelled. Run it in its own goroutine:
+
+```go
+go client.AutoPostBotStats(ctx, 30*time.Minute,
+	func(ctx context.Context) (omniplex.BotStats, error) {
+		return omniplex.BotStats{Servers: omniplex.Int(len(session.State.Guilds))}, nil
+	},
+	func(err error) { log.Printf("posting stats to Omniplex: %v", err) },
+)
+```
+
+`Status` reports your bot's presence: `StatusOnline`, `StatusIdle`, `StatusDND`
+or `StatusOffline`. Omniplex keeps showing the last value you posted, so post it
+regularly if you use it. See [Posting Bot Stats](/docs/developer/bot-stats).
+
+For a server, use a server token and
+`PostServerStats(ctx, omniplex.ServerStats{TotalMembers: ..., OnlineMembers: ...})`.
+
+## Checking votes
+
+Checking votes doesn't need a token.
+
+```go
+client := omniplex.New("")
+
+voted, err := client.HasVoted(ctx, botID, userID)
+
+vote, err := client.GetBotVote(ctx, botID, userID)
+if err == nil && vote.Wait != nil {
+	fmt.Println("They can vote again in", vote.Wait.Duration())
+}
+```
+
+`HasVotedForServer` and `GetServerVote` do the same for servers. `GetBot`,
+`GetServer` and `GetUser` read public data as a `map[string]any`.
+
+## Webhooks
+
+Set a secret on your webhook in the dashboard and choose **HMAC signature**.
+The SDK also verifies the older `splashtail` and `simple-auth` methods.
+
+Omniplex occasionally sends a webhook signed with the wrong secret to check that
+your endpoint rejects it. `WebhookHandler` verifies every request, answers `401`
+when verification fails, `405` for anything other than `POST`, `500` if your
+function returns an error and `204` otherwise:
+
+```go
+http.Handle("/omniplex", omniplex.WebhookHandler(secret,
+	func(r *http.Request, event *omniplex.WebhookEvent) error {
+		if vote, ok := event.Data.(*omniplex.NewVoteData); ok && !vote.Downvote && !vote.Auto {
+			return rewardVoter(r.Context(), event.Creator.ID)
+		}
+		return nil
+	},
+))
+```
+
+To verify inside your own handler, use `VerifyWebhookRequest(r, secret)`, or
+`VerifyWebhook(body, header, secret)` if you've already read the body. Failures
+match `errors.Is(err, omniplex.ErrInvalidWebhook)`.
+
+`event.Data` holds a pointer to the event's type, such as `*NewVoteData`. An
+event this version doesn't know yet has `Data` set to `nil`, with its raw JSON in
+`RawData`. The [webhooks page](/docs/developer/webhooks#events) lists every
+event and its fields.
+
+## Errors
+
+Failed requests return an `*omniplex.APIError` with the HTTP `Status`, the API's
+`Message`, any validation `Context`, and `RetryAfter` when you're rate limited.
+Posting without a token returns `omniplex.ErrMissingToken`.
+
+```go
+var apiErr *omniplex.APIError
+if errors.As(err, &apiErr) && apiErr.Status == http.StatusUnauthorized {
+	log.Print("Your Omniplex token is invalid")
+}
+```
+
+## Options
+
+```go
+client := omniplex.New(token,
+	omniplex.WithBaseURL("https://api.omniplex.gg"), // the default
+	omniplex.WithMaxRetries(2),                      // retries for rate limits and failed GETs
+	omniplex.WithHTTPClient(&http.Client{Timeout: 10 * time.Second}),
+	omniplex.WithUserAgent("my-bot/1.0"),
+)
+```
+
+`client.Do(ctx, method, path, body, auth, &out)` calls any other endpoint with
+the same retry and error handling.

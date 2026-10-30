@@ -1,42 +1,66 @@
 ---
 title: Authentication
-description: Getting and using User-Auth, Bot-Auth, and scoped session tokens.
+description: API tokens for bots and servers, user sessions, and scoped sessions.
 ---
 
-Authenticated requests send a token in one of two headers, depending on
-whether you're acting as a user or a bot:
+Most read endpoints are public. Anything that changes data, or posts stats,
+needs a token in the `Authorization` header:
 
 ```
-User-Auth: <token>
-Bot-Auth: <token>
+Authorization: <token>
 ```
 
-(`Authorization: User <token>` and `Authorization: Bot <token>` work the
-same way.)
+You can also prefix the token with what it belongs to, which makes requests
+easier to read in logs. If you do, the prefix has to match the token:
 
-## Where tokens come from
+```
+Authorization: Bot <token>
+Authorization: Server <token>
+Authorization: Team <token>
+Authorization: User <token>
+```
 
-Your account's User-Auth token and a bot's Bot-Auth token are both shown on
-the site itself (account settings, and the bot's own settings page after
-submission) rather than issued by an API call. There's no public endpoint
-for exchanging Discord OAuth2 credentials for a token, `POST
-/auth/login/discord-oauth2` exists and is documented in the endpoint
-reference, but it's restricted to the official site and its own client
-protocol, it isn't a general-purpose login flow third-party integrations
-can use.
+The older `Bot-Auth: <token>` and `User-Auth: <token>` headers still work the
+same way. There's no `Server-Auth` or `Team-Auth` header; use `Authorization`.
+
+## Which token to use
+
+| You're building | Use |
+|---|---|
+| A bot posting its stats | An API token for the bot |
+| A server posting its member counts | An API token for the server |
+| Anything acting as a person | Not possible from outside omniplex.gg (see below) |
+
+Create API tokens in your [dashboard](https://omniplex.gg/dashboard): pick the
+bot or server, then open **API sessions**. A token is shown once, when you
+create it, so store it somewhere safe straight away.
+
+Our [SDKs](/docs/sdks) take the token once and send it for you.
+
+## User sessions
+
+A user session is what you get by signing in to omniplex.gg. It's only accepted
+from omniplex.gg itself: Popplio rejects a user session sent from any other
+origin (with an exception for Bug Hunters testing preview builds), and the login
+endpoint only works with the official site. Third-party apps can't sign users in
+or act on their behalf, so build integrations on bot or server tokens.
+
+On omniplex.gg, the session lives in an HttpOnly `popplio_session` cookie that
+page scripts can't read, and the site calls the API through its own host. Signing
+out calls `POST /auth/logout`, which ends the session on the server and clears
+the cookie.
 
 ## Scoped sessions
 
-If you want to hand a token to something with narrower permissions than
-your full account, create a scoped session instead of sharing your own
-token directly.
+To hand a token to something that should do less than you can, create a scoped
+session with only the permissions it needs:
 
 ```
 POST /{target_type}/{target_id}/sessions
 ```
 
-Requires the `Manage API Sessions` permission on the target entity (bot,
-server, team, or pack). Body:
+Requires the `Manage API Sessions` permission on the target (bot, server, team or
+pack). Body:
 
 ```json
 {
@@ -49,13 +73,13 @@ server, team, or pack). Body:
 
 | Field | Type | Notes |
 |---|---|---|
-| `name` | string | A label so you can recognize the session later. |
-| `type` | string | Must be `api`, login sessions can't be created through this endpoint. |
-| `perm_limits` | string[] | The permissions the session is allowed to use. Empty is only allowed if you hold the `owner` permission on the target, in which case the session gets full access. |
+| `name` | string | A label so you can recognise the session later. |
+| `type` | string | Must be `api`. Login sessions can't be created here. |
+| `perm_limits` | string[] | The permissions the session may use. Empty is only allowed if you hold the `owner` permission on the target, in which case the session gets full access. |
 | `expiry` | number | How long the session lasts, in seconds. |
 
-The response includes the session's `token`, only shown once, there's no
-way to read it back afterward.
+The response includes the session's `token`. It's only shown once; there's no
+way to read it back afterwards.
 
 ```json
 {
@@ -72,11 +96,9 @@ GET    /{target_type}/{target_id}/sessions
 DELETE /{target_type}/{target_id}/sessions/{session_id}
 ```
 
-Listing requires `View API Sessions`, revoking requires `Manage API
-Sessions`. A
-listed session never includes its token, only its name, type, permission
-limits, and expiry, so losing track of a token means creating a new
-session rather than looking the old one up.
+Listing needs `View API Sessions` and revoking needs `Manage API Sessions`. A
+listed session never includes its token, only its name, type, permission limits
+and expiry, so if you lose a token, revoke it and create a new one.
 
 ## Testing a token
 
@@ -84,6 +106,9 @@ session rather than looking the old one up.
 POST /auth/test
 ```
 
-Send whichever auth header you want to check. A valid token gets back the
-resolved identity (`target_type` and `target_id`) it authenticates as; an
-invalid or expired one gets a 401.
+```json
+{ "auth_type": "bot", "target_id": "1234567890123456789", "token": "..." }
+```
+
+Returns whether the token is valid for that bot, server, team or user, without
+using it on a real request.

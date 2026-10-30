@@ -1,0 +1,162 @@
+---
+title: JavaScript and TypeScript
+description: Post stats, check votes and verify webhooks with @omniplex/sdk.
+---
+
+`@omniplex/sdk` works in Node 20 and newer, Bun, Deno, Cloudflare Workers and any
+other runtime with `fetch` and Web Crypto. It has no runtime dependencies, and
+its types come from `@omniplex/api-types`, the same types omniplex.gg itself
+uses.
+
+```sh
+npm install @omniplex/sdk
+```
+
+## Posting stats
+
+```ts
+import { Omniplex } from "@omniplex/sdk";
+
+const omniplex = new Omniplex({ token: process.env.OMNIPLEX_TOKEN });
+
+await omniplex.postBotStats({
+  servers: client.guilds.cache.size,
+  shards: client.shard?.count ?? 1,
+  status: "online",
+});
+```
+
+Or let the SDK post for you. It posts once straight away, then every 30 minutes
+(or `intervalMs`, at least a minute), and returns a function that stops it:
+
+```ts
+const stop = omniplex.autoPostBotStats(
+  () => ({
+    servers: client.guilds.cache.size,
+    shards: client.shard?.count ?? 1,
+  }),
+  {
+    intervalMs: 15 * 60_000,
+    onError: (err) => console.warn("Posting stats to Omniplex failed", err),
+  },
+);
+```
+
+Without `onError`, failures are logged with `console.error`. The timer doesn't
+keep your process alive on its own.
+
+`status` reports your bot's presence: `online`, `idle`, `dnd` or `offline`.
+Omniplex keeps showing the last value you posted, so post it regularly if you
+use it. See [Posting Bot Stats](/docs/developer/bot-stats).
+
+For a server, use a server token:
+
+```ts
+await omniplex.postServerStats({ totalMembers: 1200, onlineMembers: 340 });
+```
+
+## Checking votes
+
+Checking votes doesn't need a token.
+
+```ts
+const omniplex = new Omniplex();
+
+if (await omniplex.hasVoted(botId, userId)) {
+  // reward them
+}
+
+const vote = await omniplex.getBotVote(botId, userId);
+if (vote.wait) {
+  console.log(`They can vote again in ${vote.wait.hours}h ${vote.wait.minutes}m`);
+}
+```
+
+`hasVotedForServer` and `getServerVote` do the same for servers. `getBot`,
+`getServer` and `getUser` read public data; pass `{ includeLong: true }` to
+`getBot` or `getServer` to include the long description.
+
+## Webhooks
+
+Set a secret on your webhook in the dashboard and choose **HMAC signature**.
+The SDK also verifies the older `splashtail` and `simple-auth` methods.
+
+Always verify the request. Omniplex occasionally sends one signed with the
+wrong secret to check that your endpoint rejects it.
+
+### Fetch-style handlers
+
+For Bun, Deno, Cloudflare Workers and Next.js route handlers:
+
+```ts
+import { createWebhookHandler } from "@omniplex/sdk";
+
+export const POST = createWebhookHandler(
+  process.env.OMNIPLEX_WEBHOOK_SECRET!,
+  async (event) => {
+    if (event.type === "NEW_VOTE" && !event.data.downvote && !event.data.auto) {
+      await rewardVoter(event.creator?.id);
+    }
+  },
+);
+```
+
+The handler answers `204` once your callback finishes, `401` when verification
+fails and `405` for anything other than `POST`.
+
+### Express and other frameworks
+
+Verify against the **raw** request body, before any JSON parsing:
+
+```ts
+import express from "express";
+import { verifyWebhook, WebhookVerificationError } from "@omniplex/sdk";
+
+app.post("/omniplex", express.raw({ type: "*/*" }), async (req, res) => {
+  try {
+    const event = await verifyWebhook({ body: req.body, headers: req.headers }, secret);
+    // handle the event
+    res.sendStatus(204);
+  } catch (err) {
+    if (err instanceof WebhookVerificationError) return res.sendStatus(401);
+    throw err;
+  }
+});
+```
+
+`event` is a union typed on `event.type`, so TypeScript narrows `event.data`
+for you. The [webhooks page](/docs/developer/webhooks#events) lists every
+event and its fields.
+
+## Errors
+
+Failed requests throw an `OmniplexError` with the HTTP `status`, the API's
+`message`, any validation `context`, and `retryAfter` in seconds when you're
+rate limited. Posting without a token throws before any request is made.
+
+```ts
+import { OmniplexError } from "@omniplex/sdk";
+
+try {
+  await omniplex.postBotStats({ servers: 10 });
+} catch (err) {
+  if (err instanceof OmniplexError && err.status === 401) {
+    console.error("Your Omniplex token is invalid");
+  }
+}
+```
+
+## Options
+
+```ts
+new Omniplex({
+  token: "...",                       // needed for posting stats
+  baseUrl: "https://api.omniplex.gg", // the default
+  maxRetries: 2,                      // retries for rate limits and failed GETs
+  userAgent: "my-bot/1.0",
+  fetch: customFetch,                 // bring your own fetch
+});
+```
+
+`omniplex.request(path, options)` calls any other endpoint with the same retry
+and error handling.

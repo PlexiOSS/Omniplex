@@ -1,0 +1,140 @@
+---
+title: Rust
+description: Post stats, check votes and verify webhooks with the omniplex crate.
+---
+
+The `omniplex` crate needs Rust 1.85 or newer. It's async, built on tokio and
+reqwest with rustls, so there's no OpenSSL to install, and it works alongside
+serenity, poise, twilight and anything else on tokio.
+
+```sh
+cargo add omniplex
+```
+
+[Reference on docs.rs](https://docs.rs/omniplex).
+
+## Posting stats
+
+```rust
+use omniplex::{BotStats, Omniplex, PresenceStatus};
+
+let omniplex = Omniplex::with_token(std::env::var("OMNIPLEX_TOKEN")?);
+
+omniplex
+    .post_bot_stats(&BotStats {
+        servers: Some(213),
+        shards: Some(1),
+        status: Some(PresenceStatus::Online),
+        ..Default::default()
+    })
+    .await?;
+```
+
+Fields left as `None` aren't sent, so Omniplex keeps their last value.
+
+Or let the SDK post for you. `auto_post_bot_stats` posts once straight away, then
+on the interval you choose (at least a minute), in a background task. It returns
+an `AutoPoster` you can stop:
+
+```rust
+use std::time::Duration;
+
+let poster = omniplex.auto_post_bot_stats(Duration::from_secs(30 * 60), move || {
+    let cache = cache.clone();
+    async move {
+        BotStats {
+            servers: Some(cache.guild_count() as u64),
+            ..Default::default()
+        }
+    }
+});
+
+// Later, if you need to:
+poster.stop();
+```
+
+Failed posts are printed to stderr. Use `auto_post_bot_stats_with` to handle each
+result yourself.
+
+`status` reports your bot's presence: `Online`, `Idle`, `Dnd` or `Offline`.
+Omniplex keeps showing the last value you posted, so post it regularly if you
+use it. See [Posting Bot Stats](/docs/developer/bot-stats).
+
+For a server, use a server token and
+`post_server_stats(&ServerStats { total_members, online_members })`.
+
+## Checking votes
+
+Checking votes doesn't need a token.
+
+```rust
+let omniplex = omniplex::Omniplex::new();
+
+if omniplex.has_voted("BOT_ID", "USER_ID").await? {
+    // reward them
+}
+
+let vote = omniplex.get_bot_vote("BOT_ID", "USER_ID").await?;
+if let Some(wait) = vote.wait {
+    println!("They can vote again in {:?}", wait.duration());
+}
+```
+
+`has_voted_for_server` and `get_server_vote` do the same for servers. `get_bot`,
+`get_server` and `get_user` read public data as a `serde_json::Value`.
+
+## Webhooks
+
+Set a secret on your webhook in the dashboard and choose **HMAC signature**.
+The crate also verifies the older `splashtail` and `simple-auth` methods.
+
+Always verify the request using the **raw** body. Omniplex occasionally sends one
+signed with the wrong secret to check that your endpoint rejects it, so return
+`401` when verification fails.
+
+`verify_webhook` takes the body, the request's headers (an `http::HeaderMap`, a
+`HashMap<String, String>` or a slice of pairs) and your secret. With axum:
+
+```rust
+use axum::{body::Bytes, http::{HeaderMap, StatusCode}};
+use omniplex::{verify_webhook, WebhookEventData};
+
+async fn omniplex_webhook(headers: HeaderMap, body: Bytes) -> StatusCode {
+    let Ok(event) = verify_webhook(&body, &headers, SECRET) else {
+        return StatusCode::UNAUTHORIZED;
+    };
+
+    if let WebhookEventData::NewVote(vote) = &event.data {
+        if !vote.downvote && !vote.auto {
+            reward_voter(&event.creator.as_ref().unwrap().id).await;
+        }
+    }
+    StatusCode::NO_CONTENT
+}
+```
+
+`event.data` is a `WebhookEventData` enum with a variant per event, plus
+`Unknown` for events this version doesn't know yet. The
+[webhooks page](/docs/developer/webhooks#events) lists every event and its
+fields.
+
+## Errors
+
+Failed requests return `Error::Api` with the HTTP `status`, the API's `message`,
+any validation `context`, and `retry_after` when you're rate limited.
+`Error::MissingToken` means you tried to post stats without a token, and
+`error.status()` gives the HTTP status when there is one.
+
+## Options
+
+```rust
+let omniplex = omniplex::Omniplex::builder()
+    .token("TOKEN")
+    .base_url("https://api.omniplex.gg") // the default
+    .max_retries(2)                      // retries for rate limits and failed GETs
+    .user_agent("my-bot/1.0")
+    .build();
+```
+
+Pass your own `reqwest::Client` with `.http_client(...)` to control timeouts or
+proxies. `Omniplex` is cheap to clone, so share one between tasks.

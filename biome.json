@@ -13,7 +13,9 @@
       "!**/.next",
       "!**/dist",
       "!**/build",
-      "!**/.turbo"
+      "!**/.turbo",
+      "!**/.source",
+      "!apps/docs/openapi.json"
     ]
   },
   "formatter": {

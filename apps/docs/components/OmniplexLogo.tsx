@@ -10,7 +10,7 @@ interface OmniplexLogoProps {
  * White fills use currentColor so they adapt to light/dark mode.
  * The purple accent (#4943cb) is the brand colour and stays constant.
  */
-export function OmniplexLogo({ size = 28, className = '' }: OmniplexLogoProps) {
+export function OmniplexLogo({ size = 28, className = "" }: OmniplexLogoProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -23,10 +23,16 @@ export function OmniplexLogo({ size = 28, className = '' }: OmniplexLogoProps) {
     >
       <defs>
         <clipPath id="opx-clip-outer">
-          <path d="M 35 36.25 L 340.765625 36.25 L 340.765625 338.5 L 35 338.5 Z" clipRule="nonzero" />
+          <path
+            d="M 35 36.25 L 340.765625 36.25 L 340.765625 338.5 L 35 338.5 Z"
+            clipRule="nonzero"
+          />
         </clipPath>
         <clipPath id="opx-clip-accent">
-          <path d="M 34.015625 98 L 158 98 L 158 297 L 34.015625 297 Z" clipRule="nonzero" />
+          <path
+            d="M 34.015625 98 L 158 98 L 158 297 L 34.015625 297 Z"
+            clipRule="nonzero"
+          />
         </clipPath>
       </defs>
 

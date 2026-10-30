@@ -1,13 +1,8 @@
-'use client';
+"use client";
 
-import { OmniplexLogo } from '@/components/OmniplexLogo';
+import { OmniplexLogo } from "@/components/OmniplexLogo";
 
-export default function Error({
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function DocsError({ retry }: { retry: () => void }) {
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
       <OmniplexLogo size={40} className="text-fd-muted-foreground" />
@@ -15,13 +10,13 @@ export default function Error({
         Something went wrong
       </h1>
       <p className="mt-3 max-w-md text-fd-muted-foreground">
-        An unexpected error occurred while loading this page. You can try
-        again, or head back to the docs.
+        An unexpected error occurred while loading this page. You can try again,
+        or head back to the docs.
       </p>
       <div className="mt-8 flex items-center gap-3">
         <button
           type="button"
-          onClick={reset}
+          onClick={() => retry()}
           className="inline-flex h-11 items-center justify-center rounded-xl bg-fd-primary px-5 text-sm font-medium text-fd-primary-foreground transition-opacity hover:opacity-90"
         >
           Try again

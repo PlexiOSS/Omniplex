@@ -1,13 +1,73 @@
 ---
-title: Voting via the API
-description: Casting a vote programmatically, including the proof-of-work captcha flow.
+title: Votes
+description: Checking whether someone voted, getting told when they do, and how votes are cast.
 ---
 
-This covers the API calls involved in casting a vote. For cooldowns, the
-weekend bonus, and vote credit values, see the
-[Voting Rules & FAQ](https://omniplex.gg/kb/voting/voting-rules) on the
-main site, this page is about the request sequence, not the policy behind
-it.
+For cooldowns, the weekend bonus and vote credits, see the
+[Voting Rules & FAQ](https://omniplex.gg/kb/voting/voting-rules) on the main
+site. This page covers what your bot or integration can do with votes.
+
+## Checking a vote
+
+```
+GET /users/{uid}/{target_type}/{target_id}/votes
+```
+
+`target_type` is `bot` or `server`. This endpoint is public and needs no token,
+so it's the simplest way to reward voters: when a user runs a command, check
+whether they've voted.
+
+```json
+{
+  "has_voted": true,
+  "valid_votes": [
+    {
+      "itag": "0b6a9c2e-...",
+      "target_type": "bot",
+      "target_id": "1234567890123456789",
+      "author": "510065483693817867",
+      "upvote": true,
+      "void": false,
+      "void_reason": null,
+      "voided_at": null,
+      "created_at": "2026-10-29T12:00:00Z",
+      "vote_num": 1,
+      "credit_redeem": null,
+      "immutable": false,
+      "auto": false
+    }
+  ],
+  "vote_info": {
+    "per_user": 1,
+    "vote_time": 12,
+    "vote_credits": true,
+    "multiple_votes": true,
+    "supports_upvotes": true,
+    "supports_downvotes": false,
+    "supports_partial_vote_credits_redeem": true,
+    "weekend_bonus": false
+  },
+  "wait": { "hours": 11, "minutes": 59, "seconds": 3 }
+}
+```
+
+| Field | Notes |
+|---|---|
+| `has_voted` | For listings that allow repeat votes, whether the user voted within the current vote window. Otherwise, whether they've ever voted. |
+| `valid_votes` | The user's votes that haven't been voided. `vote_num` is 2 for the second vote of a double vote. `auto` is `true` for votes cast by an Auto-vote subscription. |
+| `vote_info.vote_time` | Hours between votes. |
+| `vote_info.per_user` | How many votes one vote counts as. It's 2 on a double-vote weekend. |
+| `wait` | How long until the user can vote again, or `null` if they can vote now. |
+
+Every [SDK](/docs/sdks) wraps this as `hasVoted` / `has_voted` and
+`getBotVote` / `get_bot_vote`, with server versions too.
+
+## Getting told about votes
+
+To react to a vote the moment it happens, instead of when the user next runs a
+command, set up a [webhook](/docs/developer/webhooks). Each vote sends a
+`NEW_VOTE` event with the voter, the vote count and whether it was an upvote or
+an Auto-vote.
 
 ## Casting a vote
 
@@ -15,69 +75,18 @@ it.
 PUT /users/{uid}/{target_type}/{target_id}/votes?upvote=true
 ```
 
-Requires **User-Auth**. `upvote` is a required query parameter, `true` or
-`false`.
+This needs a **user** session, and user sessions are only accepted from
+omniplex.gg itself, so a third-party app or bot can't cast votes on a user's
+behalf. It's documented here so you know how votes reach your listing.
 
-Bots and servers require a solved captcha unless the owner has opted out
-(`captcha_opt_out`). Packs and teams never require one. If a captcha is
-required and missing or invalid, the request fails with a 400 telling you
-to fetch a challenge first.
-
-## The captcha
-
-Omniplex uses a self-hosted, stateless proof-of-work captcha rather than a
-third-party service, there's no external API key involved.
-
-### 1. Get a challenge
-
-```
-GET /votes/captcha/challenge
-```
+`upvote` is required and must be `true` or `false`. Bots and servers ask for a
+[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) captcha
+unless the owner has turned captchas off. When one is needed, the body is:
 
 ```json
-{
-  "salt": "a1b2c3...",
-  "difficulty": 20,
-  "expires": 1735689600000,
-  "signature": "..."
-}
+{ "token": "..." }
 ```
 
-The challenge is valid for 2 minutes and needs no authentication to
-request.
-
-### 2. Solve it
-
-Find a `nonce` (a decimal-digit string, at most 32 characters) such that
-`sha256(salt + ":" + nonce)` has at least `difficulty` leading zero bits.
-There's no shortcut, this is deliberately real computational work, brute
-force incrementing nonce values until the hash qualifies.
-
-### 3. Submit it with the vote
-
-Send the solved challenge, with the `nonce` added, as the JSON body of the
-vote request:
-
-```json
-{
-  "salt": "a1b2c3...",
-  "difficulty": 20,
-  "expires": 1735689600000,
-  "signature": "...",
-  "nonce": "839201"
-}
-```
-
-The `salt`, `difficulty`, `expires`, and `signature` must be sent back
-exactly as issued, they're part of what the signature covers. Each
-signature can only be used once, resubmitting the same solved challenge on
-a second vote fails.
-
-## Checking vote status
-
-```
-GET /users/{uid}/{target_type}/{target_id}/votes
-```
-
-Tells you whether the user has an active vote for that entity right now,
-and if not, how long until they can vote again.
+where `token` comes from a Turnstile widget rendered with the action `vote`.
+Each token works once. A missing, expired or invalid token gets a `400` asking
+the user to complete the captcha again. Packs and teams never need one.

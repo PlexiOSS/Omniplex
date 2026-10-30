@@ -1,0 +1,50 @@
+---
+title: Overview
+description: Official Omniplex libraries for JavaScript, Python, Go and Rust.
+---
+
+Our SDKs handle the parts of the API that bots use most: posting stats, checking
+whether someone voted, and verifying the [webhooks](/docs/developer/webhooks)
+Omniplex sends you. You can always call the [API](/docs/api-reference) directly
+instead, but the SDKs save you the details.
+
+| Language | Package | Install |
+|---|---|---|
+| [JavaScript and TypeScript](/docs/sdks/javascript) | [`@omniplex/sdk`](https://www.npmjs.com/package/@omniplex/sdk) | `npm install @omniplex/sdk` |
+| [Python](/docs/sdks/python) | [`omniplex-sdk`](https://pypi.org/project/omniplex-sdk/) | `pip install omniplex-sdk` |
+| [Go](/docs/sdks/go) | [`github.com/PlexiOSS/Omniplex/packages/sdk-go`](https://pkg.go.dev/github.com/PlexiOSS/Omniplex/packages/sdk-go) | `go get github.com/PlexiOSS/Omniplex/packages/sdk-go` |
+| [Rust](/docs/sdks/rust) | [`omniplex`](https://crates.io/crates/omniplex) | `cargo add omniplex` |
+
+## What every SDK does
+
+- **Post stats** for a bot (`servers`, `shards`, `users`, `shard_list`, `status`)
+  or a server (`total_members`, `online_members`), once or automatically on an
+  interval of at least a minute (30 minutes by default).
+- **Check votes** for a bot or server: whether a user has voted, their valid
+  votes, and how long until they can vote again.
+- **Read** public bot, server and user data.
+- **Verify webhooks** for all three signing methods (`hmac-sha256`, `splashtail`
+  and `simple-auth`) and give you a typed event.
+- **Retry for you.** Rate-limited requests wait for the API's `Retry-After`
+  (up to a minute), and failed `GET` requests are retried with backoff. Posting
+  stats is never retried on a server error, so a stat is never posted twice.
+
+The SDKs behave the same way in every language, so the guide for one is a good
+guide for all of them. They're tested against webhook payloads produced by
+Omniplex's own signing code.
+
+## Tokens
+
+Posting stats needs an API token for your bot or server. Open your
+[dashboard](https://omniplex.gg/dashboard), pick the bot or server, and create
+one under **API sessions**. Checking votes and reading public data don't need a
+token. See [Authentication](/docs/developer/authentication) for the details.
+
+Keep tokens secret, for example in an environment variable, and never put one
+in client-side code.
+
+## Source and licence
+
+All four SDKs are open source under the MIT licence, in the
+[`packages/` folder of our GitHub repository](https://github.com/PlexiOSS/Omniplex/tree/master/packages).
+Bug reports and pull requests are welcome there.

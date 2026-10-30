@@ -1,23 +1,45 @@
 ---
 title: Webhooks
-description: Getting notified about votes and other events in real time
+description: Getting notified about votes, reviews and team changes in real time.
 ---
 
-Webhooks let your server get notified the moment something happens to a bot,
-server, or team you own, instead of polling the API. Create one from your
-entity's settings, or via `POST /{target_type}/{target_id}/webhooks`.
+Webhooks let your server know the moment something happens to a bot, server or
+team you own, instead of polling the API. Create one from the entity's settings
+in your [dashboard](https://omniplex.gg/dashboard), or with
+`POST /{target_type}/{target_id}/webhooks`.
 
-## Auth modes
+The quickest way to receive them is one of our [SDKs](/docs/sdks), which verify
+every signing method and hand you a typed event:
 
-A webhook has one of three auth modes, set on creation and changeable via
-`PATCH .../webhooks/{id}`. Pick `hmac_auth` for anything new.
+| Language | Verify with |
+|---|---|
+| JavaScript | `createWebhookHandler(secret, onEvent)` or `verifyWebhook({ body, headers }, secret)` |
+| Python | `verify_webhook(body, headers, secret)` |
+| Go | `omniplex.WebhookHandler(secret, onEvent)` or `omniplex.VerifyWebhook(body, header, secret)` |
+| Rust | `omniplex::verify_webhook(&body, &headers, secret)` |
 
-### `hmac_auth` (recommended)
+## Creating a webhook
 
-The body is the event, as plain JSON, exactly as sent, no encryption or
-encoding. The signature is an HMAC-SHA256 of the raw body bytes, keyed with
-your webhook's secret, hex-encoded, and sent in `X-Webhook-Signature` as
-`sha256=<hex>`. This is the same shape GitHub and Stripe webhooks use.
+| Field | Notes |
+|---|---|
+| `name` | A label for the webhook. |
+| `url` | Where to send events. A Discord webhook URL also works: events are posted to that channel as embeds. |
+| `secret` | Used to sign or authenticate every delivery. Required, except for Discord webhook URLs. |
+| `hmac_auth` | Sign deliveries with HMAC-SHA256. Recommended for anything new. |
+| `simple_auth` | Send the secret itself instead of a signature. Can't be combined with `hmac_auth`. |
+| `event_whitelist` | Event types to send, such as `["NEW_VOTE"]`. Empty sends every event. |
+
+## Signing methods
+
+Every delivery has an `X-Webhook-Protocol` header naming the method, so you can
+check you're verifying the right one.
+
+### `hmac-sha256` (recommended)
+
+Chosen with `hmac_auth`. The body is the event as plain JSON. The signature is
+an HMAC-SHA256 of the raw body bytes, keyed with your secret, sent hex-encoded in
+`X-Webhook-Signature` as `sha256=<hex>`. This is the same shape GitHub and
+Stripe use.
 
 ```python
 import hashlib
@@ -29,52 +51,99 @@ def verify(secret: str, raw_body: bytes, signature_header: str) -> bool:
 ```
 
 ```js
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 function verify(secret, rawBody, signatureHeader) {
   const expected =
-    'sha256=' +
-    crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
-  return crypto.timingSafeEqual(
-    Buffer.from(expected),
-    Buffer.from(signatureHeader),
+    "sha256=" + crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  return (
+    expected.length === signatureHeader.length &&
+    crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signatureHeader))
   );
 }
 ```
 
-Two things matter for this to work:
+Two things matter:
 
-- Hash the raw request body bytes, before any JSON parsing. Re-serializing
-  parsed JSON before hashing will not reproduce the same bytes, and the
-  signature will not match.
-- Compare with a constant-time comparison (`hmac.compare_digest`,
-  `crypto.timingSafeEqual`, or equivalent), not `==`/`===`. A plain string
-  comparison leaks timing information an attacker can use to guess the
-  signature byte by byte.
+- Hash the **raw** body bytes, before any JSON parsing. Parsing and
+  re-serialising won't reproduce the same bytes, so the signature won't match.
+- Compare in constant time (`hmac.compare_digest`, `crypto.timingSafeEqual` or
+  equivalent), not with `==`. A plain comparison leaks timing information that
+  can be used to guess the signature.
 
-### `simple_auth` (legacy)
+### `simple-auth` (legacy)
 
-The body is plain JSON, same as `hmac_auth`. The raw secret is sent as-is in
-the `Authorization` header, check for an exact match. No hashing involved.
-Only exists for endpoints that cannot implement a signature check at all;
-prefer `hmac_auth` if you can.
+Chosen with `simple_auth`. The body is plain JSON, and the secret itself is sent
+in the `Authorization` header. Check it's an exact match. Only use this for
+endpoints that can't check a signature at all.
 
-### Default (legacy)
+### `splashtail` (legacy default)
 
-Webhooks created before `hmac_auth` existed use this by default. The body is
-encrypted and the signing key is derived per request, so verifying it means
-implementing decryption, not just a signature check. If you're setting up a
-new integration, switch the webhook to `hmac_auth` instead
-(`PATCH .../webhooks/{id}` with `"hmac_auth": true`) rather than
-implementing this.
+Used when neither option is set, and by webhooks created before `hmac_auth`
+existed. The body is encrypted, so verifying it means decrypting it, not just
+checking a signature. The SDKs handle this for you; to do it yourself:
 
-## Every delivery
+1. Read `X-Webhook-Nonce` and `X-Webhook-Signature`.
+2. Check the signature: `hex(HMAC-SHA512(key = nonce, data = hex(HMAC-SHA512(key = secret, data = body))))`.
+3. The body is hex. Decode it. The first 12 bytes are the AES-GCM nonce and the
+   rest is the ciphertext with its 16-byte tag.
+4. Decrypt with AES-256-GCM using the key `SHA-256(secret + nonce)`. The result
+   is the event JSON.
 
-Regardless of auth mode, every delivery sends `X-Webhook-Protocol` naming
-which mode was used, in case you ever need to accept more than one.
+For a new integration, switch the webhook to `hmac_auth` instead
+(`PATCH .../webhooks/{id}` with `"hmac_auth": true`).
 
-Popplio also periodically sends a delivery signed with a throwaway secret,
-not your real one, to confirm your endpoint actually rejects invalid
-signatures. A correctly implemented verifier already rejects these; you do
-not need to special-case anything. An endpoint that accepts unsigned or
-incorrectly-signed payloads will eventually be marked broken and disabled.
+## Responding
+
+Reply with any `2xx` once you've handled the event. Reply `401` or `403` when
+verification fails. A `404` or `410` turns the webhook off, and the owner is
+told to fix the URL and save the webhook again to turn it back on.
+
+Omniplex sometimes sends a delivery signed with a throwaway secret, not your
+real one, to check your endpoint rejects it. A correct verifier already does.
+If your endpoint accepts one with a `2xx`, the owner is warned that the webhook
+isn't checking signatures, because anyone could send it fake events.
+
+## Events
+
+Every event has the same envelope:
+
+```json
+{
+  "type": "NEW_VOTE",
+  "data": { "votes": 12, "per_user": 2, "downvote": false, "auto": false },
+  "creator": {
+    "id": "510065483693817867",
+    "username": "sleepy",
+    "display_name": "Sleepy",
+    "avatar": "https://cdn.discordapp.com/embed/avatars/0.png",
+    "bot": false,
+    "status": "online",
+    "extra_data": {}
+  },
+  "targets": {
+    "bot": { "id": "1234567890123456789", "username": "Mellow", "bot": true }
+  },
+  "metadata": { "created_at": 1761700000, "test": false }
+}
+```
+
+| Field | Notes |
+|---|---|
+| `type` | The event type, below. |
+| `data` | The event's own fields, below. |
+| `creator` | The user who caused the event, such as the voter. |
+| `targets` | The `bot`, `server` or `team` the event is about. |
+| `metadata.created_at` | When it happened, in seconds since the Unix epoch. |
+| `metadata.test` | `true` for test sends from the dashboard. |
+
+| `type` | `data` |
+|---|---|
+| `NEW_VOTE` | `votes` (the new total), `per_user` (how many votes this vote counted as, 2 on a double-vote weekend), `downvote`, `auto` (cast by an Auto-vote subscription) |
+| `NEW_REVIEW` | `review_id`, `content`, `stars`, `owner_review` |
+| `EDIT_REVIEW` | `review_id`, `stars` and `content` as `{ "old": ..., "new": ... }`, `owner_review` |
+| `DELETE_REVIEW` | `review_id`, `content`, `stars`, `owner_review` |
+| `TEAM_EDIT` | `name`, `short`, `tags`, `extra_links` and `nsfw`, each as `{ "old": ..., "new": ... }` |
+
+New event types may be added. Ignore types you don't recognise rather than
+failing; every SDK passes them through as an unknown event.

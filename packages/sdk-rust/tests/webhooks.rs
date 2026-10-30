@@ -28,6 +28,10 @@ fn fixtures() -> Fixtures {
     serde_json::from_str(include_str!("fixtures/webhooks.json")).unwrap()
 }
 
+fn wrong_secret(f: &Fixtures) -> String {
+    f.secret.chars().rev().collect()
+}
+
 fn check_vote(event: &WebhookEvent) {
     assert_eq!(event.kind(), "NEW_VOTE");
     let WebhookEventData::NewVote(data) = &event.data else {
@@ -64,7 +68,7 @@ fn hmac_rejects_wrong_secret_and_tampered_body() {
         ("x-webhook-signature", f.hmac.signature.as_str()),
     ];
     assert!(matches!(
-        verify_webhook(f.hmac.body.as_bytes(), &headers, "wrong"),
+        verify_webhook(f.hmac.body.as_bytes(), &headers, &wrong_secret(&f)),
         Err(WebhookError::SignatureMismatch)
     ));
     let tampered = f.hmac.body.replacen("\"votes\":12", "\"votes\":99", 1);
@@ -87,7 +91,7 @@ fn splashtail_webhook_verifies_and_decrypts() {
     check_vote(&verify_webhook(f.splashtail.body.as_bytes(), &headers, &f.secret).unwrap());
 
     assert!(matches!(
-        verify_webhook(f.splashtail.body.as_bytes(), &headers, "wrong"),
+        verify_webhook(f.splashtail.body.as_bytes(), &headers, &wrong_secret(&f)),
         Err(WebhookError::SignatureMismatch)
     ));
     headers.insert("X-Webhook-Nonce".to_owned(), "other".to_owned());
@@ -128,7 +132,7 @@ fn missing_and_unknown_protocol() {
         verify_webhook(
             f.payload.as_bytes(),
             &[("x-webhook-protocol", "simple-auth")],
-            ""
+            &f.secret[..0]
         ),
         Err(WebhookError::MissingSecret)
     ));
