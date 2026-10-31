@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Promo codes for premium and Auto-vote. The [Premium](/premium) page and
+  the dashboard's Auto-vote tab have a **Have a promo code?** box that
+  checks the code and shows the new price before you go to Stripe. On
+  premium, credits come off first and the code applies to the rest. Codes
+  work with card payments only, so PayPal is turned off while one is
+  applied.
+- Staff with the Manage Promo Codes permission can create promo codes in
+  the admin panel under **Shop > Promo Codes**: a percentage or fixed amount
+  off, which products the code works on, how long it lasts on Auto-vote,
+  total uses, an expiry date, and whether it's once per member or for new
+  customers only. Staff with View Shop can see each code's uses, and codes
+  can be turned off and on.
+
+### Changed
+
+- An error starting Auto-vote checkout or opening billing now shows next
+  to the button instead of under the Listings card.
+
 ## [1.12.0] - 2026-10-30
 
 ### Added

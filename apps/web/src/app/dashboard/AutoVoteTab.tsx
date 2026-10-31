@@ -11,12 +11,20 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import {
+  formatCents,
+  PromoCodeField,
+} from "@/components/billing/PromoCodeField";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
 import { search, users } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import type { AutoVoteStatus, AutoVoteTarget } from "@/lib/api/types";
+import type {
+  AutoVoteStatus,
+  AutoVoteTarget,
+  PromoCodePreview,
+} from "@/lib/api/types";
 import { formatRelativeTime } from "@/lib/utils/format";
 import { FormMessage, SettingsCard } from "./manage/ManageShell";
 
@@ -68,6 +76,8 @@ export function AutoVoteTab({
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [billing, setBilling] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
+  const [promo, setPromo] = useState<PromoCodePreview | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Candidate[]>([]);
   const [searching, setSearching] = useState(false);
@@ -190,15 +200,15 @@ export function AutoVoteTab({
 
   async function openBilling(kind: "checkout" | "portal") {
     setBilling(true);
-    setError(null);
+    setBillingError(null);
     try {
       const { url } =
         kind === "checkout"
-          ? await users.startAutoVoteCheckout(userId, token)
+          ? await users.startAutoVoteCheckout(userId, token, promo?.code)
           : await users.openAutoVotePortal(userId, token);
       window.location.href = url;
     } catch (err) {
-      setError(
+      setBillingError(
         err instanceof ApiError ? err.message : "Couldn't open checkout.",
       );
       setBilling(false);
@@ -231,6 +241,11 @@ export function AutoVoteTab({
             <CreditCard size={14} />
             Manage billing
           </Button>
+          {billingError && (
+            <p className="w-full text-xs text-red-600 dark:text-red-400">
+              {billingError}
+            </p>
+          )}
         </section>
       ) : justSubscribed ? (
         <section className="rounded-2xl border border-accent/30 bg-accent/5 p-5 text-sm text-zinc-700 sm:p-6 dark:text-zinc-300">
@@ -274,13 +289,38 @@ export function AutoVoteTab({
               listing&apos;s vote credits. Those stay for votes you cast
               yourself.
             </p>
+            <div className="mt-4">
+              <PromoCodeField
+                userId={userId}
+                token={token}
+                product="autovote"
+                value={promo}
+                onChange={setPromo}
+                disabled={billing}
+              />
+            </div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 bg-zinc-50/60 px-5 py-3 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/40">
             <span className="text-sm text-zinc-600 dark:text-zinc-300">
-              <span className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-                {price}
-              </span>{" "}
-              / month · cancel anytime
+              {promo ? (
+                <>
+                  <span className="mr-1.5 text-zinc-400 line-through">
+                    {price}
+                  </span>
+                  <span className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                    {formatCents(promo.total_cents)}
+                  </span>{" "}
+                  {promo.duration === "forever" ? "/ month" : "first month"} ·
+                  cancel anytime
+                </>
+              ) : (
+                <>
+                  <span className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                    {price}
+                  </span>{" "}
+                  / month · cancel anytime
+                </>
+              )}
             </span>
             <Button
               variant="primary"
@@ -290,6 +330,11 @@ export function AutoVoteTab({
             >
               Subscribe
             </Button>
+            {billingError && (
+              <p className="w-full text-xs text-red-600 dark:text-red-400">
+                {billingError}
+              </p>
+            )}
           </div>
         </section>
       )}

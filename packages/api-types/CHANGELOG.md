@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `PromoCodePreview` and `PromoCodeProduct` for
+  `POST /users/{id}/promo-codes/check`, and `promo_code` on
+  `CreatePerkPayload`.
+
 ## [0.1.2] - 2026-10-30
 
 ### Added

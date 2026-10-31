@@ -1287,6 +1287,24 @@ export interface CreatePerkPayload {
   id: "premium";
   name: string;
   for: string;
+  promo_code?: string;
+}
+
+export type PromoCodeProduct = "premium" | "autovote";
+
+/** Returned by `POST /users/{id}/promo-codes/check`. Amounts are US cents.
+ * For premium, `subtotal_cents` is the plan price after credits. */
+export interface PromoCodePreview {
+  code: string;
+  product: PromoCodeProduct;
+  description: string;
+  percent_off: number | null;
+  amount_off_cents: number | null;
+  duration: "once" | "repeating" | "forever";
+  duration_months: number | null;
+  subtotal_cents: number;
+  discount_cents: number;
+  total_cents: number;
 }
 
 export interface BoosterStatus {
