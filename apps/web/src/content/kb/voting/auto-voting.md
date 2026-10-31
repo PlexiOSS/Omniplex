@@ -8,7 +8,7 @@ Auto-vote is a $2.99/month subscription that votes for up to 3 bots or servers f
 
 ## Setting it up
 
-1. Open the **Auto-vote** tab in your dashboard and click **Subscribe**. Payment is handled by Stripe.
+1. Open the **Auto-vote** tab in your dashboard and click **Subscribe**. Payment is handled by Stripe. If you have a promo code, click **Have a promo code?** first and apply it. Depending on the code, it takes money off your first month, a number of months, or every month, and a 100% code for the first month makes that month free.
 2. Search for a bot or server and add it. You can add up to 3.
 3. For each one, choose **Whenever possible** or **On a schedule**. A schedule picks the days of the week and a time window, in your own timezone.
 4. Click **Save listings**.

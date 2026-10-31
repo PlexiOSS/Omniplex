@@ -3,6 +3,8 @@ import type {
   BoosterStatus,
   PaypalMeta,
   PlanList,
+  PromoCodePreview,
+  PromoCodeProduct,
   RedirectUser,
   StripeMeta,
   TargetType,
@@ -36,6 +38,7 @@ export const paymentsResource = {
     forId: string,
     token: string,
     credits = 0,
+    promoCode?: string,
   ) =>
     client.post<RedirectUser>(
       `/users/${userId}/stripe`,
@@ -45,9 +48,24 @@ export const paymentsResource = {
         for: forId,
         for_type: forType,
         credits,
+        ...(promoCode ? { promo_code: promoCode } : {}),
       },
       { token },
     ),
+
+  checkPromoCode: (
+    userId: string,
+    body: {
+      code: string;
+      product: PromoCodeProduct;
+      plan?: string;
+      credits?: number;
+    },
+    token: string,
+  ) =>
+    client.post<PromoCodePreview>(`/users/${userId}/promo-codes/check`, body, {
+      token,
+    }),
 
   /** Returns a PayPal approval URL — redirect the browser to it. */
   createPaypalOrder: (

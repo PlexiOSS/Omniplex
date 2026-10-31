@@ -29,10 +29,10 @@ export const usersResource = {
       { token },
     ),
 
-  startAutoVoteCheckout: (userId: string, token: string) =>
+  startAutoVoteCheckout: (userId: string, token: string, promoCode?: string) =>
     client.post<RedirectUser>(
       `/users/${userId}/auto-vote/checkout`,
-      {},
+      promoCode ? { promo_code: promoCode } : {},
       {
         token,
       },

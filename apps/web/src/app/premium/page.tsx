@@ -20,6 +20,7 @@ import {
   ListingPicker,
   serverOption,
 } from "@/components/billing/ListingPicker";
+import { PromoCodeField } from "@/components/billing/PromoCodeField";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar } from "@/components/ui/Avatar";
@@ -29,7 +30,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { payments, votes } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import type { BoosterStatus, BotType, PaymentPlan } from "@/lib/api/types";
+import type {
+  BoosterStatus,
+  BotType,
+  PaymentPlan,
+  PromoCodePreview,
+} from "@/lib/api/types";
 
 type Provider = "stripe" | "paypal";
 
@@ -99,6 +105,7 @@ function PremiumPageInner() {
     null,
   );
   const [error, setError] = useState<string | null>(null);
+  const [promo, setPromo] = useState<PromoCodePreview | null>(null);
 
   useEffect(() => {
     payments.getPlans().then((res) => {
@@ -183,6 +190,7 @@ function PremiumPageInner() {
       : 0;
   const creditsToUse = discountCents * creditRules.perCent;
   const appliedDiscount = useCredits ? discountCents : 0;
+  const totalCents = promo ? promo.total_cents : priceCents - appliedDiscount;
   const bestValueId =
     plans && plans.length > 1
       ? [...plans].sort(
@@ -206,6 +214,7 @@ function PremiumPageInner() {
               target.id,
               session.token,
               useCredits ? creditsToUse : 0,
+              promo?.code,
             )
           : await payments.createPaypalOrder(
               session.user_id,
@@ -433,17 +442,23 @@ function PremiumPageInner() {
                     <dd>-${(appliedDiscount / 100).toFixed(2)}</dd>
                   </div>
                 )}
+                {promo && promo.discount_cents > 0 && (
+                  <div className="flex justify-between gap-2 text-emerald-600 dark:text-emerald-400">
+                    <dt className="truncate">Code {promo.code}</dt>
+                    <dd>-${(promo.discount_cents / 100).toFixed(2)}</dd>
+                  </div>
+                )}
                 <div className="flex justify-between gap-2 pt-1.5 font-semibold">
                   <dt className="text-zinc-950 dark:text-zinc-50">Total</dt>
                   <dd className="text-zinc-950 dark:text-zinc-50">
                     {plan ? (
                       <>
-                        {appliedDiscount > 0 && (
+                        {totalCents < priceCents && (
                           <span className="mr-1.5 font-normal text-zinc-400 line-through">
                             ${plan.price.toFixed(2)}
                           </span>
                         )}
-                        ${((priceCents - appliedDiscount) / 100).toFixed(2)}
+                        ${(totalCents / 100).toFixed(2)}
                       </>
                     ) : (
                       "None"
@@ -480,6 +495,19 @@ function PremiumPageInner() {
                     </span>
                   </span>
                 </label>
+              )}
+
+              {session && plan && stripeAvailable && (
+                <PromoCodeField
+                  userId={session.user_id}
+                  token={session.token}
+                  product="premium"
+                  plan={planId}
+                  credits={useCredits ? creditsToUse : 0}
+                  value={promo}
+                  onChange={setPromo}
+                  disabled={submitting !== null}
+                />
               )}
 
               {canRedeemBooster && (
@@ -526,11 +554,16 @@ function PremiumPageInner() {
                     <Button
                       variant={stripeAvailable ? "secondary" : "primary"}
                       loading={submitting === "paypal"}
-                      disabled={!ready}
+                      disabled={!ready || !!promo}
                       onClick={() => handleCheckout("paypal")}
                     >
                       Pay with PayPal
                     </Button>
+                  )}
+                  {paypalAvailable && promo && (
+                    <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+                      Promo codes work with card payments only.
+                    </p>
                   )}
                   {!stripeAvailable && !paypalAvailable && (
                     <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">

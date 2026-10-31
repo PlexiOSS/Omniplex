@@ -23,6 +23,9 @@ import type {
   Partners,
   PlatformUser,
   PopplioStaffQuery,
+  PromoCode,
+  PromoCodeAction,
+  PromoCodeCreate,
   Report,
   ReportAction,
   ReportStatus,
@@ -576,6 +579,43 @@ export const arcadia = {
         UpdateShopCoupons: {
           login_token: loginToken,
           action: { Delete: { id } } satisfies ShopCouponAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  promoCodes: {
+    list: async (loginToken: string): Promise<PromoCode[]> => {
+      const res = await postQuery({
+        UpdatePromoCodes: {
+          login_token: loginToken,
+          action: "List" satisfies PromoCodeAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    create: async (
+      loginToken: string,
+      promo: PromoCodeCreate,
+    ): Promise<{ id: string }> => {
+      const res = await postQuery({
+        UpdatePromoCodes: {
+          login_token: loginToken,
+          action: { Create: promo } satisfies PromoCodeAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    setActive: async (
+      loginToken: string,
+      id: string,
+      active: boolean,
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdatePromoCodes: {
+          login_token: loginToken,
+          action: { SetActive: { id, active } } satisfies PromoCodeAction,
         },
       });
       await assertOk(res);

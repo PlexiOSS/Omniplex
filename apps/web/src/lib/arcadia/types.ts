@@ -476,6 +476,50 @@ export type ShopCouponAction =
   | { Edit: ShopCouponUpsert }
   | { Delete: { id: string } };
 
+export type PromoCodeProduct = "premium" | "autovote";
+export type PromoCodeDuration = "once" | "repeating" | "forever";
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  description: string;
+  products: PromoCodeProduct[];
+  percent_off: number | null;
+  amount_off_cents: number | null;
+  duration: PromoCodeDuration;
+  duration_months: number | null;
+  max_redemptions: number | null;
+  redemptions: number;
+  expires_at: string | null;
+  once_per_user: boolean;
+  new_customers_only: boolean;
+  active: boolean;
+  stripe_coupon_id: string;
+  stripe_promotion_code_id: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PromoCodeCreate {
+  code: string;
+  description: string;
+  products: PromoCodeProduct[];
+  percent_off: number | null;
+  amount_off_cents: number | null;
+  duration: PromoCodeDuration;
+  duration_months: number | null;
+  max_redemptions: number | null;
+  expires_at: string | null;
+  once_per_user: boolean;
+  new_customers_only: boolean;
+}
+
+export type PromoCodeAction =
+  | "List"
+  | { Create: PromoCodeCreate }
+  | { SetActive: { id: string; active: boolean } };
+
 export interface BotWhitelist {
   bot_id: string;
   user_id: string;

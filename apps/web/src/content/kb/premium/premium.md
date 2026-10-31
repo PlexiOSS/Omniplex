@@ -34,6 +34,15 @@ Bots and servers earn vote credits from their votes (see [Vote Credits & the Sho
 
 You need permission to spend the listing's credits, the same as in the shop. The credits are taken when you start checkout. If you don't finish paying, they're returned to the listing automatically within a few hours, and you get a notification when they are.
 
+## Promo codes
+
+We sometimes share promo codes for premium. On the [Premium](/premium) page, pick your plan and listing, then click **Have a promo code?** in the order summary and apply the code. The summary shows the new total before you pay.
+
+- Promo codes work with card payments only, not PayPal.
+- If you also use credits, the credits come off first and the code applies to what's left. A code can't bring the total to between $0.01 and $0.49, since that's below the smallest card payment, so use fewer credits if that happens.
+- A code can be limited to new customers, to one use per member, to a number of uses in total, or to a date. If it can't be used, the box tells you why.
+- A code is only used up once you finish paying.
+
 ## Discord server boosters
 
 If you boost *our* official Discord server (not the same thing as a "server" listing; this is about being a Nitro booster of our community), you get a free Bronze-plan redemption once every 30 days instead of paying. This option appears automatically on the [Premium](/premium) page when you're eligible.
