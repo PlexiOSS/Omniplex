@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@omniplex/core", "@omniplex/ui"],
+
   images: {
     unoptimized: true,
     localPatterns: [{ pathname: "/cdn/**" }],
@@ -37,7 +39,16 @@ const nextConfig: NextConfig = {
   },
 
   async redirects() {
+    const staff = (
+      process.env.NEXT_PUBLIC_STAFF_URL ?? "https://panel.omniplex.gg"
+    ).replace(/\/+$/, "");
     return [
+      { source: "/admin", destination: staff, permanent: false },
+      {
+        source: "/admin/:path*",
+        destination: `${staff}/:path*`,
+        permanent: false,
+      },
       {
         source: "/help",
         destination: "/kb",

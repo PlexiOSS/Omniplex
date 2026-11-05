@@ -1,5 +1,11 @@
 "use client";
 
+import type {
+  BotPack,
+  IndexBot,
+  IndexServer,
+  Team,
+} from "@omniplex/core/api/types";
 import {
   Bot,
   Package,
@@ -12,7 +18,6 @@ import { BotCard } from "@/components/cards/BotCard";
 import { PackCard } from "@/components/cards/PackCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { TeamCard } from "@/components/cards/TeamCard";
-import type { BotPack, IndexBot, IndexServer, Team } from "@/lib/api/types";
 
 interface UserEntityTabsProps {
   bots: IndexBot[];

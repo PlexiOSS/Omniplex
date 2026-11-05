@@ -1,6 +1,6 @@
-import { changelogs } from "@/lib/api";
-import { BASE_URL } from "@/lib/api/config";
-import { changelogLabel } from "@/lib/changelog";
+import { changelogs } from "@omniplex/core/api";
+import { BASE_URL } from "@omniplex/core/api/config";
+import { changelogLabel } from "@omniplex/core/changelog";
 
 function escapeXml(value: string): string {
   return value

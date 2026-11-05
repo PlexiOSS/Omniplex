@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/Badge";
-import { badges as badgesApi } from "@/lib/api";
-import { badgeColor, badgeIcon } from "@/lib/constants/badgeIcons";
+import { badges as badgesApi } from "@omniplex/core/api";
+import { badgeColor, badgeIcon } from "@omniplex/core/constants/badgeIcons";
+import { Badge } from "@omniplex/ui/Badge";
 
 interface EntityBadgesProps {
   targetType: "bot" | "server" | "team";

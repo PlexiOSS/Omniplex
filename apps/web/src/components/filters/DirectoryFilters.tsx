@@ -1,8 +1,8 @@
 "use client";
 
+import { Input } from "@omniplex/ui/Input";
 import { Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/Input";
 import { BOT_TAGS } from "@/lib/constants/tags";
 
 interface DirectoryFiltersProps {

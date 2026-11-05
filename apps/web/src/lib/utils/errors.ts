@@ -1,6 +1,6 @@
 // Copyright (C) 2026 NodeByte LTD
 
-import { ApiError } from "@/lib/api/client";
+import { ApiError } from "@omniplex/core/api/client";
 
 const SERVER_ERROR_STATUSES = new Set([408, 500, 502, 503, 504]);
 

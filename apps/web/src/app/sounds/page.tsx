@@ -1,17 +1,17 @@
 "use client";
 
+import { sounds } from "@omniplex/core/api";
+import type { FlatPackSound } from "@omniplex/core/api/types";
+import { packSoundUrl } from "@omniplex/core/utils/assets";
+import { Pagination } from "@omniplex/ui/Pagination";
 import { Layers, Music, Pause, Play, Volume2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Pagination } from "@/components/search/Pagination";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
-import { sounds } from "@/lib/api";
-import type { FlatPackSound } from "@/lib/api/types";
-import { packSoundUrl } from "@/lib/utils/assets";
 
 export default function SoundsPage() {
   const [page, setPage] = useState(1);

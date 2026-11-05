@@ -1,9 +1,9 @@
 "use client";
 
+import type { PermissionData } from "@omniplex/core/api/types";
+import { hasPermString, isSuperPerm } from "@omniplex/core/permissions";
 import { X } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { PermissionData } from "@/lib/api/types";
-import { hasPermString, isSuperPerm } from "@/lib/permissions";
 
 interface PermSelectorProps {
   catalog: PermissionData[];

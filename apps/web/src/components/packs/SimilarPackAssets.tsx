@@ -1,6 +1,6 @@
+import { packEmojiUrl, packStickerUrl } from "@omniplex/core/utils/assets";
 import { Music } from "lucide-react";
 import Link from "next/link";
-import { packEmojiUrl, packStickerUrl } from "@/lib/utils/assets";
 
 interface SimilarPackAssetsProps {
   kind: "emoji" | "sticker" | "sound";

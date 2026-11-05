@@ -1,5 +1,10 @@
 "use client";
 
+import { tickets } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { TicketTopic } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
 import { ArrowLeft, LifeBuoy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,13 +19,8 @@ import {
 } from "@/components/forms/FormSection";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
-import { tickets } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { TicketTopic } from "@/lib/api/types";
 
 const ISSUE_MAX = 200;
 const MESSAGE_MIN = 20;

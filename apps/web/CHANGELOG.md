@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-11-05
+
+### Changed
+
+- The staff panel moved out of the website into its own app,
+  `apps/staff`, deployed on its own domain (`NEXT_PUBLIC_STAFF_URL`,
+  `https://panel.omniplex.gg` by default). Bot and server descriptions can
+  contain HTML, so keeping staff sessions on a different origin means a
+  description that ever got past the sanitizer couldn't reach them. `/admin`
+  and every page under it now redirect there, and the account menu's
+  **Staff Panel** link opens it. The header no longer has a staff mode.
+- The API client, shared helpers and the basic UI components (buttons,
+  badges, inputs, modals, avatars and others) moved into the new private
+  `@omniplex/core` and `@omniplex/ui` packages so the website and the staff
+  panel share them. The theme's colour, font and radius tokens moved to
+  `@omniplex/ui`'s `theme.css`.
+- `/api/uploads` no longer takes partner logos. The staff panel has its own
+  upload route for them.
+- The lockfile now matches the Next.js 16.4.5 that `package.json` already
+  asked for. It still had 16.4.3.
+
 ## [1.13.0] - 2026-11-04
 
 ### Added

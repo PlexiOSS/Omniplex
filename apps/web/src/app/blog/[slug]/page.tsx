@@ -1,3 +1,6 @@
+import { blogs } from "@omniplex/core/api";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -6,9 +9,6 @@ import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { Markdown } from "@/components/markdown/Markdown";
 import { TableOfContents } from "@/components/markdown/TableOfContents";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { blogs } from "@/lib/api";
 import { markdownOutline, readingMinutes } from "@/lib/markdown/outline";
 import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
 

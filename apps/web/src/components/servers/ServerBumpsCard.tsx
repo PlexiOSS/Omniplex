@@ -1,7 +1,7 @@
+import type { ServerBumpInfo } from "@omniplex/core/api/types";
+import { formatCount, formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { ArrowBigUpDash } from "lucide-react";
-import { Avatar } from "@/components/ui/Avatar";
-import type { ServerBumpInfo } from "@/lib/api/types";
-import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 
 interface ServerBumpsCardProps {
   info: ServerBumpInfo;

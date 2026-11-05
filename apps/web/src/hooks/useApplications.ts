@@ -2,9 +2,13 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
+import { apps } from "@omniplex/core/api";
+import type {
+  AppListResponse,
+  AppMeta,
+  AuthSession,
+} from "@omniplex/core/api/types";
 import useSWR from "swr";
-import { apps } from "@/lib/api";
-import type { AppListResponse, AppMeta, AuthSession } from "@/lib/api/types";
 
 export function useAppMeta() {
   return useSWR<AppMeta>("apps/meta", () => apps.getMeta());

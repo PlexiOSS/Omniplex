@@ -1,5 +1,6 @@
 "use client";
 
+import { Pagination } from "@omniplex/ui/Pagination";
 import { SquareTerminal, Terminal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
@@ -11,7 +12,6 @@ import { commandLabel } from "@/components/commands/commandLabel";
 import { DirectoryFilters } from "@/components/filters/DirectoryFilters";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Pagination } from "@/components/search/Pagination";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCommandBots, useCommandSearch } from "@/hooks/useBots";
 

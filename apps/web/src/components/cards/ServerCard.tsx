@@ -1,3 +1,12 @@
+import type { IndexServer } from "@omniplex/core/api/types";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  serverPath,
+} from "@omniplex/core/utils/assets";
+import { formatCount, formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import {
   ArrowUpRight,
   Eye,
@@ -6,13 +15,8 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import type { IndexServer } from "@/lib/api/types";
-import { bannerUrl, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
 import { cardCosmetics } from "@/lib/utils/cardCosmetics";
-import { formatCount, formatCountLabel } from "@/lib/utils/format";
 
 interface ServerCardProps {
   server: IndexServer;

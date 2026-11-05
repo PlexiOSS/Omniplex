@@ -1,5 +1,7 @@
 "use client";
 
+import { reminders } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
 import { Bell, BellRing } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -7,8 +9,6 @@ import {
   ENTITY_ACTION_CLASS,
 } from "@/components/ui/entityAction";
 import { useAuth } from "@/hooks/useAuth";
-import { reminders } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
 
 interface ReminderToggleProps {
   targetType: "bot" | "server";

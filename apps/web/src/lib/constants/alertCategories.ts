@@ -1,4 +1,4 @@
-import type { AlertCategory } from "@/lib/api/types";
+import type { AlertCategory } from "@omniplex/core/api/types";
 
 export const ALERT_CATEGORY_LABELS: Record<AlertCategory, string> = {
   votes: "Votes & Reminders",

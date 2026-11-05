@@ -1,5 +1,5 @@
+import { API_URL, BASE_URL } from "@omniplex/core/api/config";
 import { type NextRequest, NextResponse } from "next/server";
-import { API_URL, BASE_URL } from "@/lib/api/config";
 import { buildCsp } from "@/lib/csp";
 import {
   getShortLinkDomains,

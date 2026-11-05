@@ -1,19 +1,23 @@
+import { votes } from "@omniplex/core/api";
+import type {
+  VoterLeaderboardEntry,
+  VoterLeaderboardFavorite,
+  VoterLeaderboardPeriod,
+} from "@omniplex/core/api/types";
+import {
+  botPath,
+  mirroredAvatarUrl,
+  serverPath,
+} from "@omniplex/core/utils/assets";
+import { formatCount } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Avatar } from "@/components/ui/Avatar";
-import { votes } from "@/lib/api";
-import type {
-  VoterLeaderboardEntry,
-  VoterLeaderboardFavorite,
-  VoterLeaderboardPeriod,
-} from "@/lib/api/types";
-import { botPath, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCount } from "@/lib/utils/format";
 import { YourRank } from "./YourRank";
 
 export const metadata: Metadata = {

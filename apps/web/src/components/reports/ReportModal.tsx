@@ -1,15 +1,15 @@
 "use client";
 
+import { reports } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { ReportReason, TargetType } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
+import { Modal } from "@omniplex/ui/Modal";
 import { Flag } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
 import { ENTITY_ACTION_REPORT_CLASS } from "@/components/ui/entityAction";
-import { Modal } from "@/components/ui/Modal";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
-import { reports } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { ReportReason, TargetType } from "@/lib/api/types";
 
 interface ReportModalProps {
   targetType: TargetType;

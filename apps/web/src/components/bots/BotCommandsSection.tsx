@@ -1,5 +1,11 @@
 "use client";
 
+import { bots as botsApi } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { BotCommand, BotCommandInput } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { Modal } from "@omniplex/ui/Modal";
 import {
   ArrowRight,
   Pencil,
@@ -11,13 +17,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { commandLabel } from "@/components/commands/commandLabel";
-import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { bots as botsApi } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { BotCommand, BotCommandInput } from "@/lib/api/types";
 
 interface BotCommandsSectionProps {
   botId: string;

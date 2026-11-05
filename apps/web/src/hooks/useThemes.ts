@@ -1,8 +1,8 @@
 "use client";
 
+import { themes } from "@omniplex/core/api";
+import type { AuthSession } from "@omniplex/core/api/types";
 import useSWR from "swr";
-import { themes } from "@/lib/api";
-import type { AuthSession } from "@/lib/api/types";
 
 /** Themes aren't embedded in /me, so the dashboard's Themes tab fetches
  * its own list via the existing `owner` filter on GET /themes/@all. */

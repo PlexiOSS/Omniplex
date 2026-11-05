@@ -1,15 +1,18 @@
-import { ArrowRight, History, Terminal, Trophy } from "lucide-react";
-import Link from "next/link";
-import type { ReactNode } from "react";
-import { commandLabel } from "@/components/commands/commandLabel";
-import { Avatar } from "@/components/ui/Avatar";
 import type {
   BotWithCommands,
   RecentChangelogBot,
   VoterLeaderboardEntry,
-} from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { formatCountLabel, formatRelativeTime } from "@/lib/utils/format";
+} from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import {
+  formatCountLabel,
+  formatRelativeTime,
+} from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { ArrowRight, History, Terminal, Trophy } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { commandLabel } from "@/components/commands/commandLabel";
 
 interface ActivityStripProps {
   recentBots: RecentChangelogBot[];

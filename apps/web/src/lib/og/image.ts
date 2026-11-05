@@ -1,8 +1,8 @@
 // Copyright (C) 2026 NodeByte LTD
 
+import { CDN_URL, DISCORD_CDN_URL } from "@omniplex/core/api/config";
+import { isSafeImageType } from "@omniplex/core/cdn/safety";
 import sharp from "sharp";
-import { CDN_URL, DISCORD_CDN_URL } from "@/lib/api/config";
-import { isSafeImageType } from "@/lib/cdn/safety";
 
 const ALLOWED_HOSTS = new Set([
   new URL(DISCORD_CDN_URL).hostname,

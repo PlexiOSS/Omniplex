@@ -1,7 +1,7 @@
 "use client";
 
+import { Button } from "@omniplex/ui/Button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 
 export function LoadingState({ label = "Loading…" }: { label?: string }) {
   return (

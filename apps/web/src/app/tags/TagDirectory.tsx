@@ -1,10 +1,10 @@
 "use client";
 
+import type { ListTag } from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { ListTag } from "@/lib/api/types";
-import { formatCount } from "@/lib/utils/format";
 
 type Kind = "all" | "bots" | "servers";
 type Sort = "popular" | "az";

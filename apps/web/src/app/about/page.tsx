@@ -1,3 +1,5 @@
+import { list } from "@omniplex/core/api";
+import { formatCount } from "@omniplex/core/utils/format";
 import {
   Activity,
   ArrowRight,
@@ -15,8 +17,6 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { list } from "@/lib/api";
-import { formatCount } from "@/lib/utils/format";
 import { totalListedBots } from "@/lib/utils/stats";
 
 export const metadata: Metadata = {

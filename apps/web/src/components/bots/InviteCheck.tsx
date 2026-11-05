@@ -1,9 +1,12 @@
 "use client";
 
+import {
+  NOADMIN_CALCULATOR_URL,
+  noAdminReportUrl,
+} from "@omniplex/core/noadmin";
 import { Info, ShieldAlert, ShieldCheck, TriangleAlert } from "lucide-react";
 import type { ReactNode } from "react";
 import { useInviteCheck } from "@/hooks/useInviteCheck";
-import { NOADMIN_CALCULATOR_URL, noAdminReportUrl } from "@/lib/noadmin";
 
 interface InviteCheckProps {
   invite: string;

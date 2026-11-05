@@ -1,5 +1,5 @@
+import { badgeColor, badgeIcon } from "@omniplex/core/constants/badgeIcons";
 import type { ReactNode } from "react";
-import { badgeColor, badgeIcon } from "@/lib/constants/badgeIcons";
 
 const TILE: Record<ReturnType<typeof badgeColor>, string> = {
   default:

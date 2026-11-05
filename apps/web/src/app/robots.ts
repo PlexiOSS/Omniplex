@@ -1,5 +1,5 @@
+import { BASE_URL } from "@omniplex/core/api/config";
 import type { MetadataRoute } from "next";
-import { BASE_URL } from "@/lib/api/config";
 
 export default function robots(): MetadataRoute.Robots {
   return {

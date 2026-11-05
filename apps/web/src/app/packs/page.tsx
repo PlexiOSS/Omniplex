@@ -1,3 +1,6 @@
+import { packs } from "@omniplex/core/api";
+import type { BotPack, PackType, PagedResult } from "@omniplex/core/api/types";
+import { formatCountLabel } from "@omniplex/core/utils/format";
 import { Package } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -6,10 +9,7 @@ import { PackCard } from "@/components/cards/PackCard";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { packs } from "@/lib/api";
-import type { BotPack, PackType, PagedResult } from "@/lib/api/types";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCountLabel } from "@/lib/utils/format";
 
 export const metadata: Metadata = { title: "Packs" };
 

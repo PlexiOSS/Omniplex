@@ -1,3 +1,10 @@
+import { servers } from "@omniplex/core/api";
+import type {
+  IndexServer,
+  PagedResult,
+  ServerBrowseSort,
+} from "@omniplex/core/api/types";
+import { formatCountLabel } from "@omniplex/core/utils/format";
 import { Server } from "lucide-react";
 import Link from "next/link";
 import { BrowseControls, browseHref } from "@/components/browse/BrowseControls";
@@ -6,15 +13,8 @@ import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { servers } from "@/lib/api";
-import type {
-  IndexServer,
-  PagedResult,
-  ServerBrowseSort,
-} from "@/lib/api/types";
 import { SERVER_TAGS } from "@/lib/constants/tags";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCountLabel } from "@/lib/utils/format";
 
 interface Props {
   searchParams: Promise<{

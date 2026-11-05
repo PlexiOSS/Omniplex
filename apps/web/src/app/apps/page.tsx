@@ -1,11 +1,11 @@
+import { apps } from "@omniplex/core/api";
+import { Badge } from "@omniplex/ui/Badge";
 import { ArrowRight, Briefcase, ClipboardList, CloudOff } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { apps } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Apply",

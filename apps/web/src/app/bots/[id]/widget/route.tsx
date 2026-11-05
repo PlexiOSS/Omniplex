@@ -1,8 +1,8 @@
+import { bots, vanity } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import { formatCount } from "@omniplex/core/utils/format";
 import { ImageResponse } from "next/og";
-import { bots, vanity } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
 import { toOgImageSrc } from "@/lib/og/image";
-import { formatCount } from "@/lib/utils/format";
 import {
   BOT_WIDGET_STATS,
   resolveVisibleStats,

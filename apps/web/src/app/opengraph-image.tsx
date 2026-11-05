@@ -1,8 +1,8 @@
+import { list } from "@omniplex/core/api";
+import { formatCount } from "@omniplex/core/utils/format";
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import { ImageResponse } from "next/og";
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
-import { list } from "@/lib/api";
 import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, OgStat, og } from "@/lib/og/shared";
-import { formatCount } from "@/lib/utils/format";
 
 export const alt = "Omniplex — Discord Bot List";
 export const size = OG_SIZE;

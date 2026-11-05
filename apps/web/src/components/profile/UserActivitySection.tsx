@@ -1,15 +1,22 @@
-import { MessageSquare, ThumbsUp, Trophy } from "lucide-react";
-import Link from "next/link";
-import type { ReactNode } from "react";
-import { StarRating } from "@/components/reviews/StarRating";
-import { Avatar } from "@/components/ui/Avatar";
-import type { UserActivity, VoterLeaderboardFavorite } from "@/lib/api/types";
-import { botPath, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
+import type {
+  UserActivity,
+  VoterLeaderboardFavorite,
+} from "@omniplex/core/api/types";
+import {
+  botPath,
+  mirroredAvatarUrl,
+  serverPath,
+} from "@omniplex/core/utils/assets";
 import {
   formatCount,
   formatCountLabel,
   formatRelativeTime,
-} from "@/lib/utils/format";
+} from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { StarRating } from "@omniplex/ui/StarRating";
+import { MessageSquare, ThumbsUp, Trophy } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface UserActivitySectionProps {
   activity: UserActivity;

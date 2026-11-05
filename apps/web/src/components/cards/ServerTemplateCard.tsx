@@ -1,15 +1,15 @@
 "use client";
 
+import { serverTemplates } from "@omniplex/core/api";
+import type { ServerTemplate } from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
 import { ExternalLink, Layers, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
-import { serverTemplates } from "@/lib/api";
-import type { ServerTemplate } from "@/lib/api/types";
-import { formatCount } from "@/lib/utils/format";
 
 interface ServerTemplateCardProps {
   template: ServerTemplate;

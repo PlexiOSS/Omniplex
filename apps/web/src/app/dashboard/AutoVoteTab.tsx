@@ -1,5 +1,16 @@
 "use client";
 
+import { search, users } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  AutoVoteStatus,
+  AutoVoteTarget,
+  PromoCodePreview,
+} from "@omniplex/core/api/types";
+import { isAlways, voteStatus } from "@omniplex/core/autoVote";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Button } from "@omniplex/ui/Button";
 import {
   Check,
   Clock,
@@ -16,17 +27,7 @@ import {
   formatCents,
   PromoCodeField,
 } from "@/components/billing/PromoCodeField";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
-import { search, users } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type {
-  AutoVoteStatus,
-  AutoVoteTarget,
-  PromoCodePreview,
-} from "@/lib/api/types";
-import { formatRelativeTime } from "@/lib/utils/format";
 import { FormMessage, SettingsCard } from "./manage/ManageShell";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -57,31 +58,6 @@ function fromTime(value: string, fallback: number) {
   const [h, m] = value.split(":").map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return fallback;
   return h * 60 + m;
-}
-
-function waitLabel(ms: number) {
-  const minutes = Math.ceil(ms / 60000);
-  if (minutes < 60) return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ${minutes % 60}m`;
-}
-
-function voteStatus(t: Draft, subscribed: boolean, now: number) {
-  if (!subscribed) return "Not running. Subscribe to start voting for this.";
-  const wait = t.cooldown_until
-    ? new Date(t.cooldown_until).getTime() - now
-    : 0;
-  if (wait > 0) {
-    return `On cooldown from your last vote. Next vote in about ${waitLabel(wait)}${isAlways(t) ? "." : ", if your schedule allows it then."}`;
-  }
-  if (!t.in_schedule) {
-    return "Outside your schedule. It will vote when your schedule opens.";
-  }
-  return "Ready. It will vote within about 5 minutes.";
-}
-
-function isAlways(t: Draft) {
-  return t.days.length === 0 && t.start_minute === 0 && t.end_minute === 1440;
 }
 
 export function AutoVoteTab({

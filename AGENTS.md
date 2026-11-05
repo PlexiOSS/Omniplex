@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Project overview
 
-Omniplex is a Discord bot and server list built with **Next.js 16 App Router**, **Tailwind CSS v4**, and **TypeScript**. The backend API is called **Popplio**; the default base URL is set in `src/lib/api/config.ts` and overridable via `NEXT_PUBLIC_API_URL` (see env var table below — do not hardcode a hostname elsewhere, it will drift). This frontend is intentionally decoupled from the API — swapping the backend means changing `src/lib/api/` only.
+Omniplex is a Discord bot and server list built with **Next.js 16 App Router**, **Tailwind CSS v4**, and **TypeScript**. The backend API is called **Popplio**; the default base URL is set in `packages/core/api/config.ts` and overridable via `NEXT_PUBLIC_API_URL` (see env var table below — do not hardcode a hostname elsewhere, it will drift). This frontend is intentionally decoupled from the API — swapping the backend means changing `packages/core/api/` only.
 
 ---
 
@@ -24,12 +24,12 @@ Sibling repos, as of this writing:
 |---|---|
 | `omniplex/` | This frontend (Next.js). |
 | `popplio/` | The Go backend API this frontend talks to. Source of truth for every payload shape — when a frontend type and the backend struct disagree, read the Go struct, don't guess. |
-| `arcadia/` | The Rust staff-panel backend (`panel-api`) — both a Discord bot and an axum HTTP microservice. Single-endpoint RPC dispatch (`PanelQuery` tagged union), not REST. Powers `omniplex/src/app/admin`. |
+| `arcadia/` | The Rust staff-panel backend (`panel-api`) — both a Discord bot and an axum HTTP microservice. Single-endpoint RPC dispatch (`PanelQuery` tagged union), not REST. Powers the staff panel in `omniplex/apps/staff`. |
 | `infernoplex/` | The Rust Discord bot that tracks/lists servers. Slash-command only; deliberately requests no privileged gateway intents (member/presence data comes from REST, e.g. `with_counts=true` and per-member lookups, not the gateway cache), so it never needs to go through Discord's intent-verification review. |
 | `kittycat/` | The permission model shared by Popplio (Go), Arcadia (Rust), and Infernoplex (Rust) as a real dependency, and hand-ported (a deliberately-scoped subset) into Omniplex (`src/lib/permissions.ts`) for client-side UI gating. `namespace.perm` strings, wildcard (`*`)/negator (`~`) semantics, and position-hierarchy resolution (`resolve()`) — implemented independently per language and required to stay behaviorally identical; check its own `CHANGELOG.md`/README before assuming behavior, and update all language implementations together if you touch the resolution algorithm. |
 | `botox/` | Shared Rust utility crate (help-command pagination, task scheduling) consumed as a git dependency by Infernoplex and Arcadia. |
 | `reedwhisker/` | The legacy Next.js Pages-Router site being replaced by Omniplex. Useful as a reference for what a feature *used* to do, but don't assume it's still correct — it's been wrong or simply absent (e.g. it never had a working "add a server" flow either) more than once. |
-| `legacy-panel/` | The old SvelteKit staff panel, superseded by `omniplex/src/app/admin` + `arcadia`. Reference only. |
+| `legacy-panel/` | The old SvelteKit staff panel, superseded by `omniplex/apps/staff` + `arcadia`. Reference only. |
 
 Each repo keeps its own `CHANGELOG.md` (Keep a Changelog format). Update the changelog in whichever repo(s) you actually touched as part of finishing a task, not as an afterthought — see each changelog's own "Unreleased" version header for the convention (most of these repos aren't tagged/released yet, so everything currently accumulates under the first pending version).
 
@@ -74,15 +74,18 @@ The `monorepo` branch turns `omniplex/` into a Turborepo monorepo. Until it's me
 |---|---|---|
 | `apps/web/` | `@omniplex/web` | The website. Every `src/...` path in the rest of this file is relative to `apps/web/`. |
 | `apps/docs/` | `@omniplex/docs` | docs.omniplex.gg, on Fumadocs 16 (same Next/React/Tailwind as the website). Brought in with `git subtree` from the old Documentation repo, history included. MDX pages in `content/docs/`. The API reference pages are built from the committed `openapi.json` snapshot by `fumadocs-openapi` 12 at build time (refresh it with `bun run openapi`); only `api-reference/index.mdx` and `meta.json` are files. Release workflows keep OIDC (`id-token: write`) in a publish-only job, separate from build and test, and pin every action to a commit SHA. Deployed on Dokploy from `apps/docs/Dockerfile` (repo root as context, port 3001). `bun run dev:docs` runs it locally. |
-| `packages/api-types/` | `@omniplex/api-types` | The API types, formerly `src/lib/api/types.ts`. The website's `src/lib/api/types.ts` is now one line that re-exports this package, so imports from `@/lib/api/types` still work. Add or change API types here. Runtime values don't belong in it (`ALERT_CATEGORY_LABELS` moved to `apps/web/src/lib/constants/alertCategories.ts`). |
+| `apps/staff/` | `@omniplex/staff` | The staff panel, on its own domain (`NEXT_PUBLIC_STAFF_URL`, default `panel.omniplex.gg`) so user-written HTML on the website can never reach a staff session. Moved out of the website's `/admin`, which now redirects there. Routes sit at the root (`/queue`, not `/admin/queue`). It has no member session: it calls Popplio straight from the browser without cookies (its `next.config.ts` sets `NEXT_PUBLIC_SESSION_MODE=header` and points `NEXT_PUBLIC_BROWSER_API_URL` at the API), and staff-only Popplio routes go through Arcadia's `PopplioStaff` proxy with panel auth. Links to listings and tickets use `SITE_URL`, and `/cdn/*` is rewritten to the website. Its own `/api/uploads` only takes partner logos. Strict CSP (`src/lib/csp.ts`), `noindex`. Deployed on Dokploy from `apps/staff/Dockerfile` (port 3002). `bun run dev:staff` runs it locally. |
+| `packages/core/` | `@omniplex/core` | Private. Code both apps use: the Popplio API client (`api/`), `utils/`, `permissions`, `promo`, `autoVote`, `changelog`, `s3/` and `cdn/safety`. Import it by path, such as `@omniplex/core/api/client`. It has no `exports` field so those paths resolve to the `.ts` files. |
+| `packages/ui/` | `@omniplex/ui` | Private. React components both apps use (`Button`, `Badge`, `Input`, `Modal`, `Avatar`, `Dropdown`, `TagPicker`, `LinksEditor`, `StarRating`, `Pagination`, `OmniplexLogo`, `ThemeProvider`) and `theme.css`, the accent, font, radius and dark-mode tokens each app's `globals.css` imports. Both apps list `@omniplex/core` and `@omniplex/ui` in `transpilePackages` and `@source` them for Tailwind. |
+| `packages/api-types/` | `@omniplex/api-types` | The API types, formerly `src/lib/api/types.ts`. `packages/core/api/types.ts` is one line that re-exports this package, so imports from `@omniplex/core/api/types` work too. Add or change API types here. Runtime values don't belong in it (`ALERT_CATEGORY_LABELS` moved to `apps/web/src/lib/constants/alertCategories.ts`). |
 | `packages/sdk-js/` | `@omniplex/sdk` | The JavaScript and TypeScript SDK, published to npm. |
 | `packages/sdk-python/` | `omniplex-sdk` | The Python SDK, published to PyPI and imported as `omniplex`. It isn't a Bun workspace. |
 | `packages/sdk-go/` | `github.com/PlexiOSS/Omniplex/packages/sdk-go` | The Go SDK (package `omniplex`), standard library only. Released by tagging `packages/sdk-go/vX.Y.Z`, the tag form Go requires for a module in a subfolder; `publish-go.yml` then asks the Go proxy to fetch it so pkg.go.dev lists it. |
 | `packages/sdk-rust/` | `omniplex` (crates.io) | The Rust SDK, async on tokio + reqwest (rustls). Minimum Rust 1.85, set by reqwest. Its `target/` is ignored by Git and Docker. |
 
 - Run `bun install`, `bun dev`, `bun run build`, `bun run lint`, `bun run typecheck` and `bun run test` from the repo root. They go through Turborepo. Bun uses the hoisted linker (`bunfig.toml`).
-- The `Dockerfile` stays at the repo root with the whole repo as its build context, so Dokploy needs no changes, and it runs the site from `apps/web`. Its install stage copies each workspace's `package.json` by name for `--frozen-lockfile`. **When you add a JS package or app, add its `package.json` to the `manifests` stage of both the root `Dockerfile` and `apps/docs/Dockerfile`**, or their image builds fail.
-- In `apps/web` and `apps/docs`, `typecheck` runs after that app's `build` (their own `turbo.json`), because `next build` rewrites `.next/types` while `tsc` reads it. Don't remove that ordering to make CI faster.
+- The `Dockerfile` stays at the repo root with the whole repo as its build context, so Dokploy needs no changes, and it runs the site from `apps/web`. Its install stage copies each workspace's `package.json` by name for `--frozen-lockfile`. **When you add a JS package or app, add its `package.json` to the `manifests` stage of the root `Dockerfile`, `apps/docs/Dockerfile` and `apps/staff/Dockerfile`**, or their image builds fail.
+- In `apps/web`, `apps/staff` and `apps/docs`, `typecheck` runs after that app's `build` (their own `turbo.json`), because `next build` rewrites `.next/types` while `tsc` reads it. Don't remove that ordering to make CI faster.
 - There's no global `js-yaml` override: Bun overrides apply to every package, and Fumadocs needs js-yaml 4 while `gray-matter` needs 3. Each resolves to a patched release on its own.
 - Local overrides go in `apps/web/.env.local`.
 - The SDKs follow Popplio's contracts: `POST /bots/stats` and `POST /servers/stats` with the raw API session token as `Authorization`, the public `GET /users/{uid}/{bots|servers}/{id}/votes`, and webhook verification for `hmac-sha256`, `splashtail` (the default for webhooks without HMAC) and `simple-auth`. The webhook test fixtures in both SDKs were produced by Popplio's own `sealPayload` and HMAC code. If Popplio's signing changes, regenerate them from Popplio rather than editing them by hand.
@@ -92,7 +95,7 @@ The `monorepo` branch turns `omniplex/` into a Turborepo monorepo. Until it's me
 
 ## File structure
 
-This tree is illustrative, not exhaustive — read the actual directory before assuming a file exists. In the monorepo it lives under `apps/web/`.
+This tree is illustrative, not exhaustive — read the actual directory before assuming a file exists. In the monorepo it lives under `apps/web/`. The API client (`lib/api/`), shared `lib/utils/` helpers and the shared UI primitives (`Button`, `Badge`, `Input`, `Modal`, `Avatar` and others) have since moved to `packages/core` and `packages/ui`; see the monorepo table above.
 
 ```
 src/
@@ -199,7 +202,7 @@ src/
 ### Using the API in server components (preferred for initial data)
 
 ```tsx
-import { bots } from "@/lib/api";
+import { bots } from "@omniplex/core/api";
 
 export default async function BotPage({ params }) {
   const bot = await bots.getBot(params.id);
@@ -221,22 +224,22 @@ export default function BotsPage() {
 ### Calling the API directly in a client component
 
 ```tsx
-import { client } from "@/lib/api";
+import { client } from "@omniplex/core/api";
 const data = await client.get<MyType>("/some/endpoint", { token, cache: "no-store" });
 ```
 
 ### Adding a new resource
 
-1. Create `src/lib/api/resources/myresource.ts`
+1. Create `packages/core/api/resources/myresource.ts`
 2. Export functions that call `client.get/post/patch/delete`
-3. Add the type shapes to `src/lib/api/types.ts`
-4. Re-export from `src/lib/api/index.ts`
+3. Add the type shapes to `packages/api-types/src/`
+4. Re-export from `packages/core/api/index.ts`
 
 ### Swapping the backend entirely
 
-1. Update `API_URL` in `src/lib/api/config.ts`
-2. Update type shapes in `src/lib/api/types.ts` to match the new API
-3. Update resource functions in `src/lib/api/resources/` to match new endpoint paths and request/response shapes
+1. Update `API_URL` in `packages/core/api/config.ts`
+2. Update type shapes in `packages/api-types/src/` to match the new API
+3. Update resource functions in `packages/core/api/resources/` to match new endpoint paths and request/response shapes
 4. Nothing in `components/`, `hooks/`, or `app/` needs to change
 
 ---
@@ -246,7 +249,7 @@ const data = await client.get<MyType>("/some/endpoint", { token, cache: "no-stor
 - Session stored in `localStorage` under the key `wistala` as `{ token, user_id, expires_at }`, and mirrored into a first-party `omniplex_session` cookie (`saveSession`/`clearSession` in `src/lib/utils/auth.ts`) so server-rendered pages can act as the viewer. Read it server-side with `getServerToken()` (`src/lib/utils/serverSession.ts`).
 - `useAuth` hook reads/writes/clears the session; subscribe to it for reactive auth state
 - Auth token is passed as `Authorization: User {token}` by the API client automatically
-- **Server-side calls with a user token must go through `client` (`src/lib/api/client.ts`), never a raw `fetch`.** Popplio rejects a user session whose `Origin` isn't `sites.frontend` unless the user is a Bug Hunter (that rule exists to keep staging/preview frontends Bug-Hunter-only). Browsers send `Origin` themselves; on the server `client` adds `Origin: NEXT_PUBLIC_BASE_URL` whenever it sends a token. A raw server-side `fetch` with a token gets a 403 for every regular user, which is how "Bot not found for logged-in users" happened. Popplio logs these rejections as "Rejected user session from a non-frontend origin".
+- **Server-side calls with a user token must go through `client` (`packages/core/api/client.ts`), never a raw `fetch`.** Popplio rejects a user session whose `Origin` isn't `sites.frontend` unless the user is a Bug Hunter (that rule exists to keep staging/preview frontends Bug-Hunter-only). Browsers send `Origin` themselves; on the server `client` adds `Origin: NEXT_PUBLIC_BASE_URL` whenever it sends a token. A raw server-side `fetch` with a token gets a 403 for every regular user, which is how "Bot not found for logged-in users" happened. Popplio logs these rejections as "Rejected user session from a non-frontend origin".
 - Public read routes that change with the viewer (`GET /bots/{id}`, `/servers/{id}`, `/teams/{id}`, `/users/{id}` and their sub-resources) use `AuthOptional`: a missing, invalid, banned or wrong-origin session is treated as anonymous rather than rejected, so a public page can never break because of who is viewing it. Requests that send a token must be `cache: "no-store"` so one viewer's response is never cached for another.
 - Production `sites.frontend` (Popplio) and `NEXT_PUBLIC_BASE_URL` (Omniplex, baked in at build time) must use the same host.
 - OAuth flow: `/auth/login` → Discord → `/auth/sauron?code=...` → `auth.callback(code, client_id, redirectUri)` → `login(session)`. `/auth/callback` is a dead route kept only to redirect old bookmarks back to `/auth/login`.
@@ -371,7 +374,7 @@ Omniplex and Popplio each deploy from the `Dockerfile` at their repo root. Omnip
 
 **Do not treat this section as the feature list — it goes stale fast. `CHANGELOG.md` (in this repo and in `popplio/`) is the source of truth for what's actually shipped, kept current as work lands.** This section only tracks structural/architectural notes worth knowing before touching a given area, plus genuinely open decisions.
 
-- **Admin panel** (`/admin`, `src/app/admin/`): built — Discord OAuth + mandatory TOTP MFA login, Bot Queue, entity Search, Staff Positions/Members management, an Arcadia-backed permission system. Talks to **Arcadia** (`arcadia/`), not Popplio directly, via a single-endpoint tagged-union RPC protocol (`src/lib/arcadia/client.ts`). `docs/admin-panel-plan.md` is a historical planning doc from before this was built — check the changelog and the actual code before trusting anything in it about current state.
+- **Staff panel** (`apps/staff`, formerly `/admin` in the website): built — Discord OAuth + mandatory TOTP MFA login, Bot Queue, entity Search, Staff Positions/Members management, an Arcadia-backed permission system. Talks to **Arcadia** (`arcadia/`), not Popplio directly, via a single-endpoint tagged-union RPC protocol (`apps/staff/src/lib/arcadia/client.ts`). `docs/admin-panel-plan.md` is a historical planning doc from before this was built — check the changelog and the actual code before trusting anything in it about current state.
 - **Knowledge base** (`/kb`): built. Articles are `.md` files with YAML frontmatter under `src/content/kb/<category>/<slug>.md` (frontmatter: `title`, `description`, `order`), parsed at request time with `gray-matter` in `src/lib/kb/content.ts` and rendered through the existing sanitized `Markdown` pipeline — no MDX/component execution. Category metadata (title/description/order) lives in `src/lib/kb/categories.ts` since a category isn't itself an article. Routes: `/kb` (landing + client-side search via `KbSearch`), `/kb/[category]` (listing), `/kb/[category]/[slug]` (article, with a persistent `KbSidebar` nav). `/help` and `/help/[category]/[slug]` redirect permanently to `/kb` via `next.config.ts`. Content was ported from reedwhisker's `src/components/guide/articles/` tree, excluding everything under `legal/` (superseded by nodebyte.co.uk's legal pages) — do not port reedwhisker's toggle-sidebar `HelpCenter.tsx` (it violates the rules of hooks) or its other bespoke components. To add an article: drop a new `.md` file with frontmatter in the right category folder; to add a category, add an entry to `KB_CATEGORIES` and a matching directory.
 - **Reviews, Packs (bot+server), server presence, "add a server"**: all built this cycle — see the changelog for exact scope. Server deletion goes through `DELETE /servers/{id}` (Popplio, `delete_servers` team permission), surfaced in the server's danger zone at `/dashboard/servers/{id}?section=danger`.
 - **Open**: no staff moderation path exists yet for reviews (no force-delete RPC). Servers do go through review: they're created `pending` and appear in Arcadia's server queue alongside bots.

@@ -1,12 +1,12 @@
 "use client";
 
+import { serverTemplates } from "@omniplex/core/api";
+import type { ServerTemplate } from "@omniplex/core/api/types";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
 import { ArrowUpRight, LayoutTemplate, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { serverTemplates } from "@/lib/api";
-import type { ServerTemplate } from "@/lib/api/types";
 import { TemplateEditModal } from "./TemplateEditModal";
 
 function TemplateItem({

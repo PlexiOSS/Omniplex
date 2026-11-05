@@ -1,10 +1,13 @@
 "use client";
 
+import { bots, servers } from "@omniplex/core/api";
+import type {
+  EntityAnalytics,
+  EntityAnalyticsDay,
+} from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
 import { useState } from "react";
 import useSWR from "swr";
-import { bots, servers } from "@/lib/api";
-import type { EntityAnalytics, EntityAnalyticsDay } from "@/lib/api/types";
-import { formatCount } from "@/lib/utils/format";
 
 interface AnalyticsPanelProps {
   kind: "bot" | "server";

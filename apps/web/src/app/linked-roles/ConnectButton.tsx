@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@omniplex/ui/Button";
 
 export const LINKED_ROLES_STATE_KEY = "omniplex-linked-roles-state";
 

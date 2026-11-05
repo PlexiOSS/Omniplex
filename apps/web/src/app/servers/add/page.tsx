@@ -1,5 +1,18 @@
 "use client";
 
+import { servers } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  Link as ApiLink,
+  DiscordServerMeta,
+} from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { LinksEditor } from "@omniplex/ui/LinksEditor";
+import { TagPicker } from "@omniplex/ui/TagPicker";
 import {
   AlertTriangle,
   BookOpen,
@@ -21,24 +34,14 @@ import {
   NsfwToggle,
   TEXTAREA_CLASS,
 } from "@/components/forms/FormSection";
-import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TeamPicker } from "@/components/teams/TeamPicker";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { TagPicker } from "@/components/ui/TagPicker";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { usePersistedFormDraft } from "@/hooks/usePersistedFormDraft";
-import { servers } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { Link as ApiLink, DiscordServerMeta } from "@/lib/api/types";
 import { SERVER_TAGS as AVAILABLE_TAGS } from "@/lib/constants/tags";
 import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
-import { formatCount } from "@/lib/utils/format";
 
 const LONG_MIN = 500;
 const SHORT_MIN = 30;

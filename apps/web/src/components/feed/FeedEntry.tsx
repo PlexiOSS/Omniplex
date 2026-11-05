@@ -1,14 +1,14 @@
 "use client";
 
+import type { BotChangelogFeedEntry } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import { ListFilter } from "lucide-react";
 import Link from "next/link";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import type { BotChangelogFeedEntry } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 const COLLAPSED_HEIGHT = 200;
 

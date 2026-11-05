@@ -1,3 +1,6 @@
+import { badges as badgesApi } from "@omniplex/core/api";
+import type { PublicBadge } from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
 import { Award, Link2, ShieldCheck, Sparkles, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { BadgeTile } from "@/components/badges/BadgeRow";
@@ -5,10 +8,7 @@ import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { badges as badgesApi } from "@/lib/api";
-import type { PublicBadge } from "@/lib/api/types";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
   title: "Badges",

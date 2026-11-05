@@ -1,8 +1,8 @@
+import type { Partner } from "@omniplex/core/api/types";
+import { partnerLogoUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import type { Partner } from "@/lib/api/types";
-import { partnerLogoUrl } from "@/lib/utils/assets";
 
 interface PartnersMarqueeProps {
   partners: Partner[];

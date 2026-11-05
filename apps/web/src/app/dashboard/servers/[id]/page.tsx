@@ -1,5 +1,24 @@
 "use client";
 
+import { servers, vanity } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  Link as ApiLink,
+  Server,
+  ServerState,
+} from "@omniplex/core/api/types";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  serverPath,
+} from "@omniplex/core/utils/assets";
+import { formatCount } from "@omniplex/core/utils/format";
+import { UploadError, uploadAsset } from "@omniplex/core/utils/upload";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { LinksEditor } from "@omniplex/ui/LinksEditor";
+import { TagPicker } from "@omniplex/ui/TagPicker";
 import {
   BarChart2,
   FileText,
@@ -15,24 +34,13 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { TokenManager } from "@/components/sessions/TokenManager";
-import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { TagPicker } from "@/components/ui/TagPicker";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntityPermission } from "@/hooks/useEntityPermission";
-import { servers, vanity } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { Link as ApiLink, Server, ServerState } from "@/lib/api/types";
 import { SERVER_TAGS } from "@/lib/constants/tags";
-import { bannerUrl, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
-import { formatCount } from "@/lib/utils/format";
-import { UploadError, uploadAsset } from "@/lib/utils/upload";
 import { AnalyticsPanel } from "../../manage/AnalyticsPanel";
 import {
   FormMessage,

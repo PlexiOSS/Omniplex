@@ -2,8 +2,8 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
+import { auth } from "@omniplex/core/api";
 import useSWR from "swr";
-import { auth } from "@/lib/api";
 
 export function useOAuthMeta() {
   return useSWR("oauth-meta", () => auth.getOAuthMeta(), {

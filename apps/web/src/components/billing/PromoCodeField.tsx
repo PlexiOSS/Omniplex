@@ -1,28 +1,17 @@
 "use client";
 
+import { payments } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  PromoCodePreview,
+  PromoCodeProduct,
+} from "@omniplex/core/api/types";
+import { promoSummary } from "@omniplex/core/promo";
+import { Button } from "@omniplex/ui/Button";
 import { Tag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { payments } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { PromoCodePreview, PromoCodeProduct } from "@/lib/api/types";
 
-export function formatCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-export function promoSummary(preview: PromoCodePreview) {
-  const off =
-    preview.percent_off != null
-      ? `${preview.percent_off}% off`
-      : `${formatCents(preview.amount_off_cents ?? 0)} off`;
-  if (preview.product !== "autovote") return off;
-  if (preview.duration === "forever") return `${off} every month`;
-  if (preview.duration === "repeating" && preview.duration_months) {
-    return `${off} for ${preview.duration_months} ${preview.duration_months === 1 ? "month" : "months"}`;
-  }
-  return `${off} your first month`;
-}
+export { formatCents, promoSummary } from "@omniplex/core/promo";
 
 export function PromoCodeField({
   userId,

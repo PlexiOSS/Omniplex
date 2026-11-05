@@ -1,15 +1,15 @@
 "use client";
 
+import { themes } from "@omniplex/core/api";
+import { Pagination } from "@omniplex/ui/Pagination";
 import { Palette, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Pagination } from "@/components/search/Pagination";
 import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
-import { themes } from "@/lib/api";
 
 export default function ThemesPage() {
   const [page, setPage] = useState(1);

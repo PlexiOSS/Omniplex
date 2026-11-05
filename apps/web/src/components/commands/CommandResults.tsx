@@ -1,11 +1,11 @@
 "use client";
 
+import type { BotCommandSearchResult } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import { ExternalLink, ListFilter } from "lucide-react";
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import type { BotCommandSearchResult } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { CopyUsageButton } from "./CopyUsageButton";
 import { commandLabel } from "./commandLabel";
 

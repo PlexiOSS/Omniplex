@@ -1,10 +1,10 @@
 "use client";
 
+import { emojis, sounds, stickers } from "@omniplex/core/api";
+import { formatCount } from "@omniplex/core/utils/format";
+import { Button } from "@omniplex/ui/Button";
 import { Download } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { emojis, sounds, stickers } from "@/lib/api";
-import { formatCount } from "@/lib/utils/format";
 
 interface AssetDownloadButtonProps {
   kind: "emoji" | "sticker" | "sound";

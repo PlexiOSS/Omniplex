@@ -2,10 +2,14 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
+import { auth } from "@omniplex/core/api";
+import type { AuthSession } from "@omniplex/core/api/types";
+import {
+  clearSession,
+  getSession,
+  saveSession,
+} from "@omniplex/core/utils/auth";
 import { useCallback, useEffect, useState } from "react";
-import { auth } from "@/lib/api";
-import type { AuthSession } from "@/lib/api/types";
-import { clearSession, getSession, saveSession } from "@/lib/utils/auth";
 
 export function useAuth() {
   const [session, setSession] = useState<AuthSession | null>(null);

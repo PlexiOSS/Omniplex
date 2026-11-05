@@ -1,5 +1,10 @@
 "use client";
 
+import { STAFF_URL } from "@omniplex/core/api/config";
+import type { AuthSession } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Dropdown, DropdownItem } from "@omniplex/ui/Dropdown";
 import {
   Gift,
   LayoutDashboard,
@@ -13,10 +18,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GiPaper } from "react-icons/gi";
-import { Avatar } from "@/components/ui/Avatar";
-import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
-import type { AuthSession } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 
 interface UserMenuProps {
   session: AuthSession;
@@ -94,7 +95,10 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
         {isStaff && (
           <DropdownItem
             icon={<Shield size={14} />}
-            onClick={() => go("/admin")}
+            onClick={() => {
+              setOpen(false);
+              window.location.href = STAFF_URL;
+            }}
           >
             Staff Panel
           </DropdownItem>

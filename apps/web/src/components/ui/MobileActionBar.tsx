@@ -1,8 +1,8 @@
 "use client";
 
+import { Avatar } from "@omniplex/ui/Avatar";
 import { ExternalLink, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
 
 interface MobileActionBarProps {
   targetId: string;

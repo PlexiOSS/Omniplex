@@ -1,15 +1,15 @@
 "use client";
 
+import { packs, search } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { BotPack, IndexBot } from "@omniplex/core/api/types";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { Modal } from "@omniplex/ui/Modal";
+import { TagPicker } from "@omniplex/ui/TagPicker";
 import { Search as SearchIcon, X } from "lucide-react";
 import { useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { TagPicker } from "@/components/ui/TagPicker";
-import { packs, search } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { BotPack, IndexBot } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
 
 type PickedEntity = {

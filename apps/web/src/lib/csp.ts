@@ -1,8 +1,7 @@
-import { API_URL, CDN_URL } from "@/lib/api/config";
-import { ARCADIA_URL } from "@/lib/arcadia/config";
+import { API_URL, CDN_URL } from "@omniplex/core/api/config";
 
 function insecureOrigins(): string[] {
-  return [API_URL, CDN_URL, ARCADIA_URL].flatMap((url) => {
+  return [API_URL, CDN_URL].flatMap((url) => {
     try {
       const { protocol, origin } = new URL(url);
       return protocol === "http:" ? [origin] : [];

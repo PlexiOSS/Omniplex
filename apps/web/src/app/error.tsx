@@ -1,11 +1,11 @@
 "use client";
 
+import { Button } from "@omniplex/ui/Button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Button } from "@/components/ui/Button";
 import { isBoundaryApiError } from "@/lib/utils/errors";
 
 export default function GlobalError({

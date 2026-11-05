@@ -1,10 +1,10 @@
 "use client";
 
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
 import { ArrowRight, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { StatusCard } from "@/components/ui/StatusCard";
 import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";

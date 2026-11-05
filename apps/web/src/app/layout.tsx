@@ -1,3 +1,5 @@
+import { BASE_URL } from "@omniplex/core/api/config";
+import { ThemeProvider } from "@omniplex/ui/ThemeProvider";
 import type { Metadata } from "next";
 import {
   Atkinson_Hyperlegible,
@@ -16,13 +18,10 @@ import {
 import { headers } from "next/headers";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { HideOnAdmin } from "@/components/layout/HideOnAdmin";
 import { CustomizationProvider } from "@/components/providers/CustomizationProvider";
 import { SoundPlayerProvider } from "@/components/providers/SoundPlayerProvider";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SoundPlayerBar } from "@/components/sounds/SoundPlayerBar";
-import { BASE_URL } from "@/lib/api/config";
 import { SOCIAL_LINKS } from "@/lib/social";
 import "./globals.css";
 
@@ -176,9 +175,7 @@ export default async function RootLayout({
             <SoundPlayerProvider>
               <Header />
               <main className="flex flex-1 flex-col">{children}</main>
-              <HideOnAdmin>
-                <Footer />
-              </HideOnAdmin>
+              <Footer />
               <SoundPlayerBar />
             </SoundPlayerProvider>
           </CustomizationProvider>

@@ -1,3 +1,7 @@
+import { packs, sounds, vanity } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import { packSoundUrl } from "@omniplex/core/utils/assets";
+import { formatCount, formatRelativeTime } from "@omniplex/core/utils/format";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
@@ -6,15 +10,11 @@ import { AssetDownloadButton } from "@/components/packs/AssetDownloadButton";
 import { AssetHero } from "@/components/packs/AssetHero";
 import { PlaySoundButton } from "@/components/packs/PlaySoundButton";
 import { SimilarPackAssets } from "@/components/packs/SimilarPackAssets";
-import { packs, sounds, vanity } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import { packSoundUrl } from "@/lib/utils/assets";
 import {
   isApiUnavailable,
   isNotFoundError,
   nullIfNotFound,
 } from "@/lib/utils/errors";
-import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 
 interface Props {
   params: Promise<{ id: string }>;

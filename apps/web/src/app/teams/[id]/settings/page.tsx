@@ -1,5 +1,24 @@
 "use client";
 
+import { reviews, teams, votes, webhooks } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  PermissionData,
+  Team,
+  TeamMember,
+} from "@omniplex/core/api/types";
+import { hasPermString } from "@omniplex/core/permissions";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  teamAvatarUrl,
+} from "@omniplex/core/utils/assets";
+import { formatCount, formatCountLabel } from "@omniplex/core/utils/format";
+import { UploadError, uploadAsset } from "@omniplex/core/utils/upload";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
 import {
   ArrowUpRight,
   Bot,
@@ -29,26 +48,11 @@ import {
 } from "@/app/dashboard/manage/ManageShell";
 import { Container } from "@/components/layout/Container";
 import { PermSelector } from "@/components/teams/PermSelector";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
-import { reviews, teams, votes, webhooks } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { PermissionData, Team, TeamMember } from "@/lib/api/types";
-import { hasPermString } from "@/lib/permissions";
-import {
-  bannerUrl,
-  mirroredAvatarUrl,
-  teamAvatarUrl,
-} from "@/lib/utils/assets";
-import { formatCount, formatCountLabel } from "@/lib/utils/format";
-import { UploadError, uploadAsset } from "@/lib/utils/upload";
 
 const SECTIONS = [
   "overview",

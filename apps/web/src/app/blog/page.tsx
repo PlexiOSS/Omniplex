@@ -1,14 +1,14 @@
+import { blogs } from "@omniplex/core/api";
+import type { BlogListPost } from "@omniplex/core/api/types";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import { ArrowRight, Newspaper } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { blogs } from "@/lib/api";
-import type { BlogListPost } from "@/lib/api/types";
 import { isApiUnavailable } from "@/lib/utils/errors";
 
 export const metadata: Metadata = {

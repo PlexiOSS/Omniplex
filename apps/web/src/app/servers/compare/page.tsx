@@ -1,3 +1,8 @@
+import { servers, vanity } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { Server } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { formatCount } from "@omniplex/core/utils/format";
 import {
   ArrowRightLeft,
   Eye,
@@ -11,12 +16,7 @@ import type { CompareEntity } from "@/components/compare/types";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { servers, vanity } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { Server } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCount } from "@/lib/utils/format";
 
 interface Props {
   searchParams: Promise<{ a?: string; b?: string }>;

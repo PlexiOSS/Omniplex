@@ -1,3 +1,14 @@
+import type { IndexBot } from "@omniplex/core/api/types";
+import {
+  bannerUrl,
+  botPath,
+  discordBannerUrl,
+  discordDefaultAvatar,
+  mirroredAvatarUrl,
+} from "@omniplex/core/utils/assets";
+import { formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import {
   ArrowUpRight,
   Eye,
@@ -7,19 +18,8 @@ import {
   Star,
 } from "lucide-react";
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import type { IndexBot } from "@/lib/api/types";
-import {
-  bannerUrl,
-  botPath,
-  discordBannerUrl,
-  discordDefaultAvatar,
-  mirroredAvatarUrl,
-} from "@/lib/utils/assets";
 import { cardCosmetics } from "@/lib/utils/cardCosmetics";
-import { formatCountLabel } from "@/lib/utils/format";
 
 interface BotCardProps {
   bot: IndexBot;

@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@omniplex/ui/Button";
 import { useEffect } from "react";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Button } from "@/components/ui/Button";
 import { isBoundaryApiError } from "@/lib/utils/errors";
 
 export default function ServersError({

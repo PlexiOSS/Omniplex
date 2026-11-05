@@ -1,18 +1,18 @@
 "use client";
 
+import { bots as botsApi } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { BotChangelog } from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { Modal } from "@omniplex/ui/Modal";
 import { ChevronDown, Megaphone, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
 import { useHighlightScroll } from "@/hooks/useHighlightScroll";
-import { bots as botsApi } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { BotChangelog } from "@/lib/api/types";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 interface BotChangelogSectionProps {
   botId: string;

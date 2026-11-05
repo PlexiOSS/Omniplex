@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
-import { DISCORD_CDN_URL } from "@/lib/api/config";
-import { cdnHeaders, isSafeImageType } from "@/lib/cdn/safety";
-import { fetchCurrentAvatar, fetchDiscordImage } from "@/lib/japi/client";
-import { MIRROR_SOURCE_METADATA_KEY } from "@/lib/s3/config";
+import { DISCORD_CDN_URL } from "@omniplex/core/api/config";
+import { cdnHeaders, isSafeImageType } from "@omniplex/core/cdn/safety";
+import { MIRROR_SOURCE_METADATA_KEY } from "@omniplex/core/s3/config";
 import {
   discardObject,
   type FetchedObject,
   getObject,
   putObject,
   S3UnavailableError,
-} from "@/lib/s3/objects";
+} from "@omniplex/core/s3/objects";
+import { NextResponse } from "next/server";
+import { fetchCurrentAvatar, fetchDiscordImage } from "@/lib/japi/client";
 
 const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
 

@@ -1,9 +1,9 @@
-import { AlertTriangle, Paperclip } from "lucide-react";
 import type {
   DiscordEmbed,
   TicketAttachment,
   TicketMessage,
-} from "@/lib/api/types";
+} from "@omniplex/core/api/types";
+import { AlertTriangle, Paperclip } from "lucide-react";
 import { DiscordContent, type MentionLookup } from "./DiscordContent";
 
 interface TicketMessageBodyProps {

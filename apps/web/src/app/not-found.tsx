@@ -1,3 +1,4 @@
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import {
   ArrowLeft,
   BookOpen,
@@ -8,7 +9,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 
 const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/bots", label: "Browse bots", icon: Bot },

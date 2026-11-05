@@ -1,3 +1,13 @@
+import type { BotPack } from "@omniplex/core/api/types";
+import {
+  discordDefaultAvatar,
+  mirroredAvatarUrl,
+  packEmojiUrl,
+  packStickerUrl,
+} from "@omniplex/core/utils/assets";
+import { formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import {
   ArrowUpRight,
   Bot,
@@ -9,16 +19,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { PackTypeBadge } from "@/components/packs/PackTypeBadge";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import type { BotPack } from "@/lib/api/types";
-import {
-  discordDefaultAvatar,
-  mirroredAvatarUrl,
-  packEmojiUrl,
-  packStickerUrl,
-} from "@/lib/utils/assets";
-import { formatCountLabel } from "@/lib/utils/format";
 
 interface PackCardProps {
   pack: BotPack;

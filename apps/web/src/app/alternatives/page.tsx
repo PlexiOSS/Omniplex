@@ -1,3 +1,4 @@
+import { Button } from "@omniplex/ui/Button";
 import {
   ArrowRight,
   BadgeCheck,
@@ -14,7 +15,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "Omniplex vs top.gg and other Discord bot lists",

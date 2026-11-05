@@ -1,14 +1,18 @@
 "use client";
 
+import { search } from "@omniplex/core/api";
+import {
+  botPath,
+  mirroredAvatarUrl,
+  serverPath,
+} from "@omniplex/core/utils/assets";
+import { formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { CornerDownLeft, Search, Tag, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
-import { Avatar } from "@/components/ui/Avatar";
-import { search } from "@/lib/api";
 import { BOT_TAGS, SERVER_TAGS } from "@/lib/constants/tags";
-import { botPath, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
-import { formatCountLabel } from "@/lib/utils/format";
 
 interface Item {
   key: string;

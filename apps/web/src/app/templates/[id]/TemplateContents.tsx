@@ -1,3 +1,4 @@
+import type { TemplateChannel, TemplateRole } from "@omniplex/core/api/types";
 import {
   Hash,
   Megaphone,
@@ -6,7 +7,6 @@ import {
   ShieldCheck,
   Volume2,
 } from "lucide-react";
-import type { TemplateChannel, TemplateRole } from "@/lib/api/types";
 
 const CHANNEL_ICONS: Record<number, typeof Hash> = {
   0: Hash, // text

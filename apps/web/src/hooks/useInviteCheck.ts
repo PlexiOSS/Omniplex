@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import useSWR from "swr";
-import { analyzeInvite } from "@/lib/noadmin";
+import { analyzeInvite } from "@omniplex/core/noadmin";
 import {
   isDiscordAuthorizeUrl,
   readInvitePermissions,
-} from "@/lib/utils/invitePermissions";
+} from "@omniplex/core/utils/invitePermissions";
+import { useEffect, useState } from "react";
+import useSWR from "swr";
 
 export function useInviteCheck(invite: string) {
   const trimmed = invite.trim();

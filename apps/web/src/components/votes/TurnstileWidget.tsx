@@ -1,8 +1,8 @@
 "use client";
 
+import { TURNSTILE_SITE_KEY } from "@omniplex/core/api/config";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
-import { TURNSTILE_SITE_KEY } from "@/lib/api/config";
 
 interface TurnstileWidgetProps {
   action: string;

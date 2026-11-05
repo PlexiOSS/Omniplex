@@ -1,21 +1,21 @@
-import { NextResponse } from "next/server";
-import { cdnHeaders } from "@/lib/cdn/safety";
-import {
-  fetchDiscordImage,
-  isSnowflake,
-  lookupBanner,
-} from "@/lib/japi/client";
+import { cdnHeaders } from "@omniplex/core/cdn/safety";
 import {
   MIRROR_CHECKED_AT_METADATA_KEY,
   MIRROR_SOURCE_METADATA_KEY,
-} from "@/lib/s3/config";
+} from "@omniplex/core/s3/config";
 import {
   discardObject,
   type FetchedObject,
   getObject,
   putObject,
   S3UnavailableError,
-} from "@/lib/s3/objects";
+} from "@omniplex/core/s3/objects";
+import { NextResponse } from "next/server";
+import {
+  fetchDiscordImage,
+  isSnowflake,
+  lookupBanner,
+} from "@/lib/japi/client";
 
 interface Params {
   params: Promise<{ targetType: string; id: string }>;

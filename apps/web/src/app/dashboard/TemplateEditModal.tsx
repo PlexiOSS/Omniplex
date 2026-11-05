@@ -1,12 +1,12 @@
 "use client";
 
+import { serverTemplates } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { ServerTemplate } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
+import { Modal } from "@omniplex/ui/Modal";
+import { TagPicker } from "@omniplex/ui/TagPicker";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
-import { TagPicker } from "@/components/ui/TagPicker";
-import { serverTemplates } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { ServerTemplate } from "@/lib/api/types";
 import { SERVER_TAGS } from "@/lib/constants/tags";
 
 interface TemplateEditModalProps {

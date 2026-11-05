@@ -1,10 +1,10 @@
 "use client";
 
+import { Modal } from "@omniplex/ui/Modal";
 import { Check, Code2, Copy, ExternalLink, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { ENTITY_ACTION_CLASS } from "@/components/ui/entityAction";
-import { Modal } from "@/components/ui/Modal";
 import { useCustomization } from "@/hooks/useCustomization";
 import {
   ACCENT_COLORS,

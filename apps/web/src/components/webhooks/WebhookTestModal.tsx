@@ -1,13 +1,13 @@
 "use client";
 
+import { webhooks } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { WebhookTestMeta } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { Modal } from "@omniplex/ui/Modal";
 import { CircleCheck, CircleX } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { webhooks } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { WebhookTestMeta } from "@/lib/api/types";
 
 type TargetType = "bot" | "server" | "team";
 

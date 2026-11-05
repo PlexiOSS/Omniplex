@@ -1,5 +1,6 @@
+import { blogs } from "@omniplex/core/api";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
 import { ImageResponse } from "next/og";
-import { blogs } from "@/lib/api";
 import { toOgImageSrc } from "@/lib/og/image";
 import {
   OG_CONTENT_TYPE,
@@ -9,7 +10,6 @@ import {
   og,
   ogClamp,
 } from "@/lib/og/shared";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;

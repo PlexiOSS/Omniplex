@@ -1,5 +1,10 @@
 "use client";
 
+import { themes } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { TagPicker } from "@omniplex/ui/TagPicker";
 import { Palette } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,14 +16,9 @@ import {
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
-import { Button } from "@/components/ui/Button";
 import { ColorInput } from "@/components/ui/ColorInput";
-import { Input } from "@/components/ui/Input";
-import { TagPicker } from "@/components/ui/TagPicker";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { themes } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
 import { THEME_CATEGORIES } from "@/lib/constants/tags";
 
 export default function AddThemePage() {

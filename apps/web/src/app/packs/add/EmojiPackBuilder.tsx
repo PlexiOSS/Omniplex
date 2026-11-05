@@ -1,10 +1,10 @@
 "use client";
 
+import type { PackEmojiInput } from "@omniplex/core/api/types";
+import { packEmojiUrl } from "@omniplex/core/utils/assets";
+import { Button } from "@omniplex/ui/Button";
 import { Plus, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import type { PackEmojiInput } from "@/lib/api/types";
-import { packEmojiUrl } from "@/lib/utils/assets";
 
 const MAX_EMOJIS = 50;
 const MAX_BYTES = 256 * 1024;

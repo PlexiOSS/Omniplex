@@ -1,15 +1,15 @@
 "use client";
 
+import { linkedRoles } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { LinkedRolesResult } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
 import { CheckCircle2, Link2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Container } from "@/components/layout/Container";
-import { Button } from "@/components/ui/Button";
 import { StatusCard } from "@/components/ui/StatusCard";
-import { linkedRoles } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { LinkedRolesResult } from "@/lib/api/types";
 import { linkedRolesRedirectUri, takeLinkedRolesState } from "../ConnectButton";
 
 function Callback() {

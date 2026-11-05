@@ -1,11 +1,11 @@
+import { serverTemplates } from "@omniplex/core/api";
+import { Button } from "@omniplex/ui/Button";
 import { LayoutTemplate, Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { Button } from "@/components/ui/Button";
-import { serverTemplates } from "@/lib/api";
 import { SERVER_TAGS } from "@/lib/constants/tags";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { TemplateGrid } from "./TemplateGrid";

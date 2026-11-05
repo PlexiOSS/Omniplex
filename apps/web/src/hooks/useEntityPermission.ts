@@ -2,10 +2,10 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
+import { teams as teamsApi } from "@omniplex/core/api";
+import { hasPermString } from "@omniplex/core/permissions";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { teams as teamsApi } from "@/lib/api";
-import { hasPermString } from "@/lib/permissions";
 
 export type PermissionTargetType =
   | "team"

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 NodeByte LTD
 
-import { DISCORD_CDN_URL, JAPI_URL } from "@/lib/api/config";
-import { isSafeImageType } from "@/lib/cdn/safety";
+import { DISCORD_CDN_URL, JAPI_URL } from "@omniplex/core/api/config";
+import { isSafeImageType } from "@omniplex/core/cdn/safety";
 
 const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
 const JAPI_HOST = new URL(JAPI_URL).hostname;

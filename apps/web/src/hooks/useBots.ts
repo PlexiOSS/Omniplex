@@ -2,8 +2,7 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
-import useSWR from "swr";
-import { bots } from "@/lib/api";
+import { bots } from "@omniplex/core/api";
 import type {
   Bot,
   BotChangelogFeedEntry,
@@ -14,7 +13,8 @@ import type {
   ListIndexBot,
   PagedResult,
   RecentChangelogBot,
-} from "@/lib/api/types";
+} from "@omniplex/core/api/types";
+import useSWR from "swr";
 
 export function useBotIndex() {
   return useSWR<ListIndexBot>("bots/index", () => bots.getIndex());

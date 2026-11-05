@@ -1,10 +1,10 @@
 "use client";
 
+import type { IndexBot, IndexServer } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import type { IndexBot, IndexServer } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 
 export type ListingEntity = "bot" | "server";
 

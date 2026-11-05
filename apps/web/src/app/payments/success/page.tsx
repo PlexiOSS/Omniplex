@@ -1,8 +1,8 @@
+import { Button } from "@omniplex/ui/Button";
 import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { Button } from "@/components/ui/Button";
 import { StatusCard } from "@/components/ui/StatusCard";
 
 export const metadata: Metadata = {

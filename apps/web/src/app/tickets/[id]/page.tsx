@@ -1,5 +1,16 @@
 "use client";
 
+import { tickets } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  PlatformUser,
+  Ticket,
+  TicketMessage,
+} from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
 import {
   ArrowLeft,
   CalendarDays,
@@ -21,18 +32,11 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
 import { TicketMessageBody } from "@/components/tickets/TicketMessageBody";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { LoadingState } from "@/components/ui/PageStates";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { StatRow } from "@/components/ui/StatRow";
 import { StatusCard } from "@/components/ui/StatusCard";
 import { useAuth } from "@/hooks/useAuth";
-import { tickets } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { PlatformUser, Ticket, TicketMessage } from "@/lib/api/types";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 const GROUP_WINDOW_MS = 7 * 60 * 1000;
 
