@@ -1,14 +1,14 @@
+import { list } from "@omniplex/core/api";
+import type { Partner, PartnerList } from "@omniplex/core/api/types";
+import { partnerLogoUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { ArrowRight, CloudOff, ExternalLink, Handshake } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BsDiscord } from "react-icons/bs";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { list } from "@/lib/api";
-import type { Partner, PartnerList } from "@/lib/api/types";
-import { partnerLogoUrl } from "@/lib/utils/assets";
 
 export const metadata: Metadata = {
   title: "Partners",

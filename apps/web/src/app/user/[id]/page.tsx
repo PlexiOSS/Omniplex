@@ -1,3 +1,12 @@
+import { badges as badgesApi, users } from "@omniplex/core/api";
+import type { Link as ApiLink } from "@omniplex/core/api/types";
+import {
+  discordBannerUrl,
+  mirroredAvatarUrl,
+} from "@omniplex/core/utils/assets";
+import { formatCount } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import {
   ArrowLeft,
   Bot,
@@ -27,16 +36,10 @@ import {
   VoterRankLine,
 } from "@/components/profile/UserActivitySection";
 import { UserEntityTabs } from "@/components/profile/UserEntityTabs";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatRow } from "@/components/ui/StatRow";
-import { badges as badgesApi, users } from "@/lib/api";
-import type { Link as ApiLink } from "@/lib/api/types";
-import { discordBannerUrl, mirroredAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
-import { formatCount } from "@/lib/utils/format";
 import { getServerToken } from "@/lib/utils/serverSession";
 
 interface Props {

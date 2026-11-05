@@ -1,9 +1,13 @@
 "use client";
 
+import type {
+  PackEmoji,
+  PackSound,
+  PackSticker,
+} from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
 import { Download } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import type { PackEmoji, PackSound, PackSticker } from "@/lib/api/types";
 import {
   downloadEmojiPack,
   downloadSoundPack,

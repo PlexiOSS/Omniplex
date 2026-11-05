@@ -1,7 +1,7 @@
 {
   "name": "omniplex",
   "private": true,
-  "description": "Omniplex monorepo: the omniplex.gg website, its developer docs and the official API SDKs.",
+  "description": "Omniplex monorepo: the omniplex.gg website, the staff panel, its developer docs and the official API SDKs.",
   "license": "AGPL-3.0-or-later",
   "packageManager": "bun@1.3.14",
   "workspaces": [
@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "turbo run dev --filter=@omniplex/web",
     "dev:docs": "turbo run dev --filter=@omniplex/docs",
+    "dev:staff": "turbo run dev --filter=@omniplex/staff",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

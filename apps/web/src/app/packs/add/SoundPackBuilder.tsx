@@ -1,10 +1,10 @@
 "use client";
 
+import type { PackSoundInput } from "@omniplex/core/api/types";
+import { packSoundUrl } from "@omniplex/core/utils/assets";
+import { Button } from "@omniplex/ui/Button";
 import { Play, Plus, Square, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import type { PackSoundInput } from "@/lib/api/types";
-import { packSoundUrl } from "@/lib/utils/assets";
 
 const MAX_SOUNDS = 50;
 const MAX_BYTES = 2 * 1024 * 1024;

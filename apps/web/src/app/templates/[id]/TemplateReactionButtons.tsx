@@ -1,12 +1,12 @@
 "use client";
 
+import { serverTemplates } from "@omniplex/core/api";
+import { formatCount } from "@omniplex/core/utils/format";
+import { Button } from "@omniplex/ui/Button";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
-import { serverTemplates } from "@/lib/api";
-import { formatCount } from "@/lib/utils/format";
 
 interface TemplateReactionButtonsProps {
   templateId: string;

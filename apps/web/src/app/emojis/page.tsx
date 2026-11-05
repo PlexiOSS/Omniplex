@@ -1,16 +1,16 @@
 "use client";
 
+import { emojis } from "@omniplex/core/api";
+import { packEmojiUrl } from "@omniplex/core/utils/assets";
+import { Pagination } from "@omniplex/ui/Pagination";
 import { Layers, Smile } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Pagination } from "@/components/search/Pagination";
 import { EmojiImage } from "@/components/servers/EmojiStickerMedia";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
-import { emojis } from "@/lib/api";
-import { packEmojiUrl } from "@/lib/utils/assets";
 
 export default function EmojisPage() {
   const [page, setPage] = useState(1);

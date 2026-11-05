@@ -1,3 +1,10 @@
+import { bots } from "@omniplex/core/api";
+import type {
+  BotBrowseSort,
+  IndexBot,
+  PagedResult,
+} from "@omniplex/core/api/types";
+import { formatCountLabel } from "@omniplex/core/utils/format";
 import { Bot } from "lucide-react";
 import Link from "next/link";
 import { BrowseControls, browseHref } from "@/components/browse/BrowseControls";
@@ -6,11 +13,8 @@ import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { bots } from "@/lib/api";
-import type { BotBrowseSort, IndexBot, PagedResult } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCountLabel } from "@/lib/utils/format";
 
 interface Props {
   searchParams: Promise<{

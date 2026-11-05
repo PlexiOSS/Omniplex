@@ -1,3 +1,6 @@
+import { themes } from "@omniplex/core/api";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -6,10 +9,7 @@ import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { CopyColorButton } from "@/components/themes/CopyColorButton";
 import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
-import { Avatar } from "@/components/ui/Avatar";
-import { themes } from "@/lib/api";
 import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 interface Props {
   params: Promise<{ id: string }>;

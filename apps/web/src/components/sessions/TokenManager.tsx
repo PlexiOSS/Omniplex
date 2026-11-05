@@ -1,5 +1,13 @@
 "use client";
 
+import { auth, sessions, teams } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { ApiSession, PermissionData } from "@omniplex/core/api/types";
+import { hasPermString, isSuperPerm } from "@omniplex/core/permissions";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Dropdown } from "@omniplex/ui/Dropdown";
+import { Input } from "@omniplex/ui/Input";
 import {
   Check,
   ChevronDown,
@@ -10,14 +18,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { PermSelector } from "@/components/teams/PermSelector";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Dropdown } from "@/components/ui/Dropdown";
-import { Input } from "@/components/ui/Input";
-import { auth, sessions, teams } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { ApiSession, PermissionData } from "@/lib/api/types";
-import { hasPermString, isSuperPerm } from "@/lib/permissions";
 
 type TargetType = "user" | "bot" | "server" | "team";
 

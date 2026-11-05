@@ -2,9 +2,9 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
+import { bots, packs, servers, teams } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
 import { useState } from "react";
-import { bots, packs, servers, teams } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
 
 type EntityType = "bot" | "server" | "team" | "pack";
 

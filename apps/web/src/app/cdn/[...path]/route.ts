@@ -1,7 +1,7 @@
+import { cdnHeaders } from "@omniplex/core/cdn/safety";
+import { ASSET_VERSION_METADATA_KEY } from "@omniplex/core/s3/config";
+import { getObject, S3UnavailableError } from "@omniplex/core/s3/objects";
 import { NextResponse } from "next/server";
-import { cdnHeaders } from "@/lib/cdn/safety";
-import { ASSET_VERSION_METADATA_KEY } from "@/lib/s3/config";
-import { getObject, S3UnavailableError } from "@/lib/s3/objects";
 
 interface Params {
   params: Promise<{ path: string[] }>;

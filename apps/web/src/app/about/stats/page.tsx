@@ -1,3 +1,6 @@
+import { list } from "@omniplex/core/api";
+import type { ListStats, ListTag } from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
 import {
   ArrowRight,
   BarChart3,
@@ -12,10 +15,7 @@ import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { list } from "@/lib/api";
-import type { ListStats, ListTag } from "@/lib/api/types";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
   title: "Platform Stats",

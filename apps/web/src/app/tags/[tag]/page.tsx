@@ -1,3 +1,9 @@
+import {
+  bots as botsApi,
+  search,
+  servers as serversApi,
+} from "@omniplex/core/api";
+import { formatCountLabel } from "@omniplex/core/utils/format";
 import { ArrowRight, Tag as TagIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,9 +14,7 @@ import { TeamCard } from "@/components/cards/TeamCard";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { bots as botsApi, search, servers as serversApi } from "@/lib/api";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCountLabel } from "@/lib/utils/format";
 
 const RELATED_LIMIT = 10;
 

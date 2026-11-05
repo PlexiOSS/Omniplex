@@ -1,12 +1,12 @@
 "use client";
 
+import { auth } from "@omniplex/core/api";
+import { Button } from "@omniplex/ui/Button";
 import { AlertTriangle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { useOAuthMeta } from "@/hooks/useOAuthMeta";
-import { auth } from "@/lib/api";
 import { AuthShell } from "../AuthShell";
 
 /** Persisted across the Discord redirect round trip so the callback knows

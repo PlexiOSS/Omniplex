@@ -1,5 +1,9 @@
 "use client";
 
+import { search } from "@omniplex/core/api";
+import type { SearchResponse } from "@omniplex/core/api/types";
+import { formatCount, formatCountLabel } from "@omniplex/core/utils/format";
+import { Pagination } from "@omniplex/ui/Pagination";
 import {
   ArrowRight,
   Bot,
@@ -22,15 +26,11 @@ import { PackCard } from "@/components/cards/PackCard";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { TeamCard } from "@/components/cards/TeamCard";
 import { Container } from "@/components/layout/Container";
-import { Pagination } from "@/components/search/Pagination";
 import { SearchDiscover } from "@/components/search/SearchDiscover";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/PageStates";
 import { BotCardSkeleton } from "@/components/ui/Skeleton";
-import { search } from "@/lib/api";
-import type { SearchResponse } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
-import { formatCount, formatCountLabel } from "@/lib/utils/format";
 
 const EXAMPLES = ["moderation", "music", "giveaways", "economy"];
 

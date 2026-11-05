@@ -1,10 +1,10 @@
 "use client";
 
+import type { PackSound } from "@omniplex/core/api/types";
+import { packSoundUrl } from "@omniplex/core/utils/assets";
 import { Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
-import type { PackSound } from "@/lib/api/types";
-import { packSoundUrl } from "@/lib/utils/assets";
 
 interface PackSoundGridProps {
   packUrl: string;

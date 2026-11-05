@@ -1,18 +1,18 @@
 "use client";
 
-import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
-import { SignInLink } from "@/components/ui/SignInLink";
-import { useAuth } from "@/hooks/useAuth";
-import { useVote } from "@/hooks/useVote";
 import {
   formatCount,
   isWeekendVoteBonusDay,
   voteCooldownHours,
-} from "@/lib/utils/format";
+} from "@omniplex/core/utils/format";
+import { Button } from "@omniplex/ui/Button";
+import { Modal } from "@omniplex/ui/Modal";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { SignInLink } from "@/components/ui/SignInLink";
+import { useAuth } from "@/hooks/useAuth";
+import { useVote } from "@/hooks/useVote";
 
 interface TeamVoteButtonProps {
   teamId: string;

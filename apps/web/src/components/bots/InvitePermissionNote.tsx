@@ -1,6 +1,6 @@
+import { noAdminReportUrl } from "@omniplex/core/noadmin";
+import { readInvitePermissions } from "@omniplex/core/utils/invitePermissions";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
-import { noAdminReportUrl } from "@/lib/noadmin";
-import { readInvitePermissions } from "@/lib/utils/invitePermissions";
 
 interface InvitePermissionNoteProps {
   invite: string;

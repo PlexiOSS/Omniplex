@@ -1,16 +1,16 @@
 "use client";
 
+import { packs } from "@omniplex/core/api";
+import type { BotPack, IndexBot } from "@omniplex/core/api/types";
+import { formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Modal } from "@omniplex/ui/Modal";
 import { ArrowUpRight, Coins, Package, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
 import { VoteCreditsPanel } from "@/components/votes/VoteCreditsPanel";
-import { packs } from "@/lib/api";
-import type { BotPack, IndexBot } from "@/lib/api/types";
-import { formatCountLabel } from "@/lib/utils/format";
 import { EmojiStickerPackEditModal } from "./EmojiStickerPackEditModal";
 import { PackEditModal } from "./PackEditModal";
 

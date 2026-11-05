@@ -1,6 +1,6 @@
 // Copyright (C) 2026 NodeByte LTD
 
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = "image/png";

@@ -1,11 +1,11 @@
+import { list } from "@omniplex/core/api";
+import type { ListTags } from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
 import { Tags } from "lucide-react";
 import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { list } from "@/lib/api";
-import type { ListTags } from "@/lib/api/types";
 import { isApiUnavailable } from "@/lib/utils/errors";
-import { formatCount } from "@/lib/utils/format";
 import { TagDirectory } from "./TagDirectory";
 
 export const metadata: Metadata = {

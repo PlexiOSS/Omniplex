@@ -1,16 +1,16 @@
 "use client";
 
+import { votes } from "@omniplex/core/api";
+import type { EntityVoterList, TargetType } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { formatCount, formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { Users } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
-import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
 import { useAuth } from "@/hooks/useAuth";
-import { votes } from "@/lib/api";
-import type { EntityVoterList, TargetType } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { formatCount, formatCountLabel } from "@/lib/utils/format";
 
 interface VoterListProps {
   targetType: TargetType;

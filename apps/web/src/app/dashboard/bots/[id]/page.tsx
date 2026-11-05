@@ -1,5 +1,22 @@
 "use client";
 
+import { bots, vanity } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { Link as ApiLink, Bot } from "@omniplex/core/api/types";
+import { hasPermString } from "@omniplex/core/permissions";
+import {
+  bannerUrl,
+  botPath,
+  mirroredAvatarUrl,
+} from "@omniplex/core/utils/assets";
+import { formatCount, formatRelativeTime } from "@omniplex/core/utils/format";
+import { requestsAdministrator } from "@omniplex/core/utils/invitePermissions";
+import { UploadError, uploadAsset } from "@omniplex/core/utils/upload";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { LinksEditor } from "@omniplex/ui/LinksEditor";
+import { TagPicker } from "@omniplex/ui/TagPicker";
 import {
   BarChart2,
   FileText,
@@ -20,28 +37,15 @@ import useSWR from "swr";
 import { BotChangelogSection } from "@/components/bots/BotChangelogSection";
 import { BotCommandsSection } from "@/components/bots/BotCommandsSection";
 import { InviteCheck } from "@/components/bots/InviteCheck";
-import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { TokenManager } from "@/components/sessions/TokenManager";
-import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { TagPicker } from "@/components/ui/TagPicker";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntityPermission } from "@/hooks/useEntityPermission";
 import { useMe } from "@/hooks/useMe";
-import { bots, vanity } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { Link as ApiLink, Bot } from "@/lib/api/types";
 import { BOT_TAGS } from "@/lib/constants/tags";
-import { hasPermString } from "@/lib/permissions";
-import { bannerUrl, botPath, mirroredAvatarUrl } from "@/lib/utils/assets";
 import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
-import { formatCount, formatRelativeTime } from "@/lib/utils/format";
-import { requestsAdministrator } from "@/lib/utils/invitePermissions";
-import { UploadError, uploadAsset } from "@/lib/utils/upload";
 import { AnalyticsPanel } from "../../manage/AnalyticsPanel";
 import {
   FormMessage,

@@ -1,5 +1,14 @@
 "use client";
 
+import { alerts, votes } from "@omniplex/core/api";
+import type { BotType, IndexBot, IndexServer } from "@omniplex/core/api/types";
+import {
+  botPath,
+  mirroredAvatarUrl,
+  serverPath,
+} from "@omniplex/core/utils/assets";
+import { formatCount, formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
 import {
   AlertTriangle,
   ArrowRight,
@@ -16,11 +25,6 @@ import {
 import Link from "next/link";
 import type { ReactNode } from "react";
 import useSWR from "swr";
-import { Avatar } from "@/components/ui/Avatar";
-import { alerts, votes } from "@/lib/api";
-import type { BotType, IndexBot, IndexServer } from "@/lib/api/types";
-import { botPath, mirroredAvatarUrl, serverPath } from "@/lib/utils/assets";
-import { formatCount, formatCountLabel } from "@/lib/utils/format";
 
 interface Listing {
   kind: "bot" | "server";

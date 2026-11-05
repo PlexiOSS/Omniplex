@@ -2,9 +2,9 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
+import { notifications } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
 import { useCallback, useEffect, useState } from "react";
-import { notifications } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
 import { useAuth } from "./useAuth";
 
 function urlBase64ToUint8Array(base64: string): Uint8Array {

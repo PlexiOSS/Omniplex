@@ -1,13 +1,13 @@
 "use client";
 
+import { data } from "@omniplex/core/api";
+import type { Task } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { Modal } from "@omniplex/ui/Modal";
 import { AlertTriangle, Download, Loader2, ShieldAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "@/hooks/useAuth";
-import { data } from "@/lib/api";
-import type { Task } from "@/lib/api/types";
 import { SOCIAL_LINKS } from "@/lib/social";
 
 interface SecurityTabProps {

@@ -1,5 +1,11 @@
 "use client";
 
+import type {
+  BotChangelog,
+  BotCommand,
+  EntityVoterList,
+  Review,
+} from "@omniplex/core/api/types";
 import {
   BookOpen,
   Megaphone,
@@ -14,12 +20,6 @@ import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntityPermission } from "@/hooks/useEntityPermission";
-import type {
-  BotChangelog,
-  BotCommand,
-  EntityVoterList,
-  Review,
-} from "@/lib/api/types";
 import { BotChangelogSection } from "./BotChangelogSection";
 import { BotCommandsSection } from "./BotCommandsSection";
 

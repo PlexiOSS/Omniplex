@@ -1,8 +1,8 @@
 "use client";
 
-import { Avatar } from "@/components/ui/Avatar";
-import type { BotWithCommands } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
+import type { BotWithCommands } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
 
 interface CommandBotListProps {
   bots: BotWithCommands[];

@@ -1,17 +1,17 @@
 "use client";
 
-import { AlertTriangle, Pencil, Plus, Send, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { Pagination } from "@/components/search/Pagination";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { webhooks } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
+import { webhooks } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
 import type {
   Webhook,
   WebhookLogEntry,
   WebhookTestMeta,
-} from "@/lib/api/types";
+} from "@omniplex/core/api/types";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Pagination } from "@omniplex/ui/Pagination";
+import { AlertTriangle, Pencil, Plus, Send, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { WebhookEditModal } from "./WebhookEditModal";
 import { WebhookTestModal } from "./WebhookTestModal";
 

@@ -1,5 +1,5 @@
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import { ImageResponse } from "next/og";
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, og } from "@/lib/og/shared";
 
 export const alt = "Omniplex Blog";

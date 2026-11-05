@@ -1,7 +1,7 @@
+import { blogs, bots, list, packs, servers } from "@omniplex/core/api";
+import { BASE_URL } from "@omniplex/core/api/config";
+import type { PagedResult } from "@omniplex/core/api/types";
 import type { MetadataRoute } from "next";
-import { blogs, bots, list, packs, servers } from "@/lib/api";
-import { BASE_URL } from "@/lib/api/config";
-import type { PagedResult } from "@/lib/api/types";
 import { getKbCategories } from "@/lib/kb/content";
 import { getLegalDocuments } from "@/lib/legal/content";
 

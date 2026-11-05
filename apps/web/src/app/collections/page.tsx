@@ -1,3 +1,5 @@
+import { search } from "@omniplex/core/api";
+import type { IndexBot, IndexServer } from "@omniplex/core/api/types";
 import { ArrowRight, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -6,8 +8,6 @@ import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { search } from "@/lib/api";
-import type { IndexBot, IndexServer } from "@/lib/api/types";
 import { COLLECTIONS, type Collection } from "@/lib/constants/collections";
 
 export const metadata: Metadata = {

@@ -1,11 +1,11 @@
 "use client";
 
+import { votes } from "@omniplex/core/api";
+import type { VoterLeaderboardPeriod } from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
 import Link from "next/link";
 import useSWR from "swr";
 import { useAuth } from "@/hooks/useAuth";
-import { votes } from "@/lib/api";
-import type { VoterLeaderboardPeriod } from "@/lib/api/types";
-import { formatCount } from "@/lib/utils/format";
 
 interface YourRankProps {
   period: VoterLeaderboardPeriod;

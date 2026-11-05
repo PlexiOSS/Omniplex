@@ -1,5 +1,5 @@
+import { Avatar } from "@omniplex/ui/Avatar";
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
 import { StatRow } from "@/components/ui/StatRow";
 import { TagBadgeLink } from "@/components/ui/TagBadgeLink";
 import type { CompareEntity } from "./types";

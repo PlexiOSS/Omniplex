@@ -1,12 +1,12 @@
 "use client";
 
+import { themes } from "@omniplex/core/api";
+import type { Theme } from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
 import { ArrowUpRight, Palette, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ThemePreviewCard } from "@/components/themes/ThemePreviewCard";
-import { Button } from "@/components/ui/Button";
-import { themes } from "@/lib/api";
-import type { Theme } from "@/lib/api/types";
 
 function ThemeItem({
   theme,

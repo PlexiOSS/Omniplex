@@ -1,6 +1,6 @@
+import type { PackType } from "@omniplex/core/api/types";
+import { Badge } from "@omniplex/ui/Badge";
 import { Bot, Music, Server, Smile, Sticker } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
-import type { PackType } from "@/lib/api/types";
 
 const CONFIG: Record<PackType, { label: string; icon: typeof Bot }> = {
   bot: { label: "Bot Pack", icon: Bot },

@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { EmojiPackBuilder } from "@/app/packs/add/EmojiPackBuilder";
-import { SoundPackBuilder } from "@/app/packs/add/SoundPackBuilder";
-import { StickerPackBuilder } from "@/app/packs/add/StickerPackBuilder";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { TagPicker } from "@/components/ui/TagPicker";
-import { packs, vanity as vanityApi } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
+import { packs, vanity as vanityApi } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
 import type {
   BotPack,
   PackEmojiInput,
   PackSoundInput,
   PackStickerInput,
-} from "@/lib/api/types";
+} from "@omniplex/core/api/types";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { Modal } from "@omniplex/ui/Modal";
+import { TagPicker } from "@omniplex/ui/TagPicker";
+import { useState } from "react";
+import { EmojiPackBuilder } from "@/app/packs/add/EmojiPackBuilder";
+import { SoundPackBuilder } from "@/app/packs/add/SoundPackBuilder";
+import { StickerPackBuilder } from "@/app/packs/add/StickerPackBuilder";
 import { BOT_TAGS } from "@/lib/constants/tags";
 
 interface EmojiStickerPackEditModalProps {

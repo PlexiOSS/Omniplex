@@ -1,13 +1,13 @@
 "use client";
 
+import { search } from "@omniplex/core/api";
+import type { IndexBot, IndexServer } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Input } from "@omniplex/ui/Input";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import { Input } from "@/components/ui/Input";
-import { search } from "@/lib/api";
-import type { IndexBot, IndexServer } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 
 type PickerResult = { id: string; name: string; avatarSrc: string };
 

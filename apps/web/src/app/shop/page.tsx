@@ -1,5 +1,26 @@
 "use client";
 
+import { shop, votes } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  EntityVote,
+  EntityVoteRedeemLogSummary,
+  PagedResult,
+  ShopCoupon,
+  ShopItem,
+  ShopItemBenefit,
+  ShopPurchase,
+  TargetType,
+  VoteCreditTier,
+  VoteCreditTierRedeemSummary,
+} from "@omniplex/core/api/types";
+import {
+  formatCountLabel,
+  formatRelativeTime,
+} from "@omniplex/core/utils/format";
+import { Button } from "@omniplex/ui/Button";
+import { Input } from "@omniplex/ui/Input";
+import { Pagination } from "@omniplex/ui/Pagination";
 import {
   ArrowRight,
   Award,
@@ -27,27 +48,9 @@ import {
 } from "@/components/billing/ListingPicker";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Pagination } from "@/components/search/Pagination";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { shop, votes } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type {
-  EntityVote,
-  EntityVoteRedeemLogSummary,
-  PagedResult,
-  ShopCoupon,
-  ShopItem,
-  ShopItemBenefit,
-  ShopPurchase,
-  TargetType,
-  VoteCreditTier,
-  VoteCreditTierRedeemSummary,
-} from "@/lib/api/types";
-import { formatCountLabel, formatRelativeTime } from "@/lib/utils/format";
 
 type Entity = Extract<TargetType, "bot" | "server">;
 type HistoryTab = "purchases" | "votes";

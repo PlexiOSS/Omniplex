@@ -2,14 +2,14 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
-import useSWR from "swr";
-import { servers } from "@/lib/api";
+import { servers } from "@omniplex/core/api";
 import type {
   ListIndexServer,
   PagedResult,
   Server,
   ServerEmojiPreview,
-} from "@/lib/api/types";
+} from "@omniplex/core/api/types";
+import useSWR from "swr";
 
 export function useServerIndex() {
   return useSWR<ListIndexServer>("servers/index", () => servers.getIndex());

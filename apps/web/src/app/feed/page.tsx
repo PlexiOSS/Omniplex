@@ -1,5 +1,7 @@
 "use client";
 
+import type { BotChangelogFeedEntry } from "@omniplex/core/api/types";
+import { Pagination } from "@omniplex/ui/Pagination";
 import { Megaphone, Rss } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
@@ -8,10 +10,8 @@ import { RecentBots } from "@/components/feed/RecentBots";
 import { DirectoryFilters } from "@/components/filters/DirectoryFilters";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Pagination } from "@/components/search/Pagination";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useBotChangelogFeed, useRecentChangelogBots } from "@/hooks/useBots";
-import type { BotChangelogFeedEntry } from "@/lib/api/types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SKELETON_KEYS = ["a", "b", "c", "d", "e"];

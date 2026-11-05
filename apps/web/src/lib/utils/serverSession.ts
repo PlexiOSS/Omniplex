@@ -1,7 +1,7 @@
 // Copyright (C) 2026 NodeByte LTD
 
+import { SESSION_COOKIE } from "@omniplex/core/utils/auth";
 import { cookies } from "next/headers";
-import { SESSION_COOKIE } from "./auth";
 
 export async function getServerToken(): Promise<string | undefined> {
   const store = await cookies();

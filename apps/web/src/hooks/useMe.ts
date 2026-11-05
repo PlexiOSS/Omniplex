@@ -2,9 +2,9 @@
 
 // Copyright (C) 2026 NodeByte LTD
 
+import { users } from "@omniplex/core/api";
+import type { AuthSession } from "@omniplex/core/api/types";
 import useSWR from "swr";
-import { users } from "@/lib/api";
-import type { AuthSession } from "@/lib/api/types";
 
 export function useMe(session: AuthSession | null | undefined) {
   const { data, error, isLoading, mutate } = useSWR(

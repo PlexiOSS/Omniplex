@@ -1,12 +1,12 @@
+import { list, reports } from "@omniplex/core/api";
+import type { ReportReason, ReportStatus } from "@omniplex/core/api/types";
+import { formatCount } from "@omniplex/core/utils/format";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { list, reports } from "@/lib/api";
-import type { ReportReason, ReportStatus } from "@/lib/api/types";
-import { formatCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
   title: "Moderation Transparency",

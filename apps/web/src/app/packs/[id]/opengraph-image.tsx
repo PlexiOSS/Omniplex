@@ -1,5 +1,6 @@
+import { packs } from "@omniplex/core/api";
+import { formatCount } from "@omniplex/core/utils/format";
 import { ImageResponse } from "next/og";
-import { packs } from "@/lib/api";
 import { toOgImageSrc } from "@/lib/og/image";
 import {
   OG_CONTENT_TYPE,
@@ -10,7 +11,6 @@ import {
   og,
   ogClamp,
 } from "@/lib/og/shared";
-import { formatCount } from "@/lib/utils/format";
 import { getPackItemCount, getPackWidgetStats } from "@/lib/widget/shared";
 
 export const size = OG_SIZE;

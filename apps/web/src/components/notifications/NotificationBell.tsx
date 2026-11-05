@@ -1,16 +1,16 @@
 "use client";
 
+import { alerts as alertsApi } from "@omniplex/core/api";
+import type { Alert, AlertType } from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Dropdown, DropdownItem } from "@omniplex/ui/Dropdown";
 import { Bell, BellOff, Check, ListChecks } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { useAuth } from "@/hooks/useAuth";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { alerts as alertsApi } from "@/lib/api";
-import type { Alert, AlertType } from "@/lib/api/types";
 import { alertLink } from "@/lib/utils/alerts";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 const TRIGGER_CLASS =
   "flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";

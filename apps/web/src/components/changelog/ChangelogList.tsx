@@ -1,5 +1,16 @@
 "use client";
 
+import type { ChangelogEntry } from "@omniplex/core/api/types";
+import {
+  CHANGELOG_PROJECTS,
+  type ChangelogTrack,
+  changelogLabel,
+  packageLabel,
+  trackKey,
+} from "@omniplex/core/changelog";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import {
   ChevronDown,
   GitBranch,
@@ -13,17 +24,6 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import type { ChangelogEntry } from "@/lib/api/types";
-import {
-  CHANGELOG_PROJECTS,
-  type ChangelogTrack,
-  changelogLabel,
-  packageLabel,
-  trackKey,
-} from "@/lib/changelog";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 /**
  * Turns a plain-text list into a GFM bullet list source string, escaping

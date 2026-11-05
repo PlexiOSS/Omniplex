@@ -1,12 +1,12 @@
 "use client";
 
+import type { AppResponse, AppState } from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
 import { ClipboardList } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { useAppMeta } from "@/hooks/useApplications";
-import type { AppResponse, AppState } from "@/lib/api/types";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 const STATE_BADGE: Record<
   AppState,

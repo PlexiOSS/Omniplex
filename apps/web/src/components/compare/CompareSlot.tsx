@@ -1,7 +1,7 @@
 "use client";
 
+import { Button } from "@omniplex/ui/Button";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
 import { CompareCard } from "./CompareCard";
 import { ComparePicker } from "./ComparePicker";
 import type { CompareEntity } from "./types";

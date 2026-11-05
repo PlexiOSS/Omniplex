@@ -1,5 +1,9 @@
 "use client";
 
+import { STAFF_URL } from "@omniplex/core/api/config";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import {
   Activity,
   Award,
@@ -35,15 +39,11 @@ import { useEffect, useState } from "react";
 import { BsDiscord } from "react-icons/bs";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { SearchPalette } from "@/components/search/SearchPalette";
-import { Avatar } from "@/components/ui/Avatar";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SignInLink } from "@/components/ui/SignInLink";
-import { useArcadiaAuth } from "@/hooks/useArcadiaAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { SOCIAL_LINKS } from "@/lib/social";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 import { Container } from "./Container";
 import { NavGroupMenu, type NavMenuSection } from "./NavGroupMenu";
 import { UserMenu } from "./UserMenu";
@@ -251,10 +251,6 @@ const CREATE_SECTIONS: NavMenuSection[] = [
   },
 ];
 
-function AdminHeaderWrap({ children }: { children: React.ReactNode }) {
-  return <div className="w-full px-4 lg:px-5">{children}</div>;
-}
-
 function isNavGroup(item: NavLink | NavGroup): item is NavGroup {
   return "items" in item;
 }
@@ -263,8 +259,6 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { session, isAuthenticated, logout } = useAuth();
-  const { isAuthenticated: isStaffAuthenticated, logout: staffLogout } =
-    useArcadiaAuth();
   const { me } = useMe(session);
   const isStaff = me?.staff ?? false;
 
@@ -284,25 +278,15 @@ export function Header() {
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
   const [mobileCustomizeOpen, setMobileCustomizeOpen] = useState(false);
 
-  const isAdminSection =
-    pathname.startsWith("/admin") &&
-    pathname !== "/admin/login" &&
-    !pathname.startsWith("/admin/auth");
-  const links = isAdminSection ? [] : NAV_LINKS;
-  const mobileLinks: (NavLink | NavGroup)[] = isAdminSection
-    ? links
-    : [...links, group("Create", CREATE_SECTIONS)];
+  const links = NAV_LINKS;
+  const mobileLinks: (NavLink | NavGroup)[] = [
+    ...links,
+    group("Create", CREATE_SECTIONS),
+  ];
   const isActiveLink = (href: string) => {
-    if (isAdminSection) return pathname === href;
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
-
-  const HeaderWrap = isAdminSection ? AdminHeaderWrap : Container;
-
-  function exitStaffPanel() {
-    router.push("/");
-  }
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -323,23 +307,17 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
-        <HeaderWrap>
+        <Container>
           <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
             {/* Logo */}
             <Link
-              href={isAdminSection ? "/admin" : "/"}
+              href="/"
               className="flex items-center gap-2 justify-self-start text-zinc-950 dark:text-zinc-50"
             >
               <OmniplexLogo size={26} />
               <span className="text-base font-semibold tracking-tight">
                 Omniplex
               </span>
-              {isAdminSection && (
-                <span className="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
-                  <Shield size={11} />
-                  Staff
-                </span>
-              )}
             </Link>
 
             {/* Nav */}
@@ -376,15 +354,13 @@ export function Header() {
             {/* Right side */}
             <div className="col-start-3 flex items-center gap-1 justify-self-end">
               {/* Create menu */}
-              {!isAdminSection && (
-                <div className="hidden md:block">
-                  <NavGroupMenu
-                    label="Create"
-                    icon={Plus}
-                    sections={CREATE_SECTIONS}
-                  />
-                </div>
-              )}
+              <div className="hidden md:block">
+                <NavGroupMenu
+                  label="Create"
+                  icon={Plus}
+                  sections={CREATE_SECTIONS}
+                />
+              </div>
 
               {/* Social links */}
               <a
@@ -397,17 +373,6 @@ export function Header() {
                 <BsDiscord size={16} />
               </a>
 
-              {isAdminSection && isStaffAuthenticated && (
-                <button
-                  type="button"
-                  onClick={exitStaffPanel}
-                  className={ICON_BUTTON}
-                  aria-label="Exit staff panel"
-                  title="Exit staff panel"
-                >
-                  <LogOut size={16} />
-                </button>
-              )}
               {/* Mobile nav toggle */}
               <button
                 type="button"
@@ -445,7 +410,7 @@ export function Header() {
                 />
               </div>
 
-              {!isAdminSection && <SearchPalette />}
+              <SearchPalette />
 
               <NotificationBell />
 
@@ -464,7 +429,7 @@ export function Header() {
               )}
             </div>
           </div>
-        </HeaderWrap>
+        </Container>
 
         {/* Mobile nav panel */}
         {mobileNavOpen && (
@@ -631,13 +596,13 @@ export function Header() {
                         Support Tickets
                       </Link>
                       {isStaff && (
-                        <Link
-                          href="/admin"
+                        <a
+                          href={STAFF_URL}
                           className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
                         >
                           <Shield size={14} />
                           Staff Panel
-                        </Link>
+                        </a>
                       )}
                       <Link
                         href="/premium"

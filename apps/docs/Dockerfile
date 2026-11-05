@@ -7,8 +7,11 @@ FROM base AS manifests
 COPY package.json bun.lock bunfig.toml ./
 COPY apps/web/package.json apps/web/
 COPY apps/docs/package.json apps/docs/
+COPY apps/staff/package.json apps/staff/
 COPY packages/api-types/package.json packages/api-types/
+COPY packages/core/package.json packages/core/
 COPY packages/sdk-js/package.json packages/sdk-js/
+COPY packages/ui/package.json packages/ui/
 
 FROM manifests AS deps
 RUN bun install --frozen-lockfile

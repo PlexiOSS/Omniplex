@@ -1,9 +1,9 @@
 "use client";
 
+import type { ServerEmoji, ServerSticker } from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
 import { Check, Copy, Sparkles } from "lucide-react";
 import { useState } from "react";
-import type { ServerEmoji, ServerSticker } from "@/lib/api/types";
-import { formatRelativeTime } from "@/lib/utils/format";
 import {
   EmojiImage,
   isAnimatedSticker,

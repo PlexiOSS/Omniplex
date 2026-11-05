@@ -1,11 +1,11 @@
 "use client";
 
+import { serverTemplates } from "@omniplex/core/api";
+import { Button } from "@omniplex/ui/Button";
 import { ExternalLink, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
-import { serverTemplates } from "@/lib/api";
 
 interface TemplateDetailActionsProps {
   templateId: string;

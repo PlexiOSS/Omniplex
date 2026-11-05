@@ -1,10 +1,10 @@
 "use client";
 
-import { Avatar } from "@/components/ui/Avatar";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useRecentChangelogBots } from "@/hooks/useBots";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 interface RecentBotsProps {
   activeBot: string;

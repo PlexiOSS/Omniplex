@@ -1,5 +1,9 @@
 "use client";
 
+import { apps } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
 import { ArrowLeft, CheckCircle2, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -17,13 +21,9 @@ import {
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Markdown } from "@/components/markdown/Markdown";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAppMeta } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
-import { apps } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
 
 const SHORT_MAX = 4096;
 const PARAGRAPH_MIN = 50;

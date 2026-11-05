@@ -1,6 +1,6 @@
 "use client";
 
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 
 interface ServiceUnavailableProps {
   inline?: boolean;

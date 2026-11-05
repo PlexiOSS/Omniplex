@@ -1,5 +1,10 @@
 "use client";
 
+import { tickets } from "@omniplex/core/api";
+import type { Ticket } from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
 import {
   CheckCircle2,
   ChevronRight,
@@ -11,16 +16,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/PageStates";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { StatusCard } from "@/components/ui/StatusCard";
 import { useAuth } from "@/hooks/useAuth";
-import { tickets } from "@/lib/api";
-import type { Ticket } from "@/lib/api/types";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 export default function TicketsPage() {
   const { session, isAuthenticated, loading: authLoading } = useAuth();

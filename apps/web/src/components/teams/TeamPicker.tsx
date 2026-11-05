@@ -1,11 +1,11 @@
 "use client";
 
+import type { Team } from "@omniplex/core/api/types";
+import { hasPermString } from "@omniplex/core/permissions";
+import { teamAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import type { Team } from "@/lib/api/types";
-import { hasPermString } from "@/lib/permissions";
-import { teamAvatarUrl } from "@/lib/utils/assets";
 
 interface TeamPickerProps {
   teams: Team[];

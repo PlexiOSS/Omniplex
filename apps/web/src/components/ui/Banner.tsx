@@ -1,8 +1,8 @@
 "use client";
 
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import Image from "next/image";
 import { useState } from "react";
-import { OmniplexLogo } from "./OmniplexLogo";
 
 interface BannerProps {
   src?: string | null;

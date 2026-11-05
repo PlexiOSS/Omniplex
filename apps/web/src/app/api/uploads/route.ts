@@ -1,19 +1,22 @@
 import { createHash } from "node:crypto";
-import { NextResponse } from "next/server";
-import { assets, auth, teams } from "@/lib/api";
-import { ApiError, client } from "@/lib/api/client";
-import { BASE_URL } from "@/lib/api/config";
+import { assets, auth, teams } from "@omniplex/core/api";
+import { ApiError, client } from "@omniplex/core/api/client";
+import { BASE_URL } from "@omniplex/core/api/config";
 import type {
   VersionedAssetKind,
   VersionedAssetTarget,
-} from "@/lib/api/resources/assets";
-import type { BotPack } from "@/lib/api/types";
-import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
-import { matchesDeclaredType } from "@/lib/cdn/safety";
-import { hasPermString } from "@/lib/permissions";
-import { ASSET_VERSION_METADATA_KEY } from "@/lib/s3/config";
-import { headObject, putObject, S3UnavailableError } from "@/lib/s3/objects";
-import { COOKIE_TOKEN } from "@/lib/utils/auth";
+} from "@omniplex/core/api/resources/assets";
+import type { BotPack } from "@omniplex/core/api/types";
+import { matchesDeclaredType } from "@omniplex/core/cdn/safety";
+import { hasPermString } from "@omniplex/core/permissions";
+import { ASSET_VERSION_METADATA_KEY } from "@omniplex/core/s3/config";
+import {
+  headObject,
+  putObject,
+  S3UnavailableError,
+} from "@omniplex/core/s3/objects";
+import { COOKIE_TOKEN } from "@omniplex/core/utils/auth";
+import { NextResponse } from "next/server";
 import { getServerToken } from "@/lib/utils/serverSession";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
@@ -29,7 +32,6 @@ const ALLOWED_AUDIO_TYPE = "audio/mpeg";
 const AUDIO_EXTENSION = "mp3";
 
 type Kind =
-  | "partner-logo"
   | "team-avatar"
   | "team-banner"
   | "bot-banner"
@@ -49,8 +51,7 @@ function isPackAssetKind(
 interface KindConfig {
   key: (targetId: string, assetId?: string) => string;
   perm: string;
-  requiresStaff: boolean;
-  popplioTargetType?: "team" | "bot" | "server" | "pack";
+  popplioTargetType: "team" | "bot" | "server" | "pack";
   maxBytes?: number;
   versioned?: { target: VersionedAssetTarget; kind: VersionedAssetKind };
 }
@@ -59,57 +60,45 @@ const EMOJI_MAX_BYTES = 256 * 1024;
 const SOUND_MAX_BYTES = 2 * 1024 * 1024;
 
 const KIND_CONFIG: Record<Kind, KindConfig> = {
-  "partner-logo": {
-    key: (id) => `avatars/partners/${id}.webp`,
-    perm: "manage_partners",
-    requiresStaff: true,
-  },
   "team-avatar": {
     key: (id) => `avatars/teams/${id}.webp`,
     perm: "edit_team",
-    requiresStaff: false,
     popplioTargetType: "team",
     versioned: { target: "team", kind: "avatar" },
   },
   "team-banner": {
     key: (id) => `banners/teams/${id}.webp`,
     perm: "edit_team",
-    requiresStaff: false,
     popplioTargetType: "team",
     versioned: { target: "team", kind: "banner" },
   },
   "bot-banner": {
     key: (id) => `banners/bots/${id}.webp`,
     perm: "edit_bots",
-    requiresStaff: false,
     popplioTargetType: "bot",
     versioned: { target: "bot", kind: "banner" },
   },
   "server-banner": {
     key: (id) => `banners/servers/${id}.webp`,
     perm: "edit_servers",
-    requiresStaff: false,
     popplioTargetType: "server",
     versioned: { target: "server", kind: "banner" },
   },
   "pack-emoji": {
     key: (packUrl, assetId) => `emojis/packs/${packUrl}/${assetId}`,
     perm: "edit_packs",
-    requiresStaff: false,
     popplioTargetType: "pack",
     maxBytes: EMOJI_MAX_BYTES,
   },
   "pack-sticker": {
     key: (packUrl, assetId) => `stickers/packs/${packUrl}/${assetId}`,
     perm: "edit_packs",
-    requiresStaff: false,
     popplioTargetType: "pack",
     maxBytes: EMOJI_MAX_BYTES,
   },
   "pack-sound": {
     key: (packUrl, assetId) => `sounds/packs/${packUrl}/${assetId}`,
     perm: "edit_packs",
-    requiresStaff: false,
     popplioTargetType: "pack",
     maxBytes: SOUND_MAX_BYTES,
   },
@@ -213,88 +202,59 @@ export async function POST(req: Request) {
     assetId = `${rawAssetId}.${animated ? "gif" : "webp"}`;
   }
 
-  let userToken: string | null = null;
+  const userId = form.get("userId");
+  const formToken = form.get("token");
+  if (formToken === COOKIE_TOKEN && !fromSite(req)) {
+    return NextResponse.json(
+      { error: "Uploads must come from this site." },
+      { status: 403 },
+    );
+  }
+  const token = formToken === COOKIE_TOKEN ? await getServerToken() : formToken;
+  if (
+    typeof userId !== "string" ||
+    typeof token !== "string" ||
+    !userId ||
+    !token
+  ) {
+    return NextResponse.json({ error: "Missing session" }, { status: 401 });
+  }
 
-  if (config.requiresStaff) {
-    const loginToken = form.get("loginToken");
-    if (typeof loginToken !== "string" || !loginToken) {
+  const testResult = await auth
+    .testAuth("user", userId, token)
+    .catch(() => null);
+
+  if (!testResult?.authorized) {
+    return NextResponse.json(
+      { error: "Invalid or expired session." },
+      { status: 401 },
+    );
+  }
+  const userToken = token;
+
+  if (isPackAssetKind(kind)) {
+    const existingPack = await client
+      .get<BotPack>(`/packs/${targetId}`, { cache: "no-store" })
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
+      });
+
+    if (existingPack && existingPack.owner.id !== userId) {
       return NextResponse.json(
-        { error: "Missing staff session" },
-        { status: 401 },
-      );
-    }
-    try {
-      const hello = await arcadia.hello(loginToken);
-      if (!hasPermString(hello.staff_member.resolved_perms, config.perm)) {
-        return NextResponse.json(
-          { error: "You don't have permission to do this." },
-          { status: 403 },
-        );
-      }
-    } catch (err) {
-      const status = err instanceof ArcadiaError ? 401 : 500;
-      return NextResponse.json(
-        { error: "Invalid or expired staff session." },
-        { status },
-      );
-    }
-  } else {
-    const userId = form.get("userId");
-    const formToken = form.get("token");
-    if (formToken === COOKIE_TOKEN && !fromSite(req)) {
-      return NextResponse.json(
-        { error: "Uploads must come from this site." },
+        { error: "You don't have permission to do this." },
         { status: 403 },
       );
     }
-    const token =
-      formToken === COOKIE_TOKEN ? await getServerToken() : formToken;
-    if (
-      typeof userId !== "string" ||
-      typeof token !== "string" ||
-      !userId ||
-      !token
-    ) {
-      return NextResponse.json({ error: "Missing session" }, { status: 401 });
-    }
-
-    const testResult = await auth
-      .testAuth("user", userId, token)
-      .catch(() => null);
-
-    if (!testResult?.authorized) {
+  } else {
+    const entityPerms = await teams
+      .getEntityPerms(userId, config.popplioTargetType, targetId)
+      .catch(() => ({ perms: [] }));
+    if (!hasPermString(entityPerms.perms, config.perm)) {
       return NextResponse.json(
-        { error: "Invalid or expired session." },
-        { status: 401 },
+        { error: "You don't have permission to do this." },
+        { status: 403 },
       );
-    }
-    userToken = token;
-
-    if (isPackAssetKind(kind)) {
-      const existingPack = await client
-        .get<BotPack>(`/packs/${targetId}`, { cache: "no-store" })
-        .catch((err) => {
-          if (err instanceof ApiError && err.status === 404) return null;
-          throw err;
-        });
-
-      if (existingPack && existingPack.owner.id !== userId) {
-        return NextResponse.json(
-          { error: "You don't have permission to do this." },
-          { status: 403 },
-        );
-      }
-    } else {
-      const entityPerms = await teams
-        // biome-ignore lint/style/noNonNullAssertion: guaranteed non-null
-        .getEntityPerms(userId, config.popplioTargetType!, targetId)
-        .catch(() => ({ perms: [] }));
-      if (!hasPermString(entityPerms.perms, config.perm)) {
-        return NextResponse.json(
-          { error: "You don't have permission to do this." },
-          { status: 403 },
-        );
-      }
     }
   }
 

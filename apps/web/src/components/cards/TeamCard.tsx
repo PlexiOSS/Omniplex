@@ -1,7 +1,7 @@
+import type { Team } from "@omniplex/core/api/types";
+import { teamAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
-import type { Team } from "@/lib/api/types";
-import { teamAvatarUrl } from "@/lib/utils/assets";
 
 interface TeamCardProps {
   team: Team;

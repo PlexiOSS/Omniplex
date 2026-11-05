@@ -1,11 +1,11 @@
 "use client";
 
+import { users } from "@omniplex/core/api";
+import { Button } from "@omniplex/ui/Button";
 import { CheckCircle2, RefreshCw } from "lucide-react";
 import { BsDiscord } from "react-icons/bs";
 import useSWR from "swr";
-import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
-import { users } from "@/lib/api";
 import { SOCIAL_LINKS } from "@/lib/social";
 
 interface JoinServerCardProps {

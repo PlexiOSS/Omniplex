@@ -1,6 +1,6 @@
 # Omniplex
 
-Omniplex is a Discord bot and server listing platform. This repository is a monorepo containing the website, the developer documentation and the official API SDKs. The website is built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the staff panel API that powers `/admin`.
+Omniplex is a Discord bot and server listing platform. This repository is a monorepo containing the website, the staff panel, the developer documentation and the official API SDKs. The website is built with Next.js 16, Tailwind CSS v4, and TypeScript. The API backend, Popplio, lives in a separate repository, as does Arcadia, the staff panel API that powers the staff panel in `apps/staff`.
 
 * See [apps/web/CHANGELOG.md](apps/web/CHANGELOG.md) for what's shipped on the website, [apps/docs/CHANGELOG.md](apps/docs/CHANGELOG.md) for the documentation, and each package's own `CHANGELOG.md` for the SDKs.
 * Production runs at [omniplex.gg](https://omniplex.gg), and the developer docs at [docs.omniplex.gg](https://docs.omniplex.gg).
@@ -48,19 +48,20 @@ To run one package's task, use `bunx turbo run <task> --filter=<package name>`, 
 
 ## Configuration
 
-The website is decoupled from both backends it talks to: Popplio (`apps/web/src/lib/api/`) and Arcadia, the staff panel API (`apps/web/src/lib/arcadia/`). These environment variables control them:
+The website talks to Popplio through the API client in `packages/core/api/`. The staff panel (`apps/staff`) also talks to Arcadia, the staff panel API (`apps/staff/src/lib/arcadia/`). These environment variables control the website:
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:3000` | Canonical URL of this instance used in metadata, sitemaps, and as the OAuth redirect URI. Must exactly match what's registered in the Discord Developer Portal and in Popplio/Arcadia's own redirect allowlists. |
 | `NEXT_PUBLIC_API_URL` | `https://spider.omniplex.gg` | Popplio API base URL |
 | `NEXT_PUBLIC_CDN_URL` | `https://cdn.omniplex.gg` | Asset CDN base URL |
-| `NEXT_PUBLIC_ARCADIA_URL` | `https://staging--panel-api.omniplex.gg` | Arcadia panel API base URL, which powers `/admin` |
-| `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` | `infinity-list` | Arcadia's configured `panel_scope` for this instance. Must match Arcadia's own config exactly or staff login fails |
+| `NEXT_PUBLIC_STAFF_URL` | `https://panel.omniplex.gg` | Where the staff panel is deployed. The account menu links there, and `/admin` redirects there |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | (none) | Cloudflare Turnstile site key for vote captchas. Its secret key goes in Popplio's `captcha.turnstile_secret`. Without it, votes on listings that use captchas can't be cast |
 | `SHORT_LINK_DOMAINS` | (none) | Comma-separated short-link domains, such as `botlist.site`. `<domain>/<id or vanity>` redirects to that listing, other paths redirect to the same path on `NEXT_PUBLIC_BASE_URL`, and the first domain is used by the "Short link" button. Read at runtime, so adding a domain needs a restart, not a rebuild. Point the domain's DNS at this deployment and add it to your host first. |
 
-Copy `apps/web/.env.template` to `apps/web/.env.local` to override any of these for local development. None are required to run the app against staging; the defaults point there already.
+The staff panel's settings, including `NEXT_PUBLIC_ARCADIA_URL`, `NEXT_PUBLIC_ARCADIA_PANEL_SCOPE` and `NEXT_PUBLIC_SITE_URL`, are listed in `apps/staff/.env.template`.
+
+Copy `apps/web/.env.template` to `apps/web/.env.local` (or `apps/staff/.env.template` to `apps/staff/.env.local`) to override any of these for local development. None are required to run the app against staging; the defaults point there already.
 
 ## Deployment
 
@@ -73,6 +74,8 @@ docker run -p 3000:3000 -e SHORT_LINK_DOMAINS=botlist.site omniplex
 
 The `NEXT_PUBLIC_*` variables are inlined when the site is built, so pass them with `--build-arg`. Setting them on the running container does nothing, and changing one means rebuilding the image. Any you leave out fall back to the defaults above. Runtime settings like `SHORT_LINK_DOMAINS` and the `S3_*` values go on the container.
 
+The staff panel builds from `apps/staff/Dockerfile`, also with the repo root as context, and listens on port 3002. Deploy it on its own domain (such as `panel.omniplex.gg`), never under the website's domain: keeping it on a separate origin is the point of splitting it out. Partner logo uploads need the same `S3_*` values as the website on its container. Add `<staff URL>/auth/callback` to Arcadia's `arcadia.panel.redirect_url` list and to the Discord application's redirects.
+
 Tagged releases are also published to `ghcr.io/plexioss/omniplex` by the `Publish Docker Image` workflow, built with the `NEXT_PUBLIC_*` values set as repository Actions variables.
 
 ---
@@ -82,6 +85,7 @@ Tagged releases are also published to `ghcr.io/plexioss/omniplex` by the `Publis
 ```
 apps/
 ├── docs/                docs.omniplex.gg (Fumadocs), @omniplex/docs
+├── staff/               the staff panel (Next.js), @omniplex/staff
 └── web/                 omniplex.gg (Next.js), @omniplex/web
     └── src/
         ├── app/         App Router pages, layouts, and route handlers
@@ -90,10 +94,12 @@ apps/
         └── lib/         API client and shared utilities
 packages/
 ├── api-types/           @omniplex/api-types: TypeScript types for the API, used by the website and the JS SDK
+├── core/                @omniplex/core: the API client and helpers shared by the website and staff panel (private)
 ├── sdk-go/              github.com/PlexiOSS/Omniplex/packages/sdk-go: the Go SDK (Go module proxy)
 ├── sdk-js/              @omniplex/sdk: the JavaScript and TypeScript SDK (npm)
 ├── sdk-python/          omniplex-sdk: the Python SDK (PyPI)
-└── sdk-rust/            omniplex: the Rust SDK (crates.io)
+├── sdk-rust/            omniplex: the Rust SDK (crates.io)
+└── ui/                  @omniplex/ui: React components and theme shared by the website and staff panel (private)
 ```
 
 See `AGENTS.md` at the root of the wider plexicore workspace (outside this repo) for a full breakdown of the codebase layout, API layer conventions, and styling rules.

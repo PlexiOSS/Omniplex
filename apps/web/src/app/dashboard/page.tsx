@@ -1,5 +1,22 @@
 "use client";
 
+import { platform, users } from "@omniplex/core/api";
+import type {
+  Link as ApiLink,
+  BotType,
+  IndexBot,
+  IndexServer,
+  Team,
+  User as UserType,
+} from "@omniplex/core/api/types";
+import { hasAnyPermString, hasPermString } from "@omniplex/core/permissions";
+import { mirroredAvatarUrl, teamAvatarUrl } from "@omniplex/core/utils/assets";
+import { formatCount, formatCountLabel } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
+import { Button } from "@omniplex/ui/Button";
+import { Dropdown, DropdownItem } from "@omniplex/ui/Dropdown";
+import { LinksEditor } from "@omniplex/ui/LinksEditor";
 import {
   ArrowUpRight,
   BarChart2,
@@ -28,32 +45,15 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { LinksEditor } from "@/components/forms/LinksEditor";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TokenManager } from "@/components/sessions/TokenManager";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { useMyTemplates } from "@/hooks/useTemplates";
 import { useMyThemes } from "@/hooks/useThemes";
-import { platform, users } from "@/lib/api";
-import type {
-  Link as ApiLink,
-  BotType,
-  IndexBot,
-  IndexServer,
-  Team,
-  User as UserType,
-} from "@/lib/api/types";
-import { hasAnyPermString, hasPermString } from "@/lib/permissions";
-import { mirroredAvatarUrl, teamAvatarUrl } from "@/lib/utils/assets";
-import { formatCount, formatCountLabel } from "@/lib/utils/format";
 import { ApplicationsTab } from "./ApplicationsTab";
 import { AutoVoteTab } from "./AutoVoteTab";
 import { DashboardNav } from "./DashboardNav";

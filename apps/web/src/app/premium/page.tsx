@@ -1,5 +1,15 @@
 "use client";
 
+import { payments, votes } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  BoosterStatus,
+  BotType,
+  PaymentPlan,
+  PromoCodePreview,
+} from "@omniplex/core/api/types";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Button } from "@omniplex/ui/Button";
 import {
   ArrowRight,
   BadgeCheck,
@@ -23,19 +33,9 @@ import {
 import { PromoCodeField } from "@/components/billing/PromoCodeField";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { payments, votes } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type {
-  BoosterStatus,
-  BotType,
-  PaymentPlan,
-  PromoCodePreview,
-} from "@/lib/api/types";
 
 type Provider = "stripe" | "paypal";
 

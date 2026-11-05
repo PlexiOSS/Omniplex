@@ -1,8 +1,8 @@
 "use client";
 
+import type { ServerTemplate } from "@omniplex/core/api/types";
 import { useState } from "react";
 import { ServerTemplateCard } from "@/components/cards/ServerTemplateCard";
-import type { ServerTemplate } from "@/lib/api/types";
 
 export function TemplateGrid({
   initialTemplates,

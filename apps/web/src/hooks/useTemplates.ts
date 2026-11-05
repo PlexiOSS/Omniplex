@@ -1,8 +1,8 @@
 "use client";
 
+import { serverTemplates } from "@omniplex/core/api";
+import type { AuthSession } from "@omniplex/core/api/types";
 import useSWR from "swr";
-import { serverTemplates } from "@/lib/api";
-import type { AuthSession } from "@/lib/api/types";
 
 /** Server templates aren't embedded in /me like packs/bots are, so the
  * dashboard's Templates tab fetches its own list -- the existing

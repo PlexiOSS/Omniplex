@@ -1,7 +1,7 @@
 "use client";
 
+import { Pagination } from "@omniplex/ui/Pagination";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Pagination } from "@/components/search/Pagination";
 
 interface UrlPaginationProps {
   page: number;

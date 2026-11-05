@@ -1,10 +1,10 @@
 "use client";
 
+import type { PackStickerInput } from "@omniplex/core/api/types";
+import { packStickerUrl } from "@omniplex/core/utils/assets";
+import { Button } from "@omniplex/ui/Button";
 import { Plus, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import type { PackStickerInput } from "@/lib/api/types";
-import { packStickerUrl } from "@/lib/utils/assets";
 
 const MAX_STICKERS = 50;
 const MAX_BYTES = 256 * 1024;

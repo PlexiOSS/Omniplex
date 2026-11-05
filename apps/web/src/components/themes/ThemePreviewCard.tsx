@@ -1,7 +1,7 @@
+import type { PlatformUser } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { Smile } from "lucide-react";
-import { Avatar } from "@/components/ui/Avatar";
-import type { PlatformUser } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 
 interface ThemePreviewCardProps {
   themeName: string;

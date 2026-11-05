@@ -1,6 +1,19 @@
 "use client";
 
 import {
+  alerts as alertsApi,
+  notifications as notificationsApi,
+} from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type {
+  Alert,
+  AlertCategory,
+  AlertType,
+  NotificationPrefs,
+} from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Button } from "@omniplex/ui/Button";
+import {
   Bell,
   BellOff,
   BellRing,
@@ -20,23 +33,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
-import {
-  alerts as alertsApi,
-  notifications as notificationsApi,
-} from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type {
-  Alert,
-  AlertCategory,
-  AlertType,
-  NotificationPrefs,
-} from "@/lib/api/types";
 import { ALERT_CATEGORY_LABELS } from "@/lib/constants/alertCategories";
 import { alertLink } from "@/lib/utils/alerts";
-import { formatRelativeTime } from "@/lib/utils/format";
 
 interface NotificationsTabProps {
   userId: string;

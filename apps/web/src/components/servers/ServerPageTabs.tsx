@@ -1,17 +1,17 @@
 "use client";
 
+import type {
+  EntityVoterList,
+  Review,
+  ServerEmoji,
+  ServerSticker,
+} from "@omniplex/core/api/types";
 import { BookOpen, MessageSquare, Smile, Users } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
-import type {
-  EntityVoterList,
-  Review,
-  ServerEmoji,
-  ServerSticker,
-} from "@/lib/api/types";
 import { EmojiStickerGallery } from "./EmojiStickerGallery";
 
 type Tab = "about" | "emojis" | "reviews" | "voters";

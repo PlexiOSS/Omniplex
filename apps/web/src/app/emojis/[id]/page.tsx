@@ -1,3 +1,8 @@
+import { emojis, packs, vanity } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import { packEmojiUrl } from "@omniplex/core/utils/assets";
+import { formatCount, formatRelativeTime } from "@omniplex/core/utils/format";
+import { Badge } from "@omniplex/ui/Badge";
 import { Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -7,16 +12,11 @@ import { AssetDownloadButton } from "@/components/packs/AssetDownloadButton";
 import { AssetHero } from "@/components/packs/AssetHero";
 import { DiscordPreview } from "@/components/packs/DiscordPreview";
 import { SimilarPackAssets } from "@/components/packs/SimilarPackAssets";
-import { Badge } from "@/components/ui/Badge";
-import { emojis, packs, vanity } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import { packEmojiUrl } from "@/lib/utils/assets";
 import {
   isApiUnavailable,
   isNotFoundError,
   nullIfNotFound,
 } from "@/lib/utils/errors";
-import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 
 interface Props {
   params: Promise<{ id: string }>;

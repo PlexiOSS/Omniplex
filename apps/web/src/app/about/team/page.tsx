@@ -1,13 +1,13 @@
+import { staff } from "@omniplex/core/api";
+import type { PublicStaffMember } from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { CloudOff, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { staff } from "@/lib/api";
-import type { PublicStaffMember } from "@/lib/api/types";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
 
 export const metadata: Metadata = {
   title: "Team",

@@ -1,11 +1,11 @@
+import { linkedRoles } from "@omniplex/core/api";
+import type { LinkedRolesMeta } from "@omniplex/core/api/types";
 import { Link2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { linkedRoles } from "@/lib/api";
-import type { LinkedRolesMeta } from "@/lib/api/types";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { ConnectButton } from "./ConnectButton";
 

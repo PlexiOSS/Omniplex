@@ -1,11 +1,11 @@
+import { BASE_URL } from "@omniplex/core/api/config";
+import type { PlatformUser } from "@omniplex/core/api/types";
+import { Avatar } from "@omniplex/ui/Avatar";
 import { ArrowLeft, Layers } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Avatar } from "@/components/ui/Avatar";
 import { ENTITY_ACTION_CLASS } from "@/components/ui/entityAction";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
-import { BASE_URL } from "@/lib/api/config";
-import type { PlatformUser } from "@/lib/api/types";
 
 interface AssetHeroProps {
   backHref: string;

@@ -1,5 +1,12 @@
 "use client";
 
+import { reviews as reviewsApi } from "@omniplex/core/api";
+import { ApiError } from "@omniplex/core/api/client";
+import type { Review, ReviewTargetType } from "@omniplex/core/api/types";
+import { formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Button } from "@omniplex/ui/Button";
+import { StarRating, StarRatingInput } from "@omniplex/ui/StarRating";
 import {
   Check,
   Link2,
@@ -9,18 +16,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntityPermission } from "@/hooks/useEntityPermission";
 import { useHighlightScroll } from "@/hooks/useHighlightScroll";
-import { reviews as reviewsApi } from "@/lib/api";
-import { ApiError } from "@/lib/api/client";
-import type { Review, ReviewTargetType } from "@/lib/api/types";
-import { formatRelativeTime } from "@/lib/utils/format";
-import { StarRating, StarRatingInput } from "./StarRating";
 
 interface ReviewsSectionProps {
   targetType: ReviewTargetType;

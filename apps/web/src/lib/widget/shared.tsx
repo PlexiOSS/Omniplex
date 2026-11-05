@@ -1,6 +1,6 @@
 // Copyright (C) 2026 NodeByte LTD
 
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import { ACCENT_COLORS, isAccentColor } from "@/lib/constants/accent";
 
 export const WIDGET_SIZE = { width: 480, height: 180 };

@@ -1,6 +1,6 @@
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import Link from "next/link";
 import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
-import { OmniplexLogo } from "@/components/ui/OmniplexLogo";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
 

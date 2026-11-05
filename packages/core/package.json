@@ -1,0 +1,24 @@
+{
+  "name": "@omniplex/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared Omniplex code for the website and staff panel: the Popplio API client, formatting and asset helpers, permissions and S3 storage.",
+  "license": "AGPL-3.0-or-later",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1107.0",
+    "@omniplex/api-types": "workspace:*",
+    "@smithy/node-http-handler": "^4.9.13",
+    "lucide-react": "^1.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "next": "16.4.5",
+    "typescript": "^5"
+  }
+}

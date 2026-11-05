@@ -1,11 +1,11 @@
+import { changelogs } from "@omniplex/core/api";
+import { trackKey } from "@omniplex/core/changelog";
 import { Megaphone, Rss } from "lucide-react";
 import type { Metadata } from "next";
 import { ChangelogList } from "@/components/changelog/ChangelogList";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
-import { changelogs } from "@/lib/api";
-import { trackKey } from "@/lib/changelog";
 import { isApiUnavailable } from "@/lib/utils/errors";
 
 export const metadata: Metadata = {

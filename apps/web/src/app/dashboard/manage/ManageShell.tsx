@@ -1,12 +1,12 @@
 "use client";
 
+import { Avatar } from "@omniplex/ui/Avatar";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Avatar } from "@/components/ui/Avatar";
 import { DashboardNav, type DashboardNavGroup } from "../DashboardNav";
 
 interface ManageShellProps<K extends string> {

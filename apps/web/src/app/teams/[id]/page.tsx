@@ -1,3 +1,9 @@
+import { reviews, teams } from "@omniplex/core/api";
+import { hasPermString } from "@omniplex/core/permissions";
+import { bannerUrl, teamAvatarUrl } from "@omniplex/core/utils/assets";
+import { formatCount } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import { ArrowLeft, Bot, Server, Star, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,17 +16,11 @@ import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { ReportModal } from "@/components/reports/ReportModal";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { TeamManageLink } from "@/components/teams/TeamManageLink";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import { ENTITY_ACTION_ROW } from "@/components/ui/entityAction";
 import { ShortLinkButton } from "@/components/ui/ShortLinkButton";
-import { reviews, teams } from "@/lib/api";
-import { hasPermString } from "@/lib/permissions";
 import { shortLinkUrl } from "@/lib/shortLinks";
-import { bannerUrl, teamAvatarUrl } from "@/lib/utils/assets";
 import { isApiUnavailable, isNotFoundError } from "@/lib/utils/errors";
-import { formatCount } from "@/lib/utils/format";
 import { getServerToken } from "@/lib/utils/serverSession";
 import { TeamVoteButton } from "./TeamVoteButton";
 

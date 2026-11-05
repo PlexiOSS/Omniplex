@@ -1,5 +1,5 @@
+import { isCdnHealthy } from "@omniplex/core/s3/health";
 import { NextResponse } from "next/server";
-import { isCdnHealthy } from "@/lib/s3/health";
 
 export async function GET() {
   const ok = await isCdnHealthy();

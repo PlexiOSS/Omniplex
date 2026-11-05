@@ -1,11 +1,11 @@
 "use client";
 
+import { bots, servers } from "@omniplex/core/api";
+import type { IndexBot, IndexServer } from "@omniplex/core/api/types";
 import { ChevronDown, Shuffle } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { BotCard } from "@/components/cards/BotCard";
 import { ServerCard } from "@/components/cards/ServerCard";
-import { bots, servers } from "@/lib/api";
-import type { IndexBot, IndexServer } from "@/lib/api/types";
 
 type Tab = {
   key: string;

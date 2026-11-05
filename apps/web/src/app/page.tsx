@@ -1,3 +1,17 @@
+import { blogs, bots, list, servers, votes } from "@omniplex/core/api";
+import type {
+  Blog,
+  BotWithCommands,
+  IndexBot,
+  ListStats,
+  PartnerList,
+  RecentChangelogBot,
+  VoterLeaderboardEntry,
+} from "@omniplex/core/api/types";
+import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import { formatCount, formatRelativeTime } from "@omniplex/core/utils/format";
+import { Avatar } from "@omniplex/ui/Avatar";
+import { Badge } from "@omniplex/ui/Badge";
 import { ArrowRight, BookOpen, Handshake, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { PackCard } from "@/components/cards/PackCard";
@@ -8,21 +22,7 @@ import { RotatingWord } from "@/components/home/RotatingWord";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { SearchBar } from "@/components/search/SearchBar";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { blogs, bots, list, servers, votes } from "@/lib/api";
-import type {
-  Blog,
-  BotWithCommands,
-  IndexBot,
-  ListStats,
-  PartnerList,
-  RecentChangelogBot,
-  VoterLeaderboardEntry,
-} from "@/lib/api/types";
 import { COLLECTIONS } from "@/lib/constants/collections";
-import { mirroredAvatarUrl } from "@/lib/utils/assets";
-import { formatCount, formatRelativeTime } from "@/lib/utils/format";
 import { totalListedBots } from "@/lib/utils/stats";
 
 const POPULAR_TAGS = [
