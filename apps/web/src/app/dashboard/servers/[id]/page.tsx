@@ -264,7 +264,7 @@ function DetailsSection({ server, token, onSaved }: SectionProps) {
           checked={form.acceptAutoVotes}
           onChange={(v) => update("acceptAutoVotes", v)}
           label="Accept automatic votes"
-          description="Auto-vote subscribers can vote for this server automatically. Automatic votes never earn vote credits."
+          description="Auto-vote subscribers can vote for this server automatically, without a captcha. Automatic votes never earn vote credits."
         />
         <Toggle
           checked={form.nsfw}
