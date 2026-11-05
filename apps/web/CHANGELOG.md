@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-11-04
+
 ### Added
 
 - Promo codes for premium and Auto-vote. The [Premium](/premium) page and
@@ -24,6 +26,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Auto-vote now works on listings that require a captcha. Owners who don't
+  want automatic votes can switch off **Accept automatic votes** in their
+  listing's options. Votes cast by hand still need the captcha.
+- The dashboard's Auto-vote tab shows what each listing is waiting for: not
+  subscribed yet, on cooldown with the time until the next vote, outside its
+  schedule, or ready to vote. It also updates on its own, without losing
+  changes you haven't saved.
+- Saving your Auto-vote listings no longer clears "last voted".
+- Choosing **On a schedule** now starts with every day selected instead of
+  Monday to Friday, so a new schedule doesn't miss weekends.
 - An error starting Auto-vote checkout or opening billing now shows next
   to the button instead of under the Listings card.
 

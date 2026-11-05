@@ -2,6 +2,7 @@
 
 import {
   Check,
+  Clock,
   CreditCard,
   Plus,
   Repeat,
@@ -10,7 +11,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   formatCents,
   PromoCodeField,
@@ -30,9 +31,14 @@ import { FormMessage, SettingsCard } from "./manage/ManageShell";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-type Draft = Omit<AutoVoteTarget, "last_voted_at" | "last_skip_reason"> & {
+type Draft = Omit<
+  AutoVoteTarget,
+  "last_voted_at" | "last_skip_reason" | "cooldown_until" | "in_schedule"
+> & {
   last_voted_at?: string | null;
   last_skip_reason?: string | null;
+  cooldown_until?: string | null;
+  in_schedule?: boolean;
 };
 
 type Candidate = {
@@ -51,6 +57,27 @@ function fromTime(value: string, fallback: number) {
   const [h, m] = value.split(":").map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return fallback;
   return h * 60 + m;
+}
+
+function waitLabel(ms: number) {
+  const minutes = Math.ceil(ms / 60000);
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m`;
+}
+
+function voteStatus(t: Draft, subscribed: boolean, now: number) {
+  if (!subscribed) return "Not running. Subscribe to start voting for this.";
+  const wait = t.cooldown_until
+    ? new Date(t.cooldown_until).getTime() - now
+    : 0;
+  if (wait > 0) {
+    return `On cooldown from your last vote. Next vote in about ${waitLabel(wait)}${isAlways(t) ? "." : ", if your schedule allows it then."}`;
+  }
+  if (!t.in_schedule) {
+    return "Outside your schedule. It will vote when your schedule opens.";
+  }
+  return "Ready. It will vote within about 5 minutes.";
 }
 
 function isAlways(t: Draft) {
@@ -81,6 +108,9 @@ export function AutoVoteTab({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Candidate[]>([]);
   const [searching, setSearching] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const dirtyRef = useRef(dirty);
+  dirtyRef.current = dirty;
 
   const load = useCallback(async () => {
     try {
@@ -100,11 +130,34 @@ export function AutoVoteTab({
     load();
   }, [load]);
 
+  const refresh = useCallback(async () => {
+    setNow(Date.now());
+    try {
+      const s = await users.getAutoVote(userId, token);
+      setStatus(s);
+      if (!dirtyRef.current) setTargets(s.targets);
+    } catch {
+      return;
+    }
+  }, [userId, token]);
+
   useEffect(() => {
     if (!justSubscribed || status?.subscribed) return;
-    const id = setInterval(load, 4000);
+    const id = setInterval(refresh, 4000);
     return () => clearInterval(id);
-  }, [justSubscribed, status?.subscribed, load]);
+  }, [justSubscribed, status?.subscribed, refresh]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (!document.hidden) refresh();
+    };
+    const id = setInterval(onVisible, 60000);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [refresh]);
 
   if (loadError) return <ErrorState message={loadError} onRetry={load} />;
   if (!status) return <LoadingState label="Loading auto-vote…" />;
@@ -275,7 +328,7 @@ export function AutoVoteTab({
                 "Votes count toward the listing's votes and ranking",
                 "Pick up to 3 listings, each with its own schedule",
                 "Skips listings whose owners turned automatic votes off",
-                "Skips listings that need a captcha to vote",
+                "No captchas to solve",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
                   <Check size={15} className="mt-0.5 shrink-0 text-accent" />
@@ -392,6 +445,13 @@ export function AutoVoteTab({
                     </button>
                   </div>
 
+                  {!dirty && !t.last_skip_reason && (
+                    <p className="mt-3 flex items-start gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                      <Clock size={13} className="mt-0.5 shrink-0" />
+                      {voteStatus(t, status.subscribed, now)}
+                    </p>
+                  )}
+
                   {t.last_skip_reason && (
                     <p className="mt-3 flex items-start gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
                       <TriangleAlert size={13} className="mt-0.5 shrink-0" />
@@ -415,7 +475,7 @@ export function AutoVoteTab({
                                   end_minute: 1440,
                                 })
                               : update(i, {
-                                  days: [1, 2, 3, 4, 5],
+                                  days: [],
                                   start_minute: 9 * 60,
                                   end_minute: 22 * 60,
                                 })

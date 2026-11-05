@@ -13,7 +13,9 @@ Auto-vote is a $2.99/month subscription that votes for up to 3 bots or servers f
 3. For each one, choose **Whenever possible** or **On a schedule**. A schedule picks the days of the week and a time window, in your own timezone.
 4. Click **Save listings**.
 
-You can set up your listings before subscribing, and change them any time. Omniplex checks every few minutes and votes for each listing once your cooldown is over and it's inside its schedule.
+You can set up your listings before subscribing, and change them any time, but nothing is voted for until you subscribe. Omniplex checks every few minutes and votes for each listing once your cooldown is over and it's inside its schedule.
+
+Votes you cast by hand start the same cooldown, so if you vote for a listing yourself, Auto-vote waits until that cooldown ends. The Auto-vote tab shows what each listing is waiting for and when its next vote is due.
 
 ## What automatic votes count for
 
@@ -32,7 +34,6 @@ Those stay for votes you cast yourself.
 Auto-vote skips a listing, and shows the reason in your dashboard, when:
 
 - its owner has turned off **Accept automatic votes**,
-- it needs a captcha to vote,
 - it's no longer listed,
 - you've been vote banned.
 
@@ -42,4 +43,4 @@ Click **Manage billing** in the Auto-vote tab to update your card or cancel. If 
 
 ## For bot and server owners
 
-Automatic votes are accepted by default. To turn them off, open your listing in the dashboard and switch off **Accept automatic votes** under **Options**.
+Automatic votes are accepted by default, and they don't need a captcha, even if your listing requires one for votes cast by hand. To turn them off, open your listing in the dashboard and switch off **Accept automatic votes** under **Options**.

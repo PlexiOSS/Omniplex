@@ -1250,6 +1250,8 @@ export interface AutoVoteTarget extends AutoVoteTargetInput {
   avatar: string;
   last_voted_at: string | null;
   last_skip_reason: string | null;
+  cooldown_until: string | null;
+  in_schedule: boolean;
 }
 
 export interface AutoVoteStatus {
