@@ -50,7 +50,7 @@ export function ReviewsModal({
     );
 
   return (
-    <Modal open onClose={onClose} title={`Reviews — ${entityLabel}`}>
+    <Modal open onClose={onClose} title={`Reviews of ${entityLabel}`}>
       <div className="space-y-4">
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>

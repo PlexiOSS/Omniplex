@@ -1445,7 +1445,8 @@ export type AlertCategory =
   | "webhooks"
   | "staff_applications"
   | "reports"
-  | "account_security";
+  | "account_security"
+  | "staff";
 
 export type NotificationPrefs = Partial<Record<AlertCategory, boolean>>;
 

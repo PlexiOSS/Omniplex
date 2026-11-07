@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "@omniplex/ui/Button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, Lock, type LucideIcon, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 export function AdminLoading({ label = "Loading…" }: { label?: string }) {
   return (
@@ -36,6 +38,63 @@ export function AdminError({ message, onRetry }: AdminErrorProps) {
         <RefreshCw size={14} />
         Try again
       </Button>
+    </div>
+  );
+}
+
+export function AdminNoAccess({ perm }: { perm: string }) {
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center px-4 py-24 text-center">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">
+        <Lock size={18} className="text-zinc-500 dark:text-zinc-400" />
+      </div>
+      <p className="font-medium text-zinc-950 dark:text-zinc-50">
+        You don't have access to this page
+      </p>
+      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        It needs the{" "}
+        <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-xs dark:bg-zinc-800">
+          {perm}
+        </code>{" "}
+        permission. Ask a manager if you think you should have it.
+      </p>
+      <Link
+        href="/"
+        className="mt-4 text-sm font-medium text-accent hover:underline"
+      >
+        Back to the overview
+      </Link>
+    </div>
+  );
+}
+
+interface AdminEmptyProps {
+  icon: LucideIcon;
+  title: string;
+  description?: ReactNode;
+  action?: ReactNode;
+}
+
+export function AdminEmpty({
+  icon: Icon,
+  title,
+  description,
+  action,
+}: AdminEmptyProps) {
+  return (
+    <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 px-4 py-20 text-center dark:border-zinc-800">
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">
+        <Icon size={19} className="text-zinc-400" />
+      </div>
+      <p className="mt-4 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+        {title}
+      </p>
+      {description && (
+        <p className="mt-1 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
+          {description}
+        </p>
+      )}
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }

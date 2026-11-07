@@ -187,6 +187,15 @@ export default function StaffMembersPage() {
                   {member.unaccounted && (
                     <Badge variant="warning">Unaccounted</Badge>
                   )}
+                  {(member.disciplinaries ?? []).map((d) => (
+                    <Badge
+                      key={d.id}
+                      variant="danger"
+                      title={d.description || d.title}
+                    >
+                      {d.type.name}
+                    </Badge>
+                  ))}
                 </div>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {positions.map((p, i) => (

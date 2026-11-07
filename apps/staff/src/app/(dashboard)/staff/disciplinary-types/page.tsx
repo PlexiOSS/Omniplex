@@ -11,6 +11,7 @@ import { useAdmin } from "@/app/AdminContext";
 import { AdminPageHeader } from "@/app/AdminPageHeader";
 import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
 import { AdminError, AdminLoading } from "@/components/admin/AdminState";
+import { describeLimits, formatLength } from "@/components/admin/Disciplinary";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { StaffDisciplinaryType } from "@/lib/arcadia/types";
 
@@ -138,9 +139,8 @@ export default function DisciplinaryTypesPage() {
                 {type.name}
               </span>
               {type.self_assignable && (
-                <Badge variant="info">Self-assignable</Badge>
+                <Badge variant="info">Staff can request</Badge>
               )}
-              {type.additory && <Badge>Additory</Badge>}
               {type.needs_approval && (
                 <Badge variant="warning">Needs approval</Badge>
               )}
@@ -148,11 +148,11 @@ export default function DisciplinaryTypesPage() {
             <p className="mt-0.5 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
               {type.description}
             </p>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-600">
-              {type.perm_limits.length} permission
-              {type.perm_limits.length === 1 ? "" : "s"} limited
-              {type.max_expiry != null &&
-                ` · expires after ${Math.round(type.max_expiry / 3600)}h`}
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              {describeLimits(type)}
+              {type.max_expiry != null
+                ? ` · lasts at most ${formatLength(type.max_expiry)}`
+                : " · no time limit"}
             </p>
           </AdminListRow>
         ))}

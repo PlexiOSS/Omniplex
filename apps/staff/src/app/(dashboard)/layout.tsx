@@ -1,5 +1,6 @@
 import { AdminWarnings } from "@/app/(dashboard)/AdminWarnings";
 import { AdminGate } from "@/app/AdminContext";
+import { AdminPageGate } from "@/app/AdminPageGate";
 import { AdminMobileNav, AdminSidebar } from "@/app/AdminSidebar";
 
 export default function AdminDashboardLayout({
@@ -14,7 +15,7 @@ export default function AdminDashboardLayout({
         <AdminSidebar />
         <div className="min-w-0 flex-1">
           <AdminMobileNav />
-          {children}
+          <AdminPageGate>{children}</AdminPageGate>
         </div>
       </div>
     </AdminGate>

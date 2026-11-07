@@ -3,7 +3,6 @@ import { ThemeProvider } from "@omniplex/ui/ThemeProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
-import { StaffHeader } from "@/components/StaffHeader";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -31,7 +30,6 @@ export default async function RootLayout({
     >
       <body className="flex min-h-screen flex-col bg-white text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
         <ThemeProvider nonce={nonce}>
-          <StaffHeader />
           <main className="flex flex-1 flex-col">{children}</main>
         </ThemeProvider>
       </body>

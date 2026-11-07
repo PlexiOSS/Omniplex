@@ -1,53 +1,58 @@
 "use client";
 
 import { formatRelativeTime } from "@omniplex/core/utils/format";
-import { Badge } from "@omniplex/ui/Badge";
-import { Flag } from "lucide-react";
+import { CheckCircle2, Flag, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { ReportDetailModal } from "@/app/(dashboard)/reports/ReportDetailModal";
+import {
+  REASON_LABELS,
+  ReportDetail,
+} from "@/app/(dashboard)/reports/ReportDetail";
 import { useAdmin } from "@/app/AdminContext";
 import { AdminPageHeader } from "@/app/AdminPageHeader";
-import { AdminError, AdminLoading } from "@/components/admin/AdminState";
+import {
+  AdminEmpty,
+  AdminError,
+  AdminLoading,
+} from "@/components/admin/AdminState";
+import { AdminFilterChips } from "@/components/admin/AdminToolbar";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { Report, ReportStatus } from "@/lib/arcadia/types";
 
-const STATUS_TABS: { key: ReportStatus | null; label: string }[] = [
+type StatusFilter = ReportStatus | "all";
+
+const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
   { key: "open", label: "Open" },
-  { key: "under_review", label: "Under Review" },
+  { key: "under_review", label: "Under review" },
   { key: "resolved", label: "Resolved" },
   { key: "dismissed", label: "Dismissed" },
-  { key: null, label: "All" },
+  { key: "all", label: "All" },
 ];
 
-const REASON_LABELS: Record<Report["reason"], string> = {
-  license_violation: "License violation",
-  tos_violation: "ToS violation",
-  spam: "Spam",
-  other: "Other",
-};
-
-const STATUS_BADGE: Record<
-  ReportStatus,
-  { variant: "warning" | "info" | "success" | "default"; label: string }
-> = {
-  open: { variant: "warning", label: "Open" },
-  under_review: { variant: "info", label: "Under Review" },
-  resolved: { variant: "success", label: "Resolved" },
-  dismissed: { variant: "default", label: "Dismissed" },
+const STATUS_DOT: Record<ReportStatus, string> = {
+  open: "bg-amber-500",
+  under_review: "bg-sky-500",
+  resolved: "bg-emerald-500",
+  dismissed: "bg-zinc-400",
 };
 
 export default function ReportsAdminPage() {
   const { loginToken, hasPerm } = useAdmin();
   const canReview = hasPerm("review_reports");
 
-  const [status, setStatus] = useState<ReportStatus | null>("open");
+  const [status, setStatus] = useState<StatusFilter>("open");
   const [reports, setReports] = useState<Report[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<Report | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      setReports(await arcadia.reports.list(loginToken, status));
+      setReports(
+        await arcadia.reports.list(
+          loginToken,
+          status === "all" ? null : status,
+        ),
+      );
     } catch (err) {
       setError(
         err instanceof ArcadiaError ? err.message : "Failed to load reports.",
@@ -57,110 +62,128 @@ export default function ReportsAdminPage() {
 
   useEffect(() => {
     setReports(null);
+    setSelectedId(null);
     load();
   }, [load]);
 
-  if (!canReview) {
-    return (
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          You don't have permission to review reports.
-        </p>
-      </div>
-    );
-  }
+  const selected =
+    reports?.find((r) => r.id === selectedId) ?? reports?.[0] ?? null;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Reports"
-        description="User-filed reports against bots, servers and packs: license violations, ToS violations, spam, and anything else that needs a look."
+        description="Reports from members about bots, servers and packs: licence or ToS violations, spam, and anything else that needs a look."
       />
-
-      <div className="mt-6 flex flex-wrap gap-1.5">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.label}
-            type="button"
-            onClick={() => setStatus(tab.key)}
-            className={[
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-              status === tab.key
-                ? "bg-accent/10 text-accent"
-                : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-            ].join(" ")}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="mt-6">
+        <AdminFilterChips
+          value={status}
+          onChange={setStatus}
+          chips={STATUS_FILTERS}
+        />
       </div>
 
-      {error && reports && (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
-
-      {!reports ? (
-        error ? (
-          <AdminError
-            message={error}
-            onRetry={() => {
-              setError(null);
-              load();
-            }}
-          />
-        ) : (
-          <AdminLoading />
-        )
-      ) : (
-        <div className="mt-6 divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
-          {reports.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center text-zinc-500 dark:text-zinc-400">
-              <Flag
-                size={24}
-                className="mb-2 text-zinc-300 dark:text-zinc-700"
-              />
-              <p className="text-sm">No reports here.</p>
-            </div>
-          )}
-          {reports.map((report) => (
-            <button
-              key={report.id}
-              type="button"
-              onClick={() => setSelected(report)}
-              className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/5 dark:hover:bg-accent/10"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-semibold text-zinc-950 dark:text-zinc-50">
-                    {report.target_name}
-                  </span>
-                  <Badge variant="default">{report.target_type}</Badge>
-                  <Badge variant={STATUS_BADGE[report.status].variant}>
-                    {STATUS_BADGE[report.status].label}
-                  </Badge>
-                </div>
-                <p className="mt-1 line-clamp-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  {REASON_LABELS[report.reason]}: {report.description}
-                </p>
-              </div>
-              <span className="shrink-0 text-xs text-zinc-400 dark:text-zinc-600">
-                {formatRelativeTime(report.created_at)}
-              </span>
-            </button>
-          ))}
+      {notice && (
+        <div
+          aria-live="polite"
+          className="mt-4 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200"
+        >
+          <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+          <p className="min-w-0 flex-1 font-medium">{notice}</p>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            aria-label="Dismiss"
+            className="shrink-0 opacity-60 transition-opacity hover:opacity-100"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
-      {selected && (
-        <ReportDetailModal
-          report={selected}
-          loginToken={loginToken}
-          onClose={() => setSelected(null)}
-          onResolved={() => {
-            setSelected(null);
+      {error ? (
+        <AdminError
+          message={error}
+          onRetry={() => {
+            setError(null);
             load();
           }}
         />
+      ) : !reports ? (
+        <AdminLoading />
+      ) : reports.length === 0 ? (
+        <AdminEmpty
+          icon={Flag}
+          title={status === "open" ? "No open reports" : "No reports here"}
+          description={
+            status === "open"
+              ? "New reports from members show up here."
+              : "Try a different filter."
+          }
+        />
+      ) : (
+        <div className="mt-4 grid items-start gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
+          <ul className="overflow-hidden rounded-2xl border border-zinc-200 bg-white lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto dark:border-zinc-800 dark:bg-zinc-900/60">
+            {reports.map((report) => {
+              const active = selected?.id === report.id;
+              return (
+                <li
+                  key={report.id}
+                  className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800/80"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(report.id)}
+                    aria-current={active ? "true" : undefined}
+                    className={[
+                      "relative flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
+                      active
+                        ? "bg-accent/8"
+                        : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50",
+                    ].join(" ")}
+                  >
+                    {active && (
+                      <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-accent" />
+                    )}
+                    <span
+                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[report.status]}`}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-baseline justify-between gap-2">
+                        <span className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                          {report.target_name}
+                        </span>
+                        <span className="shrink-0 text-xs text-zinc-400 dark:text-zinc-500">
+                          {formatRelativeTime(report.created_at)}
+                        </span>
+                      </span>
+                      <span className="block truncate text-xs text-zinc-500 dark:text-zinc-400">
+                        {REASON_LABELS[report.reason]} · {report.target_type}
+                      </span>
+                      <span className="mt-0.5 line-clamp-1 text-xs text-zinc-400 dark:text-zinc-500">
+                        {report.description}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {selected && (
+            <ReportDetail
+              key={selected.id}
+              report={selected}
+              loginToken={loginToken}
+              canReview={canReview}
+              onResolved={(message) => {
+                setNotice(message);
+                setSelectedId(null);
+                load();
+              }}
+            />
+          )}
+        </div>
       )}
     </div>
   );

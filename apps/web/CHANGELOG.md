@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Notifications about your staff leave and disciplinaries show with their
+  own icon.
+
 ## [1.14.0] - 2026-11-05
 
 ### Changed

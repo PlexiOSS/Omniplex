@@ -53,7 +53,7 @@ export function MemberEditModal({
   }
 
   return (
-    <Modal open onClose={onClose} title={`Edit — ${member.user.username}`}>
+    <Modal open onClose={onClose} title={`Edit ${member.user.username}`}>
       <div className="space-y-4">
         {member.positions.length > 0 && (
           <div>

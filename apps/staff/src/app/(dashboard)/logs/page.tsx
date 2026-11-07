@@ -16,6 +16,7 @@ import {
   AdminSearch,
   AdminToolbar,
 } from "@/components/admin/AdminToolbar";
+import { DataValue, fieldLabel } from "@/components/admin/DataValue";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { PlatformUser, RPCLogEntry } from "@/lib/arcadia/types";
 
@@ -35,13 +36,6 @@ function fieldsOf(data: unknown): [string, unknown][] {
     return Object.entries(entries[0][1] as Record<string, unknown>);
   }
   return entries;
-}
-
-function labelFor(key: string) {
-  return key
-    .replace(/_/g, " ")
-    .replace(/\bid\b/g, "ID")
-    .replace(/^\w/, (c) => c.toUpperCase());
 }
 
 function display(value: unknown): string {
@@ -241,10 +235,10 @@ export default function AdminLogsPage() {
                       {fields.map(([key, value]) => (
                         <div key={key} className="contents">
                           <dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                            {labelFor(key)}
+                            {fieldLabel(key)}
                           </dt>
                           <dd className="min-w-0 wrap-anywhere text-zinc-950 dark:text-zinc-50">
-                            {display(value)}
+                            <DataValue value={value} />
                           </dd>
                         </div>
                       ))}

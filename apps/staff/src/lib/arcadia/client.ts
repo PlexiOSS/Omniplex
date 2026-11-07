@@ -1,6 +1,6 @@
 // Copyright (C) 2026 NodeByte LTD
 
-import type { TicketList } from "@omniplex/core/api/types";
+import type { Ticket, TicketList } from "@omniplex/core/api/types";
 import { ARCADIA_URL } from "@/lib/arcadia/config";
 import { touchArcadiaSession } from "@/lib/arcadia/session";
 import type {
@@ -39,12 +39,14 @@ import type {
   ShopItemAction,
   ShopItemBenefit,
   ShopItemBenefitAction,
+  StaffDisciplinary,
   StaffDisciplinaryType,
   StaffDisciplinaryTypeAction,
   StaffMember,
   StaffMemberAction,
   StaffPosition,
   StaffPositionAction,
+  StaffSession,
   StaffTemplateAction,
   StaffTemplateUpsert,
   StartAuth,
@@ -343,6 +345,78 @@ export const arcadia = {
         },
       });
       await assertOk(res);
+    },
+  },
+
+  disciplinaries: {
+    list: async (
+      loginToken: string,
+      filter: { userId?: string; state?: string } = {},
+    ): Promise<StaffDisciplinary[]> => {
+      const res = await postQuery({
+        UpdateDisciplinaries: {
+          login_token: loginToken,
+          action: {
+            List: {
+              user_id: filter.userId ?? null,
+              state: filter.state ?? null,
+            },
+          },
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+
+    issue: async (
+      loginToken: string,
+      body: {
+        user_id: string;
+        type: string;
+        title: string;
+        description: string;
+        expiry: number | null;
+      },
+    ): Promise<StaffDisciplinary> => {
+      const res = await postQuery({
+        UpdateDisciplinaries: {
+          login_token: loginToken,
+          action: { Issue: body },
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+
+    request: async (
+      loginToken: string,
+      body: {
+        type: string;
+        title: string;
+        description: string;
+        expiry: number | null;
+      },
+    ): Promise<StaffDisciplinary> => {
+      const res = await postQuery({
+        UpdateDisciplinaries: {
+          login_token: loginToken,
+          action: { Request: body },
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+
+    decide: async (
+      loginToken: string,
+      kind: "Approve" | "Deny" | "Revoke",
+      id: string,
+      note = "",
+    ): Promise<StaffDisciplinary> => {
+      const res = await postQuery({
+        UpdateDisciplinaries: {
+          login_token: loginToken,
+          action: { [kind]: { id, note } },
+        },
+      });
+      return (await assertOk(res)).json();
     },
   },
 
@@ -948,6 +1022,59 @@ export const arcadia = {
       `/staff/tickets${qs}`,
     );
     return json ?? { tickets: [] };
+  },
+
+  sessions: {
+    list: async (loginToken: string): Promise<StaffSession[]> => {
+      const res = await postQuery({
+        UpdateSessions: { login_token: loginToken, action: { List: {} } },
+      });
+      return (await assertOk(res)).json();
+    },
+
+    revoke: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateSessions: { login_token: loginToken, action: { Revoke: { id } } },
+      });
+      await assertOk(res);
+    },
+
+    revokeOthers: async (loginToken: string): Promise<number> => {
+      const res = await postQuery({
+        UpdateSessions: {
+          login_token: loginToken,
+          action: { RevokeOthers: {} },
+        },
+      });
+      const json = (await (await assertOk(res)).json()) as { revoked: number };
+      return json.revoked;
+    },
+  },
+
+  staffTicket: async (loginToken: string, id: string) => {
+    const { json } = await arcadia.popplioStaff<
+      Ticket & { ticket_context?: Record<string, string> }
+    >(loginToken, "GET", `/staff/tickets/${encodeURIComponent(id)}`);
+    if (!json) throw new ArcadiaError("Ticket not found", 404);
+    return json;
+  },
+
+  replyToTicket: async (loginToken: string, id: string, content: string) => {
+    await arcadia.popplioStaff(
+      loginToken,
+      "POST",
+      `/staff/tickets/${encodeURIComponent(id)}/messages`,
+      { content },
+    );
+  },
+
+  setTicketOpen: async (loginToken: string, id: string, open: boolean) => {
+    await arcadia.popplioStaff(
+      loginToken,
+      "PATCH",
+      `/staff/tickets/${encodeURIComponent(id)}`,
+      { open },
+    );
   },
 
   reports: {
