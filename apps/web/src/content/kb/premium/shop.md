@@ -8,7 +8,7 @@ Every vote a bot or server receives is worth something beyond the vote count its
 
 ## Earning credits
 
-Votes convert into credits at a tiered rate: the first block of votes earns more per vote than later blocks, tapering off the more a listing accumulates. Go to [Shop](/shop), pick **Bot** or **Server**, then pick which one, and you'll see how many unredeemed votes it has and how many credits converting them would earn. Converting is a manual action, so a listing can rack up votes for a while before you decide to cash them in. Just don't wait past the monthly reset (see below).
+Votes convert into credits at a tiered rate: the first block of votes earns more per vote than later blocks, tapering off the more a listing accumulates. Go to [Credit shop](/shop/items), pick **Bot** or **Server**, then pick which one, and you'll see how many unredeemed votes it has and how many credits converting them would earn. Converting is a manual action, so a listing can rack up votes for a while before you decide to cash them in. Just don't wait past the monthly reset (see below).
 
 ## Redeem before the monthly reset
 
@@ -16,7 +16,7 @@ Vote counts reset once a month (see [Voting Rules & FAQ](/kb/voting/voting-rules
 
 ## Spending credits
 
-The [Shop](/shop) lists items your credit balance can be spent on. What's available can change, but typically includes:
+The [Credit shop](/shop/items) lists items your credit balance can be spent on. What's available can change, but typically includes:
 
 - **Bonus premium days**: extends the premium period, the same effect as buying premium directly.
 - **Priority Boost**: bumps it toward the top of listing sort order for a limited time.

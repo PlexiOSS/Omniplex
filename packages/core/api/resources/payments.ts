@@ -39,6 +39,7 @@ export const paymentsResource = {
     token: string,
     credits = 0,
     promoCode?: string,
+    gift?: { message: string; anonymous: boolean },
   ) =>
     client.post<RedirectUser>(
       `/users/${userId}/stripe`,
@@ -49,6 +50,13 @@ export const paymentsResource = {
         for_type: forType,
         credits,
         ...(promoCode ? { promo_code: promoCode } : {}),
+        ...(gift
+          ? {
+              gift: true,
+              gift_message: gift.message,
+              gift_anonymous: gift.anonymous,
+            }
+          : {}),
       },
       { token },
     ),
@@ -75,6 +83,7 @@ export const paymentsResource = {
     forId: string,
     token: string,
     credits = 0,
+    gift?: { message: string; anonymous: boolean },
   ) =>
     client.post<RedirectUser>(
       `/users/${userId}/paypal`,
@@ -84,6 +93,13 @@ export const paymentsResource = {
         for: forId,
         for_type: forType,
         credits,
+        ...(gift
+          ? {
+              gift: true,
+              gift_message: gift.message,
+              gift_anonymous: gift.anonymous,
+            }
+          : {}),
       },
       { token },
     ),

@@ -3,18 +3,20 @@
 import { search, users } from "@omniplex/core/api";
 import { ApiError } from "@omniplex/core/api/client";
 import type {
+  AutoVoteNotify,
   AutoVoteStatus,
   AutoVoteTarget,
-  PromoCodePreview,
 } from "@omniplex/core/api/types";
 import { isAlways, voteStatus } from "@omniplex/core/autoVote";
 import { formatRelativeTime } from "@omniplex/core/utils/format";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Button } from "@omniplex/ui/Button";
 import {
-  Check,
+  Bell,
   Clock,
   CreditCard,
+  Pause,
+  Play,
   Plus,
   Repeat,
   Search,
@@ -23,11 +25,9 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  formatCents,
-  PromoCodeField,
-} from "@/components/billing/PromoCodeField";
+import { AutoVoteSubscribe } from "@/components/billing/AutoVoteSubscribe";
 import { ErrorState, LoadingState } from "@/components/ui/PageStates";
+import { AutoVoteSlotsCard } from "./AutoVoteSlotsCard";
 import { FormMessage, SettingsCard } from "./manage/ManageShell";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -72,6 +72,8 @@ export function AutoVoteTab({
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
   const [status, setStatus] = useState<AutoVoteStatus | null>(null);
+  const [savingNotify, setSavingNotify] = useState(false);
+  const [notifyError, setNotifyError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [targets, setTargets] = useState<Draft[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -80,7 +82,6 @@ export function AutoVoteTab({
   const [error, setError] = useState<string | null>(null);
   const [billing, setBilling] = useState(false);
   const [billingError, setBillingError] = useState<string | null>(null);
-  const [promo, setPromo] = useState<PromoCodePreview | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Candidate[]>([]);
   const [searching, setSearching] = useState(false);
@@ -138,7 +139,6 @@ export function AutoVoteTab({
   if (loadError) return <ErrorState message={loadError} onRetry={load} />;
   if (!status) return <LoadingState label="Loading auto-vote…" />;
 
-  const price = `$${(status.price_cents / 100).toFixed(2)}`;
   const full = targets.length >= status.max_targets;
 
   function update(i: number, patch: Partial<Draft>) {
@@ -165,7 +165,14 @@ export function AutoVoteTab({
       return;
     setTargets((prev) => [
       ...prev,
-      { ...c, days: [], start_minute: 0, end_minute: 1440, timezone },
+      {
+        ...c,
+        days: [],
+        start_minute: 0,
+        end_minute: 1440,
+        timezone,
+        paused: false,
+      },
     ]);
     setResults([]);
     setQuery("");
@@ -202,6 +209,35 @@ export function AutoVoteTab({
     }
   }
 
+  async function saveNotify(notify: AutoVoteNotify) {
+    if (!status || status.notify === notify) return;
+    setSavingNotify(true);
+    setNotifyError(null);
+    try {
+      await users.updateAutoVoteTargets(
+        userId,
+        status.targets.map((t) => ({
+          target_type: t.target_type,
+          target_id: t.target_id,
+          days: t.days,
+          start_minute: t.start_minute,
+          end_minute: t.end_minute,
+          timezone: t.timezone,
+          paused: t.paused,
+        })),
+        token,
+        { notify },
+      );
+      setStatus({ ...status, notify });
+    } catch (err) {
+      setNotifyError(
+        err instanceof ApiError ? err.message : "Couldn't save that.",
+      );
+    } finally {
+      setSavingNotify(false);
+    }
+  }
+
   async function save() {
     setSaving(true);
     setError(null);
@@ -215,6 +251,7 @@ export function AutoVoteTab({
           start_minute: t.start_minute,
           end_minute: t.end_minute,
           timezone: t.timezone,
+          paused: !!t.paused,
         })),
         token,
       );
@@ -227,14 +264,11 @@ export function AutoVoteTab({
     }
   }
 
-  async function openBilling(kind: "checkout" | "portal") {
+  async function openBilling() {
     setBilling(true);
     setBillingError(null);
     try {
-      const { url } =
-        kind === "checkout"
-          ? await users.startAutoVoteCheckout(userId, token, promo?.code)
-          : await users.openAutoVotePortal(userId, token);
+      const { url } = await users.openAutoVotePortal(userId, token);
       window.location.href = url;
     } catch (err) {
       setBillingError(
@@ -257,15 +291,15 @@ export function AutoVoteTab({
             </p>
             <p className="text-sm text-zinc-600 dark:text-zinc-300">
               {status.current_period_end
-                ? `${status.cancel_at_period_end ? "Ends" : "Renews"} ${new Date(status.current_period_end).toLocaleDateString()} · ${price}/month`
-                : `${price}/month`}
+                ? `${status.cancel_at_period_end ? "Ends" : "Renews"} ${new Date(status.current_period_end).toLocaleDateString()}`
+                : "Active"}
             </p>
           </div>
           <Button
             variant="secondary"
             size="sm"
             loading={billing}
-            onClick={() => openBilling("portal")}
+            onClick={openBilling}
           >
             <CreditCard size={14} />
             Manage billing
@@ -282,90 +316,15 @@ export function AutoVoteTab({
           activate, and this page updates on its own.
         </section>
       ) : (
-        <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="p-5 sm:p-6">
-            <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/15">
-                <Repeat size={20} />
-              </span>
-              <div className="min-w-0">
-                <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  Never miss a vote
-                </h2>
-                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                  Auto-vote votes for up to {status.max_targets} bots or servers
-                  for you as soon as your cooldown ends, always or on a schedule
-                  you choose.
-                </p>
-              </div>
-            </div>
-            <ul className="mt-5 grid gap-2 text-sm text-zinc-600 sm:grid-cols-2 dark:text-zinc-300">
-              {[
-                "Votes count toward the listing's votes and ranking",
-                "Pick up to 3 listings, each with its own schedule",
-                "Skips listings whose owners turned automatic votes off",
-                "No captchas to solve",
-              ].map((line) => (
-                <li key={line} className="flex items-start gap-2">
-                  <Check size={15} className="mt-0.5 shrink-0 text-accent" />
-                  {line}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 rounded-xl bg-zinc-50 px-3 py-2.5 text-xs text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
-              Automatic votes don&apos;t count toward the voter leaderboard,
-              voting badges like Active Voter and Top Voter, or the
-              listing&apos;s vote credits. Those stay for votes you cast
-              yourself.
-            </p>
-            <div className="mt-4">
-              <PromoCodeField
-                userId={userId}
-                token={token}
-                product="autovote"
-                value={promo}
-                onChange={setPromo}
-                disabled={billing}
-              />
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 bg-zinc-50/60 px-5 py-3 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/40">
-            <span className="text-sm text-zinc-600 dark:text-zinc-300">
-              {promo ? (
-                <>
-                  <span className="mr-1.5 text-zinc-400 line-through">
-                    {price}
-                  </span>
-                  <span className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-                    {formatCents(promo.total_cents)}
-                  </span>{" "}
-                  {promo.duration === "forever" ? "/ month" : "first month"} ·
-                  cancel anytime
-                </>
-              ) : (
-                <>
-                  <span className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-                    {price}
-                  </span>{" "}
-                  / month · cancel anytime
-                </>
-              )}
-            </span>
-            <Button
-              variant="primary"
-              size="sm"
-              loading={billing}
-              onClick={() => openBilling("checkout")}
-            >
-              Subscribe
-            </Button>
-            {billingError && (
-              <p className="w-full text-xs text-red-600 dark:text-red-400">
-                {billingError}
-              </p>
-            )}
-          </div>
-        </section>
+        <AutoVoteSubscribe
+          priceCents={status.price_cents}
+          yearlyPriceCents={status.yearly_price_cents}
+          includedSlots={status.max_targets - status.booster_slots}
+          slotPriceCents={status.slot_price_cents}
+          userId={userId}
+          token={token}
+          initialPromo={searchParams.get("promo")}
+        />
       )}
 
       <SettingsCard
@@ -413,6 +372,17 @@ export function AutoVoteTab({
                     </div>
                     <button
                       type="button"
+                      onClick={() => update(i, { paused: !t.paused })}
+                      aria-label={
+                        t.paused ? `Resume ${t.name}` : `Pause ${t.name}`
+                      }
+                      title={t.paused ? "Resume" : "Pause"}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                    >
+                      {t.paused ? <Play size={14} /> : <Pause size={14} />}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => remove(i)}
                       aria-label={`Remove ${t.name}`}
                       className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400"
@@ -421,11 +391,20 @@ export function AutoVoteTab({
                     </button>
                   </div>
 
-                  {!dirty && !t.last_skip_reason && (
-                    <p className="mt-3 flex items-start gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                      <Clock size={13} className="mt-0.5 shrink-0" />
-                      {voteStatus(t, status.subscribed, now)}
+                  {t.paused ? (
+                    <p className="mt-3 flex items-start gap-2 rounded-lg bg-zinc-100 px-3 py-2 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                      <Pause size={13} className="mt-0.5 shrink-0" />
+                      Paused. Auto-vote won't vote for this listing until you
+                      resume it.
                     </p>
+                  ) : (
+                    !dirty &&
+                    !t.last_skip_reason && (
+                      <p className="mt-3 flex items-start gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <Clock size={13} className="mt-0.5 shrink-0" />
+                        {voteStatus(t, status.subscribed, now)}
+                      </p>
+                    )
                   )}
 
                   {t.last_skip_reason && (
@@ -544,6 +523,14 @@ export function AutoVoteTab({
           </div>
         )}
 
+        {full && status.subscribed && (
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            All {status.max_targets} slots are in use.
+            {status.extra_slots < status.max_extra_slots &&
+              " Add more under Listing slots below."}
+          </p>
+        )}
+
         {!full && (
           <div>
             <div className="flex gap-2">
@@ -597,6 +584,71 @@ export function AutoVoteTab({
               </div>
             )}
           </div>
+        )}
+      </SettingsCard>
+
+      {status.subscribed && (
+        <AutoVoteSlotsCard
+          status={status}
+          userId={userId}
+          token={token}
+          inUse={targets.length}
+          onChanged={load}
+        />
+      )}
+
+      <SettingsCard
+        title="Notifications"
+        description="How you hear about the votes Auto-vote casts for you. Skipped votes always get a notification."
+      >
+        <div className="grid gap-2 sm:grid-cols-3">
+          {(
+            [
+              ["off", "Off", "No notification for votes that go through."],
+              [
+                "daily",
+                "Daily summary",
+                "One notification a day with what was voted for.",
+              ],
+              [
+                "each",
+                "Every vote",
+                "A notification each time Auto-vote votes.",
+              ],
+            ] as const
+          ).map(([value, title, body]) => {
+            const active = status.notify === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={active}
+                disabled={savingNotify}
+                onClick={() => saveNotify(value)}
+                className={[
+                  "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors disabled:opacity-60",
+                  active
+                    ? "border-accent/50 bg-accent/5"
+                    : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700",
+                ].join(" ")}
+              >
+                <span className="flex items-center gap-1.5 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                  {value !== "off" && (
+                    <Bell size={13} className="text-accent" />
+                  )}
+                  {title}
+                </span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {body}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {notifyError && (
+          <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+            {notifyError}
+          </p>
         )}
       </SettingsCard>
     </div>

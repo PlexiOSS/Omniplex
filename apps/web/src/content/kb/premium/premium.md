@@ -13,7 +13,7 @@ Premium gives one of your bots or servers a shorter vote cooldown and a Premium 
 
 ## Plans
 
-Go to [Premium](/premium), pick **Bot** or **Server**, then pick the listing you want to upgrade. Only your own approved or certified listings that aren't already premium are eligible. Plans are Bronze, Silver, and Gold, differing only in how many days of premium you get for the price.
+Go to [Premium](/shop/premium), pick **Bot** or **Server**, then pick the listing you want to upgrade. Only your own approved or certified listings that aren't already premium are eligible. Plans are Bronze, Silver, and Gold, differing only in how many days of premium you get for the price.
 
 ## Paying
 
@@ -30,13 +30,13 @@ Bots and servers earn vote credits from their votes (see [Vote Credits & the Sho
 
 - Every **2 credits** take **1 cent** off the price.
 - Credits can cover up to **half** of the plan's price. The rest is paid by card or PayPal.
-- The order summary on the [Premium](/premium) page shows how many credits you can use and the discount they give. Tick the **Use … credits for … off** option before choosing how to pay.
+- The order summary on the [Premium](/shop/premium) page shows how many credits you can use and the discount they give. Tick the **Use … credits for … off** option before choosing how to pay.
 
 You need permission to spend the listing's credits, the same as in the shop. The credits are taken when you start checkout. If you don't finish paying, they're returned to the listing automatically within a few hours, and you get a notification when they are.
 
 ## Promo codes
 
-We sometimes share promo codes for premium. On the [Premium](/premium) page, pick your plan and listing, then click **Have a promo code?** in the order summary and apply the code. The summary shows the new total before you pay.
+We sometimes share promo codes for premium. On the [Premium](/shop/premium) page, pick your plan and listing, then click **Have a promo code?** in the order summary and apply the code. The summary shows the new total before you pay.
 
 - Promo codes work with card payments only, not PayPal.
 - If you also use credits, the credits come off first and the code applies to what's left. A code can't bring the total to between $0.01 and $0.49, since that's below the smallest card payment, so use fewer credits if that happens.
@@ -45,7 +45,13 @@ We sometimes share promo codes for premium. On the [Premium](/premium) page, pic
 
 ## Discord server boosters
 
-If you boost *our* official Discord server (not the same thing as a "server" listing; this is about being a Nitro booster of our community), you get a free Bronze-plan redemption once every 30 days instead of paying. This option appears automatically on the [Premium](/premium) page when you're eligible.
+If you boost *our* official Discord server (not the same thing as a "server" listing; this is about being a Nitro booster of our community), you get:
+
+- **30 days of Bronze premium every month** for one of your bots or servers. Pick the listing on [Booster perks](/shop/booster) and it renews on its own every 30 days for as long as you boost. If the listing already has premium, the month is added on top.
+- **A free Auto-vote slot** on top of the ones your subscription has.
+- **The Server Booster badge** on your profile.
+
+Perks start within about 10 minutes of boosting and stop when the boost ends. Premium you already got stays until it runs out.
 
 ## Prefer not to pay with money?
 

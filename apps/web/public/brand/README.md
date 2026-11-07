@@ -82,6 +82,20 @@ Each folder has:
 - `lockup.png` / `lockup-dark.png`: the icon, name and "by Omniplex"
 - `discord-profile-banner-1360x480.png`, `readme-banner-1280x320.png` and `social-preview-1280x640.png`
 
+## Servers (`servers/`)
+
+Icons for our other Discord servers, so each is easy to tell apart in the server list. They follow the bot style: the Omniplex mark on the server's colour, with a badge for what it's for. The main community server keeps the regular icon from `themes/`. `preview.png` shows them all as Discord crops them.
+
+| Server | For | Colour | Badge |
+|---|---|---|---|
+| `staff` | The private staff server | Ink | Gold star |
+| `testing` | Testing bots and features before release | Amber, with caution stripes | Flask |
+| `development` | Developers, builds and logs | Emerald | Code brackets |
+| `appeals` | Ban and listing appeals | Blue | Gavel |
+| `partners` | Talking with partners | Pink | Link |
+
+Each folder has `server-icon.svg`, `server-icon-1024.png` and `server-icon-512.png` (upload either PNG as the server icon), `app-icon-1024.png` with rounded corners, and `emoji-omniplex_<server>.png` (128).
+
 ## Seasonal and regular themes (`themes/`)
 
 Each theme folder has:

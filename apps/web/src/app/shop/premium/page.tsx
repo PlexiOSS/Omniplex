@@ -36,6 +36,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
+import { GiftPicker, type GiftTarget } from "./GiftPicker";
 
 type Provider = "stripe" | "paypal";
 
@@ -101,11 +102,13 @@ function PremiumPageInner() {
   const [botId, setBotId] = useState(searchParams.get("bot") ?? "");
   const [serverId, setServerId] = useState(searchParams.get("server") ?? "");
   const [planId, setPlanId] = useState("");
-  const [submitting, setSubmitting] = useState<Provider | "redeem" | null>(
-    null,
-  );
+  const [submitting, setSubmitting] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [promo, setPromo] = useState<PromoCodePreview | null>(null);
+  const [giftMode, setGiftMode] = useState(searchParams.get("gift") === "1");
+  const [giftTarget, setGiftTarget] = useState<GiftTarget | null>(null);
+  const [giftMessage, setGiftMessage] = useState("");
+  const [giftAnonymous, setGiftAnonymous] = useState(false);
 
   useEffect(() => {
     payments.getPlans().then((res) => {
@@ -165,12 +168,17 @@ function PremiumPageInner() {
   }, [firstBotId, firstServerId]);
 
   const targetId = entity === "bot" ? botId : serverId;
-  const target = eligible.find((o) => o.id === targetId);
+  const ownTarget = eligible.find((o) => o.id === targetId);
+  const target = giftMode
+    ? giftTarget
+      ? { id: giftTarget.id, name: giftTarget.name, avatar: giftTarget.avatar }
+      : undefined
+    : ownTarget;
   const plan = plans?.find((p) => p.id === planId);
 
   useEffect(() => {
     setUseCredits(false);
-    if (!targetId) {
+    if (!targetId || giftMode) {
       setAvailableCredits(0);
       return;
     }
@@ -178,7 +186,7 @@ function PremiumPageInner() {
       .getRedeemLogs(entity, targetId)
       .then((summary) => setAvailableCredits(summary.available_credits ?? 0))
       .catch(() => setAvailableCredits(0));
-  }, [entity, targetId]);
+  }, [entity, targetId, giftMode]);
 
   const priceCents = plan ? Math.round(plan.price * 100) : 0;
   const discountCents =
@@ -215,6 +223,9 @@ function PremiumPageInner() {
               session.token,
               useCredits ? creditsToUse : 0,
               promo?.code,
+              giftMode
+                ? { message: giftMessage.trim(), anonymous: giftAnonymous }
+                : undefined,
             )
           : await payments.createPaypalOrder(
               session.user_id,
@@ -223,6 +234,9 @@ function PremiumPageInner() {
               target.id,
               session.token,
               useCredits ? creditsToUse : 0,
+              giftMode
+                ? { message: giftMessage.trim(), anonymous: giftAnonymous }
+                : undefined,
             );
       window.location.href = url;
     } catch (err) {
@@ -233,30 +247,7 @@ function PremiumPageInner() {
     }
   }
 
-  async function handleRedeemBooster() {
-    if (!session || !target || !planId) return;
-    setSubmitting("redeem");
-    setError(null);
-    try {
-      await payments.redeemBoosterOffer(
-        session.user_id,
-        planId,
-        entity,
-        target.id,
-        session.token,
-      );
-      window.location.href = "/payments/success";
-    } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : "Failed to redeem booster offer.",
-      );
-      setSubmitting(null);
-    }
-  }
-
-  const canRedeemBooster = booster?.is_booster && planId === "bronze";
+  const showBoosterPerk = !giftMode && booster?.is_booster;
   const ready = !!target && !!plan && submitting === null;
 
   return (
@@ -359,7 +350,44 @@ function PremiumPageInner() {
               <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 2. Choose what to upgrade
               </h2>
-              <EntityToggle value={entity} onChange={setEntity} />
+              <div className="flex flex-wrap items-center gap-2">
+                {isAuthenticated && (
+                  <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-950">
+                    {(
+                      [
+                        [false, "Mine"],
+                        [true, "Gift"],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <button
+                        key={label}
+                        type="button"
+                        aria-pressed={giftMode === value}
+                        onClick={() => {
+                          setGiftMode(value);
+                          setPromo(null);
+                        }}
+                        className={[
+                          "inline-flex h-7 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors",
+                          giftMode === value
+                            ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-zinc-50"
+                            : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
+                        ].join(" ")}
+                      >
+                        {value && <Gift size={12} />}
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <EntityToggle
+                  value={entity}
+                  onChange={(e) => {
+                    setEntity(e);
+                    setGiftTarget(null);
+                  }}
+                />
+              </div>
             </div>
             {authLoading || meLoading ? (
               <div className="h-12 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
@@ -374,6 +402,16 @@ function PremiumPageInner() {
                   </Button>
                 </SignInLink>
               </div>
+            ) : giftMode ? (
+              <GiftPicker
+                entity={entity}
+                value={giftTarget}
+                onChange={setGiftTarget}
+                message={giftMessage}
+                onMessageChange={setGiftMessage}
+                anonymous={giftAnonymous}
+                onAnonymousChange={setGiftAnonymous}
+              />
             ) : options.length === 0 ? (
               <div className="rounded-xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
                 You don&apos;t have any {entity}s listed yet.{" "}
@@ -467,7 +505,7 @@ function PremiumPageInner() {
                 </div>
               </dl>
 
-              {target && plan && discountCents > 0 && (
+              {!giftMode && target && plan && discountCents > 0 && (
                 <label
                   className={[
                     "flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm transition-colors",
@@ -507,29 +545,24 @@ function PremiumPageInner() {
                   value={promo}
                   onChange={setPromo}
                   disabled={submitting !== null}
+                  initialCode={searchParams.get("promo")}
                 />
               )}
 
-              {canRedeemBooster && (
-                <div className="flex items-start gap-2.5 rounded-lg bg-accent/5 p-3 text-xs text-zinc-700 dark:text-zinc-300">
+              {showBoosterPerk && (
+                <Link
+                  href="/shop/booster"
+                  className="flex items-start gap-2.5 rounded-lg bg-accent/5 p-3 text-xs text-zinc-700 transition-colors hover:bg-accent/10 dark:text-zinc-300"
+                >
                   <Gift size={14} className="mt-0.5 shrink-0 text-accent" />
-                  <div className="flex-1">
-                    <p>
-                      You boost our Discord server, so you can redeem Bronze for
-                      free.
-                    </p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      loading={submitting === "redeem"}
-                      disabled={!ready}
-                      onClick={handleRedeemBooster}
-                      className="mt-2"
-                    >
-                      Redeem free
-                    </Button>
-                  </div>
-                </div>
+                  <span className="flex-1">
+                    You boost our Discord server, so you get Bronze free every
+                    month.{" "}
+                    <span className="font-medium text-accent">
+                      Choose the listing
+                    </span>
+                  </span>
+                </Link>
               )}
 
               {error && (
@@ -581,7 +614,7 @@ function PremiumPageInner() {
 
           <div className="mt-4 space-y-2 text-xs text-zinc-500 dark:text-zinc-400">
             <Link
-              href={`/shop${targetId ? `?${entity}=${targetId}` : ""}`}
+              href={`/shop/items${targetId ? `?${entity}=${targetId}` : ""}`}
               className="group flex items-center justify-between rounded-lg px-1 py-1 transition-colors hover:text-accent"
             >
               Spend vote credits on premium days instead

@@ -89,7 +89,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
     default: "Omniplex: Discord Bot List and Server List",
-    template: "%s — Omniplex",
+    template: "%s | Omniplex",
   },
   description:
     "Find the best Discord bots and servers on Omniplex, the community-driven Discord bot list. Browse by tag, read reviews, vote for your favourites and add bots in one click.",

@@ -605,12 +605,6 @@ export function Header() {
                         </a>
                       )}
                       <Link
-                        href="/premium"
-                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                      >
-                        Premium
-                      </Link>
-                      <Link
                         href="/shop"
                         className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
                       >

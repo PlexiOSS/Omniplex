@@ -124,25 +124,32 @@ export default async function ServerPage({ params }: Props) {
       `https://ui-avatars.com/api/?name=${encodeURIComponent(server.name)}&size=256&background=random`,
   );
 
-  const [reviewList, similarServers, voterList, bumpInfo] = await Promise.all([
-    reviews
-      .getAll(
-        "server",
-        server.server_id,
-        isListed(server.type) ? undefined : token,
-      )
-      .catch(() => ({ reviews: [] })),
-    servers.getSimilar(server.server_id).catch(() => []),
-    votes
-      .getVoters(
-        "server",
-        server.server_id,
-        24,
-        isListed(server.type) ? undefined : token,
-      )
-      .catch(() => null),
-    servers.getBumps(server.server_id).catch(() => null),
-  ]);
+  const [reviewList, similarServers, voterList, bumpInfo, changelogList] =
+    await Promise.all([
+      reviews
+        .getAll(
+          "server",
+          server.server_id,
+          isListed(server.type) ? undefined : token,
+        )
+        .catch(() => ({ reviews: [] })),
+      servers.getSimilar(server.server_id).catch(() => []),
+      votes
+        .getVoters(
+          "server",
+          server.server_id,
+          24,
+          isListed(server.type) ? undefined : token,
+        )
+        .catch(() => null),
+      servers.getBumps(server.server_id).catch(() => null),
+      servers
+        .getChangelogs(
+          server.server_id,
+          isListed(server.type) ? undefined : token,
+        )
+        .catch(() => ({ changelogs: [] })),
+    ]);
 
   const voteBlitzActive =
     !!server.vote_blitz_until && new Date(server.vote_blitz_until) > new Date();
@@ -281,6 +288,7 @@ export default async function ServerPage({ params }: Props) {
             emojisSyncedAt={server.emojis_synced_at}
             initialReviews={reviewList.reviews}
             initialVoters={voterList}
+            changelogs={changelogList.changelogs}
           />
         </div>
 

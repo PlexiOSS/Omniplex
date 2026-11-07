@@ -1,17 +1,24 @@
 "use client";
 
-import type { BotChangelogFeedEntry } from "@omniplex/core/api/types";
+import { servers as serversApi } from "@omniplex/core/api";
 import { Pagination } from "@omniplex/ui/Pagination";
-import { Megaphone, Rss } from "lucide-react";
+import { Bot, Megaphone, Rss, Server } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
-import { FeedEntry } from "@/components/feed/FeedEntry";
+import useSWR from "swr";
+import {
+  FeedEntry,
+  type FeedItem,
+  fromBotEntry,
+  fromServerEntry,
+} from "@/components/feed/FeedEntry";
 import { RecentBots } from "@/components/feed/RecentBots";
 import { DirectoryFilters } from "@/components/filters/DirectoryFilters";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useBotChangelogFeed, useRecentChangelogBots } from "@/hooks/useBots";
+import { SERVER_TAGS } from "@/lib/constants/tags";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SKELETON_KEYS = ["a", "b", "c", "d", "e"];
@@ -32,9 +39,9 @@ function groupLabel(iso: string, now: Date): string {
   });
 }
 
-function groupEntries(entries: BotChangelogFeedEntry[]) {
+function groupEntries(entries: FeedItem[]) {
   const now = new Date();
-  const groups: { label: string; entries: BotChangelogFeedEntry[] }[] = [];
+  const groups: { label: string; entries: FeedItem[] }[] = [];
 
   for (const entry of entries) {
     const label = groupLabel(entry.created_at, now);
@@ -54,9 +61,10 @@ function FeedView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const kind = searchParams.get("type") === "servers" ? "server" : "bot";
   const query = searchParams.get("q") ?? "";
   const tag = searchParams.get("tag") ?? "";
-  const bot = searchParams.get("bot") ?? "";
+  const bot = searchParams.get(kind === "server" ? "server" : "bot") ?? "";
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
 
   const updateParams = useCallback(
@@ -82,13 +90,42 @@ function FeedView() {
     [query, tag, bot],
   );
 
-  const { data, isLoading, error } = useBotChangelogFeed(page, filters);
+  const botFeed = useBotChangelogFeed(page, filters);
+  const serverFeed = useSWR(
+    kind === "server"
+      ? ["servers/changelogs/feed", page, query, tag, bot]
+      : null,
+    () =>
+      serversApi.getChangelogFeed(page, {
+        q: query || undefined,
+        tag: tag || undefined,
+        server: bot || undefined,
+      }),
+  );
   const { data: recent } = useRecentChangelogBots();
 
+  const source = kind === "server" ? serverFeed : botFeed;
+  const { isLoading, error } = source;
+  const data = useMemo(() => {
+    if (kind === "server") {
+      return serverFeed.data
+        ? {
+            ...serverFeed.data,
+            results: serverFeed.data.results.map(fromServerEntry),
+          }
+        : undefined;
+    }
+    return botFeed.data
+      ? { ...botFeed.data, results: botFeed.data.results.map(fromBotEntry) }
+      : undefined;
+  }, [kind, botFeed.data, serverFeed.data]);
+
   const botLabel = bot
-    ? (data?.results.find((e) => e.bot_id === bot)?.user.username ??
-      recent?.find((r) => r.bot_id === bot)?.user?.username ??
-      "this bot")
+    ? (data?.results.find((e) => e.entityId === bot)?.name ??
+      (kind === "bot"
+        ? recent?.find((r) => r.bot_id === bot)?.user?.username
+        : undefined) ??
+      `this ${kind}`)
     : null;
 
   const groups = useMemo(
@@ -106,15 +143,27 @@ function FeedView() {
     (t: string) => updateParams({ tag: t }),
     [updateParams],
   );
+  const entityParam = kind === "server" ? "server" : "bot";
   const onSelectBot = useCallback(
     (b: string) => {
-      updateParams({ bot: b });
+      updateParams({ [entityParam]: b });
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    [updateParams],
+    [updateParams, entityParam],
   );
   const onClearAll = useCallback(
-    () => updateParams({ q: "", tag: "", bot: "" }),
+    () => updateParams({ q: "", tag: "", bot: "", server: "" }),
+    [updateParams],
+  );
+  const onKindChange = useCallback(
+    (next: "bot" | "server") =>
+      updateParams({
+        type: next === "server" ? "servers" : "",
+        q: "",
+        tag: "",
+        bot: "",
+        server: "",
+      }),
     [updateParams],
   );
   const onPageChange = useCallback(
@@ -130,24 +179,58 @@ function FeedView() {
       <PageHeader
         icon={Rss}
         title="Feed"
-        description={<>Updates bot owners have posted, newest first.</>}
+        description={
+          <>Updates bot and server owners have posted, newest first.</>
+        }
       />
+
+      <div className="mb-6 inline-flex rounded-xl border border-zinc-200 p-1 dark:border-zinc-800">
+        {(
+          [
+            ["bot", "Bots", Bot],
+            ["server", "Servers", Server],
+          ] as const
+        ).map(([value, label, Icon]) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={kind === value}
+            onClick={() => onKindChange(value)}
+            className={[
+              "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              kind === value
+                ? "bg-accent/10 text-accent"
+                : "text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50",
+            ].join(" ")}
+          >
+            <Icon size={14} />
+            {label}
+          </button>
+        ))}
+      </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <aside className="min-w-0 space-y-8 lg:sticky lg:top-24 lg:order-last lg:self-start">
           <DirectoryFilters
             query={query}
-            searchPlaceholder="Search updates or bots"
+            searchPlaceholder={
+              kind === "server"
+                ? "Search updates or servers"
+                : "Search updates or bots"
+            }
             tag={tag}
             botLabel={botLabel}
             onQueryChange={onQueryChange}
             onTagChange={onTagChange}
-            onClearBot={() => updateParams({ bot: "" })}
+            onClearBot={() => updateParams({ [entityParam]: "" })}
             onClearAll={onClearAll}
+            tags={kind === "server" ? SERVER_TAGS : undefined}
           />
-          <div className="hidden lg:block">
-            <RecentBots activeBot={bot} onSelect={onSelectBot} />
-          </div>
+          {kind === "bot" && (
+            <div className="hidden lg:block">
+              <RecentBots activeBot={bot} onSelect={onSelectBot} />
+            </div>
+          )}
         </aside>
 
         <div className="min-w-0">
@@ -215,7 +298,7 @@ function FeedView() {
                         <FeedEntry
                           key={entry.id}
                           entry={entry}
-                          filteredToBot={bot === entry.bot_id}
+                          filteredToBot={bot === entry.entityId}
                           onFilterBot={onSelectBot}
                         />
                       ))}

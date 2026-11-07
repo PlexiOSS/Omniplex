@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-07
+
+### Changed
+
+- The Payments page labels monthly booster premium as "Booster perk".
+- Auto-vote subscribers on the Payments page show their extra slots and
+  whether they're on the yearly plan.
+- The Payments page marks Auto-vote listings their subscriber has paused.
+
+### Added
+
+- Promo Codes have a **Who used it** list (who, what for, when, and whether
+  they paid) and a **Link** button that copies a link applying the code at
+  checkout.
+
 ## [1.1.0] - 2026-11-07
 
 ### Added

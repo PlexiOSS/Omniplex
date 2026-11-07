@@ -18,7 +18,7 @@ export default function PaymentCancelledPage() {
         title="Payment cancelled"
         description="No charge was made. You can try again whenever you're ready."
         actions={
-          <Link href="/premium">
+          <Link href="/shop/premium">
             <Button variant="primary" size="sm">
               Back to Premium
             </Button>

@@ -22,6 +22,7 @@ export function PromoCodeField({
   value,
   onChange,
   disabled,
+  initialCode,
 }: {
   userId: string;
   token: string;
@@ -31,6 +32,7 @@ export function PromoCodeField({
   value: PromoCodePreview | null;
   onChange: (preview: PromoCodePreview | null) => void;
   disabled?: boolean;
+  initialCode?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
@@ -78,6 +80,15 @@ export function PromoCodeField({
       checkRef.current(appliedCode);
     }
   }, [key, appliedCode]);
+
+  const triedInitial = useRef(false);
+
+  useEffect(() => {
+    const start = initialCode?.trim().toUpperCase();
+    if (!start || triedInitial.current || appliedCode) return;
+    triedInitial.current = true;
+    checkRef.current(start);
+  }, [initialCode, appliedCode]);
 
   if (value) {
     return (

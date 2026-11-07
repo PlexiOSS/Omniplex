@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-11-07
+
+### Fixed
+
+- "Try again" on error pages did nothing. Next.js 16.4 passes the retry
+  function as `retry`, and the pages still read the old `unstable_retry`.
+
+### Changed
+
+- Premium, Auto-vote, the credit shop and booster perks are now tabs of one
+  **Shop** (`/shop/premium`, `/shop/auto-vote`, `/shop/items`,
+  `/shop/booster`). `/premium` links, including `?promo=` and `?bot=` ones,
+  redirect to the new page, and the header and account menu have a single
+  Shop link.
+- The Premium page no longer has a one-off "Redeem free" button for
+  boosters; it links to Booster perks instead, where the month is applied
+  automatically.
+- Premium, Shop, Emojis, Stickers, Sounds, Themes, Feed, the Command
+  Directory and each application form now have their own titles and
+  descriptions, so they show properly in browser tabs, search results and
+  link previews. Pages you have to be signed in for, such as the dashboard
+  and tickets, have titles too and are kept out of search engines. Titles
+  end in "| Omniplex" instead of a dash.
+
+### Added
+
+- **Booster perks** page (`/shop/booster`): boosters pick which bot or
+  server gets their free month of Bronze, and it renews on its own every 30
+  days. It also explains the free Auto-vote slot and the Server Booster
+  badge, and how to join and boost if you haven't.
+- An **Auto-vote** page in the shop (`/shop/auto-vote`) with prices and
+  subscribing, which works before signing in.
+- Add more Auto-vote slots: a **Listing slots** card on the Auto-vote tab
+  lets subscribers go beyond 3 listings, up to 10, for $0.99 a month (or
+  $9.99 a year) per extra slot.
+- A **Vote messages** section in server settings: pick a channel and the
+  Infernoplex bot posts there each time someone votes for your server.
+- Links that apply a promo code: `/shop/premium?promo=CODE` and
+  `/dashboard?tab=auto-vote&promo=CODE` fill in and check the code at
+  checkout.
+- Gift premium to someone else's bot or server from the Premium page:
+  switch to **Gift**, find the listing, and add an optional message. Tick
+  "Gift anonymously" to keep your name from the owners.
+- A yearly Auto-vote plan, $29.99 a year instead of $2.99 a month.
+- Pause an Auto-vote listing without removing it, and choose how you hear
+  about automatic votes: no notification, one for every vote, or a daily
+  summary.
+- Servers can post updates, like bots: an **Updates** tab on the server
+  page, an Updates section in server settings, and a Bots and Servers
+  switch on the Feed.
+- Owner analytics show how votes, page views and invite clicks compare with
+  the previous period, and can be downloaded as a CSV.
+
 ## [1.15.0] - 2026-11-07
 
 ### Added

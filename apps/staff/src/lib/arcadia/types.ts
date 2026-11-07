@@ -535,7 +535,16 @@ export interface PromoCodeCreate {
 export type PromoCodeAction =
   | "List"
   | { Create: PromoCodeCreate }
-  | { SetActive: { id: string; active: boolean } };
+  | { SetActive: { id: string; active: boolean } }
+  | { ListRedemptions: { id: string } };
+
+export interface PromoCodeRedemption {
+  user_id: string;
+  product: string;
+  status: "pending" | "completed" | "abandoned";
+  created_at: string;
+  completed_at: string | null;
+}
 
 export interface BotWhitelist {
   bot_id: string;

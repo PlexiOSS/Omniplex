@@ -54,6 +54,8 @@ interface AutoVoteStaffEntry {
   stripe_subscription_id: string;
   stripe_customer_id: string;
   auto_votes_30d: number;
+  extra_slots: number;
+  billing_interval: string;
   targets: AutoVoteTarget[];
 }
 
@@ -152,8 +154,14 @@ function PremiumPayments({ loginToken }: { loginToken: string }) {
                   >
                     {p.for_type} {p.for_id}
                   </Link>
-                  <Badge variant="info">
-                    {p.provider === "stripe" ? "Stripe" : "PayPal"}
+                  <Badge
+                    variant={p.provider === "booster" ? "success" : "info"}
+                  >
+                    {p.provider === "stripe"
+                      ? "Stripe"
+                      : p.provider === "booster"
+                        ? "Booster perk"
+                        : "PayPal"}
                   </Badge>
                   {p.revoke_reason && (
                     <Badge variant="danger">
@@ -176,7 +184,7 @@ function PremiumPayments({ loginToken }: { loginToken: string }) {
                   )}
                 </p>
                 <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                  Bought by{" "}
+                  {p.provider === "booster" ? "Claimed by" : "Bought by"}{" "}
                   <Link
                     href={`/activity?actor=${p.user_id}`}
                     className="font-mono hover:text-accent"
@@ -207,6 +215,13 @@ function PremiumPayments({ loginToken }: { loginToken: string }) {
 }
 
 function targetStatus(t: AutoVoteTarget, active: boolean, now: number) {
+  if (t.paused) {
+    return {
+      label: "Paused",
+      tone: "default" as const,
+      detail: "The subscriber paused this listing",
+    };
+  }
   if (t.last_skip_reason) {
     return {
       label: "Skipped",
@@ -298,6 +313,12 @@ function AutoVoteOverview({ loginToken }: { loginToken: string }) {
             </Badge>
             {e.cancel_at_period_end && (
               <Badge variant="warning">Cancels at period end</Badge>
+            )}
+            {e.billing_interval === "year" && <Badge>Yearly</Badge>}
+            {e.extra_slots > 0 && (
+              <Badge>
+                +{e.extra_slots} slot{e.extra_slots === 1 ? "" : "s"}
+              </Badge>
             )}
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
               {e.auto_votes_30d} automatic votes in 30 days

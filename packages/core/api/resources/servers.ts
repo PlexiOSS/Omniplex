@@ -2,6 +2,7 @@ import { client } from "../client";
 import type {
   BrowseFilters,
   CaptchaSolution,
+  CreateBotChangelogPayload,
   DiscordServerMeta,
   EntityAnalytics,
   IndexServer,
@@ -12,12 +13,61 @@ import type {
   Server,
   ServerBrowseSort,
   ServerBumpInfo,
+  ServerChangelog,
+  ServerChangelogFeedEntry,
+  ServerChangelogFeedFilters,
+  ServerChangelogList,
   ServerEmojiPreview,
   ServerSettingsUpdate,
+  ServerVoteChannel,
   UserVote,
 } from "../types";
 
 export const serversResource = {
+  getChangelogs: (serverId: string, token?: string) =>
+    client.get<ServerChangelogList>(`/servers/${serverId}/changelogs`, {
+      token,
+      cache: "no-store",
+    }),
+
+  getChangelogFeed: (page = 1, filters: ServerChangelogFeedFilters = {}) => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (filters.q) params.set("q", filters.q);
+    if (filters.tag) params.set("tag", filters.tag);
+    if (filters.server) params.set("server", filters.server);
+    return client.get<PagedResult<ServerChangelogFeedEntry[]>>(
+      `/servers/@changelogs?${params}`,
+      { cache: "no-store" },
+    );
+  },
+
+  createChangelog: (
+    serverId: string,
+    payload: CreateBotChangelogPayload,
+    token: string,
+  ) =>
+    client.post<ServerChangelog>(`/servers/${serverId}/changelogs`, payload, {
+      token,
+    }),
+
+  deleteChangelog: (serverId: string, changelogId: string, token: string) =>
+    client.delete<void>(`/servers/${serverId}/changelogs/${changelogId}`, {
+      token,
+    }),
+
+  getVoteChannel: (serverId: string, token: string) =>
+    client.get<ServerVoteChannel>(`/servers/${serverId}/vote-channel`, {
+      token,
+      cache: "no-store",
+    }),
+
+  setVoteChannel: (serverId: string, channelId: string | null, token: string) =>
+    client.put<void>(
+      `/servers/${serverId}/vote-channel`,
+      { channel_id: channelId },
+      { token },
+    ),
+
   getIndex: () =>
     client.get<ListIndexServer>("/servers/@index", {
       cache: "no-store",

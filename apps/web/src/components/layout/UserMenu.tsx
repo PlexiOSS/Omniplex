@@ -6,13 +6,11 @@ import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Dropdown, DropdownItem } from "@omniplex/ui/Dropdown";
 import {
-  Gift,
   LayoutDashboard,
   LogOut,
   Shield,
   ShoppingBag,
   Ticket,
-  TicketIcon,
   User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -103,9 +101,6 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
             Staff Panel
           </DropdownItem>
         )}
-        <DropdownItem icon={<Gift size={14} />} onClick={() => go("/premium")}>
-          Premium
-        </DropdownItem>
         <DropdownItem
           icon={<ShoppingBag size={14} />}
           onClick={() => go("/shop")}
