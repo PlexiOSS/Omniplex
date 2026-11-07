@@ -843,3 +843,39 @@ export interface StaffSession {
   user_agent: string | null;
   current: boolean;
 }
+
+export interface AppPositionQuestion {
+  id: string;
+  question: string;
+  paragraph: string;
+  placeholder: string;
+  short: boolean;
+}
+
+export interface AppPositionBehaviour {
+  id: string;
+  name: string;
+  description: string;
+  locked_questions: string[];
+}
+
+export interface AppPositionInput {
+  id: string;
+  name: string;
+  info: string;
+  tags: string[];
+  questions: AppPositionQuestion[];
+  hidden: boolean;
+  closed: boolean;
+  requires_main_server: boolean;
+  cooldown_secs: number;
+  approval_note: string;
+  help_url: string;
+  help_label: string;
+}
+
+export interface AppPosition extends AppPositionInput {
+  behaviour: AppPositionBehaviour | null;
+  pending_apps: number;
+  updated_at: string;
+}

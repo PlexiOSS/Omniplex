@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-07
+
 ### Added
 
+- **Application Forms** under Moderation, for staff with the new Manage
+  Application Forms permission. Create forms, reorder them, and edit each
+  one's name, description, tags and help link, whether it's open, hidden or
+  needs our Discord server, how long applicants wait before applying again,
+  and the message sent when they're approved. A question builder adds,
+  rewords, reorders and removes questions, and sets each as a short or long
+  answer. Built-in forms explain what they do automatically, and the
+  questions they rely on are marked and can't be removed.
 - A **Disciplinaries** page under Staff, for staff with Manage
   Disciplinaries. It lists what's waiting for approval (with a count in the
   sidebar), what's active, and the full history, with who issued, approved

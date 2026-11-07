@@ -44,21 +44,6 @@ const SECTIONS: {
   },
 ];
 
-const REQUIREMENTS: Record<string, { href: string; label: string }> = {
-  staff: { href: "/kb/programs/applications", label: "How applying works" },
-  dev: { href: "/kb/programs/applications", label: "How applying works" },
-  certification: {
-    href: "/kb/programs/certification",
-    label: "Certification requirements",
-  },
-  server_certification: {
-    href: "/kb/programs/certification",
-    label: "Certification requirements",
-  },
-  partners: { href: "/kb/programs/partnership", label: "Partner requirements" },
-  resubmit: { href: "/kb/bots/rules", label: "Bot Rules" },
-};
-
 const ALWAYS_HIDDEN = new Set(["banappeal"]);
 
 function preview(info: string, max = 160): string {
@@ -71,7 +56,10 @@ function preview(info: string, max = 160): string {
 }
 
 function PositionCard({ position }: { position: Position }) {
-  const requirements = REQUIREMENTS[position.id];
+  const requirements =
+    position.help_url && position.help_label
+      ? { href: position.help_url, label: position.help_label }
+      : null;
   return (
     <div className="flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start justify-between gap-2">

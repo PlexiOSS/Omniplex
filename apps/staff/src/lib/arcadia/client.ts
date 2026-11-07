@@ -4,6 +4,8 @@ import type { Ticket, TicketList } from "@omniplex/core/api/types";
 import { ARCADIA_URL } from "@/lib/arcadia/config";
 import { touchArcadiaSession } from "@/lib/arcadia/session";
 import type {
+  AppPosition,
+  AppPositionInput,
   AuthorizeAction,
   BadgeAction,
   BadgeCatalogEntry,
@@ -342,6 +344,49 @@ export const arcadia = {
         UpdateStaffMembers: {
           login_token: loginToken,
           action: { EditMember: member } satisfies StaffMemberAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
+
+  appPositions: {
+    list: async (loginToken: string): Promise<AppPosition[]> => {
+      const res = await postQuery({
+        UpdateAppPositions: { login_token: loginToken, action: { List: {} } },
+      });
+      return (await assertOk(res)).json();
+    },
+
+    save: async (
+      loginToken: string,
+      mode: "Create" | "Update",
+      position: AppPositionInput,
+    ): Promise<AppPosition> => {
+      const res = await postQuery({
+        UpdateAppPositions: {
+          login_token: loginToken,
+          action: { [mode]: position },
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+
+    remove: async (loginToken: string, id: string): Promise<void> => {
+      const res = await postQuery({
+        UpdateAppPositions: {
+          login_token: loginToken,
+          action: { Delete: { id } },
+        },
+      });
+      await assertOk(res);
+    },
+
+    reorder: async (loginToken: string, ids: string[]): Promise<void> => {
+      const res = await postQuery({
+        UpdateAppPositions: {
+          login_token: loginToken,
+          action: { Reorder: { ids } },
         },
       });
       await assertOk(res);
