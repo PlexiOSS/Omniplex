@@ -303,16 +303,16 @@ try {
 }
 ```
 
-**Error boundary pattern** — Next.js 16 uses `unstable_retry` (not `reset`):
+**Error boundary pattern** — Next.js 16.4 passes `retry` (not `reset`, and no longer `unstable_retry`):
 ```tsx
 "use client";
-export default function MyError({ error, unstable_retry }) {
-  if (isBoundaryApiError(error)) return <ServiceUnavailable onRetry={unstable_retry} />;
-  return <GenericError onRetry={unstable_retry} />;
+export default function MyError({ error, retry }) {
+  if (isBoundaryApiError(error)) return <ServiceUnavailable onRetry={retry} />;
+  return <GenericError onRetry={retry} />;
 }
 ```
 
-The `ServiceUnavailable` component accepts `inline` (renders as a section, not full-screen) and `onRetry` (calls `unstable_retry` or `window.location.reload`).
+The `ServiceUnavailable` component accepts `inline` (renders as a section, not full-screen) and `onRetry` (calls `retry` or `window.location.reload`).
 
 ---
 
@@ -377,4 +377,4 @@ Omniplex and Popplio each deploy from the `Dockerfile` at their repo root. Omnip
 - **Staff panel** (`apps/staff`, formerly `/admin` in the website): built — Discord OAuth + mandatory TOTP MFA login, Bot Queue, entity Search, Staff Positions/Members management, an Arcadia-backed permission system. Talks to **Arcadia** (`arcadia/`), not Popplio directly, via a single-endpoint tagged-union RPC protocol (`apps/staff/src/lib/arcadia/client.ts`). `docs/admin-panel-plan.md` is a historical planning doc from before this was built — check the changelog and the actual code before trusting anything in it about current state.
 - **Knowledge base** (`/kb`): built. Articles are `.md` files with YAML frontmatter under `src/content/kb/<category>/<slug>.md` (frontmatter: `title`, `description`, `order`), parsed at request time with `gray-matter` in `src/lib/kb/content.ts` and rendered through the existing sanitized `Markdown` pipeline — no MDX/component execution. Category metadata (title/description/order) lives in `src/lib/kb/categories.ts` since a category isn't itself an article. Routes: `/kb` (landing + client-side search via `KbSearch`), `/kb/[category]` (listing), `/kb/[category]/[slug]` (article, with a persistent `KbSidebar` nav). `/help` and `/help/[category]/[slug]` redirect permanently to `/kb` via `next.config.ts`. Content was ported from reedwhisker's `src/components/guide/articles/` tree, excluding everything under `legal/` (superseded by nodebyte.co.uk's legal pages) — do not port reedwhisker's toggle-sidebar `HelpCenter.tsx` (it violates the rules of hooks) or its other bespoke components. To add an article: drop a new `.md` file with frontmatter in the right category folder; to add a category, add an entry to `KB_CATEGORIES` and a matching directory.
 - **Reviews, Packs (bot+server), server presence, "add a server"**: all built this cycle — see the changelog for exact scope. Server deletion goes through `DELETE /servers/{id}` (Popplio, `delete_servers` team permission), surfaced in the server's danger zone at `/dashboard/servers/{id}?section=danger`.
-- **Open**: no staff moderation path exists yet for reviews (no force-delete RPC). Servers do go through review: they're created `pending` and appear in Arcadia's server queue alongside bots.
+- **Done**: staff can remove a review with the `DeleteReview` RPC (Popplio 1.14.0), from a bot or server's actions in the staff panel (Search, then Actions). Servers do go through review: they're created `pending` and appear in Arcadia's server queue alongside bots.

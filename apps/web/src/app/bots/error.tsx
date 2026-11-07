@@ -8,17 +8,17 @@ import { isBoundaryApiError } from "@/lib/utils/errors";
 
 export default function BotsError({
   error,
-  unstable_retry,
+  retry,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  retry: () => void;
 }) {
   useEffect(() => {
     console.error("[BotsError]", error);
   }, [error]);
 
   if (isBoundaryApiError(error)) {
-    return <ServiceUnavailable inline onRetry={unstable_retry} />;
+    return <ServiceUnavailable inline onRetry={retry} />;
   }
 
   return (
@@ -29,7 +29,7 @@ export default function BotsError({
       <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
         There was a problem fetching bot data. Please try again.
       </p>
-      <Button variant="secondary" onClick={unstable_retry} className="mt-6">
+      <Button variant="secondary" onClick={retry} className="mt-6">
         Try again
       </Button>
     </Container>

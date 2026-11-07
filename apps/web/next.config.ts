@@ -54,6 +54,7 @@ const nextConfig: NextConfig = {
         destination: "/kb",
         permanent: true,
       },
+      { source: "/premium", destination: "/shop/premium", permanent: true },
       {
         source: "/help/:category/:slug",
         destination: "/kb/:category/:slug",

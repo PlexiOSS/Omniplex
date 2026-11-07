@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-07
+
+### Added
+
+- `BoosterPerks`, `BoosterPerkTarget`, `AutoVotePricing` (as `auto_vote` on
+  `PlanList`) and `booster_slots` on `AutoVoteStatus`.
+- `extra_slots`, `max_extra_slots`, `slot_price_cents` and
+  `billing_interval` on `AutoVoteStatus`.
+- `ServerVoteChannel` and `ServerVoteChannelOption`.
+- `ServerChangelog`, `ServerChangelogList`, `ServerChangelogFeedEntry` and
+  `ServerChangelogFeedFilters`.
+- `AutoVoteNotify`, `notify` and `yearly_price_cents` on `AutoVoteStatus`,
+  and `paused` on Auto-vote targets.
+
 ## [0.2.0] - 2026-11-07
 
 ### Added

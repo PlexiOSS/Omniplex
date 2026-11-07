@@ -10,10 +10,10 @@ import { isBoundaryApiError } from "@/lib/utils/errors";
 
 export default function GlobalError({
   error,
-  unstable_retry,
+  retry,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  retry: () => void;
 }) {
   useEffect(() => {
     console.error("[GlobalError]", error);
@@ -21,7 +21,7 @@ export default function GlobalError({
 
   // API / network errors → service unavailable UI
   if (isBoundaryApiError(error)) {
-    return <ServiceUnavailable onRetry={unstable_retry} />;
+    return <ServiceUnavailable onRetry={retry} />;
   }
 
   return (
@@ -37,7 +37,7 @@ export default function GlobalError({
         fixes it.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-2">
-        <Button variant="primary" onClick={unstable_retry}>
+        <Button variant="primary" onClick={retry}>
           <RefreshCw size={14} />
           Try again
         </Button>

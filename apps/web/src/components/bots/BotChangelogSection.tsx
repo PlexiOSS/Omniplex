@@ -1,6 +1,6 @@
 "use client";
 
-import { bots as botsApi } from "@omniplex/core/api";
+import { bots as botsApi, servers as serversApi } from "@omniplex/core/api";
 import { ApiError } from "@omniplex/core/api/client";
 import type { BotChangelog } from "@omniplex/core/api/types";
 import { formatRelativeTime } from "@omniplex/core/utils/format";
@@ -15,7 +15,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { useHighlightScroll } from "@/hooks/useHighlightScroll";
 
 interface BotChangelogSectionProps {
-  botId: string;
+  entityId: string;
+  kind?: "bot" | "server";
   initialChangelogs: BotChangelog[];
   canEdit: boolean;
   token?: string;
@@ -23,7 +24,8 @@ interface BotChangelogSectionProps {
 }
 
 export function BotChangelogSection({
-  botId,
+  entityId,
+  kind = "bot",
   initialChangelogs,
   canEdit,
   token,
@@ -45,8 +47,8 @@ export function BotChangelogSection({
     }
     setConfirmDeleteId(null);
     setDeleting(id);
-    botsApi
-      .deleteChangelog(botId, id, token)
+    (kind === "server" ? serversApi : botsApi)
+      .deleteChangelog(entityId, id, token)
       .then(() => setChangelogs((prev) => prev.filter((c) => c.id !== id)))
       .catch(() => {})
       .finally(() => setDeleting(null));
@@ -57,7 +59,8 @@ export function BotChangelogSection({
       {canEdit && (
         <div className="mb-5 flex items-center justify-between gap-3">
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Updates shown on your bot's page and in the Feed.
+            Updates shown on your {kind === "server" ? "server" : "bot"}'s page
+            and in the Feed.
           </p>
           <Button
             variant="secondary"
@@ -90,7 +93,8 @@ export function BotChangelogSection({
 
       {posting && token && (
         <PostChangelogModal
-          botId={botId}
+          entityId={entityId}
+          kind={kind}
           token={token}
           onClose={() => setPosting(false)}
           onPosted={(entry) => setChangelogs((prev) => [entry, ...prev])}
@@ -202,12 +206,14 @@ function ChangelogEntry({
 }
 
 function PostChangelogModal({
-  botId,
+  entityId,
+  kind,
   token,
   onClose,
   onPosted,
 }: {
-  botId: string;
+  entityId: string;
+  kind: "bot" | "server";
   token: string;
   onClose: () => void;
   onPosted: (entry: BotChangelog) => void;
@@ -226,8 +232,11 @@ function PostChangelogModal({
     setSaving(true);
     setError(null);
     try {
-      const entry = await botsApi.createChangelog(
-        botId,
+      const entry = await (kind === "server"
+        ? serversApi
+        : botsApi
+      ).createChangelog(
+        entityId,
         {
           title: title.trim(),
           content: content.trim(),

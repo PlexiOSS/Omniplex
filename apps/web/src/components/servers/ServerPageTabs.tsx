@@ -3,18 +3,22 @@
 import type {
   EntityVoterList,
   Review,
+  ServerChangelog,
   ServerEmoji,
   ServerSticker,
 } from "@omniplex/core/api/types";
-import { BookOpen, MessageSquare, Smile, Users } from "lucide-react";
+import { BookOpen, Megaphone, MessageSquare, Smile, Users } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { BotChangelogSection } from "@/components/bots/BotChangelogSection";
 import { Markdown } from "@/components/markdown/Markdown";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection";
 import { VoterList } from "@/components/votes/VoterList";
+import { useAuth } from "@/hooks/useAuth";
+import { useEntityPermission } from "@/hooks/useEntityPermission";
 import { EmojiStickerGallery } from "./EmojiStickerGallery";
 
-type Tab = "about" | "emojis" | "reviews" | "voters";
+type Tab = "about" | "emojis" | "changelog" | "reviews" | "voters";
 
 interface ServerPageTabsProps {
   serverId: string;
@@ -26,9 +30,10 @@ interface ServerPageTabsProps {
   emojisSyncedAt: string | null;
   initialReviews: Review[];
   initialVoters?: EntityVoterList | null;
+  changelogs?: ServerChangelog[];
 }
 
-const TAB_KEYS: Tab[] = ["about", "emojis", "reviews", "voters"];
+const TAB_KEYS: Tab[] = ["about", "emojis", "changelog", "reviews", "voters"];
 
 export function ServerPageTabs(props: ServerPageTabsProps) {
   return (
@@ -42,17 +47,20 @@ function ServerPageTabsWithSearchParams(props: ServerPageTabsProps) {
   const searchParams = useSearchParams();
   const requested = searchParams.get("tab");
   const highlightReviewId = searchParams.get("review") ?? undefined;
+  const highlightChangelogId = searchParams.get("changelog") ?? undefined;
 
   let initialTab: Tab = (TAB_KEYS as string[]).includes(requested ?? "")
     ? (requested as Tab)
     : "about";
   if (!requested && highlightReviewId) initialTab = "reviews";
+  if (!requested && highlightChangelogId) initialTab = "changelog";
 
   return (
     <ServerPageTabsInner
       {...props}
       initialTab={initialTab}
       highlightReviewId={highlightReviewId}
+      highlightChangelogId={highlightChangelogId}
     />
   );
 }
@@ -66,10 +74,19 @@ function ServerPageTabsInner({
   emojisSyncedAt,
   initialReviews,
   initialVoters,
+  changelogs = [],
   initialTab,
   highlightReviewId,
-}: ServerPageTabsProps & { initialTab: Tab; highlightReviewId?: string }) {
+  highlightChangelogId,
+}: ServerPageTabsProps & {
+  initialTab: Tab;
+  highlightReviewId?: string;
+  highlightChangelogId?: string;
+}) {
   const [tab, setTab] = useState<Tab>(initialTab);
+  const { session } = useAuth();
+  const { hasPerm } = useEntityPermission("server", serverId);
+  const canEdit = hasPerm("edit_servers");
 
   const hasEmojiTab = showEmojis && (emojis.length > 0 || stickers.length > 0);
 
@@ -87,6 +104,16 @@ function ServerPageTabsInner({
             label: "Emojis & Stickers",
             icon: Smile,
             count: emojis.length + stickers.length,
+          },
+        ]
+      : []),
+    ...(changelogs.length > 0 || canEdit
+      ? [
+          {
+            key: "changelog" as Tab,
+            label: "Updates",
+            icon: Megaphone,
+            count: changelogs.length,
           },
         ]
       : []),
@@ -151,6 +178,17 @@ function ServerPageTabsInner({
             stickers={stickers}
             syncedAt={emojisSyncedAt}
             noTopBorder
+          />
+        )}
+
+        {tab === "changelog" && (
+          <BotChangelogSection
+            entityId={serverId}
+            kind="server"
+            initialChangelogs={changelogs}
+            canEdit={canEdit}
+            token={session?.token}
+            highlightId={highlightChangelogId}
           />
         )}
 

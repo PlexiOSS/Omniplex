@@ -37,7 +37,7 @@ The [Voter Leaderboard](/leaderboard) ranks the most active voters, both **this 
 
 ## Vote credits
 
-The votes a bot or server receives can be converted into credits and spent in the [Shop](/shop) on things like bonus premium days and priority placement. See [Vote Credits & the Shop](/kb/premium/shop) for the full breakdown.
+The votes a bot or server receives can be converted into credits and spent in the [Credit shop](/shop/items) on things like bonus premium days and priority placement. See [Vote Credits & the Shop](/kb/premium/shop) for the full breakdown.
 
 ## Vote abuse
 

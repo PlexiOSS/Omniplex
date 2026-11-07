@@ -1,11 +1,13 @@
 "use client";
 
+import { SITE_URL } from "@omniplex/core/api/config";
 import { Badge } from "@omniplex/ui/Badge";
 import { Button } from "@omniplex/ui/Button";
-import { Plus } from "lucide-react";
+import { Check, Link2, Plus, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { describePromo } from "@/app/(dashboard)/shop/promo-codes/describePromo";
+import { RedemptionsModal } from "@/app/(dashboard)/shop/promo-codes/RedemptionsModal";
 import { useAdmin } from "@/app/AdminContext";
 import { AdminPageHeader } from "@/app/AdminPageHeader";
 import { AdminEmptyState, AdminListRow } from "@/components/admin/AdminListRow";
@@ -39,6 +41,8 @@ export default function PromoCodesPage() {
 
   const [codes, setCodes] = useState<PromoCode[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<PromoCode | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -56,6 +60,19 @@ export default function PromoCodesPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  function copyLink(promo: PromoCode) {
+    const path = promo.products.includes("premium")
+      ? `/premium?promo=${encodeURIComponent(promo.code)}`
+      : `/dashboard?tab=auto-vote&promo=${encodeURIComponent(promo.code)}`;
+    navigator.clipboard
+      ?.writeText(`${SITE_URL}${path}`)
+      .then(() => {
+        setCopied(promo.id);
+        setTimeout(() => setCopied(null), 1500);
+      })
+      .catch(() => {});
+  }
 
   function toggle(promo: PromoCode) {
     setToggling(promo.id);
@@ -117,16 +134,39 @@ export default function PromoCodesPage() {
             <AdminListRow
               key={promo.id}
               actions={
-                canManage && (
+                <>
                   <Button
-                    variant={promo.active ? "ghost" : "secondary"}
+                    variant="ghost"
                     size="sm"
-                    loading={toggling === promo.id}
-                    onClick={() => toggle(promo)}
+                    onClick={() => copyLink(promo)}
+                    title="Copy a link that applies this code at checkout"
                   >
-                    {promo.active ? "Turn off" : "Turn on"}
+                    {copied === promo.id ? (
+                      <Check size={13} />
+                    ) : (
+                      <Link2 size={13} />
+                    )}
+                    {copied === promo.id ? "Copied" : "Link"}
                   </Button>
-                )
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setViewing(promo)}
+                  >
+                    <Users size={13} />
+                    Who used it
+                  </Button>
+                  {canManage && (
+                    <Button
+                      variant={promo.active ? "ghost" : "secondary"}
+                      size="sm"
+                      loading={toggling === promo.id}
+                      onClick={() => toggle(promo)}
+                    >
+                      {promo.active ? "Turn off" : "Turn on"}
+                    </Button>
+                  )}
+                </>
               }
             >
               <div className="flex flex-wrap items-center gap-1.5">
@@ -161,6 +201,14 @@ export default function PromoCodesPage() {
           );
         })}
       </div>
+
+      {viewing && (
+        <RedemptionsModal
+          promo={viewing}
+          loginToken={loginToken}
+          onClose={() => setViewing(null)}
+        />
+      )}
     </div>
   );
 }

@@ -173,7 +173,7 @@ function BotPageTabsInner({
 
         {tab === "changelog" && (
           <BotChangelogSection
-            botId={botId}
+            entityId={botId}
             initialChangelogs={changelogs}
             canEdit={canEdit}
             token={session?.token}

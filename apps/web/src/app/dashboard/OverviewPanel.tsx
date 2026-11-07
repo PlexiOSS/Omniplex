@@ -208,7 +208,7 @@ export function OverviewPanel({
             : " monthly"}
           , so{" "}
           <Link
-            href="/shop"
+            href="/shop/items"
             className="font-medium text-accent hover:underline"
           >
             redeem them for credits

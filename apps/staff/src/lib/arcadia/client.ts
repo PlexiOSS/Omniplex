@@ -29,6 +29,7 @@ import type {
   PromoCode,
   PromoCodeAction,
   PromoCodeCreate,
+  PromoCodeRedemption,
   Report,
   ReportAction,
   ReportStatus,
@@ -706,6 +707,18 @@ export const arcadia = {
   },
 
   promoCodes: {
+    redemptions: async (
+      loginToken: string,
+      id: string,
+    ): Promise<PromoCodeRedemption[]> => {
+      const res = await postQuery({
+        UpdatePromoCodes: {
+          login_token: loginToken,
+          action: { ListRedemptions: { id } } satisfies PromoCodeAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
     list: async (loginToken: string): Promise<PromoCode[]> => {
       const res = await postQuery({
         UpdatePromoCodes: {

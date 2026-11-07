@@ -1,7 +1,9 @@
 import { client } from "../client";
 import type {
+  AutoVoteNotify,
   AutoVoteStatus,
   AutoVoteTargetInput,
+  BoosterPerks,
   MainServerStatus,
   RedirectUser,
   SEO,
@@ -22,20 +24,50 @@ export const usersResource = {
     userId: string,
     targets: AutoVoteTargetInput[],
     token: string,
+    options: { notify?: AutoVoteNotify } = {},
   ) =>
     client.put<void>(
       `/users/${userId}/auto-vote/targets`,
-      { targets },
+      { targets, ...options },
       { token },
     ),
 
-  startAutoVoteCheckout: (userId: string, token: string, promoCode?: string) =>
+  startAutoVoteCheckout: (
+    userId: string,
+    token: string,
+    promoCode?: string,
+    plan: "monthly" | "yearly" = "monthly",
+  ) =>
     client.post<RedirectUser>(
       `/users/${userId}/auto-vote/checkout`,
-      promoCode ? { promo_code: promoCode } : {},
+      { plan, ...(promoCode ? { promo_code: promoCode } : {}) },
       {
         token,
       },
+    ),
+
+  getBoosterPerks: (userId: string, token: string) =>
+    client.get<BoosterPerks>(`/users/${userId}/booster-perks`, {
+      token,
+      cache: "no-store",
+    }),
+
+  setBoosterPerkTarget: (
+    userId: string,
+    target: { target_type: "bot" | "server"; target_id: string } | null,
+    token: string,
+  ) =>
+    client.put<BoosterPerks>(
+      `/users/${userId}/booster-perks`,
+      target ?? { target_type: null, target_id: null },
+      { token },
+    ),
+
+  setAutoVoteSlots: (userId: string, extraSlots: number, token: string) =>
+    client.put<void>(
+      `/users/${userId}/auto-vote/slots`,
+      { extra_slots: extraSlots },
+      { token },
     ),
 
   openAutoVotePortal: (userId: string, token: string) =>

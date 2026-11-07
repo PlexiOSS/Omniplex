@@ -88,14 +88,14 @@ const QUICK_LINKS: {
       "paypal",
       "stripe",
     ],
-    href: "/premium",
+    href: "/shop/premium",
     label: "Premium",
     description:
       "Buy premium for one of your bots with card, PayPal, or vote credits.",
   },
   {
     keywords: ["shop", "credit", "boost", "featured", "badge", "blitz"],
-    href: "/shop",
+    href: "/shop/items",
     label: "Shop",
     description:
       "Spend a bot's earned vote credits on boosts, badges, and more.",

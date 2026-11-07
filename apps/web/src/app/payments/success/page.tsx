@@ -24,7 +24,7 @@ export default function PaymentSuccessPage() {
                 Go to dashboard
               </Button>
             </Link>
-            <Link href="/premium">
+            <Link href="/shop/premium">
               <Button variant="secondary" size="sm">
                 Back to Premium
               </Button>

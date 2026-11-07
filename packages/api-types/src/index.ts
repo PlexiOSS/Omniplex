@@ -188,6 +188,47 @@ export interface CreateBotChangelogPayload {
   version: string;
 }
 
+export interface ServerChangelog {
+  id: string;
+  title: string;
+  content: string;
+  version: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface ServerChangelogList {
+  changelogs: ServerChangelog[];
+}
+
+export interface ServerVoteChannelOption {
+  id: string;
+  name: string;
+}
+
+export interface ServerVoteChannel {
+  channel_id: string | null;
+  channels: ServerVoteChannelOption[];
+  available: boolean;
+}
+
+export interface ServerChangelogFeedEntry {
+  id: string;
+  server_id: string;
+  name: string;
+  avatar: string;
+  title: string;
+  content: string;
+  version: string;
+  created_at: string;
+}
+
+export interface ServerChangelogFeedFilters {
+  q?: string;
+  tag?: string;
+  server?: string;
+}
+
 /** One result row of the cross-bot command search (GET /bots/@commands) --
  * just enough of the owning bot's identity to display and link back to it. */
 export interface BotCommandSearchResult {
@@ -1245,7 +1286,10 @@ export interface AutoVoteTargetInput {
   start_minute: number;
   end_minute: number;
   timezone: string;
+  paused?: boolean;
 }
+
+export type AutoVoteNotify = "off" | "each" | "daily";
 
 export interface AutoVoteTarget extends AutoVoteTargetInput {
   name: string;
@@ -1254,6 +1298,7 @@ export interface AutoVoteTarget extends AutoVoteTargetInput {
   last_skip_reason: string | null;
   cooldown_until: string | null;
   in_schedule: boolean;
+  paused: boolean;
 }
 
 export interface AutoVoteStatus {
@@ -1262,14 +1307,52 @@ export interface AutoVoteStatus {
   current_period_end: string | null;
   cancel_at_period_end: boolean;
   price_cents: number;
+  yearly_price_cents: number;
   max_targets: number;
+  extra_slots: number;
+  max_extra_slots: number;
+  slot_price_cents: number;
+  billing_interval: "month" | "year";
+  booster_slots: number;
   targets: AutoVoteTarget[];
+  notify: AutoVoteNotify;
+}
+
+export interface AutoVotePricing {
+  price_cents: number;
+  yearly_price_cents: number;
+  slot_price_cents: number;
+  yearly_slot_price_cents: number;
+  included_slots: number;
+  max_extra_slots: number;
 }
 
 export interface PlanList {
   plans: PaymentPlan[];
   credits_per_cent?: number;
   max_credit_share?: number;
+  auto_vote?: AutoVotePricing;
+}
+
+export interface BoosterPerkTarget {
+  target_type: "bot" | "server";
+  target_id: string;
+  name: string;
+  avatar: string;
+}
+
+export interface BoosterPerks {
+  boosting: boolean;
+  in_server: boolean;
+  boosting_since: string | null;
+  target: BoosterPerkTarget | null;
+  last_claim_at: string | null;
+  next_renewal_at: string | null;
+  last_error: string | null;
+  just_applied: boolean;
+  premium_days: number;
+  auto_vote_slots: number;
+  renewal_days: number;
 }
 
 export interface PaypalMeta {

@@ -1,11 +1,9 @@
 "use client";
 
 import { bots, servers } from "@omniplex/core/api";
-import type {
-  EntityAnalytics,
-  EntityAnalyticsDay,
-} from "@omniplex/core/api/types";
+import type { EntityAnalyticsDay } from "@omniplex/core/api/types";
 import { formatCount } from "@omniplex/core/utils/format";
+import { Download } from "lucide-react";
 import { useState } from "react";
 import useSWR from "swr";
 
@@ -325,41 +323,122 @@ function DailyChart({ title, days, series, type }: DailyChartProps) {
   );
 }
 
-function pick(
-  data: EntityAnalytics,
+function percentChange(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? 0 : null;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function csvCell(v: string | number | null | undefined) {
+  if (v == null) return "";
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadCsv(
+  filename: string,
+  rows: EntityAnalyticsDay[],
+  growthKey: "servers" | "total_members",
+) {
+  const header = [
+    "day",
+    "votes",
+    "automatic_votes",
+    "manual_votes",
+    "page_views",
+    "invite_clicks",
+    growthKey === "servers" ? "servers" : "members",
+  ];
+  if (growthKey === "total_members") header.push("online_members");
+  const lines = [header.join(",")];
+  for (const d of rows) {
+    const cells: (string | number | null | undefined)[] = [
+      d.day,
+      d.votes,
+      d.auto_votes,
+      d.votes - d.auto_votes,
+      d.views,
+      d.invite_clicks,
+      d[growthKey],
+    ];
+    if (growthKey === "total_members") cells.push(d.online_members);
+    lines.push(cells.map(csvCell).join(","));
+  }
+  const blob = new Blob([`${lines.join("\n")}\n`], {
+    type: "text/csv;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function pickFrom(
+  rows: EntityAnalyticsDay[],
   key: keyof Omit<EntityAnalyticsDay, "day">,
 ) {
-  return data.days.map((d) => d[key] ?? null);
+  return rows.map((d) => d[key] ?? null);
 }
 
 export function AnalyticsPanel({ kind, id, token }: AnalyticsPanelProps) {
   const [days, setDays] = useState(30);
+  const fetchDays = days * 2 <= 365 ? days * 2 : days;
   const { data, error } = useSWR(
-    ["manage/analytics", kind, id, days],
+    ["manage/analytics", kind, id, fetchDays],
     () =>
       kind === "bot"
-        ? bots.getAnalytics(id, days, token)
-        : servers.getAnalytics(id, days, token),
+        ? bots.getAnalytics(id, fetchDays, token)
+        : servers.getAnalytics(id, fetchDays, token),
     { keepPreviousData: true },
   );
 
-  const dayKeys = data?.days.map((d) => d.day) ?? [];
-  const votes = data ? pick(data, "votes") : [];
-  const autoVotes = data ? pick(data, "auto_votes") : [];
+  const all = data?.days ?? [];
+  const current = all.slice(-days);
+  const previous =
+    all.length >= days * 2 ? all.slice(0, all.length - days) : null;
+  const growthKey = kind === "bot" ? "servers" : "total_members";
+
+  const dayKeys = current.map((d) => d.day);
+  const votes = pickFrom(current, "votes");
+  const autoVotes = pickFrom(current, "auto_votes");
   const manualVotes = votes.map((v, i) => (v ?? 0) - (autoVotes[i] ?? 0));
-  const views = data ? pick(data, "views") : [];
-  const inviteClicks = data ? pick(data, "invite_clicks") : [];
-  const growth = data
-    ? pick(data, kind === "bot" ? "servers" : "total_members")
-    : [];
+  const views = pickFrom(current, "views");
+  const inviteClicks = pickFrom(current, "invite_clicks");
+  const growth = pickFrom(current, growthKey);
   const growthLabel = kind === "bot" ? "Servers" : "Members";
+
+  const vsPrevious = (key: "votes" | "views" | "invite_clicks") => {
+    if (!previous) return null;
+    const before = previous.map((d) => d[key]);
+    if (key !== "votes" && before.every((v) => v == null)) return null;
+    return percentChange(sum(pickFrom(current, key)), sum(before));
+  };
 
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
-          Over time
-        </h3>
+        <div className="flex flex-wrap items-center gap-3">
+          <h3 className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
+            Over time
+          </h3>
+          {data && current.length > 0 && (
+            <button
+              type="button"
+              onClick={() =>
+                downloadCsv(
+                  `${kind}-${id}-analytics-${days}d.csv`,
+                  current,
+                  growthKey,
+                )
+              }
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:text-zinc-300"
+            >
+              <Download size={12} />
+              Download CSV
+            </button>
+          )}
+        </div>
         <fieldset
           aria-label="Time range"
           className="inline-flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-900"
@@ -403,10 +482,26 @@ export function AnalyticsPanel({ kind, id, token }: AnalyticsPanelProps) {
         <>
           <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              { label: "Votes", value: formatCount(sum(votes)) },
-              { label: "Page views", value: formatCount(sum(views)) },
-              { label: "Invite clicks", value: formatCount(sum(inviteClicks)) },
-              { label: `${growthLabel} change`, value: signed(change(growth)) },
+              {
+                label: "Votes",
+                value: formatCount(sum(votes)),
+                delta: vsPrevious("votes"),
+              },
+              {
+                label: "Page views",
+                value: formatCount(sum(views)),
+                delta: vsPrevious("views"),
+              },
+              {
+                label: "Invite clicks",
+                value: formatCount(sum(inviteClicks)),
+                delta: vsPrevious("invite_clicks"),
+              },
+              {
+                label: `${growthLabel} change`,
+                value: signed(change(growth)),
+                delta: null,
+              },
             ].map((s) => (
               <div
                 key={s.label}
@@ -418,6 +513,22 @@ export function AnalyticsPanel({ kind, id, token }: AnalyticsPanelProps) {
                 <dt className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                   {s.label}
                 </dt>
+                {s.delta !== null && (
+                  <p
+                    className={[
+                      "mt-1.5 text-xs font-medium tabular-nums",
+                      s.delta > 0
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : s.delta < 0
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-zinc-500 dark:text-zinc-400",
+                    ].join(" ")}
+                    title={`Compared with the ${days} days before`}
+                  >
+                    {s.delta > 0 ? "+" : ""}
+                    {s.delta}% vs previous {days} days
+                  </p>
+                )}
               </div>
             ))}
           </dl>

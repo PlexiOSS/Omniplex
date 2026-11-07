@@ -14,6 +14,7 @@ interface DirectoryFiltersProps {
   onTagChange: (tag: string) => void;
   onClearBot: () => void;
   onClearAll: () => void;
+  tags?: readonly string[];
 }
 
 const chip =
@@ -32,6 +33,7 @@ export function DirectoryFilters({
   onTagChange,
   onClearBot,
   onClearAll,
+  tags = BOT_TAGS,
 }: DirectoryFiltersProps) {
   const [draft, setDraft] = useState(query);
 
@@ -86,7 +88,7 @@ export function DirectoryFilters({
           Tags
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {BOT_TAGS.map((t) => {
+          {tags.map((t) => {
             const active = tag.toLowerCase() === t.toLowerCase();
             return (
               <button
