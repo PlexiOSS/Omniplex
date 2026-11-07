@@ -1,9 +1,6 @@
 "use client";
 
-import { SITE_URL } from "@omniplex/core/api/config";
 import { Button } from "@omniplex/ui/Button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { BsDiscord } from "react-icons/bs";
 import { AuthShell } from "@/app/(auth)/AuthShell";
@@ -37,11 +34,11 @@ export default function AdminLoginPage() {
   return (
     <AuthShell step={1}>
       <h2 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-        Welcome back
+        Sign in to the Staff Panel
       </h2>
-      <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-        Sign in with the Discord account linked to your staff position. You'll
-        confirm it with your authenticator app next.
+      <p className="mt-2 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+        Use the Discord account linked to your staff position. You'll confirm it
+        with your authenticator app next.
       </p>
 
       {error && (
@@ -60,14 +57,6 @@ export default function AdminLoginPage() {
         <BsDiscord size={18} />
         Continue with Discord
       </Button>
-
-      <Link
-        href={SITE_URL}
-        className="mt-6 inline-flex items-center gap-1.5 self-center text-xs text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        <ArrowLeft size={12} />
-        Back to Omniplex
-      </Link>
     </AuthShell>
   );
 }

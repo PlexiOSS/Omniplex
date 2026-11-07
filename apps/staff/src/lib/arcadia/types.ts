@@ -79,7 +79,24 @@ export interface StaffDisciplinary {
   title: string;
   description: string;
   type: StaffDisciplinaryType;
+  state: DisciplinaryState;
+  issued_by: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  decided_by: string | null;
+  decided_at: string | null;
+  decision_note: string | null;
+  revoked_by: string | null;
+  revoked_at: string | null;
+  revoke_reason: string | null;
 }
+
+export type DisciplinaryState =
+  | "pending"
+  | "active"
+  | "expired"
+  | "denied"
+  | "revoked";
 
 export interface StaffMember {
   user_id: string;
@@ -816,4 +833,13 @@ export interface PopplioStaffQuery {
   path: string;
   method: string;
   body: string;
+}
+
+export interface StaffSession {
+  id: string;
+  created_at: string;
+  last_seen_at: string;
+  ip: string | null;
+  user_agent: string | null;
+  current: boolean;
 }

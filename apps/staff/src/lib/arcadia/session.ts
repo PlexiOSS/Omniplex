@@ -1,7 +1,7 @@
 // Copyright (C) 2026 NodeByte LTD
 
 const STORAGE_KEY = "arcadia-session";
-const SESSION_LIFETIME_MS = 55 * 60 * 1000;
+const SESSION_LIFETIME_MS = (12 * 60 - 5) * 60 * 1000;
 
 export interface ArcadiaSession {
   login_token: string;

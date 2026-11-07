@@ -218,7 +218,7 @@ export function GenericRpcModal({
   }
 
   return (
-    <Modal open onClose={onClose} title={`Actions — ${entityLabel}`}>
+    <Modal open onClose={onClose} title={`Actions for ${entityLabel}`}>
       <div className="space-y-4">
         <div className="flex flex-col gap-1.5">
           <label

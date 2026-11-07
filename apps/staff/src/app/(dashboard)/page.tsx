@@ -37,21 +37,86 @@ function daysSince(iso?: string): number | null {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
 }
 
+interface QueueEntry {
+  tab: "bots" | "servers";
+  id: string;
+  name: string;
+  avatar: string;
+  claimedBy: string | null;
+  lastClaimed: string | null;
+  createdAt?: string;
+}
+
 interface QueueSummary {
   total: number;
   unclaimed: number;
   oldestDays: number | null;
+  entries: QueueEntry[];
 }
 
-function summarise(items: (PartialBot | PartialServer)[]): QueueSummary {
-  const ages = items
-    .map((i) => daysSince(i.created_at))
+function summarise(entries: QueueEntry[]): QueueSummary {
+  const ages = entries
+    .map((i) => daysSince(i.createdAt))
     .filter((d): d is number => d !== null);
   return {
-    total: items.length,
-    unclaimed: items.filter((i) => !i.claimed_by).length,
+    total: entries.length,
+    unclaimed: entries.filter((i) => !i.claimedBy).length,
     oldestDays: ages.length > 0 ? Math.max(...ages) : null,
+    entries,
   };
+}
+
+function botEntry(b: PartialBot): QueueEntry {
+  return {
+    tab: "bots",
+    id: b.bot_id,
+    name: b.user.username,
+    avatar: b.user.avatar,
+    claimedBy: b.claimed_by,
+    lastClaimed: b.last_claimed,
+    createdAt: b.created_at,
+  };
+}
+
+function serverEntry(s: PartialServer): QueueEntry {
+  return {
+    tab: "servers",
+    id: s.server_id,
+    name: s.name,
+    avatar: s.avatar,
+    claimedBy: s.claimed_by,
+    lastClaimed: s.last_claimed,
+    createdAt: s.created_at,
+  };
+}
+
+function oldestUnclaimed(q: QueueSummary | null) {
+  return (q?.entries ?? [])
+    .filter((e) => !e.claimedBy)
+    .sort((a, b) => (a.createdAt ?? "").localeCompare(b.createdAt ?? ""))[0];
+}
+
+function QueueLink({ entry, detail }: { entry: QueueEntry; detail: string }) {
+  return (
+    <Link
+      href={`/queue?tab=${entry.tab}&id=${entry.id}`}
+      className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+    >
+      <Avatar src={entry.avatar} alt={entry.name} size={32} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+          {entry.name}
+        </span>
+        <span className="block truncate text-xs text-zinc-500 dark:text-zinc-400">
+          {detail}
+        </span>
+      </span>
+      <ArrowRight
+        size={14}
+        className="shrink-0 text-zinc-400 transition-transform group-hover:translate-x-0.5"
+      />
+    </Link>
+  );
 }
 
 interface AttentionCardProps {
@@ -98,7 +163,7 @@ function AttentionCard({
       </span>
       <span className="mt-1 flex items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400">
         <span className="truncate">
-          {value === null ? "No access" : (detail ?? " ")}
+          {value === null ? "Couldn't load" : (detail ?? " ")}
         </span>
         <ArrowRight
           size={12}
@@ -119,7 +184,7 @@ function queueDetail(q: QueueSummary | null): string | undefined {
 }
 
 export default function AdminOverviewPage() {
-  const { loginToken } = useAdmin();
+  const { loginToken, hasPerm, staffMember } = useAdmin();
   const [analytics, setAnalytics] = useState<BaseAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [botQueue, setBotQueue] = useState<QueueSummary | null>(null);
@@ -150,7 +215,7 @@ export default function AdminOverviewPage() {
           summarise(
             entries
               .filter((e): e is { Bot: PartialBot } => "Bot" in e)
-              .map((e) => e.Bot),
+              .map((e) => botEntry(e.Bot)),
           ),
         ),
       )
@@ -163,7 +228,7 @@ export default function AdminOverviewPage() {
           summarise(
             entries
               .filter((e): e is { Server: PartialServer } => "Server" in e)
-              .map((e) => e.Server),
+              .map((e) => serverEntry(e.Server)),
           ),
         ),
       )
@@ -219,17 +284,73 @@ export default function AdminOverviewPage() {
   if (error && !analytics) return <AdminError message={error} onRetry={load} />;
   if (!analytics) return <AdminLoading />;
 
+  const myId = staffMember.user.id;
+  const myClaims = [
+    ...(botQueue?.entries ?? []),
+    ...(serverQueue?.entries ?? []),
+  ].filter((e) => e.claimedBy === myId);
+  const nextUp = [
+    oldestUnclaimed(botQueue),
+    oldestUnclaimed(serverQueue),
+  ].filter((e): e is QueueEntry => !!e);
+  const firstName = staffMember.user.display_name || staffMember.user.username;
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Overview"
-        description="What needs attention right now, recent staff activity, and platform totals."
+        description={`Welcome back, ${firstName}. Here's what needs attention.`}
       />
+
+      {hasPerm("review_entities") &&
+        (myClaims.length > 0 || nextUp.length > 0) && (
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <section className="rounded-2xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900/60">
+              <h2 className="px-3 pt-1 pb-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                Claimed by you
+              </h2>
+              {myClaims.length === 0 ? (
+                <p className="px-3 pb-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  Nothing claimed. Pick something from next up.
+                </p>
+              ) : (
+                myClaims.map((e) => (
+                  <QueueLink
+                    key={e.id}
+                    entry={e}
+                    detail={`${e.tab === "bots" ? "Bot" : "Server"} · claimed ${e.lastClaimed ? formatRelativeTime(e.lastClaimed) : ""}`}
+                  />
+                ))
+              )}
+            </section>
+            <section className="rounded-2xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900/60">
+              <h2 className="px-3 pt-1 pb-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                Next up
+              </h2>
+              {nextUp.length === 0 ? (
+                <p className="px-3 pb-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  Everything in the queue is claimed.
+                </p>
+              ) : (
+                nextUp.map((e) => {
+                  const days = daysSince(e.createdAt);
+                  return (
+                    <QueueLink
+                      key={e.id}
+                      entry={e}
+                      detail={`Oldest unclaimed ${e.tab === "bots" ? "bot" : "server"}${days !== null ? ` · waiting ${days < 1 ? "since today" : `${days} day${days === 1 ? "" : "s"}`}` : ""}`}
+                    />
+                  );
+                })
+              )}
+            </section>
+          </div>
+        )}
 
       <h2 className="mt-8 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
         Needs attention
       </h2>
-      <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]">
         <AttentionCard
           href="/queue"
           icon={<Bot size={13} />}
@@ -246,84 +367,100 @@ export default function AdminOverviewPage() {
           detail={queueDetail(serverQueue)}
           urgent={(serverQueue?.oldestDays ?? 0) >= 7}
         />
-        <AttentionCard
-          href="/reports"
-          icon={<Flag size={13} />}
-          label="Open reports"
-          value={openReports}
-          detail={openReports === 0 ? "All clear" : "Waiting for review"}
-          urgent={(openReports ?? 0) > 0}
-        />
-        <AttentionCard
-          href="/tickets"
-          icon={<LifeBuoy size={13} />}
-          label="Open tickets"
-          value={openTickets}
-          detail={openTickets === 0 ? "All clear" : "Waiting for a reply"}
-        />
-        <AttentionCard
-          href="/applications"
-          icon={<ClipboardList size={13} />}
-          label="Applications"
-          value={pendingApps}
-          detail={pendingApps === 0 ? "All clear" : "Pending decision"}
-        />
-      </div>
-
-      <div className="mt-10 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
-          Recent staff activity
-        </h2>
-        <Link
-          href="/logs"
-          className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
-        >
-          All logs <ArrowRight size={12} />
-        </Link>
-      </div>
-      <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-        {logs.length === 0 ? (
-          <p className="px-4 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-            No recent activity.
-          </p>
-        ) : (
-          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {logs.map((entry) => {
-              const user = users[entry.user_id];
-              return (
-                <li
-                  key={entry.id}
-                  className="flex min-w-0 items-center gap-3 px-4 py-2.5 text-sm"
-                >
-                  {user ? (
-                    <Avatar src={user.avatar} alt={user.username} size={22} />
-                  ) : (
-                    <span className="h-[22px] w-[22px] shrink-0 rounded-full bg-zinc-100 dark:bg-zinc-800" />
-                  )}
-                  <span className="min-w-0 flex-1 truncate">
-                    <span className="font-medium text-zinc-950 dark:text-zinc-50">
-                      {user?.username ?? entry.user_id}
-                    </span>{" "}
-                    <span className="text-zinc-500 dark:text-zinc-400">
-                      ran {entry.method}
-                    </span>
-                  </span>
-                  {entry.state !== "success" && (
-                    <Badge
-                      variant={entry.state === "pending" ? "warning" : "danger"}
-                    >
-                      {entry.state}
-                    </Badge>
-                  )}
-                  <span className="shrink-0 text-xs text-zinc-400 dark:text-zinc-500">
-                    {formatRelativeTime(entry.created_at)}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+        {hasPerm("review_reports") && (
+          <AttentionCard
+            href="/reports"
+            icon={<Flag size={13} />}
+            label="Open reports"
+            value={openReports}
+            detail={openReports === 0 ? "All clear" : "Waiting for review"}
+            urgent={(openReports ?? 0) > 0}
+          />
+        )}
+        {hasPerm("view_tickets") && (
+          <AttentionCard
+            href="/tickets"
+            icon={<LifeBuoy size={13} />}
+            label="Open tickets"
+            value={openTickets}
+            detail={openTickets === 0 ? "All clear" : "Waiting for a reply"}
+          />
+        )}
+        {hasPerm("view_apps") && (
+          <AttentionCard
+            href="/applications"
+            icon={<ClipboardList size={13} />}
+            label="Applications"
+            value={pendingApps}
+            detail={pendingApps === 0 ? "All clear" : "Pending decision"}
+          />
         )}
       </div>
+
+      {hasPerm("view_audit_logs") && (
+        <>
+          <div className="mt-10 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+              Recent staff activity
+            </h2>
+            <Link
+              href="/logs"
+              className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
+            >
+              All logs <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+            {logs.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                No recent activity.
+              </p>
+            ) : (
+              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {logs.map((entry) => {
+                  const user = users[entry.user_id];
+                  return (
+                    <li
+                      key={entry.id}
+                      className="flex min-w-0 items-center gap-3 px-4 py-2.5 text-sm"
+                    >
+                      {user ? (
+                        <Avatar
+                          src={user.avatar}
+                          alt={user.username}
+                          size={22}
+                        />
+                      ) : (
+                        <span className="h-[22px] w-[22px] shrink-0 rounded-full bg-zinc-100 dark:bg-zinc-800" />
+                      )}
+                      <span className="min-w-0 flex-1 truncate">
+                        <span className="font-medium text-zinc-950 dark:text-zinc-50">
+                          {user?.username ?? entry.user_id}
+                        </span>{" "}
+                        <span className="text-zinc-500 dark:text-zinc-400">
+                          ran {entry.method}
+                        </span>
+                      </span>
+                      {entry.state !== "success" && (
+                        <Badge
+                          variant={
+                            entry.state === "pending" ? "warning" : "danger"
+                          }
+                        >
+                          {entry.state}
+                        </Badge>
+                      )}
+                      <span className="shrink-0 text-xs text-zinc-400 dark:text-zinc-500">
+                        {formatRelativeTime(entry.created_at)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
 
       <h2 className="mt-10 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
         Platform totals

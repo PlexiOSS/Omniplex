@@ -2,12 +2,14 @@
 
 import { SITE_URL } from "@omniplex/core/api/config";
 import { Avatar } from "@omniplex/ui/Avatar";
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import {
   Activity,
   ArrowLeft,
   Award,
   BadgePercent,
   Bot,
+  CalendarClock,
   ChevronDown,
   ClipboardList,
   Coins,
@@ -32,6 +34,7 @@ import {
   ShoppingBag,
   Sparkles,
   Ticket,
+  UserCog,
   Users,
   X,
   Zap,
@@ -41,12 +44,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useAdmin } from "@/app/AdminContext";
 import { type AdminCounts, useAdminCounts } from "@/app/useAdminCounts";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AdminNavItem {
   href: string;
   label: string;
   icon: LucideIcon;
   count?: keyof AdminCounts;
+  perm?: string;
 }
 
 interface AdminNavGroup {
@@ -60,8 +65,19 @@ const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: "/", label: "Overview", icon: LayoutDashboard },
       { href: "/search", label: "Search", icon: Search },
-      { href: "/activity", label: "Activity", icon: Activity },
-      { href: "/logs", label: "RPC Logs", icon: ScrollText },
+      {
+        href: "/activity",
+        label: "Activity",
+        icon: Activity,
+        perm: "view_audit_logs",
+      },
+      {
+        href: "/logs",
+        label: "RPC Logs",
+        icon: ScrollText,
+        perm: "view_audit_logs",
+      },
+      { href: "/account", label: "Account", icon: UserCog },
     ],
   },
   {
@@ -78,18 +94,21 @@ const ADMIN_NAV: AdminNavGroup[] = [
         label: "Reports",
         icon: Flag,
         count: "reports",
+        perm: "review_reports",
       },
       {
         href: "/tickets",
         label: "Tickets",
         icon: LifeBuoy,
         count: "tickets",
+        perm: "view_tickets",
       },
       {
         href: "/applications",
         label: "Applications",
         icon: ClipboardList,
         count: "applications",
+        perm: "view_apps",
       },
       { href: "/actions", label: "Global Actions", icon: Zap },
     ],
@@ -97,8 +116,25 @@ const ADMIN_NAV: AdminNavGroup[] = [
   {
     label: "Staff",
     items: [
-      { href: "/staff/positions", label: "Positions", icon: ShieldCheck },
-      { href: "/staff/members", label: "Members", icon: Users },
+      {
+        href: "/staff/positions",
+        label: "Positions",
+        icon: ShieldCheck,
+        perm: "view_staff",
+      },
+      {
+        href: "/staff/members",
+        label: "Members",
+        icon: Users,
+        perm: "view_staff",
+      },
+      {
+        href: "/staff/disciplinaries",
+        label: "Disciplinaries",
+        icon: CalendarClock,
+        perm: "manage_disciplinaries",
+        count: "disciplinaries",
+      },
       {
         href: "/staff/disciplinary-types",
         label: "Disciplinary Types",
@@ -109,28 +145,79 @@ const ADMIN_NAV: AdminNavGroup[] = [
   {
     label: "Content",
     items: [
-      { href: "/blog", label: "Blog", icon: FileText },
-      { href: "/changelog", label: "Changelog", icon: Megaphone },
-      { href: "/partners", label: "Partners", icon: Handshake },
-      { href: "/badges", label: "Badges", icon: Award },
-      { href: "/templates", label: "Templates", icon: LayoutTemplate },
+      { href: "/blog", label: "Blog", icon: FileText, perm: "manage_blog" },
+      {
+        href: "/changelog",
+        label: "Changelog",
+        icon: Megaphone,
+        perm: "manage_changelog",
+      },
+      {
+        href: "/partners",
+        label: "Partners",
+        icon: Handshake,
+        perm: "manage_partners",
+      },
+      { href: "/badges", label: "Badges", icon: Award, perm: "manage_badges" },
+      {
+        href: "/templates",
+        label: "Templates",
+        icon: LayoutTemplate,
+        perm: "manage_templates",
+      },
     ],
   },
   {
     label: "Shop",
     items: [
-      { href: "/shop/items", label: "Items", icon: ShoppingBag },
-      { href: "/shop/benefits", label: "Benefits", icon: Sparkles },
-      { href: "/shop/tiers", label: "Vote Credit Tiers", icon: Coins },
-      { href: "/shop/coupons", label: "Coupons", icon: BadgePercent },
+      {
+        href: "/shop/items",
+        label: "Items",
+        icon: ShoppingBag,
+        perm: "view_shop",
+      },
+      {
+        href: "/shop/benefits",
+        label: "Benefits",
+        icon: Sparkles,
+        perm: "view_shop",
+      },
+      {
+        href: "/shop/tiers",
+        label: "Vote Credit Tiers",
+        icon: Coins,
+        perm: "view_shop",
+      },
+      {
+        href: "/shop/coupons",
+        label: "Coupons",
+        icon: BadgePercent,
+        perm: "view_shop",
+      },
       {
         href: "/shop/promo-codes",
         label: "Promo Codes",
         icon: Ticket,
+        perm: "view_shop",
       },
-      { href: "/shop/whitelist", label: "Bot Whitelist", icon: Bot },
-      { href: "/shop/purchases", label: "Purchases", icon: Receipt },
-      { href: "/payments", label: "Payments", icon: CreditCard },
+      {
+        href: "/shop/whitelist",
+        label: "Bot Whitelist",
+        icon: Bot,
+        perm: "manage_bot_whitelist",
+      },
+      {
+        href: "/shop/purchases",
+        label: "Purchases",
+        icon: Receipt,
+        perm: "view_shop",
+      },
+      {
+        href: "/payments",
+        label: "Payments",
+        icon: CreditCard,
+        perm: "view_payments",
+      },
     ],
   },
 ];
@@ -182,14 +269,40 @@ function CountPill({ value, active }: { value: number; active: boolean }) {
   );
 }
 
+const ICON_BUTTON =
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-200/60 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-50";
+
+function Brand({ compact = false }: { compact?: boolean }) {
+  return (
+    <Link
+      href="/"
+      className="flex min-w-0 items-center gap-2 text-zinc-950 dark:text-zinc-50"
+      title={compact ? "Omniplex Staff" : undefined}
+    >
+      <OmniplexLogo size={compact ? 26 : 24} className="shrink-0" />
+      {!compact && (
+        <>
+          <span className="text-[15px] font-semibold tracking-tight">
+            Omniplex
+          </span>
+          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
+            Staff
+          </span>
+        </>
+      )}
+    </Link>
+  );
+}
+
 interface NavBodyProps {
   rail?: boolean;
   onNavigate?: () => void;
+  onToggleRail?: () => void;
 }
 
-function NavBody({ rail = false, onNavigate }: NavBodyProps) {
+function NavBody({ rail = false, onNavigate, onToggleRail }: NavBodyProps) {
   const pathname = usePathname();
-  const { staffMember, logout } = useAdmin();
+  const { staffMember, logout, hasPerm } = useAdmin();
   const counts = useAdminCounts();
   const [filter, setFilter] = useState("");
   const [collapsed, setCollapsed] = useState<string[]>([]);
@@ -213,11 +326,13 @@ function NavBody({ rail = false, onNavigate }: NavBodyProps) {
     () =>
       ADMIN_NAV.map((g) => ({
         ...g,
-        items: needle
-          ? g.items.filter((i) => i.label.toLowerCase().includes(needle))
-          : g.items,
+        items: g.items.filter(
+          (i) =>
+            (!i.perm || hasPerm(i.perm)) &&
+            (!needle || i.label.toLowerCase().includes(needle)),
+        ),
       })).filter((g) => g.items.length > 0),
-    [needle],
+    [needle, hasPerm],
   );
 
   const topPosition = [...(staffMember.positions ?? [])].sort(
@@ -226,13 +341,50 @@ function NavBody({ rail = false, onNavigate }: NavBodyProps) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className={rail ? "px-2 pt-4" : "px-3 pt-4"}>
+      {onToggleRail && (
         <div
           className={[
-            "flex items-center gap-2.5 rounded-xl",
+            "flex h-14 shrink-0 items-center border-b border-zinc-200 dark:border-zinc-800",
+            rail
+              ? "flex-col justify-center gap-1 px-2"
+              : "justify-between pr-2 pl-4",
+          ].join(" ")}
+        >
+          {rail ? (
+            <button
+              type="button"
+              onClick={onToggleRail}
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
+              className={ICON_BUTTON}
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+          ) : (
+            <>
+              <Brand />
+              <button
+                type="button"
+                onClick={onToggleRail}
+                aria-label="Collapse sidebar"
+                title="Collapse sidebar"
+                className={ICON_BUTTON}
+              >
+                <PanelLeftClose size={16} />
+              </button>
+            </>
+          )}
+        </div>
+      )}
+      <div className={rail ? "px-2 pt-4" : "px-3 pt-4"}>
+        <Link
+          href="/account"
+          onClick={onNavigate}
+          className={[
+            "flex items-center gap-2.5 rounded-xl transition-colors",
             rail
               ? "justify-center"
-              : "bg-white p-2.5 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800",
+              : "bg-white p-2.5 ring-1 ring-zinc-200 hover:ring-accent/40 dark:bg-zinc-900 dark:ring-zinc-800",
           ].join(" ")}
           title={rail ? staffMember.user.username : undefined}
         >
@@ -251,7 +403,7 @@ function NavBody({ rail = false, onNavigate }: NavBodyProps) {
               </p>
             </div>
           )}
-        </div>
+        </Link>
 
         {!rail && (
           <label className="mt-3 flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2.5 dark:border-zinc-800 dark:bg-zinc-900">
@@ -372,6 +524,13 @@ function NavBody({ rail = false, onNavigate }: NavBodyProps) {
           <ArrowLeft size={16} className="shrink-0" />
           {!rail && "Back to Omniplex"}
         </Link>
+        <ThemeToggle
+          label={!rail}
+          className={[
+            "flex w-full items-center gap-2.5 rounded-lg text-sm text-zinc-500 transition-colors hover:bg-zinc-200/60 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-50",
+            rail ? "justify-center p-2" : "px-2.5 py-1.5",
+          ].join(" ")}
+        />
         <button
           type="button"
           onClick={logout}
@@ -406,20 +565,11 @@ export function AdminSidebar() {
   return (
     <aside
       className={[
-        "sticky top-14 hidden h-[calc(100vh-3.5rem)] shrink-0 border-r border-zinc-200 bg-zinc-50/80 transition-[width] duration-200 lg:block dark:border-zinc-800 dark:bg-zinc-950",
+        "sticky top-0 hidden h-screen shrink-0 border-r border-zinc-200 bg-zinc-50/80 transition-[width] duration-200 lg:block dark:border-zinc-800 dark:bg-zinc-950",
         rail ? "w-16" : "w-64",
       ].join(" ")}
     >
-      <button
-        type="button"
-        onClick={toggleRail}
-        aria-label={rail ? "Expand sidebar" : "Collapse sidebar"}
-        title={rail ? "Expand sidebar" : "Collapse sidebar"}
-        className="absolute top-5 -right-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-colors hover:text-zinc-950 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        {rail ? <PanelLeftOpen size={12} /> : <PanelLeftClose size={12} />}
-      </button>
-      <NavBody rail={rail} />
+      <NavBody rail={rail} onToggleRail={toggleRail} />
     </aside>
   );
 }
@@ -433,30 +583,36 @@ export function AdminMobileNav() {
   const CurrentIcon = current?.icon ?? LayoutDashboard;
 
   return (
-    <div className="px-4 pt-6 lg:hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="flex w-full items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm font-medium text-zinc-950 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
-      >
-        <CurrentIcon size={15} className="text-accent" />
-        <span className="flex-1 text-left">
-          {current?.label ?? "Staff panel"}
-        </span>
-        <ChevronDown
-          size={15}
-          className={[
-            "text-zinc-400 transition-transform",
-            open ? "rotate-180" : "",
-          ].join(" ")}
-        />
-      </button>
-      {open && (
-        <div className="mt-2 h-[min(70vh,36rem)] overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
-          <NavBody onNavigate={() => setOpen(false)} />
-        </div>
-      )}
+    <div className="lg:hidden">
+      <div className="flex h-14 items-center justify-between border-b border-zinc-200 px-4 dark:border-zinc-800">
+        <Brand />
+        <ThemeToggle className={ICON_BUTTON} />
+      </div>
+      <div className="px-4 pt-4">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="flex w-full items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm font-medium text-zinc-950 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
+        >
+          <CurrentIcon size={15} className="text-accent" />
+          <span className="flex-1 text-left">
+            {current?.label ?? "Staff panel"}
+          </span>
+          <ChevronDown
+            size={15}
+            className={[
+              "text-zinc-400 transition-transform",
+              open ? "rotate-180" : "",
+            ].join(" ")}
+          />
+        </button>
+        {open && (
+          <div className="mt-2 h-[min(70vh,36rem)] overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
+            <NavBody onNavigate={() => setOpen(false)} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

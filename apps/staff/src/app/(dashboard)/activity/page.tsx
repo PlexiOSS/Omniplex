@@ -15,6 +15,7 @@ import {
   AdminFilterChips,
   AdminToolbar,
 } from "@/components/admin/AdminToolbar";
+import { DataValue, fieldLabel } from "@/components/admin/DataValue";
 import {
   type AuditEvent,
   type AuditEventList,
@@ -42,12 +43,6 @@ const SOURCES: (AuditSource | "")[] = [
 
 const inputClass =
   "h-9 min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-950 outline-none transition-colors placeholder:text-zinc-400 focus:border-accent/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50";
-
-function display(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "None";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-}
 
 function ActivityLog() {
   const { loginToken, hasPerm } = useAdmin();
@@ -319,10 +314,10 @@ function ActivityLog() {
                       {fields.map(([key, value]) => (
                         <div key={key} className="contents">
                           <dt className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                            {key.replace(/_/g, " ")}
+                            {fieldLabel(key)}
                           </dt>
                           <dd className="min-w-0 wrap-anywhere text-zinc-950 dark:text-zinc-50">
-                            {display(value)}
+                            <DataValue value={value} />
                           </dd>
                         </div>
                       ))}

@@ -119,53 +119,99 @@ export function DisciplinaryTypeEditModal({
         </div>
         <Input
           id="disc-type-max-expiry"
-          label="Max expiry (hours, optional)"
+          label="Longest it can last, in hours (leave empty for no limit)"
           type="number"
           min={0}
           value={maxExpiryHours}
           onChange={(e) => setMaxExpiryHours(e.target.value)}
         />
 
+        <fieldset className="space-y-2">
+          <legend className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            While it's active
+          </legend>
+          {[
+            {
+              value: false,
+              title: "Replace their permissions",
+              body: "The member only has the permissions picked below. Pick none to remove everything, like a leave of absence.",
+            },
+            {
+              value: true,
+              title: "Add permissions",
+              body: "The member keeps their own permissions and also gets the ones picked below, such as a marker.",
+            },
+          ].map((option) => (
+            <label
+              key={String(option.value)}
+              className={[
+                "flex cursor-pointer gap-3 rounded-xl border p-3 transition-colors",
+                additory === option.value
+                  ? "border-accent/50 bg-accent/5"
+                  : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700",
+              ].join(" ")}
+            >
+              <input
+                type="radio"
+                name="disc-type-mode"
+                checked={additory === option.value}
+                onChange={() => setAdditory(option.value)}
+                className="mt-0.5 accent-accent"
+              />
+              <span>
+                <span className="block text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                  {option.title}
+                </span>
+                <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                  {option.body}
+                </span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+
         <div className="space-y-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={selfAssignable}
-              onChange={(e) => setSelfAssignable(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-            />
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              Self-assignable
-            </span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={additory}
-              onChange={(e) => setAdditory(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-            />
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              Additory (stacks with other active disciplinaries)
-            </span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={needsApproval}
-              onChange={(e) => setNeedsApproval(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
-            />
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              Needs approval before taking effect
-            </span>
-          </label>
+          {[
+            {
+              checked: selfAssignable,
+              set: setSelfAssignable,
+              title: "Staff can request it for themselves",
+              body: "It shows under Request leave on their Account page.",
+            },
+            {
+              checked: needsApproval,
+              set: setNeedsApproval,
+              title: "Needs approval before it takes effect",
+              body: "Someone ranked above the member, other than whoever issued it, has to approve it.",
+            },
+          ].map((option) => (
+            <label
+              key={option.title}
+              className="flex cursor-pointer gap-3 rounded-xl border border-zinc-200 p-3 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
+            >
+              <input
+                type="checkbox"
+                checked={option.checked}
+                onChange={(e) => option.set(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent dark:border-zinc-700"
+              />
+              <span>
+                <span className="block text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                  {option.title}
+                </span>
+                <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                  {option.body}
+                </span>
+              </span>
+            </label>
+          ))}
         </div>
 
         <div>
           <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Permission limits (what a member is restricted to while this
-            applies)
+            {additory
+              ? "Permissions to add"
+              : "Permissions they keep (none removes everything)"}
           </p>
           <ArcadiaPermSelector
             catalog={catalog}

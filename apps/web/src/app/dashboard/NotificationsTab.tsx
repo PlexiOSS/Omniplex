@@ -61,6 +61,7 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
   staff_applications: ClipboardList,
   reports: Flag,
   account_security: ShieldCheck,
+  staff: ClipboardList,
 };
 
 const ACTION_CLASS =

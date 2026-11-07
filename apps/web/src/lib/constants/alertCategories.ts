@@ -9,4 +9,5 @@ export const ALERT_CATEGORY_LABELS: Record<AlertCategory, string> = {
   staff_applications: "Staff Applications",
   reports: "Reports",
   account_security: "Account & Security",
+  staff: "Staff Team",
 };

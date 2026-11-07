@@ -11,6 +11,7 @@ import { formatRelativeTime } from "@omniplex/core/utils/format";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Badge } from "@omniplex/ui/Badge";
 import { Button } from "@omniplex/ui/Button";
+import { TicketMessageBody } from "@omniplex/ui/tickets/TicketMessageBody";
 import {
   ArrowLeft,
   CalendarDays,
@@ -31,7 +32,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
-import { TicketMessageBody } from "@/components/tickets/TicketMessageBody";
 import { LoadingState } from "@/components/ui/PageStates";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { StatRow } from "@/components/ui/StatRow";

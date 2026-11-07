@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `"staff"` in `AlertCategory`, for notifications about a staff member's
+  leave and disciplinaries.
+
 ## [0.1.3] - 2026-11-04
 
 ### Added
