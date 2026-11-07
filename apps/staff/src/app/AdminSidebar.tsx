@@ -110,6 +110,12 @@ const ADMIN_NAV: AdminNavGroup[] = [
         count: "applications",
         perm: "view_apps",
       },
+      {
+        href: "/applications/forms",
+        label: "Application Forms",
+        icon: FileText,
+        perm: "manage_app_positions",
+      },
       { href: "/actions", label: "Global Actions", icon: Zap },
     ],
   },
@@ -226,11 +232,18 @@ const COLLAPSED_KEY = "omniplex-admin-collapsed-groups";
 const RAIL_KEY = "omniplex-admin-rail";
 
 export function findAdminNav(pathname: string) {
+  let best: { group: string; item: AdminNavItem } | null = null;
   for (const group of ADMIN_NAV) {
-    const item = group.items.find((i) => isActive(pathname, i.href));
-    if (item) return { group: group.label, item };
+    for (const item of group.items) {
+      if (
+        isActive(pathname, item.href) &&
+        (!best || item.href.length > best.item.href.length)
+      ) {
+        best = { group: group.label, item };
+      }
+    }
   }
-  return null;
+  return best;
 }
 
 function isActive(pathname: string, href: string) {
@@ -302,6 +315,7 @@ interface NavBodyProps {
 
 function NavBody({ rail = false, onNavigate, onToggleRail }: NavBodyProps) {
   const pathname = usePathname();
+  const activeHref = findAdminNav(pathname)?.item.href;
   const { staffMember, logout, hasPerm } = useAdmin();
   const counts = useAdminCounts();
   const [filter, setFilter] = useState("");
@@ -468,7 +482,7 @@ function NavBody({ rail = false, onNavigate, onToggleRail }: NavBodyProps) {
               {open && (
                 <ul className="mt-0.5 space-y-0.5">
                   {group.items.map(({ href, label, icon: Icon, count }) => {
-                    const active = isActive(pathname, href);
+                    const active = href === activeHref;
                     const value = count ? (counts[count] ?? 0) : 0;
                     return (
                       <li key={href}>
@@ -577,9 +591,7 @@ export function AdminSidebar() {
 export function AdminMobileNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const current = ADMIN_NAV.flatMap((g) => g.items).find((i) =>
-    isActive(pathname, i.href),
-  );
+  const current = findAdminNav(pathname)?.item;
   const CurrentIcon = current?.icon ?? LayoutDashboard;
 
   return (

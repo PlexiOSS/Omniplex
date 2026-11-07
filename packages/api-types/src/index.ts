@@ -1192,6 +1192,8 @@ export interface AppPosition {
   requires_main_server?: boolean;
   /** Go duration string, e.g. "48h0m0s" — 0s means no cooldown. */
   cooldown: string;
+  help_url?: string;
+  help_label?: string;
 }
 
 export interface AppMeta {

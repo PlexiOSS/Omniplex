@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-11-07
+
 ### Added
 
 - Notifications about your staff leave and disciplinaries show with their
   own icon.
+
+### Changed
+
+- Each position's requirements link on the Apply page comes from the
+  position itself, so new positions can have one too.
 
 ## [1.14.0] - 2026-11-05
 
