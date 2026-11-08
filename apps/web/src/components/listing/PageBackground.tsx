@@ -12,11 +12,13 @@ export function PageBackground({
   id,
   style,
   imageOverride,
+  previewColor,
 }: {
   target: "bot" | "server";
   id: string;
   style: PageStyle | null;
   imageOverride?: string | null;
+  previewColor?: string;
 }) {
   if (!style) return null;
   const image =
@@ -36,7 +38,7 @@ export function PageBackground({
       aria-hidden
       className={[
         "pointer-events-none absolute inset-x-0 top-0 -z-10 overflow-hidden",
-        style.fixed ? "bottom-0" : "h-[min(100vh,52rem)]",
+        previewColor || style.fixed ? "bottom-0" : "h-[min(100vh,52rem)]",
       ].join(" ")}
     >
       <div
@@ -44,18 +46,34 @@ export function PageBackground({
         style={{
           backgroundImage: layers,
           backgroundPosition: POSITIONS[style.image_position],
-          backgroundAttachment: style.fixed ? "fixed" : "scroll",
+          backgroundAttachment:
+            style.fixed && !previewColor ? "fixed" : "scroll",
           filter: style.blur ? `blur(${style.blur}px)` : undefined,
           transform: style.blur && !style.fixed ? "scale(1.06)" : undefined,
         }}
       />
       <div
-        className="absolute inset-0 bg-white dark:bg-zinc-950"
-        style={{ opacity: style.dim / 100 }}
+        className={
+          previewColor
+            ? "absolute inset-0"
+            : "absolute inset-0 bg-white dark:bg-zinc-950"
+        }
+        style={{
+          opacity: style.dim / 100,
+          backgroundColor: previewColor,
+        }}
       />
-      {!style.fixed && (
-        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-b from-transparent to-white dark:to-zinc-950" />
-      )}
+      {!style.fixed &&
+        (previewColor ? (
+          <div
+            className="absolute inset-x-0 bottom-0 h-2/3"
+            style={{
+              backgroundImage: `linear-gradient(to bottom, transparent, ${previewColor})`,
+            }}
+          />
+        ) : (
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-b from-transparent to-white dark:to-zinc-950" />
+        ))}
     </div>
   );
 }

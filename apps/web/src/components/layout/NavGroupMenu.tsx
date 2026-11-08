@@ -1,5 +1,6 @@
 "use client";
 
+import { useFitViewport } from "@omniplex/ui/useFitViewport";
 import { ArrowUpRight, ChevronDown, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -41,6 +42,8 @@ export function NavGroupMenu({
 }: NavGroupMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFitViewport(panelRef, open);
   const groups: NavMenuSection[] = sections ?? [{ items: items ?? [] }];
   const rich = groups.some((g) => g.items.some((i) => i.icon || i.description));
   const columns = groups.length;
@@ -106,6 +109,7 @@ export function NavGroupMenu({
       </button>
       {open && (
         <div
+          ref={panelRef}
           role="menu"
           className={[
             "absolute z-50 mt-2 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900",

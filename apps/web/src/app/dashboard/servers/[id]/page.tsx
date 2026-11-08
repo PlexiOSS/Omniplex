@@ -1,7 +1,11 @@
 "use client";
 
 import { servers } from "@omniplex/core/api";
-import { mirroredAvatarUrl, serverPath } from "@omniplex/core/utils/assets";
+import {
+  bannerUrl,
+  mirroredAvatarUrl,
+  serverPath,
+} from "@omniplex/core/utils/assets";
 import { formatCount } from "@omniplex/core/utils/format";
 import { Badge } from "@omniplex/ui/Badge";
 import {
@@ -205,6 +209,23 @@ function ServerSettings() {
           id={server.server_id}
           userId={session.user_id}
           token={session.token}
+          listing={{
+            name: server.name,
+            avatar: mirroredAvatarUrl(
+              "servers",
+              server.server_id,
+              server.avatar,
+            ),
+            short: server.short,
+            tags: server.tags,
+            banner: server.asset_versions?.banner
+              ? bannerUrl(
+                  "servers",
+                  server.server_id,
+                  server.asset_versions.banner,
+                )
+              : null,
+          }}
         />
       )}
       {section === "stats" && (

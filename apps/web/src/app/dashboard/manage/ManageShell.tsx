@@ -113,7 +113,7 @@ export function SettingsCard({
   return (
     <section
       className={[
-        "overflow-hidden rounded-2xl border bg-white dark:bg-zinc-900",
+        "overflow-clip rounded-2xl border bg-white dark:bg-zinc-900",
         tone === "danger"
           ? "border-red-200 dark:border-red-900/60"
           : "border-zinc-200 dark:border-zinc-800",

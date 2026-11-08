@@ -1,7 +1,11 @@
 "use client";
 
 import { bots } from "@omniplex/core/api";
-import { botPath, mirroredAvatarUrl } from "@omniplex/core/utils/assets";
+import {
+  bannerUrl,
+  botPath,
+  mirroredAvatarUrl,
+} from "@omniplex/core/utils/assets";
 import { Badge } from "@omniplex/ui/Badge";
 import {
   BarChart2,
@@ -206,6 +210,15 @@ function BotSettings() {
           id={bot.bot_id}
           userId={session.user_id}
           token={session.token}
+          listing={{
+            name: bot.user.username,
+            avatar: mirroredAvatarUrl("bots", bot.bot_id, bot.user.avatar),
+            short: bot.short,
+            tags: bot.tags,
+            banner: bot.asset_versions?.banner
+              ? bannerUrl("bots", bot.bot_id, bot.asset_versions.banner)
+              : null,
+          }}
         />
       )}
       {section === "commands" &&
