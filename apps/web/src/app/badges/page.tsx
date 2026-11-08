@@ -129,7 +129,7 @@ export default async function BadgesPage() {
           Check back soon.
         </EmptyState>
       ) : (
-        <div className="mx-auto max-w-5xl space-y-12">
+        <div className="space-y-12">
           {GROUPS.map((group) => {
             const items = list.filter((b) => groupOf(b) === group.key);
             if (items.length === 0) return null;

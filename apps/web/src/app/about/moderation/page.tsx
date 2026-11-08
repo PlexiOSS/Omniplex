@@ -240,7 +240,7 @@ export default async function ModerationPage() {
         }
       />
 
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="space-y-6">
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <SummaryStat
             label="Reports filed"

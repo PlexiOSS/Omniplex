@@ -264,7 +264,7 @@ function PremiumPageInner() {
         }
       />
 
-      <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         {PERKS.map(({ icon: Icon, title, body }) => (
           <div
             key={title}
@@ -283,7 +283,7 @@ function PremiumPageInner() {
         ))}
       </div>
 
-      <div className="mx-auto mt-10 grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-8">
           <section>
             <h2 className="mb-3 text-sm font-semibold text-zinc-950 dark:text-zinc-50">

@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { Banner } from "@/components/ui/Banner";
 import { cardCosmetics } from "@/lib/utils/cardCosmetics";
+import { tagAttr } from "@/lib/utils/tagFilter";
 
 interface BotCardProps {
   bot: IndexBot;
@@ -41,6 +42,10 @@ export function BotCard({ bot }: BotCardProps) {
     <Link
       href={href}
       data-nsfw={bot.nsfw || undefined}
+      data-tags={tagAttr(bot.tags)}
+      data-status={
+        bot.user.extra_data?.presence_unknown ? undefined : bot.user.status
+      }
       style={cosmetics.style}
       className={[
         cosmetics.className,

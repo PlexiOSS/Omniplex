@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { Banner } from "@/components/ui/Banner";
 import { cardCosmetics } from "@/lib/utils/cardCosmetics";
+import { tagAttr } from "@/lib/utils/tagFilter";
 
 interface ServerCardProps {
   server: IndexServer;
@@ -38,6 +39,7 @@ export function ServerCard({ server }: ServerCardProps) {
     <Link
       href={href}
       data-nsfw={server.nsfw || undefined}
+      data-tags={tagAttr(server.tags)}
       style={cosmetics.style}
       className={[
         cosmetics.className,

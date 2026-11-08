@@ -1,11 +1,18 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 
+const SPEC_FILE = process.env.OPENAPI_FILE;
 const SPEC_URL = process.env.OPENAPI_URL ?? "https://api.omniplex.gg/openapi";
+const SOURCE = SPEC_FILE ?? SPEC_URL;
 const SCHEMA_REF = "#/components/schemas/";
 
-const res = await fetch(SPEC_URL);
-if (!res.ok) throw new Error(`Fetching ${SPEC_URL} failed: ${res.status}`);
-const spec = await res.json();
+async function load() {
+  if (SPEC_FILE) return JSON.parse(await readFile(SPEC_FILE, "utf8"));
+  const res = await fetch(SPEC_URL);
+  if (!res.ok) throw new Error(`Fetching ${SPEC_URL} failed: ${res.status}`);
+  return res.json();
+}
+
+const spec = await load();
 
 const renamed = new Map();
 const schemas = spec.components?.schemas ?? {};
@@ -38,7 +45,7 @@ fixRefs(spec);
 await writeFile("./openapi.json", `${JSON.stringify(spec, null, 2)}\n`);
 
 console.log(
-  `Saved the OpenAPI schema from ${SPEC_URL}` +
+  `Saved the OpenAPI schema from ${SOURCE}` +
     (renamed.size
       ? ` (renamed ${renamed.size} schemas with "/" in their name)`
       : ""),

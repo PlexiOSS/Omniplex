@@ -2,7 +2,7 @@ name: Publish Docker Image
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["omniplex@v*", "v*"]
   workflow_dispatch:
 
 permissions:
@@ -14,6 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - id: version
+        if: github.ref_type == 'tag'
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#omniplex@}"
+          version="${version#v}"
+          actual=$(node -p "require('./apps/web/package.json').version")
+          if [ "$actual" != "$version" ]; then
+            echo "::error::Tag $tag says $version but apps/web/package.json is $actual"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
@@ -28,9 +41,9 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/omniplex
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=semver,pattern={{version}},value=${{ steps.version.outputs.version }},enable=${{ github.ref_type == 'tag' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.version }},enable=${{ github.ref_type == 'tag' }}
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
             type=sha,format=short
 
       - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8

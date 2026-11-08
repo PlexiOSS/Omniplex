@@ -5,7 +5,9 @@ export type UploadKind =
   | "team-avatar"
   | "team-banner"
   | "bot-banner"
-  | "server-banner";
+  | "server-banner"
+  | "bot-background"
+  | "server-background";
 
 export type UploadAuth =
   | { loginToken: string }

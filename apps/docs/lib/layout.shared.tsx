@@ -14,7 +14,7 @@ export const linkItems: LinkItemType[] = [
     type: "icon",
     text: "Discord",
     icon: <FaDiscord className="size-4" />,
-    url: "https://discord.gg/zmQE9TZF9J",
+    url: "https://discord.gg/KBCRuBKrHe",
     label: "Discord",
   },
   {

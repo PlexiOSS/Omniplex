@@ -2,6 +2,7 @@
 
 import { Pause, Play, Volume1, Volume2, VolumeX, X } from "lucide-react";
 import Link from "next/link";
+import { Container } from "@/components/layout/Container";
 import { useSoundPlayer } from "@/hooks/useSoundPlayer";
 
 function formatTime(seconds: number): string {
@@ -75,7 +76,7 @@ export function SoundPlayerBar() {
        * itself exactly. */}
       <div aria-hidden className="h-24 sm:h-16" />
       <div className="fixed inset-x-0 bottom-0 z-50 border-t border-zinc-200 bg-white/95 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/95">
-        <div className="mx-auto max-w-6xl px-4 py-3">
+        <Container className="py-3">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -137,7 +138,7 @@ export function SoundPlayerBar() {
           </div>
 
           <div className="mt-2 flex sm:hidden">{seekBar}</div>
-        </div>
+        </Container>
       </div>
     </>
   );

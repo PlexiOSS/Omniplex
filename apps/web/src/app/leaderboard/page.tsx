@@ -221,7 +221,7 @@ export default async function LeaderboardPage({ searchParams }: Props) {
         }
       />
 
-      <div className="mx-auto max-w-3xl">
+      <div>
         <div className="mb-6 flex justify-center">
           <div className="inline-flex rounded-lg border border-zinc-200 p-1 dark:border-zinc-800">
             {PERIODS.map((p) => (

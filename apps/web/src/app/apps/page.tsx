@@ -166,7 +166,7 @@ export default async function AppsPage() {
           Check back later, or follow announcements in our Discord.
         </EmptyState>
       ) : (
-        <div className="mx-auto max-w-4xl space-y-12">
+        <div className="space-y-12">
           {sections.map((section) => (
             <section key={section.key}>
               <div className="mb-4">

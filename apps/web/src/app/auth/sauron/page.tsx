@@ -102,7 +102,7 @@ function SauronInner() {
 
   if (error) {
     return (
-      <AuthShell>
+      <AuthShell step={2}>
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
           <AlertTriangle size={20} className="text-red-600 dark:text-red-400" />
         </div>
@@ -136,7 +136,7 @@ function SauronInner() {
   }
 
   return (
-    <AuthShell>
+    <AuthShell step={2}>
       <div className="flex flex-col items-center py-10 text-center">
         <div className="h-9 w-9 animate-spin rounded-full border-2 border-zinc-200 border-t-accent dark:border-zinc-800 dark:border-t-accent" />
         <p className="mt-4 text-sm font-medium text-zinc-950 dark:text-zinc-50">

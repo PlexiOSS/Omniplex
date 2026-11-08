@@ -71,7 +71,7 @@ export default function TicketsPage() {
           }
         />
       ) : (
-        <div className="mx-auto max-w-3xl">
+        <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               {ticketList === null

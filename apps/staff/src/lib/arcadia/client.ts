@@ -21,9 +21,12 @@ import type {
   ChangelogGenerateRequest,
   Hello,
   MfaLogin,
+  PageImageDecision,
+  PageStyleAction,
   PartialEntity,
   PartnerAction,
   Partners,
+  PendingPageImage,
   PlatformUser,
   PopplioStaffQuery,
   PromoCode,
@@ -706,6 +709,41 @@ export const arcadia = {
     },
   },
 
+  pageStyles: {
+    listPending: async (loginToken: string): Promise<PendingPageImage[]> => {
+      const res = await postQuery({
+        UpdatePageStyles: {
+          login_token: loginToken,
+          action: "ListPending" satisfies PageStyleAction,
+        },
+      });
+      return (await assertOk(res)).json();
+    },
+    approve: async (
+      loginToken: string,
+      decision: PageImageDecision,
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdatePageStyles: {
+          login_token: loginToken,
+          action: { Approve: decision } satisfies PageStyleAction,
+        },
+      });
+      await assertOk(res);
+    },
+    reject: async (
+      loginToken: string,
+      decision: PageImageDecision,
+    ): Promise<void> => {
+      const res = await postQuery({
+        UpdatePageStyles: {
+          login_token: loginToken,
+          action: { Reject: decision } satisfies PageStyleAction,
+        },
+      });
+      await assertOk(res);
+    },
+  },
   promoCodes: {
     redemptions: async (
       loginToken: string,

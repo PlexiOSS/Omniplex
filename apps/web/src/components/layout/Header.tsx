@@ -1,259 +1,25 @@
 "use client";
 
-import { STAFF_URL } from "@omniplex/core/api/config";
-import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
-import { Avatar } from "@omniplex/ui/Avatar";
 import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
-import {
-  Activity,
-  Award,
-  BookOpen,
-  Bot,
-  ChevronDown,
-  FileCode,
-  History,
-  LayoutList,
-  LayoutTemplate,
-  LogOut,
-  Menu,
-  Newspaper,
-  Package,
-  Palette,
-  Plus,
-  Rss,
-  Server,
-  Settings2,
-  Shield,
-  Smile,
-  SquareTerminal,
-  Sticker,
-  Tag,
-  Trophy,
-  Users,
-  Volume2,
-  X,
-} from "lucide-react";
+import { Menu, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { BsDiscord } from "react-icons/bs";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { SearchPalette } from "@/components/search/SearchPalette";
 import { CustomizationPanel } from "@/components/ui/CustomizationPanel";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
-import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
-import { NavGroupMenu, type NavMenuSection } from "./NavGroupMenu";
+import { NavGroupMenu } from "./NavGroupMenu";
+import { MegaMenu } from "./nav/MegaMenu";
+import { MobileDrawer } from "./nav/MobileDrawer";
+import { CREATE_SECTIONS } from "./nav/navConfig";
 import { UserMenu } from "./UserMenu";
-
-interface NavLink {
-  href: string;
-  label: string;
-}
-
-interface NavGroup {
-  label: string;
-  items: NavLink[];
-  sections: NavMenuSection[];
-}
 
 const ICON_BUTTON =
   "flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";
-
-function group(label: string, sections: NavMenuSection[]): NavGroup {
-  return { label, sections, items: sections.flatMap((s) => s.items) };
-}
-
-const NAV_LINKS: (NavLink | NavGroup)[] = [
-  { href: "/", label: "Home" },
-  group("Browse", [
-    {
-      title: "Listings",
-      items: [
-        {
-          href: "/bots",
-          label: "Bots",
-          description: "Discord bots for every server",
-          icon: Bot,
-        },
-        {
-          href: "/servers",
-          label: "Servers",
-          description: "Communities to join",
-          icon: Server,
-        },
-        {
-          href: "/packs",
-          label: "Packs",
-          description: "Curated bundles",
-          icon: Package,
-        },
-        {
-          href: "/collections",
-          label: "Collections",
-          description: "Best-of lists by votes",
-          icon: LayoutList,
-        },
-        {
-          href: "/tags",
-          label: "Tags",
-          description: "Browse by category",
-          icon: Tag,
-        },
-      ],
-    },
-    {
-      title: "Assets",
-      items: [
-        {
-          href: "/emojis",
-          label: "Emojis",
-          description: "Custom emojis to grab",
-          icon: Smile,
-        },
-        {
-          href: "/stickers",
-          label: "Stickers",
-          description: "Sticker packs",
-          icon: Sticker,
-        },
-        {
-          href: "/sounds",
-          label: "Sounds",
-          description: "Soundboard clips",
-          icon: Volume2,
-        },
-        {
-          href: "/templates",
-          label: "Templates",
-          description: "Ready-made server setups",
-          icon: LayoutTemplate,
-        },
-        {
-          href: "/themes",
-          label: "Themes",
-          description: "Discord profile colours",
-          icon: Palette,
-        },
-      ],
-    },
-  ]),
-  group("Community", [
-    {
-      title: "What's new",
-      items: [
-        {
-          href: "/blog",
-          label: "Blog",
-          description: "News and announcements",
-          icon: Newspaper,
-        },
-        {
-          href: "/changelog",
-          label: "Changelog",
-          description: "Every site update",
-          icon: History,
-        },
-        {
-          href: "/feed",
-          label: "Bot Updates",
-          description: "Changelogs from bots",
-          icon: Rss,
-        },
-      ],
-    },
-    {
-      title: "Explore",
-      items: [
-        {
-          href: "/commands",
-          label: "Commands",
-          description: "Search every bot command",
-          icon: SquareTerminal,
-        },
-        {
-          href: "/leaderboard",
-          label: "Leaderboard",
-          description: "Top voters",
-          icon: Trophy,
-        },
-        {
-          href: "/badges",
-          label: "Badges",
-          description: "What they mean",
-          icon: Award,
-        },
-      ],
-    },
-    {
-      title: "Help",
-      items: [
-        {
-          href: "/kb",
-          label: "Knowledge Base",
-          description: "Guides and FAQs",
-          icon: BookOpen,
-        },
-        {
-          href: "https://docs.omniplex.gg",
-          label: "Documentation",
-          description: "API and developer docs",
-          icon: FileCode,
-        },
-        {
-          href: "https://status.omniplex.gg",
-          label: "Status",
-          description: "Uptime and incidents",
-          icon: Activity,
-        },
-      ],
-    },
-  ]),
-  { href: "/search", label: "Search" },
-];
-
-const CREATE_SECTIONS: NavMenuSection[] = [
-  {
-    items: [
-      {
-        href: "/bots/add",
-        label: "Add a Bot",
-        description: "List your Discord bot",
-        icon: Bot,
-      },
-      {
-        href: "/servers/add",
-        label: "Add a Server",
-        description: "List your community",
-        icon: Server,
-      },
-      {
-        href: "/packs/add",
-        label: "Add a Pack",
-        description: "Bundle bots, emojis or sounds",
-        icon: Package,
-      },
-      {
-        href: "/themes/add",
-        label: "Submit a Theme",
-        description: "Share a profile theme",
-        icon: Palette,
-      },
-      {
-        href: "/teams/add",
-        label: "Create a Team",
-        description: "Manage listings together",
-        icon: Users,
-      },
-    ],
-  },
-];
-
-function isNavGroup(item: NavLink | NavGroup): item is NavGroup {
-  return "items" in item;
-}
 
 export function Header() {
   const pathname = usePathname();
@@ -261,6 +27,11 @@ export function Header() {
   const { session, isAuthenticated, logout } = useAuth();
   const { me } = useMe(session);
   const isStaff = me?.staff ?? false;
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   useEffect(() => {
     if (
@@ -273,46 +44,33 @@ export function Header() {
     }
   }, [me?.banned, pathname, router]);
 
-  const [customizeOpen, setCustomizeOpen] = useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
-  const [mobileCustomizeOpen, setMobileCustomizeOpen] = useState(false);
-
-  const links = NAV_LINKS;
-  const mobileLinks: (NavLink | NavGroup)[] = [
-    ...links,
-    group("Create", CREATE_SECTIONS),
-  ];
-  const isActiveLink = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
-  };
-
-  useEffect(() => {
-    if (!mobileNavOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [mobileNavOpen]);
-
-  // Close the mobile nav whenever the route changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is a trigger, not read in the body
   useEffect(() => {
-    setMobileNavOpen(false);
-    setOpenMobileGroup(null);
+    setDrawerOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
+      <header
+        className={[
+          "sticky top-0 z-40 border-b backdrop-blur-xl transition-colors",
+          scrolled
+            ? "border-zinc-200 bg-white/85 dark:border-zinc-800 dark:bg-zinc-950/85"
+            : "border-transparent bg-white/60 dark:bg-zinc-950/60",
+        ].join(" ")}
+      >
         <Container>
-          <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
-            {/* Logo */}
+          <div className="flex h-16 items-center gap-6">
             <Link
               href="/"
-              className="flex items-center gap-2 justify-self-start text-zinc-950 dark:text-zinc-50"
+              className="flex shrink-0 items-center gap-2 text-zinc-950 dark:text-zinc-50"
             >
               <OmniplexLogo size={26} />
               <span className="text-base font-semibold tracking-tight">
@@ -320,40 +78,11 @@ export function Header() {
               </span>
             </Link>
 
-            {/* Nav */}
-            <nav className="items-center hidden gap-1 md:flex">
-              {links.map((item) =>
-                isNavGroup(item) ? (
-                  <NavGroupMenu
-                    key={item.label}
-                    label={item.label}
-                    sections={item.sections}
-                    align="center"
-                    active={item.items.some((i) => isActiveLink(i.href))}
-                  />
-                ) : (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={[
-                      "relative rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                      isActiveLink(item.href)
-                        ? "bg-accent/10 text-accent"
-                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                    ].join(" ")}
-                  >
-                    {item.label}
-                    {isActiveLink(item.href) && (
-                      <span className="absolute inset-x-3 -bottom-2.25 h-0.5 rounded-full bg-accent" />
-                    )}
-                  </Link>
-                ),
-              )}
-            </nav>
+            <MegaMenu />
 
-            {/* Right side */}
-            <div className="col-start-3 flex items-center gap-1 justify-self-end">
-              {/* Create menu */}
+            <div className="ml-auto flex items-center gap-1">
+              <SearchPalette />
+
               <div className="hidden md:block">
                 <NavGroupMenu
                   label="Create"
@@ -362,45 +91,18 @@ export function Header() {
                 />
               </div>
 
-              {/* Social links */}
-              <a
-                href={SOCIAL_LINKS.discord}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`hidden md:flex ${ICON_BUTTON}`}
-                aria-label="Omniplex on Discord"
-              >
-                <BsDiscord size={16} />
-              </a>
-
-              {/* Mobile nav toggle */}
-              <button
-                type="button"
-                onClick={() => setMobileNavOpen((o) => !o)}
-                className={[
-                  "order-last flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:order-none md:hidden",
-                  mobileNavOpen
-                    ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                ].join(" ")}
-                aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
-                aria-expanded={mobileNavOpen}
-              >
-                {mobileNavOpen ? <X size={18} /> : <Menu size={18} />}
-              </button>
-
-              {/* Customize */}
-              <div className="relative">
+              <div className="relative hidden md:block">
                 <button
                   type="button"
                   onClick={() => setCustomizeOpen((o) => !o)}
                   className={[
-                    "hidden h-9 w-9 items-center justify-center rounded-lg transition-colors md:flex",
+                    ICON_BUTTON,
                     customizeOpen
                       ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
+                      : "",
                   ].join(" ")}
                   aria-label="Customize appearance"
+                  aria-expanded={customizeOpen}
                 >
                   <Settings2 size={16} />
                 </button>
@@ -410,12 +112,10 @@ export function Header() {
                 />
               </div>
 
-              <SearchPalette />
-
               <NotificationBell />
 
               {isAuthenticated && session ? (
-                <div className="hidden ml-1 md:block">
+                <div className="ml-1 hidden md:block">
                   <UserMenu
                     session={session}
                     isStaff={isStaff}
@@ -423,225 +123,35 @@ export function Header() {
                   />
                 </div>
               ) : (
-                <SignInLink className="items-center justify-center hidden h-8 px-3 ml-1 text-sm font-medium transition-opacity rounded-lg md:inline-flex bg-accent text-accent-fg hover:opacity-90">
+                <SignInLink className="ml-1 hidden h-9 items-center justify-center rounded-lg bg-accent px-4 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90 md:inline-flex">
                   Sign in
                 </SignInLink>
               )}
+
+              <button
+                ref={menuButtonRef}
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                className={`${ICON_BUTTON} md:hidden`}
+                aria-label="Open menu"
+                aria-expanded={drawerOpen}
+                aria-haspopup="dialog"
+              >
+                <Menu size={20} />
+              </button>
             </div>
           </div>
         </Container>
-
-        {/* Mobile nav panel */}
-        {mobileNavOpen && (
-          <nav className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-zinc-200 md:hidden dark:border-zinc-800">
-            <Container className="flex flex-col gap-1 py-3">
-              {mobileLinks.map((item) =>
-                isNavGroup(item) ? (
-                  <div
-                    key={item.label}
-                    className="pt-2 mt-2 border-t border-zinc-200 first:mt-0 first:border-0 first:pt-0 dark:border-zinc-800"
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setOpenMobileGroup((g) =>
-                          g === item.label ? null : item.label,
-                        )
-                      }
-                      className={[
-                        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                        item.items.some((i) => isActiveLink(i.href))
-                          ? "text-accent"
-                          : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                      ].join(" ")}
-                      aria-expanded={openMobileGroup === item.label}
-                    >
-                      {item.label}
-                      <ChevronDown
-                        size={14}
-                        className={[
-                          "transition-transform",
-                          openMobileGroup === item.label ? "rotate-180" : "",
-                        ].join(" ")}
-                      />
-                    </button>
-                    {openMobileGroup === item.label && (
-                      <div className="pl-2">
-                        {item.items.map((sub) => (
-                          <Link
-                            key={sub.href}
-                            href={sub.href}
-                            className={[
-                              "rounded-lg px-3 py-2 text-sm font-medium transition-colors block",
-                              isActiveLink(sub.href)
-                                ? "bg-accent/10 text-accent"
-                                : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                            ].join(" ")}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={[
-                      "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                      isActiveLink(item.href)
-                        ? "bg-accent/10 text-accent"
-                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                    ].join(" ")}
-                  >
-                    {item.label}
-                  </Link>
-                ),
-              )}
-              <div className="flex items-center justify-between gap-2 px-3 pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setMobileCustomizeOpen((o) => !o)}
-                  aria-expanded={mobileCustomizeOpen}
-                  className={[
-                    "flex items-center gap-2 text-sm font-medium transition-colors",
-                    mobileCustomizeOpen
-                      ? "text-accent"
-                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50",
-                  ].join(" ")}
-                >
-                  <Settings2 size={16} />
-                  Customize
-                  <ChevronDown
-                    size={14}
-                    className={
-                      mobileCustomizeOpen
-                        ? "rotate-180 transition-transform"
-                        : "transition-transform"
-                    }
-                  />
-                </button>
-              </div>
-              {mobileCustomizeOpen && (
-                <div className="-mx-2">
-                  <CustomizationPanel
-                    inline
-                    open
-                    onClose={() => setMobileCustomizeOpen(false)}
-                  />
-                </div>
-              )}
-              {isAuthenticated && session ? (
-                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOpenMobileGroup((g) =>
-                        g === "Account" ? null : "Account",
-                      )
-                    }
-                    className={[
-                      "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
-                      openMobileGroup === "Account"
-                        ? "text-accent"
-                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-                    ].join(" ")}
-                    aria-expanded={openMobileGroup === "Account"}
-                  >
-                    <Avatar
-                      src={mirroredAvatarUrl(
-                        "users",
-                        session.user_id,
-                        session.avatar,
-                      )}
-                      alt={session.username ?? "Your profile"}
-                      size={28}
-                    />
-                    <span className="flex-1 truncate text-zinc-700 dark:text-zinc-300">
-                      {session.username ?? "Your account"}
-                    </span>
-                    <ChevronDown
-                      size={14}
-                      className={[
-                        "transition-transform",
-                        openMobileGroup === "Account" ? "rotate-180" : "",
-                      ].join(" ")}
-                    />
-                  </button>
-                  {openMobileGroup === "Account" && (
-                    <div className="pl-2">
-                      <Link
-                        href="/dashboard"
-                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                      >
-                        Dashboard
-                      </Link>
-                      <Link
-                        href={`/user/${session.user_id}`}
-                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                      >
-                        View Profile
-                      </Link>
-                      <Link
-                        href="/apps"
-                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                      >
-                        Applications
-                      </Link>
-                      <Link
-                        href="/tickets"
-                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                      >
-                        Support Tickets
-                      </Link>
-                      {isStaff && (
-                        <a
-                          href={STAFF_URL}
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                        >
-                          <Shield size={14} />
-                          Staff Panel
-                        </a>
-                      )}
-                      <Link
-                        href="/shop"
-                        className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                      >
-                        Shop
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={logout}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
-                      >
-                        <LogOut size={14} />
-                        Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <SignInLink className="inline-flex items-center justify-center px-3 mx-3 text-sm font-medium transition-opacity rounded-lg h-9 bg-accent text-accent-fg hover:opacity-90">
-                  Sign in
-                </SignInLink>
-              )}
-
-              <div className="flex items-center gap-1 pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                <a
-                  href={SOCIAL_LINKS.discord}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={ICON_BUTTON}
-                  aria-label="Omniplex on Discord"
-                >
-                  <BsDiscord size={16} />
-                </a>
-              </div>
-            </Container>
-          </nav>
-        )}
       </header>
+
+      <MobileDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        session={isAuthenticated ? session : null}
+        isStaff={isStaff}
+        onLogout={logout}
+        returnFocusTo={menuButtonRef}
+      />
     </>
   );
 }

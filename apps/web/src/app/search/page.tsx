@@ -31,6 +31,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/PageStates";
 import { BotCardSkeleton } from "@/components/ui/Skeleton";
 import { BOT_TAGS } from "@/lib/constants/tags";
+import { scrollBehavior } from "@/lib/utils/motion";
 
 const EXAMPLES = ["moderation", "music", "giveaways", "economy"];
 
@@ -334,7 +335,7 @@ function SearchPageInner() {
         )}
       </div>
 
-      <div className="mx-auto mt-8 max-w-4xl">
+      <div className="mt-8">
         <div className="mb-2 flex items-center justify-between gap-3">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             Filter by tag
@@ -382,7 +383,7 @@ function SearchPageInner() {
       </div>
 
       {matchedQuickLinks.length > 0 && (
-        <div className="mx-auto mt-6 max-w-4xl space-y-2">
+        <div className="mt-6 space-y-2">
           {matchedQuickLinks.map((link) => (
             <Link
               key={link.href}
@@ -406,7 +407,7 @@ function SearchPageInner() {
       {!active ? (
         <>
           <SearchDiscover />
-          <section className="mx-auto mt-14 max-w-4xl">
+          <section className="mt-14">
             <h2 className="mb-4 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
               Explore
             </h2>
@@ -541,7 +542,7 @@ function SearchPageInner() {
                     perPage={data.per_page ?? 12}
                     onPageChange={(p) => {
                       update({ page: p > 1 ? String(p) : "" }, false);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      window.scrollTo({ top: 0, behavior: scrollBehavior() });
                     }}
                   />
                 </div>

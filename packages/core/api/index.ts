@@ -13,6 +13,7 @@ export { linkedRolesResource as linkedRoles } from "./resources/linkedRoles";
 export { listResource as list } from "./resources/list";
 export { notificationsResource as notifications } from "./resources/notifications";
 export { packsResource as packs } from "./resources/packs";
+export { pageStylesResource as pageStyles } from "./resources/pageStyles";
 export { paymentsResource as payments } from "./resources/payments";
 export { platformResource as platform } from "./resources/platform";
 export { remindersResource as reminders } from "./resources/reminders";

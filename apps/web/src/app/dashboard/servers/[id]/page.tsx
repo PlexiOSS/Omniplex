@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   KeyRound,
   Megaphone,
+  Paintbrush,
   Sparkles,
   TriangleAlert,
   Users,
@@ -22,6 +23,7 @@ import { Suspense, useEffect } from "react";
 import useSWR from "swr";
 import { BotChangelogSection } from "@/components/bots/BotChangelogSection";
 import { Container } from "@/components/layout/Container";
+import { PageStyleSection } from "@/components/listing/PageStyleSection";
 import { TokenManager } from "@/components/sessions/TokenManager";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,6 +43,7 @@ import { VoteMessagesSection } from "./VoteMessagesSection";
 const SECTIONS = [
   "details",
   "appearance",
+  "style",
   "stats",
   "changelog",
   "votes",
@@ -131,6 +134,7 @@ function ServerSettings() {
       items: [
         { key: "details" as Section, label: "Details", icon: FileText },
         { key: "appearance" as Section, label: "Appearance", icon: ImageIcon },
+        { key: "style" as Section, label: "Page style", icon: Paintbrush },
         { key: "stats" as Section, label: "Statistics", icon: BarChart2 },
         { key: "changelog" as Section, label: "Updates", icon: Megaphone },
         { key: "votes" as Section, label: "Vote messages", icon: Heart },
@@ -195,6 +199,14 @@ function ServerSettings() {
     >
       {section === "details" && <DetailsSection {...props} />}
       {section === "appearance" && <AppearanceSection {...props} />}
+      {section === "style" && (
+        <PageStyleSection
+          target="server"
+          id={server.server_id}
+          userId={session.user_id}
+          token={session.token}
+        />
+      )}
       {section === "stats" && (
         <StatGrid
           stats={[

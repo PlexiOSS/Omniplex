@@ -1,52 +1,172 @@
-import { Award, MessageSquareText, PlusCircle, ThumbsUp } from "lucide-react";
+import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
+import {
+  ArrowLeft,
+  Award,
+  Check,
+  MessageSquareText,
+  PlusCircle,
+  ShieldCheck,
+  ThumbsUp,
+} from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { BotConstellation } from "@/components/auth/BotConstellation";
+
+const STEPS = ["Discord", "Finishing up"];
 
 const PERKS = [
-  { icon: ThumbsUp, text: "Vote for the bots and servers you love" },
-  { icon: MessageSquareText, text: "Leave reviews and follow updates" },
-  { icon: PlusCircle, text: "List your own bot, server or pack" },
-  { icon: Award, text: "Earn badges and Discord linked roles" },
+  {
+    icon: ThumbsUp,
+    title: "Vote for what you love",
+    body: "Help the best bots and servers rise to the top.",
+  },
+  {
+    icon: MessageSquareText,
+    title: "Review and follow",
+    body: "Leave reviews and get updates from listings you like.",
+  },
+  {
+    icon: PlusCircle,
+    title: "List your own",
+    body: "Add a bot, server or pack and manage it with your team.",
+  },
+  {
+    icon: Award,
+    title: "Earn badges",
+    body: "Collect badges and turn them into Discord linked roles.",
+  },
 ];
 
-export function AuthShell({ children }: { children: ReactNode }) {
+function Steps({ step }: { step: number }) {
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-12 sm:py-20">
-      <div className="grid w-full max-w-4xl overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl shadow-black/5 md:grid-cols-[1fr_1.1fr] dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/40">
-        <div className="relative overflow-hidden bg-linear-to-br from-indigo-500 via-indigo-700 to-[#1e1b4b] p-6 text-white sm:p-8">
-          <div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-violet-400/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-indigo-300/20 blur-3xl" />
-          <div className="relative flex items-center gap-3 md:flex-col md:items-start md:gap-5">
+    <ol className="flex items-center gap-2 text-xs">
+      {STEPS.map((label, i) => {
+        const n = i + 1;
+        const done = n < step;
+        const current = n === step;
+        return (
+          <li key={label} className="flex items-center gap-2">
+            <span
+              className={[
+                "flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold",
+                done
+                  ? "bg-accent text-accent-fg"
+                  : current
+                    ? "bg-accent/15 text-accent ring-1 ring-accent"
+                    : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500",
+              ].join(" ")}
+            >
+              {done ? <Check size={11} /> : n}
+            </span>
+            <span
+              className={
+                current
+                  ? "font-medium text-zinc-950 dark:text-zinc-50"
+                  : "text-zinc-400 dark:text-zinc-500"
+              }
+            >
+              {label}
+            </span>
+            {n < STEPS.length && (
+              <span className="mx-1 h-px w-6 bg-zinc-200 dark:bg-zinc-700" />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export function AuthShell({
+  children,
+  step = 1,
+}: {
+  children: ReactNode;
+  step?: 1 | 2;
+}) {
+  return (
+    <div className="grid min-h-screen flex-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <aside className="relative hidden overflow-hidden bg-zinc-950 text-white lg:flex lg:flex-col">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(99_102_241/0.5),transparent_60%),radial-gradient(ellipse_at_bottom_right,rgb(139_92_246/0.32),transparent_55%)]" />
+        <BotConstellation />
+
+        <div className="relative flex flex-1 flex-col justify-between p-10 xl:p-14">
+          <Link href="/" className="flex w-fit items-center gap-2.5">
+            <OmniplexLogo size={28} />
+            <span className="text-base font-semibold tracking-tight">
+              Omniplex
+            </span>
+          </Link>
+
+          <div className="max-w-md">
             {/* biome-ignore lint/performance/noImgElement: static brand asset from /public */}
             <img
               src="/brand/logo/omniplex-app-icon-1024.png"
               alt=""
-              className="h-12 w-12 rounded-xl shadow-lg md:h-16 md:w-16"
+              className="h-14 w-14 rounded-2xl shadow-lg shadow-indigo-950/50 ring-1 ring-white/15"
             />
-            <div>
-              <h2 className="text-xl font-semibold md:text-2xl">Omniplex</h2>
-              <p className="text-sm text-indigo-100/80">
-                The best place to find Discord bots and servers.
-              </p>
-            </div>
+            <h1 className="mt-6 text-3xl font-semibold tracking-tight xl:text-4xl">
+              The best place to find Discord bots and servers.
+            </h1>
+            <ul className="mt-10 space-y-5">
+              {PERKS.map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex gap-3.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/8 text-indigo-200 ring-1 ring-white/10">
+                    <Icon size={17} />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-medium">{title}</span>
+                    <span className="block text-sm text-zinc-400">{body}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="relative mt-8 hidden space-y-3.5 md:block">
-            {PERKS.map(({ icon: Icon, text }) => (
-              <li
-                key={text}
-                className="flex items-center gap-3 text-sm text-indigo-50/90"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
-                  <Icon size={14} />
-                </span>
-                {text}
-              </li>
-            ))}
-          </ul>
+
+          <p className="flex items-center gap-1.5 text-xs text-zinc-400">
+            <ShieldCheck size={12} />
+            Free, and you sign in with Discord. No new password.
+          </p>
         </div>
-        <div className="flex flex-col justify-center p-6 sm:p-10">
-          {children}
+      </aside>
+
+      <section className="flex min-h-screen flex-col px-6 py-6 sm:px-10">
+        <Link
+          href="/"
+          className="flex w-fit items-center gap-2 text-zinc-950 lg:invisible dark:text-zinc-50"
+        >
+          <OmniplexLogo size={26} />
+          <span className="text-base font-semibold tracking-tight">
+            Omniplex
+          </span>
+        </Link>
+
+        <div className="flex flex-1 items-center justify-center py-12">
+          <div className="w-full max-w-sm">
+            <Steps step={step} />
+            <div className="mt-10">{children}</div>
+          </div>
         </div>
-      </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-zinc-900 dark:hover:text-zinc-50"
+          >
+            <ArrowLeft size={12} />
+            Back to Omniplex
+          </Link>
+          <span>
+            <Link href="/legal/terms" className="hover:text-accent">
+              Terms
+            </Link>
+            {" · "}
+            <Link href="/legal/privacy" className="hover:text-accent">
+              Privacy
+            </Link>
+          </span>
+        </div>
+      </section>
     </div>
   );
 }

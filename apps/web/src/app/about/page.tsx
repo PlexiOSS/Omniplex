@@ -123,104 +123,165 @@ const LINKS = [
   },
 ];
 
+function sinceYear(iso: string | null | undefined) {
+  return iso ? new Date(iso).getFullYear() : null;
+}
+
+function SectionHeading({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="max-w-2xl">
+      <h2 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+        {title}
+      </h2>
+      {description && (
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          {description}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default async function AboutPage() {
-  const stats = await list.getStats().catch(() => null);
+  const [stats, history] = await Promise.all([
+    list.getStats().catch(() => null),
+    list.getStatsHistory().catch(() => null),
+  ]);
+  const votesSince = sinceYear(history?.votes_since);
 
   const numbers = stats
     ? [
-        { label: "Listed bots", value: totalListedBots(stats) },
         {
-          label: "Listed servers",
-          value: stats.total_approved_servers + stats.total_certified_servers,
+          label: "Bots listed",
+          value: formatCount(totalListedBots(stats)),
+          hint: `${formatCount(stats.total_certified_bots)} certified`,
         },
-        { label: "Votes cast", value: stats.total_votes },
-        { label: "Users", value: stats.total_users },
+        {
+          label: "Servers listed",
+          value: formatCount(
+            stats.total_approved_servers + stats.total_certified_servers,
+          ),
+          hint: "and growing",
+        },
+        {
+          label: "Votes cast",
+          value: formatCount(history?.votes_all_time ?? stats.total_votes),
+          hint: history
+            ? votesSince
+              ? `since ${votesSince}`
+              : "all time"
+            : "this month",
+        },
+        {
+          label: "Members",
+          value: formatCount(stats.total_users),
+          hint: history
+            ? `${formatCount(history.voters_all_time)} have voted`
+            : "signed up",
+        },
       ]
     : [];
 
   return (
     <>
       <section className="relative overflow-hidden border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40">
-        <div className="pointer-events-none absolute -top-32 left-1/2 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-accent/15 blur-3xl" />
-        <Container className="relative py-20 text-center">
-          {/* biome-ignore lint/performance/noImgElement: static brand asset from /public */}
-          <img
-            src="/brand/logo/omniplex-app-icon-1024.png"
-            alt=""
-            className="mx-auto h-16 w-16 rounded-2xl shadow-lg"
-          />
-          <h1 className="mx-auto mt-6 max-w-2xl text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
-            Find what makes your server great
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-zinc-500 dark:text-zinc-400">
-            Omniplex is a community-driven place to discover, vote for and list
-            Discord bots and servers.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/bots"
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-accent px-5 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90"
-            >
-              Browse bots <ArrowRight size={14} />
-            </Link>
-            <Link
-              href="/bots/add"
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
-            >
-              Add your bot
-            </Link>
-            <Link
-              href="/servers/add"
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
-            >
-              Add your server
-            </Link>
+        <div className="pointer-events-none absolute -top-40 -left-20 h-96 w-[36rem] rounded-full bg-accent/15 blur-3xl" />
+        <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          <div>
+            {/* biome-ignore lint/performance/noImgElement: static brand asset from /public */}
+            <img
+              src="/brand/logo/omniplex-app-icon-1024.png"
+              alt=""
+              className="h-14 w-14 rounded-2xl shadow-lg"
+            />
+            <h1 className="mt-6 max-w-xl text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
+              Find what makes your server great
+            </h1>
+            <p className="mt-4 max-w-lg text-lg text-zinc-500 dark:text-zinc-400">
+              Omniplex is a community-driven place to discover, vote for and
+              list Discord bots and servers.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/bots"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-accent px-5 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90"
+              >
+                Browse bots <ArrowRight size={14} />
+              </Link>
+              <Link
+                href="/bots/add"
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+              >
+                Add your bot
+              </Link>
+              <Link
+                href="/servers/add"
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+              >
+                Add your server
+              </Link>
+            </div>
           </div>
 
           {numbers.length > 0 && (
-            <div className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
-              {numbers.map(({ label, value }) => (
-                <div
-                  key={label}
-                  className="rounded-xl border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
-                >
-                  <p className="text-2xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
-                    {formatCount(value)}
-                  </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {label}
-                  </p>
-                </div>
-              ))}
+            <div className="rounded-3xl border border-zinc-200 bg-white p-2 shadow-xl shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
+              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-zinc-200 dark:bg-zinc-800">
+                {numbers.map(({ label, value, hint }) => (
+                  <div key={label} className="bg-white p-5 dark:bg-zinc-900">
+                    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      {label}
+                    </p>
+                    <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-zinc-950 dark:text-zinc-50">
+                      {value}
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">
+                      {hint}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/about/stats"
+                className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium text-zinc-700 transition-colors hover:text-accent dark:text-zinc-300"
+              >
+                {history
+                  ? `${formatCount(history.approvals)} listings approved by our team since ${sinceYear(history.reviews_since) ?? 2023}`
+                  : "See all platform stats"}
+                <ArrowRight size={14} className="shrink-0" />
+              </Link>
             </div>
           )}
-          <Link
-            href="/about/stats"
-            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
-          >
-            See all platform stats <ArrowRight size={13} />
-          </Link>
         </Container>
       </section>
 
       <Container className="py-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-            Our story
-          </h2>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-300">
-            Omniplex is built on the foundation of Infinity Bot List. We kept
-            what the community trusted (fair reviews, real votes and a team that
-            answers) and rebuilt everything around it: a faster site, servers
-            and packs alongside bots, and tools that help developers and server
-            owners grow.
-          </p>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
+          <SectionHeading title="Our story" />
+          <div className="space-y-4 text-zinc-600 dark:text-zinc-300">
+            <p>
+              Omniplex is built on the foundation of Infinity Bot List. We kept
+              what the community trusted (fair reviews, real votes and a team
+              that answers) and rebuilt everything around it: a faster site,
+              servers and packs alongside bots, and tools that help developers
+              and server owners grow.
+            </p>
+            <p>
+              Every listing is still checked by a person on our team before it
+              goes live.
+            </p>
+          </div>
         </div>
 
-        <h2 className="mt-20 text-center text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-          What you can do
-        </h2>
-        <div className="mx-auto mt-8 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-20">
+          <SectionHeading title="What you can do" />
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
@@ -239,13 +300,13 @@ export default async function AboutPage() {
           ))}
         </div>
 
-        <h2 className="mt-20 text-center text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-          Meet the bots
-        </h2>
-        <p className="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Three bots keep Omniplex running behind the scenes.
-        </p>
-        <div className="mx-auto mt-8 grid max-w-5xl gap-4 md:grid-cols-3">
+        <div className="mt-20">
+          <SectionHeading
+            title="Meet the bots"
+            description="Three bots keep Omniplex running behind the scenes."
+          />
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
           {BOTS.map((b) => (
             <div
               key={b.key}
@@ -269,14 +330,13 @@ export default async function AboutPage() {
           ))}
         </div>
 
-        <h2 className="mt-20 text-center text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-          Open and transparent
-        </h2>
-        <p className="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Powered by Popplio, our open-source backend, with a public API anyone
-          can build on.
-        </p>
-        <div className="mx-auto mt-8 grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-20">
+          <SectionHeading
+            title="Open and transparent"
+            description="Powered by Popplio, our open-source backend, with a public API anyone can build on."
+          />
+        </div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {LINKS.map(({ href, label, description, icon: Icon, external }) => (
             <Link
               key={href}

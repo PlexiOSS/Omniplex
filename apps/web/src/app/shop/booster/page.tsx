@@ -147,8 +147,8 @@ export default function BoosterPerksPage() {
         description="Boosting the Omniplex Discord server helps keep the lights on. Here's what you get back."
       />
 
-      <div className="mx-auto max-w-3xl space-y-6">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:order-2">
           {perkList.map(({ icon: Icon, title, body }) => (
             <div
               key={title}

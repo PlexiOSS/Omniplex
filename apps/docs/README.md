@@ -28,6 +28,15 @@ bun run openapi
 
 This downloads the schema from `https://api.omniplex.gg/openapi` (set `OPENAPI_URL` to use another instance) and saves it as `openapi.json`. Commit it, so the docs always build from a known schema instead of whatever the live API returns at build time.
 
+To document endpoints before they're deployed, build the schema from Popplio's source instead. It doesn't need a database or a config file:
+
+```bash
+cd popplio
+go run ./cmd/openapi /tmp/popplio-openapi.json
+cd ../omniplex/apps/docs
+OPENAPI_FILE=/tmp/popplio-openapi.json bun run openapi
+```
+
 The script renames schemas whose names contain `/`, such as `types.ItemList[popplio/types.ShopCoupon]`. Popplio's generator produces those for Go generic types, and they aren't valid in a JSON reference.
 
 If the schema gains or loses a tag, update the page order in `content/docs/api-reference/meta.json`.

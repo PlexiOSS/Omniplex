@@ -73,7 +73,7 @@ function AutoVoteShopInner() {
       {!pricing || !statusLoaded ? (
         <LoadingState label="Loading Auto-vote…" />
       ) : (
-        <div className="mx-auto max-w-3xl space-y-6">
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
           {status?.subscribed ? (
             <section className="flex flex-wrap items-center gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5 sm:p-6">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20 dark:text-emerald-400">
@@ -106,7 +106,7 @@ function AutoVoteShopInner() {
             />
           )}
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
             {features.map(({ icon: Icon, title, body }) => (
               <div
                 key={title}

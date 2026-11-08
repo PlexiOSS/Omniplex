@@ -7,6 +7,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-11-08
+
+### Added
+
+- Customize has 14 presets that set the whole look, not just the accent:
+  colours, font, corners, spacing, and for some page width, text size and
+  light or dark mode. New ones include Midnight (true black), Arctic, Dusk,
+  Paper, Dashboard (dense and wide) and Clear (larger, high legibility
+  text), and Discord now uses Discord's greys. Each preset shows a small
+  preview.
+- A Surface setting retints the site's greys: Default, Midnight, Discord,
+  Slate, Arctic, Dusk, Moss, Stone and Paper.
+- Layout settings for density (Compact, Cozy, Spacious), text size (Small
+  to Larger) and motion (follow the device, always reduce, or always
+  animate).
+- Content filters to hide bots and servers by tag, and to hide bots seen
+  offline. Bots whose status isn't known still show. This needs the
+  matching Popplio release, which marks unknown presence; older versions
+  report those bots as offline.
+- Signed-in users' customization settings sync to their account and follow
+  them to other devices. The panel footer says whether settings are synced
+  or only saved on this device.
+- A **Customizing Omniplex** article in the knowledge base. **How to Apply**
+  covers the new question types and the Beta Testers, Listing Appeal and
+  Spotlight Request applications.
+- Application forms support new kinds of questions: single and multiple
+  choice, yes or no, number, link and a 1 to 5 rating, plus optional
+  questions and follow-ups that only appear for certain answers.
+- **Page style** in bot and server settings for premium listings: upload a
+  background image, pick a gradient and an accent colour, and set how much
+  it fades, blurs and where it sits, with a live preview. Images are
+  re-encoded on upload (anything that isn't a real image is refused, and
+  hidden metadata such as location is removed), and show on the page once
+  our team has approved them. The accent colour applies to that page only.
+- An **Over time** section on Platform Stats with monthly charts of votes,
+  reviews (approved and denied), new bots and servers, and new members,
+  switchable between all time, 2 years and 12 months.
+
+### Changed
+
+- The Page style section offers the new Page Style pass from the Credit
+  shop alongside premium, and says when an active pass ends.
+- "How votes become credits" in the Credit shop reads as a rate (First 50
+  votes, Next 150 votes, Every vote after that, each with its credits per
+  vote), since the last tier covers every vote past it.
+- Sign-in pages match the staff panel: a full-screen split with Omniplex's
+  bots in the background on one side and the sign-in steps on the other,
+  without the site header and footer.
+- The Shop has a storefront at `/shop` instead of a row of tabs: one card
+  for each of Premium, Auto-vote, the credit shop and booster perks, with
+  the price and what you get. Each product page has a breadcrumb back to
+  the shop and "More from the shop" at the bottom.
+- The About page has a two-column hero with a stats panel, and the Team
+  page lists people in a grid under left-aligned role headings with a link
+  to open applications.
+- Sections in the phone menu start collapsed, apart from the one you're in.
+- A simpler footer: the logo, tagline and social links on one side, and
+  four short columns (Product, Resources, Company, Legal) on the other,
+  instead of six long lists that repeated the navigation.
+- Pages use the same width as the home page instead of their own narrower
+  column: Search, Badges, Tags, Blog, About, Team, Moderation, Compare,
+  Applications, Tickets, the Leaderboard, the bot and server comparison
+  tables, and the Shop tabs. Reading pages (articles, legal pages, a single
+  ticket) keep a comfortable line length. The Auto-vote and Booster perks
+  tabs use the same two-column layout as Premium.
+- A new navigation bar. Bots, Servers and Shop are direct links, and
+  **Explore** and **Community** open a full-width panel under the bar (on
+  hover or click) with a featured card, instead of floating dropdowns.
+  Search is a proper search field, Create is a compact button, and the
+  separate Home and Search links are gone (the logo goes home). On phones
+  the menu is a sheet that slides up from the bottom, with quick links,
+  every section, Create, Customize and your account in one place. Drag its
+  handle (or the menu itself, from the top) down to close it, like the
+  sheets in iOS.
+
+### Fixed
+
+- Customize settings now apply everywhere. With Spacious density the home
+  page's Spotlight showed two cards per row instead of three, because its
+  widths assumed the default gap. Sticky sidebars had the same assumption.
+  The sound player bar follows Page width, code blocks and dotted
+  backgrounds follow Surface, all corners and article content follow
+  Corners, and smooth scrolling and the home page's rotating word follow
+  Motion.
+- The About page and link previews counted only this month's bot votes as
+  "Votes cast", so they disagreed with Platform Stats. They show every vote
+  ever cast now.
+- A large empty gap under the footer on Platform Stats and in owner
+  analytics. The screen-reader tables behind the charts weren't really
+  hidden, so they stretched the page.
+- "Votes cast" on Platform Stats only counted this month's votes for bots.
+  It now shows every vote ever cast, with this month's count underneath.
+
 ## [1.16.0] - 2026-11-07
 
 ### Fixed

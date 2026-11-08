@@ -86,7 +86,7 @@ const QUICK_LINKS = [
 ];
 
 const COMMUNITY_LINKS = [
-  { icon: FaDiscord, text: "Discord", href: "https://discord.gg/zmQE9TZF9J" },
+  { icon: FaDiscord, text: "Discord", href: "https://discord.gg/KBCRuBKrHe" },
   { icon: FaGithub, text: "GitHub", href: "https://github.com/PlexiOSS" },
   {
     icon: FaTwitter,

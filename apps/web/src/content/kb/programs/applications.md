@@ -1,15 +1,15 @@
 ---
 title: How to Apply
-description: Applying for the staff team, dev team, partnerships, or certification through the in-app form.
+description: Applying for the staff team, dev team, partnerships, certification, beta testing, appeals, or a spotlight through the in-app form.
 order: 3
 ---
 
-Staff team, dev team, partnership, and certification (bot **or** server) applications are all submitted the same way, through [Apply](/apps).
+Staff team, dev team, partnership, certification (bot **or** server), beta tester, listing appeal, and spotlight applications are all submitted the same way, through [Apply](/apps).
 
 ## Applying
 
 1. Go to [Apply](/apps) and pick a position. Closed positions are shown but can't be applied to.
-2. Fill out the position's questions. Short answers have a generous length limit; longer answers need at least 50 characters, so a one-line response won't pass validation.
+2. Fill out the position's questions. Some are choices, yes or no, numbers, links or ratings, and some only appear based on an earlier answer. Longer written answers have a minimum length, usually 50 characters, and the form shows your count as you type.
 3. Submit. You'll be able to track its status from your [dashboard](/dashboard)'s Applications tab.
 
 ## While it's pending
@@ -27,4 +27,10 @@ The application form itself only covers the mechanics of applying. For what we a
 - [Certification Program](/kb/programs/certification): requirements and benefits for getting your bot or server certified.
 - [Partner Requirements](/kb/programs/partnership): what we look for in a partnership.
 
-Staff team and dev team positions don't have a separate requirements page yet. The questions on the application itself cover what we're looking for.
+Staff team members must be 16 or older. Staff team and dev team positions don't have a separate requirements page yet. The questions on the application itself cover what we're looking for.
+
+## Other applications
+
+- **Beta Testers**: try new features early and help us find what's broken. Approved testers get the Beta Tester badge.
+- **Listing Appeal**: if you think your bot or server was denied, removed or vote banned by mistake, management will take another look. For a ban on your own account, use the Ban Appeal instead.
+- **Spotlight Request**: pitch your bot, server or pack to be featured in a blog post or a collection.

@@ -116,7 +116,7 @@ export default async function BlogPage({ searchParams }: Props) {
           Check back soon.
         </EmptyState>
       ) : (
-        <div className="mx-auto max-w-5xl space-y-6">
+        <div className="space-y-6">
           <Link
             href={`/blog/${featured.slug}`}
             className="group relative block overflow-hidden rounded-3xl border border-accent/20 bg-linear-to-br from-accent/15 via-white to-white p-6 transition-colors hover:border-accent/40 sm:p-10 dark:via-zinc-900 dark:to-zinc-900"

@@ -23,7 +23,7 @@ export function ServiceUnavailable({
     <div
       className={[
         "flex flex-col items-center justify-center text-center",
-        inline ? "py-24" : "min-h-[calc(100vh-3.5rem)] py-16",
+        inline ? "py-24" : "min-h-[calc(100vh-var(--spacing)*16)] py-16",
       ].join(" ")}
     >
       {/* Pulsing logo */}

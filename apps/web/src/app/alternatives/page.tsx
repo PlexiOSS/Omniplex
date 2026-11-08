@@ -103,7 +103,7 @@ export default function AlternativesPage() {
         description="Already listed on top.gg, Discord Bot List or another directory? Here's what Omniplex does differently, and how to bring your bot or server over in a few minutes."
       />
 
-      <div className="mx-auto max-w-5xl space-y-14">
+      <div className="space-y-14">
         <section>
           <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
             What you get on Omniplex

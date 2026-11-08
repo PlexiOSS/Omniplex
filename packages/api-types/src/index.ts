@@ -1189,6 +1189,67 @@ export interface ListIndexServer {
 // List-wide stats
 // ---------------------------------------------------------------------------
 
+export type PageGradient =
+  | "aurora"
+  | "sunset"
+  | "ocean"
+  | "forest"
+  | "candy"
+  | "midnight"
+  | "ember"
+  | "mono";
+
+export interface PageStyle {
+  gradient: PageGradient | null;
+  accent: string | null;
+  image_version: string | null;
+  dim: number;
+  blur: number;
+  image_position: "top" | "center" | "bottom";
+  fixed: boolean;
+}
+
+export interface ManagedPageStyle extends PageStyle {
+  premium: boolean;
+  unlocked_until: string | null;
+  pending_version: string | null;
+  pending_since: string | null;
+  rejected_reason: string | null;
+}
+
+export interface PageStyleUpdate {
+  gradient: PageGradient | null;
+  accent: string | null;
+  dim: number;
+  blur: number;
+  image_position: "top" | "center" | "bottom";
+  fixed: boolean;
+  remove_image?: boolean;
+}
+
+export interface StatsHistoryMonth {
+  month: string;
+  votes: number | null;
+  voters: number | null;
+  approved: number | null;
+  denied: number | null;
+  new_bots: number;
+  new_servers: number;
+  new_users: number | null;
+}
+
+export interface StatsHistory {
+  votes_all_time: number;
+  votes_this_month: number;
+  voters_all_time: number;
+  votes_since: string | null;
+  approvals: number;
+  denials: number;
+  reviews_since: string | null;
+  months: StatsHistoryMonth[];
+  generated_at: string;
+}
+
 export interface ListStats {
   total_bots: number;
   total_approved_bots: number;
@@ -1214,12 +1275,34 @@ export interface ListStats {
 // Applications
 // ---------------------------------------------------------------------------
 
+export type AppQuestionType =
+  | "short"
+  | "long"
+  | "choice"
+  | "multi"
+  | "yesno"
+  | "number"
+  | "url"
+  | "rating";
+
+export interface AppQuestionCondition {
+  question_id: string;
+  values: string[];
+}
+
 export interface AppQuestion {
   id: string;
   question: string;
   paragraph: string;
   placeholder: string;
   short: boolean;
+  type?: AppQuestionType;
+  options?: string[];
+  optional?: boolean;
+  min_length?: number;
+  max_length?: number;
+  show_if?: AppQuestionCondition | null;
+  flag?: string[];
 }
 
 export interface AppPosition {
@@ -1339,6 +1422,11 @@ export interface BoosterPerkTarget {
   target_id: string;
   name: string;
   avatar: string;
+}
+
+export interface SitePrefs {
+  prefs: Record<string, unknown>;
+  updated_at: string | null;
 }
 
 export interface BoosterPerks {

@@ -19,6 +19,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useBotChangelogFeed, useRecentChangelogBots } from "@/hooks/useBots";
 import { SERVER_TAGS } from "@/lib/constants/tags";
+import { scrollBehavior } from "@/lib/utils/motion";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SKELETON_KEYS = ["a", "b", "c", "d", "e"];
@@ -147,7 +148,7 @@ function FeedView() {
   const onSelectBot = useCallback(
     (b: string) => {
       updateParams({ [entityParam]: b });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     },
     [updateParams, entityParam],
   );
@@ -169,7 +170,7 @@ function FeedView() {
   const onPageChange = useCallback(
     (p: number) => {
       updateParams({ page: p > 1 ? String(p) : "" }, false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     },
     [updateParams],
   );

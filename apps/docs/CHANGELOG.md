@@ -6,8 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-08
+
 ### Added
 
+- **Listing a Server**, a guide to adding a server and everything you can
+  set up afterward.
+- **Posting Changelogs**: publishing release notes from code, for example
+  from CI with a bot token.
+- **Platform Stats**: the public `/list/stats` and `/list/stats/history`
+  endpoints.
+- Vote messages on the Infernoplex page, and monthly resets and Auto-vote on
+  the Votes page.
+- The API reference now covers server changelogs, vote messages, Auto-vote
+  slots, booster perks, promo codes and stats history.
 - An SDKs section with a guide for each official SDK: JavaScript and
   TypeScript, Python, Go and Rust.
 - SDK examples for posting bot stats, in tabs for each language.
@@ -18,6 +30,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- The API reference covers the latest API, including site preferences and
+  the Page Style pass.
+- The schema snapshot can be built from Popplio's source with
+  `go run ./cmd/openapi`, so new endpoints can be documented before they're
+  deployed. `bun run openapi` reads it with `OPENAPI_FILE`.
+- Discord links point at the current invite.
 - Moved into the Omniplex monorepo as `@omniplex/docs`, with its history.
   It's deployed from `apps/docs/Dockerfile` on Dokploy instead of the old
   systemd service.

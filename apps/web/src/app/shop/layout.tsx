@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ShopTabs } from "./ShopTabs";
+import { MoreFromShop, ShopBreadcrumb } from "./ShopNav";
 
 export const metadata: Metadata = {
   title: { default: "Shop", template: "%s | Omniplex" },
@@ -14,8 +14,9 @@ export default function ShopLayout({
 }) {
   return (
     <>
-      <ShopTabs />
+      <ShopBreadcrumb />
       {children}
+      <MoreFromShop />
     </>
   );
 }

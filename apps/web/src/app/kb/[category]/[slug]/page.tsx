@@ -60,7 +60,7 @@ export default async function KbArticlePage({ params }: Props) {
     <Container className="py-10">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)_200px]">
         <aside className="hidden lg:block">
-          <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pb-6">
+          <div className="sticky top-24 max-h-[calc(100vh-var(--spacing)*28)] overflow-y-auto pb-6">
             <KbSidebar
               categories={categories}
               activeCategory={category.slug}

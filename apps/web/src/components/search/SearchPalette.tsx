@@ -44,6 +44,12 @@ function isTypingTarget(target: EventTarget | null) {
   );
 }
 
+export const OPEN_SEARCH_EVENT = "omniplex:open-search";
+
+export function openSearchPalette() {
+  window.dispatchEvent(new Event(OPEN_SEARCH_EVENT));
+}
+
 export function SearchPalette() {
   const router = useRouter();
   const pathname = usePathname();
@@ -77,8 +83,15 @@ export function SearchPalette() {
         setOpen(true);
       }
     }
+    function onOpen() {
+      setOpen(true);
+    }
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    window.addEventListener(OPEN_SEARCH_EVENT, onOpen);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_SEARCH_EVENT, onOpen);
+    };
   }, []);
 
   useEffect(() => {
@@ -189,9 +202,12 @@ export function SearchPalette() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Search"
-        className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+        className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 lg:w-60 lg:rounded-xl lg:border lg:border-zinc-200 lg:bg-zinc-50 lg:px-3 lg:hover:border-zinc-300 lg:hover:bg-white dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 lg:dark:border-zinc-800 lg:dark:bg-zinc-900 lg:dark:hover:border-zinc-700 lg:dark:hover:bg-zinc-900"
       >
-        <Search size={16} />
+        <Search size={16} className="shrink-0" />
+        <span className="hidden flex-1 text-left text-sm lg:inline">
+          Search…
+        </span>
         <kbd className="hidden rounded border border-zinc-200 px-1.5 py-0.5 font-sans text-[10px] font-medium text-zinc-400 lg:inline dark:border-zinc-700 dark:text-zinc-500">
           {shortcut}
         </kbd>

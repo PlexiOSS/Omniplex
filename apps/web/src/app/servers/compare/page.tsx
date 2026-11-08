@@ -105,7 +105,7 @@ export default async function CompareServersPage({ searchParams }: Props) {
   );
 
   return (
-    <Container className="py-10" narrow>
+    <Container className="py-10">
       <PageHeader
         icon={ArrowRightLeft}
         title="Compare Servers"

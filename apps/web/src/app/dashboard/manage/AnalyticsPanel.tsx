@@ -294,31 +294,33 @@ function DailyChart({ title, days, series, type }: DailyChartProps) {
         <span>{formatDay(days[n - 1])}</span>
       </div>
 
-      <table className="sr-only">
-        <caption>{title}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Day</th>
-            {series.map((s) => (
-              <th key={s.label} scope="col">
-                {s.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {days.map((day, i) => (
-            <tr key={day}>
-              <th scope="row">{formatDay(day, true)}</th>
+      <div className="sr-only">
+        <table>
+          <caption>{title}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Day</th>
               {series.map((s) => (
-                <td key={s.label}>
-                  {s.values[i] == null ? "Not recorded" : s.values[i]}
-                </td>
+                <th key={s.label} scope="col">
+                  {s.label}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {days.map((day, i) => (
+              <tr key={day}>
+                <th scope="row">{formatDay(day, true)}</th>
+                {series.map((s) => (
+                  <td key={s.label}>
+                    {s.values[i] == null ? "Not recorded" : s.values[i]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

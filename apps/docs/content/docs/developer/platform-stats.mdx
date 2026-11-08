@@ -1,0 +1,63 @@
+---
+title: Platform Stats
+description: Public numbers about Omniplex as a whole, now and month by month.
+---
+
+Two public endpoints give you numbers about the whole platform. They need
+no token, and they're what the [Platform Stats](https://omniplex.gg/about/stats)
+page uses.
+
+## Right now
+
+```
+GET /list/stats
+```
+
+Counts of bots and servers by status (approved, certified, pending,
+denied), users, packs and tickets. Vote totals here are for the current
+month only, because votes reset monthly.
+
+## Over time
+
+```
+GET /list/stats/history
+```
+
+All-time totals plus one entry per month, oldest first:
+
+```json
+{
+  "votes_all_time": 41850,
+  "votes_this_month": 394,
+  "voters_all_time": 2505,
+  "votes_since": "2023-07-26T05:20:49Z",
+  "approvals": 528,
+  "denials": 320,
+  "reviews_since": "2023-04-15T12:19:55Z",
+  "months": [
+    {
+      "month": "2026-10",
+      "votes": 511,
+      "voters": 31,
+      "approved": 21,
+      "denied": 5,
+      "new_bots": 18,
+      "new_servers": 4,
+      "new_users": 19
+    }
+  ],
+  "generated_at": "2026-11-07T22:10:00Z"
+}
+```
+
+| Field | Notes |
+|---|---|
+| `votes_all_time` | Every upvote since records start, including ones cleared by monthly resets. |
+| `votes_this_month` | Upvotes since the last reset. |
+| `approvals`, `denials` | Reviews that went through since `reviews_since`. |
+| `months[].votes`, `voters` | `null` for months before `votes_since`, rather than `0`. |
+| `months[].approved`, `denied` | `null` for months before `reviews_since`. |
+| `months[].new_users` | `null` for months before sign-up dates were recorded (January 2024). |
+
+The numbers are cached for 10 minutes, so there's no point polling more
+often than that. `generated_at` says when they were worked out.

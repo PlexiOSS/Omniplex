@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { prefersReducedMotion } from "@/lib/utils/motion";
 
 interface RotatingWordProps {
   words: string[];
@@ -34,7 +35,7 @@ export function RotatingWord({
 
   useEffect(() => {
     if (words.length <= 1) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (prefersReducedMotion()) return;
 
     const id = setInterval(() => {
       setAnim("out");

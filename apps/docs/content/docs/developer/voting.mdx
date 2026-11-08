@@ -62,12 +62,37 @@ whether they've voted.
 Every [SDK](/docs/sdks) wraps this as `hasVoted` / `has_voted` and
 `getBotVote` / `get_bot_vote`, with server versions too.
 
+## Monthly resets
+
+Vote counts reset at the start of every month, so rankings reflect recent
+votes. A reset doesn't delete anything: each vote is kept and marked
+`void`, with a `void_reason`. That's why `valid_votes` only lists votes
+from the current month, and why a listing's vote count drops to zero on
+the 1st. If you show vote totals in your bot, say they're for this month.
+
+## Auto-vote
+
+People with an [Auto-vote](https://omniplex.gg/shop/auto-vote)
+subscription can have Omniplex vote for them as soon as their cooldown
+ends. These votes count toward your listing's votes and ranking like any
+other, and they're marked `auto: true` in `valid_votes` and in the
+`NEW_VOTE` webhook, so you can treat them differently if you want (for
+example, not giving the same in-bot reward as a hand-cast vote). They
+don't earn vote credits.
+
+If you'd rather not receive automatic votes at all, turn off **Accept
+automatic votes** in your listing's settings on the dashboard
+(`auto_votes_opt_out` in the API).
+
 ## Getting told about votes
 
 To react to a vote the moment it happens, instead of when the user next runs a
 command, set up a [webhook](/docs/developer/webhooks). Each vote sends a
 `NEW_VOTE` event with the voter, the vote count and whether it was an upvote or
 an Auto-vote.
+
+Servers can also have [Infernoplex](/docs/guides/infernoplex#vote-messages)
+post a message in a channel for every vote, with no code at all.
 
 ## Casting a vote
 

@@ -14,6 +14,7 @@ import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCommandBots, useCommandSearch } from "@/hooks/useBots";
+import { scrollBehavior } from "@/lib/utils/motion";
 
 const SKELETON_KEYS = ["a", "b", "c", "d"];
 const EXAMPLE_LIMIT = 6;
@@ -90,7 +91,7 @@ function CommandsView() {
   const onSelectBot = useCallback(
     (b: string) => {
       updateParams({ bot: b });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     },
     [updateParams],
   );
@@ -101,7 +102,7 @@ function CommandsView() {
   const onPageChange = useCallback(
     (p: number) => {
       updateParams({ page: p > 1 ? String(p) : "" }, false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     },
     [updateParams],
   );

@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   KeyRound,
   Megaphone,
+  Paintbrush,
   Sparkles,
   Terminal,
   TriangleAlert,
@@ -22,6 +23,7 @@ import useSWR from "swr";
 import { BotChangelogSection } from "@/components/bots/BotChangelogSection";
 import { BotCommandsSection } from "@/components/bots/BotCommandsSection";
 import { Container } from "@/components/layout/Container";
+import { PageStyleSection } from "@/components/listing/PageStyleSection";
 import { TokenManager } from "@/components/sessions/TokenManager";
 import { WebhookManager } from "@/components/webhooks/WebhookManager";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,6 +38,7 @@ import { TeamSection } from "./TeamSection";
 const SECTIONS = [
   "details",
   "appearance",
+  "style",
   "commands",
   "changelog",
   "stats",
@@ -130,6 +133,7 @@ function BotSettings() {
       items: [
         { key: "details" as Section, label: "Details", icon: FileText },
         { key: "appearance" as Section, label: "Appearance", icon: ImageIcon },
+        { key: "style" as Section, label: "Page style", icon: Paintbrush },
         { key: "commands" as Section, label: "Commands", icon: Terminal },
         { key: "changelog" as Section, label: "Changelog", icon: Megaphone },
         { key: "stats" as Section, label: "Statistics", icon: BarChart2 },
@@ -196,6 +200,14 @@ function BotSettings() {
     >
       {section === "details" && <DetailsSection key={bot.bot_id} {...props} />}
       {section === "appearance" && <AppearanceSection {...props} />}
+      {section === "style" && (
+        <PageStyleSection
+          target="bot"
+          id={bot.bot_id}
+          userId={session.user_id}
+          token={session.token}
+        />
+      )}
       {section === "commands" &&
         (commands ? (
           <BotCommandsSection
