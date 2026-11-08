@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
+import { useFitViewport } from "./useFitViewport";
 
 interface DropdownProps {
   open: boolean;
@@ -25,6 +26,8 @@ export function Dropdown({
   panelClassName,
 }: DropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFitViewport(panelRef, open);
 
   useEffect(() => {
     if (!open) return;
@@ -47,6 +50,7 @@ export function Dropdown({
       {trigger}
       {open && (
         <div
+          ref={panelRef}
           role="menu"
           className={[
             "absolute z-50 mt-1 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900",
