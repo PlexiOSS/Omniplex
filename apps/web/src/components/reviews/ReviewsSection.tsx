@@ -21,6 +21,7 @@ import { SignInLink } from "@/components/ui/SignInLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntityPermission } from "@/hooks/useEntityPermission";
 import { useHighlightScroll } from "@/hooks/useHighlightScroll";
+import { scrollBehavior } from "@/lib/utils/motion";
 
 interface ReviewsSectionProps {
   targetType: ReviewTargetType;
@@ -121,7 +122,7 @@ export function ReviewsSection({
         setEditingId(myReview.id);
         document
           .getElementById(`review-${myReview.id}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          ?.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
       }}
     >
       <Pencil size={13} />

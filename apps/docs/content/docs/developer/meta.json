@@ -10,6 +10,8 @@
     "bot-stats",
     "server-stats",
     "voting",
+    "changelogs",
+    "platform-stats",
     "webhooks"
   ]
 }

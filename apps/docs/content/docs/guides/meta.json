@@ -2,5 +2,11 @@
   "title": "Guides",
   "description": "Discord bot commands and other developer-facing guides.",
   "root": true,
-  "pages": ["index", "infernoplex", "listing-a-bot", "vanity-urls"]
+  "pages": [
+    "index",
+    "infernoplex",
+    "listing-a-bot",
+    "listing-a-server",
+    "vanity-urls"
+  ]
 }

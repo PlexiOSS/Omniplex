@@ -48,7 +48,7 @@ export default async function ThemePage({ params }: Props) {
       </Link>
 
       <section className="grid overflow-hidden rounded-2xl border border-zinc-200 bg-white lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="border-b border-zinc-200 bg-zinc-50 bg-[radial-gradient(#e4e4e7_1px,transparent_1px)] [background-size:16px_16px] p-6 sm:p-8 lg:border-r lg:border-b-0 dark:border-zinc-800 dark:bg-zinc-950 dark:bg-[radial-gradient(#27272a_1px,transparent_1px)]">
+        <div className="border-b border-zinc-200 bg-zinc-50 bg-[radial-gradient(var(--color-zinc-200)_1px,transparent_1px)] [background-size:16px_16px] p-6 sm:p-8 lg:border-r lg:border-b-0 dark:border-zinc-800 dark:bg-zinc-950 dark:bg-[radial-gradient(var(--color-zinc-800)_1px,transparent_1px)]">
           <ThemePreviewCard
             themeName={theme.name}
             tags={theme.tags}

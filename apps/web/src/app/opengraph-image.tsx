@@ -9,7 +9,10 @@ export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
 export default async function Image() {
-  const stats = await list.getStats().catch(() => null);
+  const [stats, history] = await Promise.all([
+    list.getStats().catch(() => null),
+    list.getStatsHistory().catch(() => null),
+  ]);
 
   return new ImageResponse(
     <OgFrame>
@@ -65,7 +68,10 @@ export default async function Image() {
           <div style={{ display: "flex", gap: 56, marginTop: 48 }}>
             <OgStat label="Bots" value={formatCount(stats.total_bots)} />
             <OgStat label="Users" value={formatCount(stats.total_users)} />
-            <OgStat label="Votes" value={formatCount(stats.total_votes)} />
+            <OgStat
+              label="Votes"
+              value={formatCount(history?.votes_all_time ?? stats.total_votes)}
+            />
           </div>
         )}
       </div>

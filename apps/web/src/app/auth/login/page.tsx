@@ -48,7 +48,7 @@ export default async function LoginPage({ searchParams }: Props) {
         We never see your password, email or messages.
       </p>
 
-      <p className="mt-8 border-t border-zinc-100 pt-4 text-xs text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
+      <p className="mt-8 border-t border-zinc-200 pt-4 text-xs text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
         By signing in you agree to our{" "}
         <Link href="/legal/terms" className="underline hover:text-accent">
           Terms of Service

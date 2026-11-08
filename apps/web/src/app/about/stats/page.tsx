@@ -1,5 +1,9 @@
 import { list } from "@omniplex/core/api";
-import type { ListStats, ListTag } from "@omniplex/core/api/types";
+import type {
+  ListStats,
+  ListTag,
+  StatsHistory,
+} from "@omniplex/core/api/types";
 import { formatCount } from "@omniplex/core/utils/format";
 import {
   ArrowRight,
@@ -16,11 +20,12 @@ import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { isApiUnavailable } from "@/lib/utils/errors";
+import { StatsHistorySection } from "./StatsHistorySection";
 
 export const metadata: Metadata = {
   title: "Platform Stats",
   description:
-    "Live numbers from Omniplex: listed bots and servers, votes, users, packs and the most used tags.",
+    "Live numbers from Omniplex: listed bots and servers, votes, users, packs, the most used tags, and how they've changed over the years.",
 };
 
 const TOP_TAGS = 12;
@@ -161,10 +166,13 @@ export default async function StatsPage() {
     if (isApiUnavailable(err)) return <ServiceUnavailable />;
     throw err;
   }
-  const tags = await list
-    .getTags()
-    .then((r) => r.tags)
-    .catch(() => [] as ListTag[]);
+  const [tags, history] = await Promise.all([
+    list
+      .getTags()
+      .then((r) => r.tags)
+      .catch(() => [] as ListTag[]),
+    list.getStatsHistory().catch(() => null as StatsHistory | null),
+  ]);
 
   const listedBots = stats.total_approved_bots + stats.total_certified_bots;
   const listedServers =
@@ -191,7 +199,16 @@ export default async function StatsPage() {
           value={listedServers}
           hint={`${formatCount(stats.total_certified_servers)} certified`}
         />
-        <Tile icon={ThumbsUp} label="Votes cast" value={stats.total_votes} />
+        <Tile
+          icon={ThumbsUp}
+          label="Votes cast"
+          value={history?.votes_all_time ?? stats.total_votes}
+          hint={
+            history
+              ? `${formatCount(history.votes_this_month)} this month`
+              : "This month"
+          }
+        />
         <Tile icon={Users} label="Users" value={stats.total_users} />
         <Tile icon={Package} label="Packs" value={stats.total_packs} />
       </div>
@@ -223,6 +240,10 @@ export default async function StatsPage() {
         <div className="mt-4">
           <TopTags tags={tags} />
         </div>
+      )}
+
+      {history && history.months.length > 0 && (
+        <StatsHistorySection history={history} />
       )}
 
       <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm">

@@ -1,0 +1,105 @@
+name: GitHub Release
+
+on:
+  push:
+    tags:
+      - "omniplex@v*"
+      - "staff@v*"
+      - "docs@v*"
+      - "api-types@v*"
+      - "sdk-js@v*"
+      - "sdk-python@v*"
+      - "sdk-rust@v*"
+      - "packages/sdk-go/v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Write release notes
+        env:
+          TAG: ${{ github.ref_name }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          case "$TAG" in
+            packages/sdk-go/v*)
+              name="sdk-go"; version="${TAG#packages/sdk-go/v}" ;;
+            *@v*)
+              name="${TAG%@v*}"; version="${TAG##*@v}" ;;
+            *)
+              echo "::error::Unrecognised tag $TAG"; exit 1 ;;
+          esac
+
+          owner=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          case "$name" in
+            omniplex)
+              changelog="apps/web/CHANGELOG.md"
+              install="Docker image: \`ghcr.io/$owner/omniplex:$version\`" ;;
+            staff)
+              changelog="apps/staff/CHANGELOG.md"; install="" ;;
+            docs)
+              changelog="apps/docs/CHANGELOG.md"; install="" ;;
+            api-types)
+              changelog="packages/api-types/CHANGELOG.md"
+              install="\`npm install @omniplex/api-types@$version\`" ;;
+            sdk-js)
+              changelog="packages/sdk-js/CHANGELOG.md"
+              install="\`npm install @omniplex/sdk@$version\`" ;;
+            sdk-python)
+              changelog="packages/sdk-python/CHANGELOG.md"
+              install="\`pip install omniplex-sdk==$version\`" ;;
+            sdk-rust)
+              changelog="packages/sdk-rust/CHANGELOG.md"
+              install="\`cargo add omniplex@$version\`" ;;
+            sdk-go)
+              changelog="packages/sdk-go/CHANGELOG.md"
+              install="\`go get github.com/$GITHUB_REPOSITORY/packages/sdk-go@v$version\`" ;;
+            *)
+              echo "::error::No changelog known for $name"; exit 1 ;;
+          esac
+
+          awk -v head="## [$version]" '
+            index($0, head) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' "$changelog" | sed -e '/./,$!d' > section.md
+
+          if [ ! -s section.md ]; then
+            echo "::error::$changelog has no section for $version. Cut the release in the changelog before tagging."
+            exit 1
+          fi
+
+          {
+            if [ -n "$install" ]; then
+              echo "$install"
+              echo
+            fi
+            cat section.md
+            echo
+            echo "Full changelog: [\`$changelog\`]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$TAG/$changelog)"
+          } > notes.md
+
+          echo "PRERELEASE=$([ "${version#*-}" != "$version" ] && echo true || echo false)" >> "$GITHUB_ENV"
+          cat notes.md
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          flags="--verify-tag --title $TAG --notes-file notes.md"
+          if [ "$PRERELEASE" = "true" ]; then
+            flags="$flags --prerelease"
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TAG" --notes-file notes.md
+          else
+            gh release create "$TAG" $flags
+          fi

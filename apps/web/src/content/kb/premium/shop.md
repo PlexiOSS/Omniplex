@@ -26,6 +26,7 @@ The [Credit shop](/shop/items) lists items your credit balance can be spent on. 
 - **Highlighted Card**: an accent glow on its card in browse, search and the home page for a limited time.
 - **Spotlight**: a place in the home page's Spotlight section for a limited time.
 - **Card Theme**: a permanent unlock that lets you pick a colour to tint its card and the header of its page. Set the colour under **Card theme** in the listing's dashboard settings.
+- **Page Style**: 30 days of a custom page background, gradient and accent colour without premium. Buying it again adds another 30 days. Set it up under **Page style** in the listing's dashboard settings.
 - **Bundles**, like the Launch Bundle: several items together for less than buying them one by one.
 
 Each item shows its price in credits and how long its effect lasts, and which of bots/servers it applies to. You can only buy what your available balance covers.

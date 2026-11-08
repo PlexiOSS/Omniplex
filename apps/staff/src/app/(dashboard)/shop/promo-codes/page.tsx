@@ -63,7 +63,7 @@ export default function PromoCodesPage() {
 
   function copyLink(promo: PromoCode) {
     const path = promo.products.includes("premium")
-      ? `/premium?promo=${encodeURIComponent(promo.code)}`
+      ? `/shop/premium?promo=${encodeURIComponent(promo.code)}`
       : `/dashboard?tab=auto-vote&promo=${encodeURIComponent(promo.code)}`;
     navigator.clipboard
       ?.writeText(`${SITE_URL}${path}`)

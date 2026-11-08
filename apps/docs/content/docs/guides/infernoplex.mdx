@@ -1,19 +1,51 @@
 ---
 title: Infernoplex
-description: Omniplex tracking features and functionality.
+description: The Omniplex bot that keeps your server's listing in sync and lets you manage it from Discord.
 ---
 
-Omniplex's tracking bot manages your server's listing directly from
-Discord. All commands are slash commands, and each requires the bot to
-already be a member of the server.
+Infernoplex is Omniplex's server bot. While it's in your server, it keeps
+your listing's member counts, icon, emojis and stickers in sync, posts vote
+messages if you turn them on, and gives you slash commands to manage the
+listing without leaving Discord.
 
 <Callout type="info">
   To list a server for the first time, use **Add a Server** on the site
-  instead of a Discord command. See the [Getting Started](https://omniplex.gg/kb/basics/getting-started)
-  guide on the main site.
+  instead of a Discord command. See [Listing a Server](/docs/guides/listing-a-server).
 </Callout>
 
-## `/update`
+## What it keeps in sync
+
+Every 30 minutes, Infernoplex updates your listing with the server's member
+and online counts, its icon, and its emojis and stickers. You don't need to
+set anything up. If you'd rather report member counts yourself, see
+[Posting Server Stats](/docs/developer/server-stats).
+
+## Vote messages
+
+Infernoplex can post a message in one of your channels every time someone
+votes for your server on Omniplex: who voted, and the server's new vote
+count, with a link back to your listing.
+
+To turn it on, open your server's settings on the
+[dashboard](https://omniplex.gg/dashboard), go to **Vote messages**, pick a
+text or announcement channel and save. Infernoplex posts a test message
+first, and only saves the channel if that works. Pick **Off** to stop.
+
+Infernoplex needs these permissions in the channel:
+
+- View Channel
+- Send Messages
+- Embed Links
+
+If it loses access later, vote messages stop quietly until you fix the
+permissions or pick another channel.
+
+## Commands
+
+All commands are slash commands, and each requires the bot to already be a
+member of the server.
+
+### `/update`
 
 Updates a specific part of your server's listing (which "pane" to update is
 chosen when you run the command) without leaving Discord. Requires the
@@ -22,12 +54,12 @@ chosen when you run the command) without leaving Discord. Requires the
 - `basic`: opens a modal for the short and long description.
 - `invite`: opens a wizard asking for a new invite link.
 
-## `/delete`
+### `/delete`
 
 Removes your server's listing. Requires the `Delete Servers` permission on
 the listing, and asks for confirmation before deleting anything.
 
-## `/leaderboard`
+### `/leaderboard`
 
 Shows the server's vote leaderboard. Takes an optional `limit` (how many
 results to show, defaults to 10).
@@ -38,6 +70,6 @@ results to show, defaults to 10).
   setting it returns an error instead of filtering results.
 </Callout>
 
-## `/stats`
+### `/stats`
 
 Shows the bot's own stats (uptime, version, environment).

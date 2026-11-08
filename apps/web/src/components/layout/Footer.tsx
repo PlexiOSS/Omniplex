@@ -4,183 +4,137 @@ import { BsDiscord, BsGithub, BsInstagram, BsTwitter } from "react-icons/bs";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Container } from "./Container";
 
-const FOOTER_LINKS = [
+const COLUMNS = [
   {
-    heading: "Discover",
+    heading: "Product",
     links: [
-      { href: "/bots", label: "View Bots" },
-      { href: "/servers", label: "View Servers" },
-      { href: "/packs", label: "View Packs" },
-      { href: "/bots?sort=trending", label: "Trending Bots" },
-      { href: "/bots?certified=true", label: "Certified Bots" },
-      { href: "/tags", label: "All Tags" },
-      { href: "/search", label: "Search" },
+      { href: "/bots", label: "Bots" },
+      { href: "/servers", label: "Servers" },
+      { href: "/shop/premium", label: "Premium" },
+      { href: "/shop/auto-vote", label: "Auto-vote" },
+      { href: "/bots/add", label: "Add your bot" },
     ],
   },
   {
-    heading: "Content",
+    heading: "Resources",
     links: [
-      { href: "/emojis", label: "Emojis" },
-      { href: "/stickers", label: "Stickers" },
-      { href: "/sounds", label: "Sounds" },
-      { href: "/templates", label: "Templates" },
-      { href: "/themes", label: "Themes" },
-      { href: "/collections", label: "Collections" },
-    ],
-  },
-  {
-    heading: "Community",
-    links: [
-      { href: "/blog", label: "Blog Posts" },
-      { href: "/changelog", label: "Changelog" },
-      { href: "/feed", label: "Bot Updates" },
-      { href: "/commands", label: "Command Directory" },
-      { href: "/leaderboard", label: "Voter Leaderboard" },
-      { href: "/badges", label: "Badges" },
       { href: "/kb", label: "Knowledge Base" },
-    ],
-  },
-  {
-    heading: "Documentation",
-    links: [
-      {
-        href: "https://docs.omniplex.gg/docs/api-reference",
-        label: "API Reference",
-      },
-      { href: "https://docs.omniplex.gg/docs#faq", label: "Frequently Asked" },
-      { href: "https://docs.omniplex.gg/docs/guides", label: "User Guides" },
-      {
-        href: "https://docs.omniplex.gg/docs/developer/rate-limits",
-        label: "Rate Limits",
-      },
-      {
-        href: "https://docs.omniplex.gg/docs/api-reference/webhooks",
-        label: "Webhooks",
-      },
+      { href: "https://docs.omniplex.gg", label: "Developer docs" },
+      { href: "/changelog", label: "Changelog" },
+      { href: "/blog", label: "Blog" },
+      { href: "https://status.omniplex.gg", label: "Status" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { href: "/about", label: "About Us" },
-      { href: "/alternatives", label: "Compare Bot Lists" },
-      { href: "https://status.omniplex.gg", label: "System Status" },
-      { href: "/about/moderation", label: "Moderation Stats" },
-      { href: "/partners", label: "Our Partners" },
-      { href: "/about/team", label: "Our Team" },
+      { href: "/about", label: "About" },
+      { href: "/about/team", label: "Team" },
+      { href: "/partners", label: "Partners" },
+      { href: "/about/stats", label: "Platform stats" },
+      { href: "/about/moderation", label: "Transparency" },
+      { href: "/alternatives", label: "Compare bot lists" },
     ],
   },
   {
     heading: "Legal",
     links: [
-      { href: "/legal", label: "All Policies" },
-      { href: "/legal/terms", label: "Terms of Service" },
-      { href: "/legal/privacy", label: "Privacy Policy" },
-      { href: "/legal/acceptable-use", label: "Acceptable Usage" },
-      { href: "/legal/dmca", label: "DMCA Policy" },
+      { href: "/legal/terms", label: "Terms" },
+      { href: "/legal/privacy", label: "Privacy" },
+      { href: "/legal/acceptable-use", label: "Acceptable use" },
+      { href: "/legal/dmca", label: "DMCA" },
+      { href: "/legal", label: "All policies" },
     ],
   },
 ];
 
-/**
- * Footer component that displays links and information at the bottom of the page.
- * @returns {JSX.Element} The rendered footer component.
- */
+const SOCIALS = [
+  { href: SOCIAL_LINKS.discord, label: "Discord", icon: BsDiscord },
+  { href: SOCIAL_LINKS.twitter, label: "X", icon: BsTwitter },
+  { href: SOCIAL_LINKS.github, label: "GitHub", icon: BsGithub },
+  { href: SOCIAL_LINKS.instagram, label: "Instagram", icon: BsInstagram },
+];
+
+const LINK =
+  "text-sm text-zinc-500 transition-colors hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50";
+
 export function Footer() {
   return (
-    <footer className="py-12 mt-auto border-t border-zinc-200 dark:border-zinc-800">
+    <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800">
       <Container>
-        <div className="flex items-center gap-2 text-zinc-950 dark:text-zinc-50">
-          <OmniplexLogo size={22} />
-          <span className="font-semibold">Omniplex</span>
-        </div>
-        <p className="max-w-sm mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          The best place to find Discord bots and servers.
-        </p>
-
-        <div className="grid grid-cols-2 gap-8 mt-10 sm:grid-cols-3">
-          {FOOTER_LINKS.map(({ heading, links }) => (
-            <div key={heading}>
-              <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                {heading}
-              </p>
-              <ul className="mt-3 space-y-2">
-                {links.map(({ href, label }) => (
-                  <li key={href}>
-                    {href.startsWith("http") ? (
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-                      >
-                        {label}
-                      </a>
-                    ) : (
-                      <Link
-                        href={href}
-                        className="text-sm transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-                      >
-                        {label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
+        <div className="grid gap-10 py-12 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,3fr)] lg:gap-16">
+          <div>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-zinc-950 dark:text-zinc-50"
+            >
+              <OmniplexLogo size={22} />
+              <span className="font-semibold tracking-tight">Omniplex</span>
+            </Link>
+            <p className="mt-3 max-w-xs text-sm text-zinc-500 dark:text-zinc-400">
+              The best place to find Discord bots and servers.
+            </p>
+            <div className="mt-5 flex items-center gap-1">
+              {SOCIALS.map(({ href, label, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Omniplex on ${label}`}
+                  className="flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                >
+                  <Icon size={16} />
+                </a>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="flex flex-col-reverse items-center gap-4 pt-6 mt-10 border-t border-zinc-200 dark:border-zinc-800 sm:flex-row sm:justify-between">
-          <p className="text-xs text-zinc-400 dark:text-zinc-600">
-            © 2021–{new Date().getFullYear()}{" "}
-            <a
-              href="https://nodebyte.co.uk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-zinc-600 dark:hover:text-zinc-400"
-            >
-              NodeByte LTD
-            </a>
-            . Not affiliated with Discord.
-          </p>
-          <div className="flex items-center gap-3">
-            <a
-              href={SOCIAL_LINKS.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
-              aria-label="Omniplex on Instagram"
-            >
-              <BsInstagram size={17} />
-            </a>
-            <a
-              href={SOCIAL_LINKS.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
-              aria-label="Omniplex on X"
-            >
-              <BsTwitter size={17} />
-            </a>
-            <a
-              href={SOCIAL_LINKS.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
-              aria-label="Omniplex on GitHub"
-            >
-              <BsGithub size={17} />
-            </a>
-            <a
-              href={SOCIAL_LINKS.discord}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors text-zinc-400 hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-50"
-              aria-label="Omniplex on Discord"
-            >
-              <BsDiscord size={17} />
-            </a>
           </div>
+
+          <nav
+            aria-label="Footer"
+            className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4"
+          >
+            {COLUMNS.map(({ heading, links }) => (
+              <div key={heading}>
+                <p className="text-xs font-semibold tracking-wide text-zinc-950 uppercase dark:text-zinc-50">
+                  {heading}
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {links.map(({ href, label }) => (
+                    <li key={href}>
+                      {href.startsWith("http") ? (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={LINK}
+                        >
+                          {label}
+                        </a>
+                      ) : (
+                        <Link href={href} className={LINK}>
+                          {label}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
+        </div>
+
+        <div className="border-t border-zinc-200 py-6 text-xs text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
+          © {new Date().getFullYear()}{" "}
+          <a
+            href="https://nodebyte.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-zinc-700 dark:hover:text-zinc-300"
+          >
+            NodeByte LTD
+          </a>
+          . Not affiliated with Discord.
         </div>
       </Container>
     </footer>

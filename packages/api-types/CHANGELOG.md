@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-08
+
+### Added
+
+- `SitePrefs`.
+- `unlocked_until` on `ManagedPageStyle`.
+- `flag` on `AppQuestion`.
+- `AppQuestionType` and `AppQuestionCondition`, and `type`, `options`,
+  `optional`, `min_length`, `max_length` and `show_if` on `AppQuestion`.
+- `PageStyle`, `ManagedPageStyle`, `PageStyleUpdate` and `PageGradient`.
+- `StatsHistory` and `StatsHistoryMonth`.
+
 ## [0.3.0] - 2026-11-07
 
 ### Added

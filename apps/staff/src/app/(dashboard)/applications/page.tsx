@@ -2,7 +2,8 @@
 
 import { apps as appsApi } from "@omniplex/core/api";
 import { SITE_URL } from "@omniplex/core/api/config";
-import type { PlatformUser } from "@omniplex/core/api/types";
+import type { AppQuestion, PlatformUser } from "@omniplex/core/api/types";
+import { flaggedAnswer } from "@omniplex/core/appQuestions";
 import { formatRelativeTime } from "@omniplex/core/utils/format";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Button } from "@omniplex/ui/Button";
@@ -23,25 +24,30 @@ import { AdminError, AdminLoading } from "@/components/admin/AdminState";
 import { AdminFilterChips } from "@/components/admin/AdminToolbar";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 
-interface Question {
-  id: string;
-  question: string;
-  paragraph: string;
-  placeholder: string;
-  short: boolean;
-}
-
 interface AppResponse {
   app_id: string;
   user?: PlatformUser;
   user_id: string;
-  questions: Question[];
+  questions: AppQuestion[];
   answers: Record<string, string>;
   state: string;
   created_at: string;
   position: string;
   review_feedback: string | null;
   in_main_server?: boolean;
+}
+
+function FlagBadge({ app }: { app: AppResponse }) {
+  const count = app.questions.filter((q) =>
+    flaggedAnswer(q, app.answers[q.id]),
+  ).length;
+  if (count === 0) return null;
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+      <AlertTriangle size={12} />
+      {count} flagged {count === 1 ? "answer" : "answers"}
+    </span>
+  );
 }
 
 function MembershipBadge({ member }: { member?: boolean }) {
@@ -346,6 +352,7 @@ export default function AdminApplicationsPage() {
                         {positionName(selected.position)}
                       </span>
                       <MembershipBadge member={selected.in_main_server} />
+                      <FlagBadge app={selected} />
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
                       {selected.user?.username && (
@@ -374,14 +381,29 @@ export default function AdminApplicationsPage() {
                 <ol className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
                   {selected.questions.map((q, i) => {
                     const answer = selected.answers[q.id]?.trim();
+                    const flagged = flaggedAnswer(q, answer);
                     return (
-                      <li key={q.id} className="flex gap-4 px-5 py-5 sm:px-6">
+                      <li
+                        key={q.id}
+                        className={[
+                          "flex gap-4 px-5 py-5 sm:px-6",
+                          flagged
+                            ? "border-l-2 border-amber-500 bg-amber-500/5"
+                            : "",
+                        ].join(" ")}
+                      >
                         <span className="w-6 shrink-0 pt-0.5 font-mono text-xs text-zinc-400 tabular-nums dark:text-zinc-500">
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                          <h3 className="flex flex-wrap items-center gap-2 text-sm font-medium text-zinc-950 dark:text-zinc-50">
                             {q.question}
+                            {flagged && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                                <AlertTriangle size={11} />
+                                Flagged
+                              </span>
+                            )}
                           </h3>
                           {answer ? (
                             <p className="mt-1.5 max-w-prose whitespace-pre-wrap wrap-anywhere text-[15px] leading-relaxed text-zinc-700 dark:text-zinc-300">

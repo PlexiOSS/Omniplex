@@ -1,4 +1,6 @@
 // Copyright (C) 2026 NodeByte LTD
+
+import type { AppQuestionType } from "@omniplex/core/api/types";
 export type TargetType = "Bot" | "Server" | "Team" | "Pack" | "User";
 
 export const AUTH_VERSION = 5;
@@ -532,6 +534,32 @@ export interface PromoCodeCreate {
   new_customers_only: boolean;
 }
 
+export type PageStyleAction =
+  | "ListPending"
+  | { Approve: PageImageDecision }
+  | { Reject: PageImageDecision };
+
+export interface PageImageDecision {
+  target_type: "bot" | "server";
+  target_id: string;
+  version: string;
+  reason: string;
+}
+
+export interface PendingPageImage {
+  target_type: "bot" | "server";
+  target_id: string;
+  name: string;
+  avatar: string;
+  version: string;
+  image_url: string;
+  replaces_url: string | null;
+  dim: number;
+  blur: number;
+  image_position: "top" | "center" | "bottom";
+  pending_since: string;
+}
+
 export type PromoCodeAction =
   | "List"
   | { Create: PromoCodeCreate }
@@ -859,6 +887,13 @@ export interface AppPositionQuestion {
   paragraph: string;
   placeholder: string;
   short: boolean;
+  type?: AppQuestionType;
+  options?: string[];
+  optional?: boolean;
+  min_length?: number;
+  max_length?: number;
+  show_if?: { question_id: string; values: string[] } | null;
+  flag?: string[];
 }
 
 export interface AppPositionBehaviour {

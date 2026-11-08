@@ -18,6 +18,7 @@ import {
 import { headers } from "next/headers";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { HideOnAuth } from "@/components/layout/HideOnAuth";
 import { CustomizationProvider } from "@/components/providers/CustomizationProvider";
 import { SoundPlayerProvider } from "@/components/providers/SoundPlayerProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -83,7 +84,7 @@ const atkinson = Atkinson_Hyperlegible({
 });
 
 // Runs before React hydrates to prevent accent/font flash
-const INIT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('omniplex-prefs')||'{}');var el=document.documentElement;if(p.accent)el.dataset.accent=p.accent;if(p.font)el.dataset.font=p.font;if(p.layout)el.dataset.layout=p.layout;if(p.radius)el.dataset.radius=p.radius;el.dataset.hiddenStats=(Array.isArray(p.hiddenStats)?p.hiddenStats:['invites','shards']).join(' ');el.dataset.hideNsfw=String(!!p.hideNsfw);var blur=p.blurNsfw===undefined?true:p.blurNsfw;el.dataset.blurNsfw=String(blur&&!p.hideNsfw);}catch(e){}})()`;
+const INIT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('omniplex-prefs')||'{}');var el=document.documentElement;['accent','font','layout','radius','surface','density','textSize','motion'].forEach(function(k){if(typeof p[k]==='string')el.dataset[k]=p[k];});el.dataset.hiddenStats=(Array.isArray(p.hiddenStats)?p.hiddenStats:['invites','shards']).join(' ');el.dataset.hideNsfw=String(!!p.hideNsfw);var blur=p.blurNsfw===undefined?true:p.blurNsfw;el.dataset.blurNsfw=String(blur&&!p.hideNsfw);el.dataset.hideOffline=String(!!p.hideOffline);var tags=(Array.isArray(p.hiddenTags)?p.hiddenTags:[]).filter(function(x){return typeof x==='string'&&/^[a-z0-9-]+$/.test(x);});if(tags.length){var s=document.createElement('style');s.id='omniplex-hidden-tags';s.textContent=tags.map(function(x){return '[data-tags~="'+x+'"]';}).join(',')+'{display:none!important}';document.head.appendChild(s);}}catch(e){}})()`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -173,9 +174,13 @@ export default async function RootLayout({
         <ThemeProvider nonce={nonce}>
           <CustomizationProvider>
             <SoundPlayerProvider>
-              <Header />
+              <HideOnAuth>
+                <Header />
+              </HideOnAuth>
               <main className="flex flex-1 flex-col">{children}</main>
-              <Footer />
+              <HideOnAuth>
+                <Footer />
+              </HideOnAuth>
               <SoundPlayerBar />
             </SoundPlayerProvider>
           </CustomizationProvider>

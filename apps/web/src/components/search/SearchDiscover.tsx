@@ -43,7 +43,7 @@ export function SearchDiscover() {
   const empty = kind === "bots" ? bots.length === 0 : servers.length === 0;
 
   return (
-    <section className="mx-auto mt-14 max-w-4xl">
+    <section className="mt-14">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
           Discover

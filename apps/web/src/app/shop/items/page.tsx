@@ -28,6 +28,7 @@ import {
   Coins,
   Flashlight,
   Highlighter,
+  ImageIcon,
   Megaphone,
   Package,
   Palette,
@@ -64,6 +65,7 @@ const BENEFIT_ICONS: Record<string, typeof Sparkles> = {
   highlight: Highlighter,
   spotlight_slot: Flashlight,
   card_theme: Palette,
+  page_style: ImageIcon,
 };
 
 type VoteHistoryEntry =
@@ -302,7 +304,7 @@ function ShopPageInner() {
         }
       />
 
-      <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-10">
           <section>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -645,13 +647,15 @@ function ShopPageInner() {
                 How votes become credits
               </h2>
               <dl className="mt-3 space-y-1.5 text-sm">
-                {tiers.map((tier) => (
+                {tiers.map((tier, i) => (
                   <div key={tier.id} className="flex justify-between gap-2">
                     <dt className="text-zinc-500 dark:text-zinc-400">
-                      {formatCountLabel(tier.votes, "vote")}
+                      {i === tiers.length - 1 && i > 0
+                        ? "Every vote after that"
+                        : `${i === 0 ? "First" : "Next"} ${formatCountLabel(tier.votes, "vote")}`}
                     </dt>
                     <dd className="tabular-nums text-zinc-950 dark:text-zinc-50">
-                      {credits(tier.cents)} credits
+                      {credits(tier.cents)} each
                     </dd>
                   </div>
                 ))}

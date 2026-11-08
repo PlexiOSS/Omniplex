@@ -1,0 +1,53 @@
+---
+title: Listing a Server
+description: Adding a Discord server to Omniplex and what you can set up afterward.
+---
+
+Servers are added on the site, from **Add a Server**. Unlike bots, there's no
+API call for submitting one, because Omniplex reads most of the listing
+straight from your server.
+
+## Before you start
+
+- **An invite link that doesn't expire.** Omniplex uses it to look up the
+  server's name, icon and member count, and it's the link visitors use to
+  join.
+- **Owner, Manage Server or Administrator** in the server.
+- **[Infernoplex](/docs/guides/infernoplex) in the server.** If it isn't
+  there yet, the form gives you an invite for it.
+- **A short description** (30 characters or more) and **a long one** (500 or
+  more).
+
+Read the [Listing Rules](https://omniplex.gg/kb/servers/listing-rules) first.
+Servers that don't follow them are denied.
+
+## Adding it
+
+1. Open [Add a Server](https://omniplex.gg/servers/add) and paste your
+   invite link.
+2. Check the server it found, then fill in the descriptions, tags and any
+   extra links.
+3. Submit. Your server goes into review, and you get a notification when
+   it's approved or denied.
+
+## After it's listed
+
+Everything is managed from the server's settings on the
+[dashboard](https://omniplex.gg/dashboard):
+
+- **Details and appearance**: descriptions, tags, links, banner and card
+  colour.
+- **Vote messages**: have Infernoplex post in a channel each time someone
+  votes. See [Infernoplex](/docs/guides/infernoplex#vote-messages).
+- **Updates**: post changelogs that show on your server's page and in the
+  site-wide Feed. To post them from code, see
+  [Posting Changelogs](/docs/developer/changelogs).
+- **API sessions**: tokens for [posting server stats](/docs/developer/server-stats)
+  or posting updates from your own tools.
+- **Webhooks**: get told about votes and other events. See
+  [Webhooks](/docs/developer/webhooks).
+- **Vanity URL**: a custom link like `omniplex.gg/s/yourserver`. See
+  [Vanity URLs](/docs/guides/vanity-urls).
+
+Every server belongs to a team, which decides who else can manage it. See
+[Teams & Permissions](/docs/developer/permissions).

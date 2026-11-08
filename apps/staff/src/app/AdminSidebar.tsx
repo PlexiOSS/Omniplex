@@ -18,6 +18,7 @@ import {
   Flag,
   Gavel,
   Handshake,
+  Image as ImageIcon,
   LayoutDashboard,
   LayoutTemplate,
   LifeBuoy,
@@ -88,6 +89,13 @@ const ADMIN_NAV: AdminNavGroup[] = [
         label: "Queue",
         icon: ListChecks,
         count: "queue",
+      },
+      {
+        href: "/backgrounds",
+        label: "Backgrounds",
+        icon: ImageIcon,
+        count: "backgrounds",
+        perm: "review_entities",
       },
       {
         href: "/reports",

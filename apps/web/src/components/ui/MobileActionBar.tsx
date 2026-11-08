@@ -3,6 +3,7 @@
 import { Avatar } from "@omniplex/ui/Avatar";
 import { ExternalLink, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { scrollBehavior } from "@/lib/utils/motion";
 
 interface MobileActionBarProps {
   targetId: string;
@@ -50,7 +51,7 @@ export function MobileActionBar({
           onClick={() =>
             document
               .getElementById(targetId)
-              ?.scrollIntoView({ behavior: "smooth", block: "center" })
+              ?.scrollIntoView({ behavior: scrollBehavior(), block: "center" })
           }
           className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
         >

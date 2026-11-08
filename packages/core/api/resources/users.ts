@@ -7,6 +7,7 @@ import type {
   MainServerStatus,
   RedirectUser,
   SEO,
+  SitePrefs,
   UpdateUserPayload,
   User,
   UserActivity,
@@ -45,6 +46,19 @@ export const usersResource = {
         token,
       },
     ),
+
+  getSitePrefs: (userId: string, token: string) =>
+    client.get<SitePrefs>(`/users/${userId}/site-prefs`, {
+      token,
+      cache: "no-store",
+    }),
+
+  setSitePrefs: (
+    userId: string,
+    prefs: Record<string, unknown>,
+    token: string,
+  ) =>
+    client.put<SitePrefs>(`/users/${userId}/site-prefs`, { prefs }, { token }),
 
   getBoosterPerks: (userId: string, token: string) =>
     client.get<BoosterPerks>(`/users/${userId}/booster-perks`, {

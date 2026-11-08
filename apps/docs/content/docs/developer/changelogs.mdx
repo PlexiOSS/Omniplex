@@ -1,0 +1,79 @@
+---
+title: Posting Changelogs
+description: Publishing release notes to your bot's or server's page from code, such as a CI job.
+---
+
+Bots and servers can post changelogs ("updates"). Each one shows on the
+listing's page, in the **Updates** tab for servers, and in the site-wide
+[Feed](https://omniplex.gg/feed). You can post them from the dashboard, or
+from code so every release posts its notes automatically.
+
+## Which token to use
+
+| Listing | Tokens that work | Permission needed |
+|---|---|---|
+| Bot | The bot's own API token, or a team API token | `Edit Bots` |
+| Server | A team API token | `Edit Servers` |
+
+A bot's API token is the simplest choice for a bot, since it's scoped to
+that one bot. For servers, create a team API token for the team that owns
+the server. See [Authentication](/docs/developer/authentication) for how to
+create tokens, and [Teams & Permissions](/docs/developer/permissions) for
+the permissions.
+
+## Posting one
+
+```
+POST /bots/{id}/changelogs
+POST /servers/{id}/changelogs
+```
+
+```json
+{
+  "title": "Music queue and new dashboard",
+  "content": "- Added a shared music queue\n- The dashboard loads twice as fast",
+  "version": "2.4.0"
+}
+```
+
+| Field | Notes |
+|---|---|
+| `title` | Required, 1 to 200 characters. |
+| `content` | Required, 1 to 10,000 characters. Markdown is supported. |
+| `version` | Optional, up to 50 characters. Shown next to the title. |
+
+For example, from a GitHub Actions step after you publish a release:
+
+```bash
+curl -X POST "https://api.omniplex.gg/bots/$BOT_ID/changelogs" \
+  -H "Authorization: Bot $OMNIPLEX_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "$(jq -n --arg t "$TITLE" --arg c "$NOTES" --arg v "$VERSION" \
+        '{title: $t, content: $c, version: $v}')"
+```
+
+Keep the token in your CI's secret store, not in the workflow file.
+
+## Listing and removing
+
+```
+GET    /bots/{id}/changelogs
+GET    /servers/{id}/changelogs
+DELETE /bots/{id}/changelogs/{changelog_id}
+DELETE /servers/{id}/changelogs/{changelog_id}
+```
+
+Listing is public. Deleting needs the same token and permission as
+posting.
+
+## The site-wide feeds
+
+```
+GET /bots/@changelogs
+GET /servers/@changelogs
+```
+
+These return recent changelogs across every listing, newest first, with
+the listing's name and avatar. They're public and take `page`, plus
+optional search, tag and listing filters. See the
+[API Reference](/docs/api-reference) for the exact parameters.

@@ -21,6 +21,7 @@ import type {
   AppPositionInput,
   AppPositionQuestion,
 } from "@/lib/arcadia/types";
+import { QuestionSettings } from "./QuestionSettings";
 
 const field =
   "w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition-colors placeholder:text-zinc-400 focus:border-accent/50 focus:ring-2 focus:ring-accent/15 disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50";
@@ -392,7 +393,7 @@ export function FormEditor({ position }: FormEditorProps) {
 
           <Section
             title="Questions"
-            description="Asked in this order. Short answers get a one-line box, long answers a larger one."
+            description="Asked in this order. Pick an answer type for each, and use conditions to only ask follow-ups when they apply."
           >
             <ol className="space-y-3">
               {form.questions.map((q, i) => {
@@ -482,40 +483,11 @@ export function FormEditor({ position }: FormEditorProps) {
                       className={`${field} mt-3 resize-y`}
                       placeholder="Help text shown under the question (optional)"
                     />
-                    <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <input
-                        aria-label="Placeholder"
-                        value={q.placeholder}
-                        maxLength={200}
-                        onChange={(e) =>
-                          setQuestion(i, { placeholder: e.target.value })
-                        }
-                        className={field}
-                        placeholder="Placeholder in the answer box (optional)"
-                      />
-                      <div className="inline-flex shrink-0 rounded-xl border border-zinc-200 p-1 dark:border-zinc-800">
-                        {[
-                          [true, "Short"],
-                          [false, "Long"],
-                        ].map(([value, text]) => (
-                          <button
-                            key={String(value)}
-                            type="button"
-                            onClick={() =>
-                              setQuestion(i, { short: value as boolean })
-                            }
-                            className={[
-                              "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                              q.short === value
-                                ? "bg-accent/10 text-accent"
-                                : "text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50",
-                            ].join(" ")}
-                          >
-                            {text as string} answer
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <QuestionSettings
+                      question={q}
+                      earlier={form.questions.slice(0, i)}
+                      onChange={(patch) => setQuestion(i, patch)}
+                    />
                   </li>
                 );
               })}

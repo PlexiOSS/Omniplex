@@ -9,7 +9,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --filter=@omniplex/web",
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@omniplex/web",
     "dev:docs": "turbo run dev --filter=@omniplex/docs",
     "dev:staff": "turbo run dev --filter=@omniplex/staff",
     "build": "turbo run build",

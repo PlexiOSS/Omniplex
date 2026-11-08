@@ -55,7 +55,7 @@ export function TagDirectory({ tags }: TagDirectoryProps) {
   const rest = showPopular ? visible.slice(popular.length) : visible;
 
   return (
-    <div className="mx-auto mt-8 max-w-5xl">
+    <div className="mt-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <label className="flex flex-1 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-900">
           <Search size={15} className="shrink-0 text-zinc-400" />

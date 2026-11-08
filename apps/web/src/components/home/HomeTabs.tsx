@@ -215,7 +215,7 @@ export function HomeTabs({
         <div
           className={
             centerLastRow
-              ? "mt-6 flex flex-wrap justify-center gap-4 *:w-full sm:*:w-[calc((100%-1rem)/2)] lg:*:w-[calc((100%-2rem)/3)]"
+              ? "mt-6 flex flex-wrap justify-center gap-4 *:w-full sm:*:w-[calc((100%-var(--spacing)*4)/2)] lg:*:w-[calc((100%-var(--spacing)*8)/3)]"
               : "mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           }
         >

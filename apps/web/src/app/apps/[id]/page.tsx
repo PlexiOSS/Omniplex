@@ -2,6 +2,7 @@
 
 import { apps } from "@omniplex/core/api";
 import { ApiError } from "@omniplex/core/api/client";
+import { checkAnswer, questionVisible } from "@omniplex/core/appQuestions";
 import { Badge } from "@omniplex/ui/Badge";
 import { Button } from "@omniplex/ui/Button";
 import { ArrowLeft, CheckCircle2, ClipboardList } from "lucide-react";
@@ -16,18 +17,14 @@ import {
   FormError,
   FormLayout,
   FormSection,
-  TEXTAREA_CLASS,
 } from "@/components/forms/FormSection";
+import { QuestionField } from "@/components/forms/QuestionField";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Markdown } from "@/components/markdown/Markdown";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { useAppMeta } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
-
-const SHORT_MAX = 4096;
-const PARAGRAPH_MIN = 50;
-const PARAGRAPH_MAX = 10000;
 
 export default function ApplyPage() {
   const params = useParams<{ id: string }>();
@@ -61,6 +58,8 @@ export default function ApplyPage() {
     );
   }
 
+  const visible = position.questions.filter((q) => questionVisible(q, answers));
+
   function setAnswer(id: string, value: string) {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }
@@ -69,25 +68,23 @@ export default function ApplyPage() {
     e.preventDefault();
     if (!session || !position) return;
 
-    for (const q of position.questions) {
+    for (const q of visible) {
       const ans = (answers[q.id] ?? "").trim();
-      if (!ans) return setError(`Please answer: ${q.question}`);
-      if (q.short && ans.length > SHORT_MAX)
-        return setError(`Answer for "${q.question}" is too long.`);
-      if (!q.short && ans.length < PARAGRAPH_MIN)
-        return setError(
-          `Answer for "${q.question}" needs at least ${PARAGRAPH_MIN} characters.`,
-        );
-      if (!q.short && ans.length > PARAGRAPH_MAX)
-        return setError(`Answer for "${q.question}" is too long.`);
+      if (!ans) {
+        if (q.optional) continue;
+        return setError(`Please answer: ${q.question}`);
+      }
+      const problem = checkAnswer(q, ans);
+      if (problem) return setError(`"${q.question}": your answer ${problem}.`);
     }
 
     setSubmitting(true);
     setError(null);
     try {
       const trimmed: Record<string, string> = {};
-      for (const q of position.questions) {
-        trimmed[q.id] = (answers[q.id] ?? "").trim();
+      for (const q of visible) {
+        const ans = (answers[q.id] ?? "").trim();
+        if (ans) trimmed[q.id] = ans;
       }
       await apps.create(
         session.user_id,
@@ -104,11 +101,11 @@ export default function ApplyPage() {
     }
   }
 
-  const answered = position.questions.filter((q) => {
+  const answered = visible.filter((q) => {
     const a = (answers[q.id] ?? "").trim();
-    return q.short ? a.length > 0 : a.length >= PARAGRAPH_MIN;
+    return a ? checkAnswer(q, a) === null : !!q.optional;
   }).length;
-  const total = position.questions.length;
+  const total = visible.length;
 
   const about = (
     <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
@@ -145,7 +142,7 @@ export default function ApplyPage() {
         description={
           position.closed
             ? "This position is closed right now."
-            : `${total} ${total === 1 ? "question" : "questions"}. Longer answers need at least ${PARAGRAPH_MIN} characters.`
+            : `${total} ${total === 1 ? "question" : "questions"}. Take your time; your answers stay here until you submit.`
         }
         actions={
           position.closed ? <Badge variant="danger">Closed</Badge> : undefined
@@ -230,54 +227,20 @@ export default function ApplyPage() {
             }
           >
             {position.requires_main_server && <JoinServerCard required />}
-            {position.questions.map((q, i) => {
-              const value = answers[q.id] ?? "";
-              return (
-                <FormSection
-                  key={q.id}
-                  step={i + 1}
-                  title={q.question}
-                  description={q.paragraph || undefined}
-                >
-                  {q.short ? (
-                    <input
-                      id={`q-${q.id}`}
-                      aria-label={q.question}
-                      placeholder={q.placeholder}
-                      value={value}
-                      onChange={(e) => setAnswer(q.id, e.target.value)}
-                      maxLength={SHORT_MAX}
-                      required
-                      className={TEXTAREA_CLASS}
-                    />
-                  ) : (
-                    <>
-                      <textarea
-                        id={`q-${q.id}`}
-                        aria-label={q.question}
-                        rows={5}
-                        maxLength={PARAGRAPH_MAX}
-                        value={value}
-                        onChange={(e) => setAnswer(q.id, e.target.value)}
-                        placeholder={q.placeholder}
-                        className={`resize-y ${TEXTAREA_CLASS}`}
-                        required
-                      />
-                      <p
-                        className={[
-                          "mt-1.5 text-right text-xs tabular-nums",
-                          value.trim().length >= PARAGRAPH_MIN
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-zinc-400",
-                        ].join(" ")}
-                      >
-                        {value.length} / {PARAGRAPH_MIN} min
-                      </p>
-                    </>
-                  )}
-                </FormSection>
-              );
-            })}
+            {visible.map((q, i) => (
+              <FormSection
+                key={q.id}
+                step={i + 1}
+                title={q.optional ? `${q.question} (optional)` : q.question}
+                description={q.paragraph || undefined}
+              >
+                <QuestionField
+                  question={q}
+                  value={answers[q.id] ?? ""}
+                  onChange={(v) => setAnswer(q.id, v)}
+                />
+              </FormSection>
+            ))}
           </FormLayout>
         </form>
       )}

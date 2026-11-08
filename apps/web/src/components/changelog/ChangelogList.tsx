@@ -202,7 +202,7 @@ export function ChangelogList({ entries, activeTrack }: ChangelogListProps) {
         </div>
 
         <aside className="hidden lg:block">
-          <nav className="sticky top-24 max-h-[calc(100vh-8rem)] space-y-6 overflow-y-auto">
+          <nav className="sticky top-24 max-h-[calc(100vh-var(--spacing)*32)] space-y-6 overflow-y-auto">
             {present
               .filter((t) => filtered.some((e) => trackKey(e) === trackKey(t)))
               .map((track) => (

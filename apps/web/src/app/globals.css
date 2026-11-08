@@ -30,6 +30,191 @@
 }
 
 /* --------------------------------------------------------------------------
+   Surfaces: data-surface on <html> retints every zinc utility
+   -------------------------------------------------------------------------- */
+:root[data-surface="slate"] {
+  --color-zinc-50: #f8fafc;
+  --color-zinc-100: #f1f5f9;
+  --color-zinc-200: #e2e8f0;
+  --color-zinc-300: #cbd5e1;
+  --color-zinc-400: #94a3b8;
+  --color-zinc-500: #64748b;
+  --color-zinc-600: #475569;
+  --color-zinc-700: #334155;
+  --color-zinc-800: #1e293b;
+  --color-zinc-900: #0f172a;
+  --color-zinc-950: #020617;
+}
+
+:root[data-surface="stone"] {
+  --color-zinc-50: #fafaf9;
+  --color-zinc-100: #f5f5f4;
+  --color-zinc-200: #e7e5e4;
+  --color-zinc-300: #d6d3d1;
+  --color-zinc-400: #a8a29e;
+  --color-zinc-500: #78716c;
+  --color-zinc-600: #57534e;
+  --color-zinc-700: #44403c;
+  --color-zinc-800: #292524;
+  --color-zinc-900: #1c1917;
+  --color-zinc-950: #0c0a09;
+}
+
+:root[data-surface="discord"] {
+  --color-zinc-50: #f2f3f5;
+  --color-zinc-100: #ebedef;
+  --color-zinc-200: #e3e5e8;
+  --color-zinc-300: #c4c9ce;
+  --color-zinc-400: #949ba4;
+  --color-zinc-500: #686a73;
+  --color-zinc-600: #5c5e66;
+  --color-zinc-700: #4e5058;
+  --color-zinc-800: #3f4147;
+  --color-zinc-900: #313338;
+  --color-zinc-950: #2b2d31;
+}
+
+:root[data-surface="midnight"] {
+  --color-zinc-50: #fafafa;
+  --color-zinc-100: #f5f5f5;
+  --color-zinc-200: #e5e5e5;
+  --color-zinc-300: #d4d4d4;
+  --color-zinc-400: #a3a3a3;
+  --color-zinc-500: #737373;
+  --color-zinc-600: #404040;
+  --color-zinc-700: #262626;
+  --color-zinc-800: #171717;
+  --color-zinc-900: #0a0a0a;
+  --color-zinc-950: #000000;
+}
+
+:root[data-surface="arctic"] {
+  --color-zinc-50: #eceff4;
+  --color-zinc-100: #e5e9f0;
+  --color-zinc-200: #d8dee9;
+  --color-zinc-300: #b9c2d1;
+  --color-zinc-400: #8f9bb0;
+  --color-zinc-500: #667186;
+  --color-zinc-600: #4c566a;
+  --color-zinc-700: #434c5e;
+  --color-zinc-800: #3b4252;
+  --color-zinc-900: #2e3440;
+  --color-zinc-950: #242933;
+}
+
+:root[data-surface="dusk"] {
+  --color-zinc-50: #f3f4fb;
+  --color-zinc-100: #e6e9f5;
+  --color-zinc-200: #cdd6f4;
+  --color-zinc-300: #bac2de;
+  --color-zinc-400: #9399b2;
+  --color-zinc-500: #696d83;
+  --color-zinc-600: #585b70;
+  --color-zinc-700: #45475a;
+  --color-zinc-800: #313244;
+  --color-zinc-900: #1e1e2e;
+  --color-zinc-950: #11111b;
+}
+
+:root[data-surface="moss"] {
+  --color-zinc-50: #f6f8f6;
+  --color-zinc-100: #eef2ef;
+  --color-zinc-200: #dde5df;
+  --color-zinc-300: #c0ccc3;
+  --color-zinc-400: #94a69a;
+  --color-zinc-500: #617468;
+  --color-zinc-600: #445a4d;
+  --color-zinc-700: #2b3b32;
+  --color-zinc-800: #1d2a23;
+  --color-zinc-900: #121c17;
+  --color-zinc-950: #0b120f;
+}
+
+:root[data-surface="paper"] {
+  --color-zinc-50: #faf6ee;
+  --color-zinc-100: #f3ecdf;
+  --color-zinc-200: #e6dccb;
+  --color-zinc-300: #d3c4ab;
+  --color-zinc-400: #a8977a;
+  --color-zinc-500: #76674f;
+  --color-zinc-600: #5e5141;
+  --color-zinc-700: #463c31;
+  --color-zinc-800: #2e2720;
+  --color-zinc-900: #201b16;
+  --color-zinc-950: #14110d;
+}
+
+:root[data-surface]:not([data-surface="zinc"]):not(.dark) {
+  --background: var(--color-zinc-50);
+}
+
+:root[data-surface]:not([data-surface="zinc"]):not(.dark) body {
+  background-color: var(--color-zinc-50);
+}
+
+:root[data-surface]:not([data-surface="zinc"]).dark {
+  --background: var(--color-zinc-950);
+}
+
+/* --------------------------------------------------------------------------
+   Density and text size: both scale rem-based spacing and type
+   -------------------------------------------------------------------------- */
+:root[data-density="compact"] {
+  --spacing: 0.225rem;
+}
+
+:root[data-density="spacious"] {
+  --spacing: 0.275rem;
+}
+
+:root[data-text-size="small"] {
+  font-size: 93.75%;
+}
+
+:root[data-text-size="large"] {
+  font-size: 112.5%;
+}
+
+:root[data-text-size="larger"] {
+  font-size: 125%;
+}
+
+/* --------------------------------------------------------------------------
+   Motion
+   -------------------------------------------------------------------------- */
+:root[data-motion="reduce"] {
+  scroll-behavior: auto;
+}
+
+:root[data-motion="reduce"] *,
+:root[data-motion="reduce"] *::before,
+:root[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms;
+  animation-iteration-count: 1;
+  transition-duration: 0.01ms;
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    scroll-behavior: auto;
+  }
+
+  :root:not([data-motion="full"]) *,
+  :root:not([data-motion="full"]) *::before,
+  :root:not([data-motion="full"]) *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+
+[data-hide-offline="true"] [data-status="offline"] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
    Prose — long descriptions & blog content (Markdown + inline HTML)
    -------------------------------------------------------------------------- */
 .prose {
@@ -44,7 +229,7 @@
   max-width: 100%;
 }
 .prose [id] {
-  scroll-margin-top: 6rem;
+  scroll-margin-top: calc(var(--spacing) * 24);
 }
 .prose > *:first-child {
   margin-top: 0;
@@ -64,7 +249,7 @@
   margin-top: 1.75em;
   margin-bottom: 0.6em;
   color: var(--foreground);
-  scroll-margin-top: 5rem;
+  scroll-margin-top: calc(var(--spacing) * 20);
 }
 .prose h1 {
   font-size: 1.5em;
@@ -127,7 +312,7 @@
 }
 .prose code {
   background: rgba(0 0 0 / 0.06);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.875em;
   padding: 0.125em 0.375em;
@@ -136,9 +321,9 @@
   background: rgba(255 255 255 / 0.08);
 }
 .prose pre {
-  background: #18181b;
-  border-radius: 0.75rem;
-  color: #e4e4e7;
+  background: var(--color-zinc-900);
+  border-radius: var(--radius-xl);
+  color: var(--color-zinc-200);
   font-family: var(--font-mono);
   font-size: 0.875em;
   line-height: 1.6;
@@ -191,13 +376,13 @@
   translate: 0 0.1em;
 }
 .prose img {
-  border-radius: 0.75rem;
+  border-radius: var(--radius-xl);
   max-width: 100%;
 }
 .prose iframe,
 .prose video {
   border: none;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-xl);
   max-width: 100%;
 }
 /* Embed snippets often omit `height` entirely, assuming the embedded page
@@ -220,7 +405,7 @@
 .prose blockquote {
   border-left: 3px solid var(--accent);
   background: color-mix(in srgb, var(--accent) 6%, transparent);
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   color: #52525b;
   margin: 1em 0;
   padding: 0.6em 1em;
@@ -274,7 +459,7 @@
 }
 .prose details {
   border: 1px solid rgba(0 0 0 / 0.1);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-lg);
   margin-bottom: 1em;
   padding: 0.6em 1em;
 }
@@ -334,5 +519,14 @@
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
+  }
+}
+
+@keyframes constellation-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

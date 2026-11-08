@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-08
+
+### Changed
+
+- Promo code links point at `/shop/premium`.
+
+### Added
+
+- Flagged answers: the form editor can mark answers reviewers should notice,
+  and applications show them highlighted with a count at the top.
+- The application form editor can set each question's answer type, its
+  choices, length limits, whether it's optional, and conditions that only
+  ask it for certain answers to an earlier question.
+- A **Backgrounds** page under Moderation for reviewing custom page
+  backgrounds, with a preview as visitors will see it, quick rejection
+  reasons, and a count in the sidebar. Needs Review Entities.
+
 ## [1.2.0] - 2026-11-07
 
 ### Changed

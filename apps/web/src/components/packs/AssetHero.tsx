@@ -47,7 +47,7 @@ export function AssetHero({
       </Link>
 
       <section className="grid overflow-hidden rounded-2xl border border-zinc-200 bg-white md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex min-h-64 items-center justify-center border-b border-zinc-200 bg-zinc-50 bg-[radial-gradient(#e4e4e7_1px,transparent_1px)] [background-size:16px_16px] p-8 md:border-r md:border-b-0 dark:border-zinc-800 dark:bg-zinc-950 dark:bg-[radial-gradient(#27272a_1px,transparent_1px)]">
+        <div className="flex min-h-64 items-center justify-center border-b border-zinc-200 bg-zinc-50 bg-[radial-gradient(var(--color-zinc-200)_1px,transparent_1px)] [background-size:16px_16px] p-8 md:border-r md:border-b-0 dark:border-zinc-800 dark:bg-zinc-950 dark:bg-[radial-gradient(var(--color-zinc-800)_1px,transparent_1px)]">
           {preview}
         </div>
 

@@ -17,6 +17,7 @@ import {
 } from "@omniplex/core/s3/objects";
 import { COOKIE_TOKEN } from "@omniplex/core/utils/auth";
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 import { getServerToken } from "@/lib/utils/serverSession";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
@@ -36,6 +37,8 @@ type Kind =
   | "team-banner"
   | "bot-banner"
   | "server-banner"
+  | "bot-background"
+  | "server-background"
   | "pack-emoji"
   | "pack-sticker"
   | "pack-sound";
@@ -54,12 +57,29 @@ interface KindConfig {
   popplioTargetType: "team" | "bot" | "server" | "pack";
   maxBytes?: number;
   versioned?: { target: VersionedAssetTarget; kind: VersionedAssetKind };
+  background?: boolean;
 }
 
 const EMOJI_MAX_BYTES = 256 * 1024;
 const SOUND_MAX_BYTES = 2 * 1024 * 1024;
 
+const BACKGROUND_MAX_BYTES = 8 * 1024 * 1024;
+
 const KIND_CONFIG: Record<Kind, KindConfig> = {
+  "bot-background": {
+    key: (id) => `backgrounds/bots/${id}`,
+    perm: "edit_bots",
+    popplioTargetType: "bot",
+    maxBytes: BACKGROUND_MAX_BYTES,
+    background: true,
+  },
+  "server-background": {
+    key: (id) => `backgrounds/servers/${id}`,
+    perm: "edit_servers",
+    popplioTargetType: "server",
+    maxBytes: BACKGROUND_MAX_BYTES,
+    background: true,
+  },
   "team-avatar": {
     key: (id) => `avatars/teams/${id}.webp`,
     perm: "edit_team",
@@ -103,6 +123,88 @@ const KIND_CONFIG: Record<Kind, KindConfig> = {
     maxBytes: SOUND_MAX_BYTES,
   },
 };
+
+async function storeBackground(
+  buffer: Buffer,
+  targetType: "bot" | "server",
+  targetId: string,
+  token: string,
+) {
+  const plural = `${targetType}s`;
+  const style = await client
+    .get<{ premium: boolean }>(`/${plural}/${targetId}/page-style/manage`, {
+      token,
+      cache: "no-store",
+    })
+    .catch(() => null);
+
+  if (!style?.premium) {
+    return NextResponse.json(
+      {
+        error: `Page backgrounds are a premium perk. Upgrade this ${targetType} first.`,
+      },
+      { status: 403 },
+    );
+  }
+
+  let image: Buffer;
+  try {
+    image = await sharp(buffer, {
+      limitInputPixels: 40_000_000,
+      failOn: "error",
+      animated: false,
+    })
+      .rotate()
+      .resize({
+        width: 2560,
+        height: 2560,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 82 })
+      .toBuffer();
+  } catch {
+    return NextResponse.json(
+      { error: "That file couldn't be read as an image." },
+      { status: 400 },
+    );
+  }
+
+  const version = createHash("sha256").update(image).digest("hex").slice(0, 16);
+  const wrote = await putObject(
+    `backgrounds/${plural}/${targetId}/${version}.webp`,
+    image,
+    "image/webp",
+    { [ASSET_VERSION_METADATA_KEY]: version },
+  );
+
+  if (!wrote) {
+    return NextResponse.json(
+      { error: "Failed to store the uploaded file. Please try again." },
+      { status: 502 },
+    );
+  }
+
+  try {
+    await client.put<void>(
+      `/${plural}/${targetId}/page-style/image`,
+      { version },
+      { token },
+    );
+  } catch (err) {
+    return NextResponse.json(
+      {
+        error:
+          err instanceof ApiError
+            ? err.message
+            : "Couldn't submit the background for review.",
+      },
+      { status: 400 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, version });
+}
 
 function isKind(value: unknown): value is Kind {
   return typeof value === "string" && value in KIND_CONFIG;
@@ -266,6 +368,15 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
+  if (config.background) {
+    return storeBackground(
+      buffer,
+      config.popplioTargetType as "bot" | "server",
+      targetId,
+      userToken,
+    );
+  }
+
   const key = config.key(targetId, assetId);
   const version = createHash("sha256")
     .update(buffer)
