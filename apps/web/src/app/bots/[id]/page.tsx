@@ -33,6 +33,10 @@ import { InvitePermissionNote } from "@/components/bots/InvitePermissionNote";
 import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import {
+  ListingViewTracker,
+  TrackedInviteLink,
+} from "@/components/listing/ListingTracking";
 import { PageBackground } from "@/components/listing/PageBackground";
 import { isListed, UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
@@ -56,6 +60,7 @@ import {
   isNotFoundError,
   nullIfNotFound,
 } from "@/lib/utils/errors";
+import { knownStatus, statHidden } from "@/lib/utils/hiddenStats";
 import { getServerToken } from "@/lib/utils/serverSession";
 import { BOT_WIDGET_STATS } from "@/lib/widget/shared";
 import { VoteButton } from "./VoteButton";
@@ -139,13 +144,9 @@ export default async function BotPage({ params }: Props) {
     pageStyles.get("bot", bot.bot_id).catch(() => null),
   ]);
 
-  const uptimePercent =
-    bot.total_uptime > 0
-      ? Math.min(100, (bot.uptime / bot.total_uptime) * 100)
-      : null;
-  const statusLabel = bot.user.status
-    ? STATUS_LABELS[bot.user.status]
-    : undefined;
+  const uptimePercent = bot.uptime_percent ?? null;
+  const status = knownStatus(bot.user);
+  const statusLabel = status ? STATUS_LABELS[status] : undefined;
 
   const avatarSrc = mirroredAvatarUrl(
     "bots",
@@ -167,15 +168,15 @@ export default async function BotPage({ params }: Props) {
           </div>
         )}
         {bot.invite && (
-          <a
+          <TrackedInviteLink
+            listingType="bot"
+            listingId={bot.bot_id}
             href={bot.invite}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-muted"
           >
             <ExternalLink size={14} />
             Add to Server
-          </a>
+          </TrackedInviteLink>
         )}
         {bot.invite && <InvitePermissionNote invite={bot.invite} />}
         <VoteButton
@@ -195,6 +196,9 @@ export default async function BotPage({ params }: Props) {
   return (
     <div className="relative isolate" style={accentVars(pageStyle)}>
       <PageBackground target="bot" id={bot.bot_id} style={pageStyle} />
+      {isListed(bot.type) && (
+        <ListingViewTracker target="bot" id={bot.bot_id} />
+      )}
       <Container className="py-10">
         <Link
           href="/bots"
@@ -227,7 +231,7 @@ export default async function BotPage({ params }: Props) {
                 src={avatarSrc}
                 alt={bot.user.username}
                 size={64}
-                status={bot.user.status}
+                status={status}
               />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -316,45 +320,59 @@ export default async function BotPage({ params }: Props) {
                   label="Votes"
                   value={formatCount(bot.approximate_votes)}
                 />
-                <StatRow
-                  icon={<Server size={14} />}
-                  label="Servers"
-                  value={formatCount(bot.servers)}
-                />
-                {uptimePercent !== null && (
+                {!statHidden(bot, "servers") && (
+                  <StatRow
+                    icon={<Server size={14} />}
+                    label="Servers"
+                    value={formatCount(bot.servers)}
+                  />
+                )}
+                {!statHidden(bot, "uptime") && (
                   <div>
                     <StatRow
                       icon={<Activity size={14} />}
-                      label="Uptime"
-                      value={`${uptimePercent >= 99.95 ? "100" : uptimePercent.toFixed(1)}%`}
+                      label="Uptime (30 days)"
+                      value={
+                        uptimePercent === null
+                          ? "No data yet"
+                          : `${uptimePercent >= 99.95 ? "100" : uptimePercent.toFixed(1)}%`
+                      }
                     />
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                      <div
-                        className={[
-                          "h-full rounded-full",
-                          uptimePercent >= 95
-                            ? "bg-emerald-500"
-                            : uptimePercent >= 80
-                              ? "bg-amber-500"
-                              : "bg-red-500",
-                        ].join(" ")}
-                        style={{ width: `${Math.max(uptimePercent, 2)}%` }}
-                      />
-                    </div>
+                    {uptimePercent !== null && (
+                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                        <div
+                          className={[
+                            "h-full rounded-full",
+                            uptimePercent >= 95
+                              ? "bg-emerald-500"
+                              : uptimePercent >= 80
+                                ? "bg-amber-500"
+                                : "bg-red-500",
+                          ].join(" ")}
+                          style={{ width: `${Math.max(uptimePercent, 2)}%` }}
+                        />
+                      </div>
+                    )}
+                    <Link
+                      href="/kb/developers/status-and-uptime#uptime"
+                      className="mt-1 inline-block text-xs text-zinc-500 underline-offset-2 hover:text-accent hover:underline dark:text-zinc-400"
+                    >
+                      How uptime works
+                    </Link>
                   </div>
                 )}
-                {bot.shards != null && (
+                {bot.shards != null && !statHidden(bot, "shards") && (
                   <StatRow
                     icon={<Server size={14} />}
                     label="Shards"
                     value={formatCount(bot.shards)}
                   />
                 )}
-                {bot.clicks > 0 && (
+                {(bot.views_30d ?? 0) > 0 && (
                   <StatRow
                     icon={<Eye size={14} />}
-                    label="Page Views"
-                    value={formatCount(bot.clicks)}
+                    label="Views (30 days)"
+                    value={formatCount(bot.views_30d ?? 0)}
                   />
                 )}
                 {bot.invite_clicks > 0 && (
@@ -500,6 +518,7 @@ export default async function BotPage({ params }: Props) {
           avatar={avatarSrc}
           primaryHref={bot.invite || undefined}
           primaryLabel="Add"
+          inviteTarget={{ target: "bot", id: bot.bot_id }}
         />
       </Container>
     </div>

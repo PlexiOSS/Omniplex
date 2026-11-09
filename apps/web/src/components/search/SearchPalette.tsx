@@ -13,6 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { BOT_TAGS, SERVER_TAGS } from "@/lib/constants/tags";
+import { statHidden } from "@/lib/utils/hiddenStats";
 
 interface Item {
   key: string;
@@ -132,7 +133,9 @@ export function SearchPalette() {
         key: `server-${server.server_id}`,
         href: serverPath(server.server_id, server.vanity),
         label: server.name,
-        hint: formatCountLabel(server.total_members, "member"),
+        hint: statHidden(server, "members")
+          ? undefined
+          : formatCountLabel(server.total_members, "member"),
         avatar: mirroredAvatarUrl("servers", server.server_id, server.avatar),
         kind: "server",
       });

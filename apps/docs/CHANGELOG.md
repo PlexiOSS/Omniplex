@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-09
+
+### Changed
+
+- The API reference covers 30-day uptime, hidden stats and the new view and
+  invite click endpoints.
+
 ## [1.0.0] - 2026-11-08
 
 ### Added

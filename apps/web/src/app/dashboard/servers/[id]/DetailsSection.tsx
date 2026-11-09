@@ -12,7 +12,9 @@ import { LinksEditor } from "@omniplex/ui/LinksEditor";
 import { TagPicker } from "@omniplex/ui/TagPicker";
 import Link from "next/link";
 import { useState } from "react";
+import { PublicStatsFields } from "@/components/listing/PublicStatsFields";
 import { SERVER_TAGS } from "@/lib/constants/tags";
+import { SERVER_STAT_OPTIONS } from "@/lib/utils/hiddenStats";
 import {
   FormMessage,
   SettingsCard,
@@ -63,6 +65,7 @@ export function DetailsSection({ server, token, onSaved }: SectionProps) {
     nsfw: server.nsfw,
     captchaOptOut: server.captcha_opt_out,
     acceptAutoVotes: !server.auto_votes_opt_out,
+    hiddenStats: server.hidden_stats ?? [],
     cardColor: server.card_color ?? "",
     loginRequiredForInvite: server.login_required_for_invite,
     showEmojis: server.show_emojis,
@@ -96,6 +99,7 @@ export function DetailsSection({ server, token, onSaved }: SectionProps) {
           nsfw: form.nsfw,
           captcha_opt_out: form.captchaOptOut,
           auto_votes_opt_out: !form.acceptAutoVotes,
+          hidden_stats: form.hiddenStats,
           ...(server.card_theme ? { card_color: form.cardColor } : {}),
           login_required_for_invite: form.loginRequiredForInvite,
           show_emojis: form.showEmojis,
@@ -235,6 +239,11 @@ export function DetailsSection({ server, token, onSaved }: SectionProps) {
           checked={form.nsfw}
           onChange={(v) => update("nsfw", v)}
           label="This server contains NSFW content"
+        />
+        <PublicStatsFields
+          options={SERVER_STAT_OPTIONS}
+          hidden={form.hiddenStats}
+          onChange={(v) => update("hiddenStats", v)}
         />
       </SettingsCard>
 

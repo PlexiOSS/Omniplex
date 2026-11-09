@@ -13,6 +13,7 @@ import {
   og,
   ogClamp,
 } from "@/lib/og/shared";
+import { statHidden } from "@/lib/utils/hiddenStats";
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
@@ -110,8 +111,15 @@ export default async function Image({
       {bot && (
         <div style={{ display: "flex", gap: 40 }}>
           <OgStat label="Votes" value={formatCount(bot.approximate_votes)} />
-          <OgStat label="Servers" value={formatCount(bot.servers)} />
-          <OgStat label="Page Views" value={formatCount(bot.clicks)} />
+          {!statHidden(bot, "servers") && (
+            <OgStat label="Servers" value={formatCount(bot.servers)} />
+          )}
+          {!statHidden(bot, "views") && (
+            <OgStat
+              label="Views (30 days)"
+              value={formatCount(bot.views_30d ?? 0)}
+            />
+          )}
         </div>
       )}
     </OgFrame>,

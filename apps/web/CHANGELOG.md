@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-11-09
+
+### Changed
+
+- A bot's Uptime covers the last 30 days instead of all time, and shows
+  "No data yet" instead of 0% when the bot hasn't been seen online. The bot
+  page links to **Bot Status & Uptime** in the knowledge base, which now
+  explains how checks work.
+
+### Added
+
+- **Public stats** in bot and server settings lets owners hide server or
+  member counts, shards, boosts, page views and invite clicks from their
+  page, cards, widgets, link previews, search and compare tables. Bots can
+  also hide their uptime and online status, including the dot on their
+  avatar and the status next to their name.
+
+### Fixed
+
+- Page views and invite clicks weren't being counted. The site now records
+  them from the visitor's browser, once per visitor per listing per day.
+  Cards, pages, compare tables and link previews show views from the last
+  30 days, and a new **Views & Invite Clicks** article explains how it works.
+- Bots using HTTP interactions no longer show as offline when we can't
+  actually tell. The status dot and label only appear when the status is
+  known.
+
 ## [1.17.0] - 2026-11-08
 
 ### Added

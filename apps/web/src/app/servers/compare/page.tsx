@@ -17,6 +17,7 @@ import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { isApiUnavailable } from "@/lib/utils/errors";
+import { statHidden } from "@/lib/utils/hiddenStats";
 
 interface Props {
   searchParams: Promise<{ a?: string; b?: string }>;
@@ -66,17 +67,23 @@ function toCompareEntity(server: Server): CompareEntity {
       {
         icon: <Users size={14} />,
         label: "Members",
-        value: formatCount(server.total_members),
+        value: statHidden(server, "members")
+          ? "Hidden"
+          : formatCount(server.total_members),
       },
       {
         icon: <Eye size={14} />,
-        label: "Page Views",
-        value: formatCount(server.clicks),
+        label: "Views (30 days)",
+        value: statHidden(server, "views")
+          ? "Hidden"
+          : formatCount(server.views_30d ?? 0),
       },
       {
         icon: <MousePointerClick size={14} />,
         label: "Invite Clicks",
-        value: formatCount(server.invite_clicks),
+        value: statHidden(server, "invites")
+          ? "Hidden"
+          : formatCount(server.invite_clicks),
       },
     ],
   };

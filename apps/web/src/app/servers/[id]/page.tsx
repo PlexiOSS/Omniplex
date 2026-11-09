@@ -35,6 +35,10 @@ import { EntityBadges } from "@/components/badges/EntityBadges";
 import { ServerCard } from "@/components/cards/ServerCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import {
+  ListingViewTracker,
+  TrackedInviteLink,
+} from "@/components/listing/ListingTracking";
 import { PageBackground } from "@/components/listing/PageBackground";
 import { isListed, UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
@@ -59,6 +63,7 @@ import {
   isNotFoundError,
   nullIfNotFound,
 } from "@/lib/utils/errors";
+import { statHidden } from "@/lib/utils/hiddenStats";
 import { getServerToken } from "@/lib/utils/serverSession";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
 import { ServerVoteButton } from "./ServerVoteButton";
@@ -184,15 +189,15 @@ export default async function ServerPage({ params }: Props) {
             (l) => l.name === "invite",
           )?.value;
           return inviteLink ? (
-            <a
+            <TrackedInviteLink
+              listingType="server"
+              listingId={server.server_id}
               href={inviteLink}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-muted"
             >
               <ExternalLink size={14} />
               Join Server
-            </a>
+            </TrackedInviteLink>
           ) : null;
         })()}
         <ServerVoteButton
@@ -211,6 +216,9 @@ export default async function ServerPage({ params }: Props) {
   return (
     <div className="relative isolate" style={accentVars(pageStyle)}>
       <PageBackground target="server" id={server.server_id} style={pageStyle} />
+      {isListed(server.type) && (
+        <ListingViewTracker target="server" id={server.server_id} />
+      )}
       <Container className="py-10">
         <Link
           href="/servers"
@@ -328,30 +336,32 @@ export default async function ServerPage({ params }: Props) {
                   label="Votes"
                   value={formatCount(server.approximate_votes)}
                 />
-                <div>
-                  <StatRow
-                    icon={<Users size={14} />}
-                    label="Members"
-                    value={formatCount(server.total_members)}
-                  />
-                  {server.online_members != null &&
-                    server.total_members > 0 && (
-                      <>
-                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                          <div
-                            className="h-full rounded-full bg-emerald-500"
-                            style={{
-                              width: `${Math.min(100, (server.online_members / server.total_members) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          {formatCount(server.online_members)} online
-                        </p>
-                      </>
-                    )}
-                </div>
+                {!statHidden(server, "members") && (
+                  <div>
+                    <StatRow
+                      icon={<Users size={14} />}
+                      label="Members"
+                      value={formatCount(server.total_members)}
+                    />
+                    {server.online_members != null &&
+                      server.total_members > 0 && (
+                        <>
+                          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                            <div
+                              className="h-full rounded-full bg-emerald-500"
+                              style={{
+                                width: `${Math.min(100, (server.online_members / server.total_members) * 100)}%`,
+                              }}
+                            />
+                          </div>
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            {formatCount(server.online_members)} online
+                          </p>
+                        </>
+                      )}
+                  </div>
+                )}
                 {(server.boost_count ?? 0) > 0 && (
                   <StatRow
                     icon={<Gem size={14} />}
@@ -359,11 +369,11 @@ export default async function ServerPage({ params }: Props) {
                     value={`${server.premium_tier ? `Level ${server.premium_tier} · ` : ""}${formatCount(server.boost_count ?? 0)}`}
                   />
                 )}
-                {server.clicks > 0 && (
+                {(server.views_30d ?? 0) > 0 && (
                   <StatRow
                     icon={<Eye size={14} />}
-                    label="Page Views"
-                    value={formatCount(server.clicks)}
+                    label="Views (30 days)"
+                    value={formatCount(server.views_30d ?? 0)}
                   />
                 )}
                 {server.invite_clicks > 0 && (
@@ -468,6 +478,7 @@ export default async function ServerPage({ params }: Props) {
             server.extra_links.find((l) => l.name === "invite")?.value
           }
           primaryLabel="Join"
+          inviteTarget={{ target: "server", id: server.server_id }}
         />
       </Container>
     </div>

@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { Banner } from "@/components/ui/Banner";
 import { cardCosmetics } from "@/lib/utils/cardCosmetics";
+import { knownStatus, statHidden } from "@/lib/utils/hiddenStats";
 import { tagAttr } from "@/lib/utils/tagFilter";
 
 interface BotCardProps {
@@ -43,9 +44,7 @@ export function BotCard({ bot }: BotCardProps) {
       href={href}
       data-nsfw={bot.nsfw || undefined}
       data-tags={tagAttr(bot.tags)}
-      data-status={
-        bot.user.extra_data?.presence_unknown ? undefined : bot.user.status
-      }
+      data-status={knownStatus(bot.user)}
       style={cosmetics.style}
       className={[
         cosmetics.className,
@@ -69,7 +68,7 @@ export function BotCard({ bot }: BotCardProps) {
             src={avatarSrc}
             alt={bot.user.username}
             size={44}
-            status={bot.user.status}
+            status={knownStatus(bot.user)}
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
@@ -108,18 +107,24 @@ export function BotCard({ bot }: BotCardProps) {
             <Star size={12} />
             {formatCountLabel(bot.approximate_votes, "vote")}
           </span>
-          <span data-stat="size" className="flex items-center gap-1">
-            <Server size={12} />
-            {formatCountLabel(bot.servers, "server")}
-          </span>
-          <span data-stat="views" className="flex items-center gap-1">
-            <Eye size={12} />
-            {formatCountLabel(bot.clicks, "view")}
-          </span>
-          <span data-stat="invites" className="flex items-center gap-1">
-            <MousePointerClick size={12} />
-            {formatCountLabel(bot.invite_clicks, "invite")}
-          </span>
+          {!statHidden(bot, "servers") && (
+            <span data-stat="size" className="flex items-center gap-1">
+              <Server size={12} />
+              {formatCountLabel(bot.servers, "server")}
+            </span>
+          )}
+          {!statHidden(bot, "views") && (
+            <span data-stat="views" className="flex items-center gap-1">
+              <Eye size={12} />
+              {formatCountLabel(bot.views_30d ?? 0, "view")}
+            </span>
+          )}
+          {!statHidden(bot, "invites") && (
+            <span data-stat="invites" className="flex items-center gap-1">
+              <MousePointerClick size={12} />
+              {formatCountLabel(bot.invite_clicks, "invite")}
+            </span>
+          )}
           {bot.shards > 0 && (
             <span data-stat="shards" className="flex items-center gap-1">
               <Layers size={12} />

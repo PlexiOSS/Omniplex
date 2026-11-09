@@ -4,7 +4,7 @@
     "title": "Omniplex API",
     "description": "RESTful API and Backend Services for Omniplex",
     "termsOfService": "https://omniplex.gg/legal/terms",
-    "version": "1.23.0",
+    "version": "1.24.0",
     "contact": {
       "name": "Omniplex Support",
       "url": "https://discord.gg/KBCRuBKrHe",
@@ -577,6 +577,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -685,6 +693,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -768,6 +780,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -876,6 +896,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -1031,6 +1055,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -1100,6 +1132,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "votes": {
                         "description": "The server's vote count",
@@ -1259,6 +1295,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -1328,6 +1372,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -2076,6 +2124,14 @@
               "format": "date-time",
               "type": "string"
             },
+            "hidden_stats": {
+              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+              "items": {
+                "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                "type": "string"
+              },
+              "type": "array"
+            },
             "highlighted": {
               "description": "Whether the bot has an active Highlighted Card from the shop",
               "type": "boolean"
@@ -2184,6 +2240,10 @@
               "format": "uuid",
               "type": "string"
             },
+            "views_30d": {
+              "description": "Views in the last 30 days, counting each visitor once per listing per day",
+              "type": "integer"
+            },
             "vote_blitz_until": {
               "description": "If set and in the future, the bot's vote cooldown is halved until this time",
               "format": "date-time",
@@ -2234,6 +2294,14 @@
               "description": "If set and in the future, the server appears in the home page's Featured section until this time",
               "format": "date-time",
               "type": "string"
+            },
+            "hidden_stats": {
+              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+              "items": {
+                "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                "type": "string"
+              },
+              "type": "array"
             },
             "highlighted": {
               "description": "Whether the server has an active Highlighted Card from the shop",
@@ -2304,6 +2372,10 @@
               "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
               "format": "uuid",
               "type": "string"
+            },
+            "views_30d": {
+              "description": "Views in the last 30 days, counting each visitor once per listing per day",
+              "type": "integer"
             },
             "votes": {
               "description": "The server's vote count",
@@ -3922,6 +3994,14 @@
             "format": "date-time",
             "type": "string"
           },
+          "hidden_stats": {
+            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+            "items": {
+              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+              "type": "string"
+            },
+            "type": "array"
+          },
           "highlighted": {
             "description": "Whether the bot has an active Highlighted Card from the shop",
             "type": "boolean"
@@ -4152,6 +4232,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the bot has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -4259,6 +4347,10 @@
                           "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                           "format": "uuid",
                           "type": "string"
+                        },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
                         },
                         "vote_blitz_until": {
                           "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -4403,6 +4495,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -4472,6 +4572,10 @@
                           "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                           "format": "uuid",
                           "type": "string"
+                        },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
                         },
                         "votes": {
                           "description": "The server's vote count",
@@ -4566,7 +4670,7 @@
             "type": "object"
           },
           "total_uptime": {
-            "description": "The bot's total number of uptime checks",
+            "description": "The bot's all-time number of uptime checks. Includes older checks that weren't reliable, so use uptime_percent to show uptime",
             "type": "integer"
           },
           "type": {
@@ -4584,13 +4688,23 @@
             "type": "string"
           },
           "uptime": {
-            "description": "The bot's total number of successful uptime checks",
+            "description": "The bot's all-time number of successful uptime checks. Includes older checks that weren't reliable, so use uptime_percent to show uptime",
+            "type": "integer"
+          },
+          "uptime_checks": {
+            "description": "How many uptime checks ran in the last 30 days",
             "type": "integer"
           },
           "uptime_last_checked": {
             "description": "The bot's last uptime check",
             "format": "date-time",
             "type": "string"
+          },
+          "uptime_percent": {
+            "description": "The share of uptime checks in the last 30 days where the bot was online, from 0 to 100. Null when it hasn't been seen online in that time",
+            "format": "double",
+            "nullable": true,
+            "type": "number"
           },
           "user": {
             "description": "The bot's user information",
@@ -4650,6 +4764,10 @@
             "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
             "format": "uuid",
             "type": "string"
+          },
+          "views_30d": {
+            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+            "type": "integer"
           },
           "vote_banned": {
             "description": "Whether the bot is vote banned or not",
@@ -4816,6 +4934,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -4923,6 +5049,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -5078,6 +5208,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -5147,6 +5285,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -6029,6 +6171,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -6136,6 +6286,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -6195,6 +6349,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -6302,6 +6464,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -6361,6 +6527,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -6468,6 +6642,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -6539,6 +6717,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -6647,6 +6833,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -6802,6 +6992,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -6871,6 +7069,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "votes": {
                         "description": "The server's vote count",
@@ -7022,6 +7224,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7129,6 +7339,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -7188,6 +7402,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7295,6 +7517,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -7354,6 +7580,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7461,6 +7695,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -7520,6 +7758,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7628,6 +7874,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -7686,6 +7936,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7755,6 +8013,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -7804,6 +8066,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7873,6 +8143,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -7922,6 +8196,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7991,6 +8273,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8040,6 +8326,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8109,6 +8403,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8158,6 +8456,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8227,6 +8533,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8276,6 +8586,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8345,6 +8663,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8394,6 +8716,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8463,6 +8793,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8512,6 +8846,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8581,6 +8923,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -9523,6 +9869,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -9631,6 +9985,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -9686,6 +10044,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -9756,6 +10122,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -9971,6 +10341,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -10079,6 +10457,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -10155,6 +10537,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -10263,6 +10653,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -10418,6 +10812,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -10487,6 +10889,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "votes": {
                         "description": "The server's vote count",
@@ -10635,6 +11041,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -10704,6 +11118,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -10787,6 +11205,14 @@
                             "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                             "format": "date-time",
                             "type": "string"
+                          },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
                           },
                           "highlighted": {
                             "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -10895,6 +11321,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "vote_blitz_until": {
                             "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -11039,6 +11469,14 @@
                             "format": "date-time",
                             "type": "string"
                           },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
                           "highlighted": {
                             "description": "Whether the server has an active Highlighted Card from the shop",
                             "type": "boolean"
@@ -11108,6 +11546,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "votes": {
                             "description": "The server's vote count",
@@ -11980,6 +12422,14 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "hidden_stats": {
+                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                      "items": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
                     "highlighted": {
                       "description": "Whether the bot has an active Highlighted Card from the shop",
                       "type": "boolean"
@@ -12087,6 +12537,10 @@
                       "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                       "format": "uuid",
                       "type": "string"
+                    },
+                    "views_30d": {
+                      "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                      "type": "integer"
                     },
                     "vote_blitz_until": {
                       "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -12231,6 +12685,14 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "hidden_stats": {
+                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                      "items": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
                     "highlighted": {
                       "description": "Whether the server has an active Highlighted Card from the shop",
                       "type": "boolean"
@@ -12300,6 +12762,10 @@
                       "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                       "format": "uuid",
                       "type": "string"
+                    },
+                    "views_30d": {
+                      "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                      "type": "integer"
                     },
                     "votes": {
                       "description": "The server's vote count",
@@ -13539,6 +14005,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -13647,6 +14121,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -13717,6 +14195,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -13825,6 +14311,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -13980,6 +14470,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -14049,6 +14547,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "votes": {
                         "description": "The server's vote count",
@@ -14195,6 +14697,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -14264,6 +14774,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -14341,6 +14855,14 @@
                             "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                             "format": "date-time",
                             "type": "string"
+                          },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
                           },
                           "highlighted": {
                             "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -14449,6 +14971,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "vote_blitz_until": {
                             "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -14593,6 +15119,14 @@
                             "format": "date-time",
                             "type": "string"
                           },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
                           "highlighted": {
                             "description": "Whether the server has an active Highlighted Card from the shop",
                             "type": "boolean"
@@ -14662,6 +15196,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "votes": {
                             "description": "The server's vote count",
@@ -16026,6 +16564,15 @@
                   },
                   "type": "array"
                 },
+                "hidden_stats": {
+                  "description": "Stats to hide from public view: servers, shards, uptime (which also hides the online status), views and invites. Leave it out to keep the current choice",
+                  "items": {
+                    "description": "Stats to hide from public view: servers, shards, uptime (which also hides the online status), views and invites. Leave it out to keep the current choice",
+                    "type": "string"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                },
                 "invite": {
                   "type": "string"
                 },
@@ -16340,6 +16887,15 @@
                     },
                     "type": "object"
                   },
+                  "type": "array"
+                },
+                "hidden_stats": {
+                  "description": "Stats to hide from public view: members, boosts, views and invites. Leave it out to keep the current choice",
+                  "items": {
+                    "description": "Stats to hide from public view: members, boosts, views and invites. Leave it out to keep the current choice",
+                    "type": "string"
+                  },
+                  "nullable": true,
                   "type": "array"
                 },
                 "login_required_for_invite": {
@@ -17729,6 +18285,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -17798,6 +18362,10 @@
                           "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                           "format": "uuid",
                           "type": "string"
+                        },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
                         },
                         "votes": {
                           "description": "The server's vote count",
@@ -17874,6 +18442,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -17982,6 +18558,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -18126,6 +18706,14 @@
                                     "format": "date-time",
                                     "type": "string"
                                   },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
                                     "type": "boolean"
@@ -18195,6 +18783,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -18495,6 +19087,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -18564,6 +19164,10 @@
                           "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                           "format": "uuid",
                           "type": "string"
+                        },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
                         },
                         "votes": {
                           "description": "The server's vote count",
@@ -18640,6 +19244,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -18748,6 +19360,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -18892,6 +19508,14 @@
                                     "format": "date-time",
                                     "type": "string"
                                   },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
                                     "type": "boolean"
@@ -18961,6 +19585,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -19244,6 +19872,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -19313,6 +19949,10 @@
                           "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                           "format": "uuid",
                           "type": "string"
+                        },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
                         },
                         "votes": {
                           "description": "The server's vote count",
@@ -19389,6 +20029,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -19497,6 +20145,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -19641,6 +20293,14 @@
                                     "format": "date-time",
                                     "type": "string"
                                   },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
                                     "type": "boolean"
@@ -19710,6 +20370,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -19992,6 +20656,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -20061,6 +20733,10 @@
                           "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                           "format": "uuid",
                           "type": "string"
+                        },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
                         },
                         "votes": {
                           "description": "The server's vote count",
@@ -20137,6 +20813,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -20245,6 +20929,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -20389,6 +21077,14 @@
                                     "format": "date-time",
                                     "type": "string"
                                   },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
                                     "type": "boolean"
@@ -20458,6 +21154,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -20816,6 +21516,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -20885,6 +21593,10 @@
                           "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                           "format": "uuid",
                           "type": "string"
+                        },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
                         },
                         "votes": {
                           "description": "The server's vote count",
@@ -20961,6 +21673,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -21069,6 +21789,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -21213,6 +21937,14 @@
                                     "format": "date-time",
                                     "type": "string"
                                   },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
                                     "type": "boolean"
@@ -21282,6 +22014,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -22811,6 +23547,96 @@
         ]
       }
     },
+    "/bots/{id}/views": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record bot View",
+        "tags": [
+          "Bots"
+        ],
+        "description": "Records that a visitor opened this bot's page. Each visitor counts once per bot per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_bot_view",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The bot's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bots/{id}/invite-clicks": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record bot Invite Click",
+        "tags": [
+          "Bots"
+        ],
+        "description": "Records that a visitor opened this bot's invite. Each visitor counts once per bot per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_bot_invite_click",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The bot's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bots/@all": {
       "summary": "",
       "description": "",
@@ -23190,7 +24016,7 @@
           {
             "name": "target",
             "in": "query",
-            "description": "The target page of the request if any.\n\nIf target is 'page', then unique clicks will be counted based on a SHA-256 hashed IP\n\nIf target is 'invite', then the invite will be counted as a click\n\nOfficially recognized targets:\n\n- page -> bot page view\n- settings -> bot settings page view\n- stats -> bot stats page view\n- invite -> bot invite view",
+            "description": "No longer used. Views and invite clicks are recorded with POST /bots/{id}/views and POST /bots/{id}/invite-clicks.",
             "required": false,
             "schema": {
               "type": "string"
@@ -27477,6 +28303,96 @@
         ]
       }
     },
+    "/servers/{id}/views": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record server View",
+        "tags": [
+          "Servers"
+        ],
+        "description": "Records that a visitor opened this server's page. Each visitor counts once per server per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_server_view",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The server's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/servers/{id}/invite-clicks": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record server Invite Click",
+        "tags": [
+          "Servers"
+        ],
+        "description": "Records that a visitor opened this server's invite. Each visitor counts once per server per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_server_invite_click",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The server's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/servers/@all": {
       "summary": "",
       "description": "",
@@ -27919,7 +28835,7 @@
           {
             "name": "target",
             "in": "query",
-            "description": "The target page of the request if any.\n\nIf target is 'page', then unique clicks will be counted based on a SHA-256 hashed IP\n\nIf target is 'invite', then the invite will be counted as a click\n\nOfficially recognized targets:\n\n- page -> server page view\n- settings -> server settings page view\n- invite -> server invite view",
+            "description": "No longer used. Views and invite clicks are recorded with POST /servers/{id}/views and POST /servers/{id}/invite-clicks.",
             "required": false,
             "schema": {
               "type": "string"

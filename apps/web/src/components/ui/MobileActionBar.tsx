@@ -3,6 +3,7 @@
 import { Avatar } from "@omniplex/ui/Avatar";
 import { ExternalLink, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { trackInviteClick } from "@/components/listing/ListingTracking";
 import { scrollBehavior } from "@/lib/utils/motion";
 
 interface MobileActionBarProps {
@@ -11,6 +12,7 @@ interface MobileActionBarProps {
   avatar: string;
   primaryHref?: string;
   primaryLabel: string;
+  inviteTarget?: { target: "bot" | "server"; id: string };
 }
 
 export function MobileActionBar({
@@ -19,6 +21,7 @@ export function MobileActionBar({
   avatar,
   primaryHref,
   primaryLabel,
+  inviteTarget,
 }: MobileActionBarProps) {
   const [show, setShow] = useState(false);
 
@@ -61,6 +64,10 @@ export function MobileActionBar({
         {primaryHref && (
           <a
             href={primaryHref}
+            onClick={() =>
+              inviteTarget &&
+              trackInviteClick(inviteTarget.target, inviteTarget.id)
+            }
             target="_blank"
             rel="noopener noreferrer"
             tabIndex={show ? 0 : -1}

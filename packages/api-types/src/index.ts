@@ -59,6 +59,8 @@ export interface AssetVersions {
 }
 
 export interface IndexBot {
+  /** Views in the last 30 days, counting each visitor once per listing per day. */
+  views_30d?: number;
   asset_versions?: AssetVersions;
   highlighted?: boolean;
   card_color?: string;
@@ -78,6 +80,8 @@ export interface IndexBot {
   invite_clicks: number;
   clicks: number;
   servers: number;
+  /** Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing. */
+  hidden_stats?: string[];
   nsfw: boolean;
   tags: string[];
   premium: boolean;
@@ -89,6 +93,8 @@ export interface IndexBot {
 }
 
 export interface Bot {
+  /** Views in the last 30 days, counting each visitor once per listing per day. */
+  views_30d?: number;
   asset_versions?: AssetVersions;
   itag: string;
   bot_id: string;
@@ -120,6 +126,10 @@ export interface Bot {
   /** Successful uptime checks out of total_uptime, from Popplio's periodic presence check. */
   uptime: number;
   total_uptime: number;
+  /** Share of uptime checks in the last 30 days where the bot was online, 0 to 100. Null when it hasn't been seen online in that time. */
+  uptime_percent?: number | null;
+  /** How many uptime checks ran in the last 30 days. */
+  uptime_checks?: number;
   /** Null if never checked yet. */
   uptime_last_checked: string | null;
   prefix: string;
@@ -128,6 +138,8 @@ export interface Bot {
   cert_reason: string | null;
   captcha_opt_out: boolean;
   auto_votes_opt_out?: boolean;
+  /** Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing. */
+  hidden_stats?: string[];
   auto_votes?: number;
   highlighted?: boolean;
   card_color?: string;
@@ -287,6 +299,10 @@ export interface RecentChangelogBot {
 export type ServerState = "public" | "private" | "unlisted" | "defunct";
 
 export interface IndexServer {
+  /** Views in the last 30 days, counting each visitor once per listing per day. */
+  views_30d?: number;
+  /** Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing. */
+  hidden_stats?: string[];
   asset_versions?: AssetVersions;
   highlighted?: boolean;
   card_color?: string;
@@ -1979,6 +1995,7 @@ export interface BotSettingsUpdate {
   nsfw: boolean;
   captcha_opt_out: boolean;
   auto_votes_opt_out?: boolean;
+  hidden_stats?: string[];
   card_color?: string;
 }
 
@@ -1991,6 +2008,7 @@ export interface ServerSettingsUpdate {
   nsfw: boolean;
   captcha_opt_out: boolean;
   auto_votes_opt_out?: boolean;
+  hidden_stats?: string[];
   card_color?: string;
   login_required_for_invite: boolean;
   show_emojis: boolean;
