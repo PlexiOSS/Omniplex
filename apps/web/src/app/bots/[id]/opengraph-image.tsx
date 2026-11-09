@@ -115,7 +115,10 @@ export default async function Image({
             <OgStat label="Servers" value={formatCount(bot.servers)} />
           )}
           {!statHidden(bot, "views") && (
-            <OgStat label="Page Views" value={formatCount(bot.clicks)} />
+            <OgStat
+              label="Views (30 days)"
+              value={formatCount(bot.views_30d ?? 0)}
+            />
           )}
         </div>
       )}

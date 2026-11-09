@@ -66,8 +66,10 @@ function toCompareEntity(bot: Bot): CompareEntity {
       },
       {
         icon: <Eye size={14} />,
-        label: "Page Views",
-        value: statHidden(bot, "views") ? "Hidden" : formatCount(bot.clicks),
+        label: "Views (30 days)",
+        value: statHidden(bot, "views")
+          ? "Hidden"
+          : formatCount(bot.views_30d ?? 0),
       },
       {
         icon: <MousePointerClick size={14} />,

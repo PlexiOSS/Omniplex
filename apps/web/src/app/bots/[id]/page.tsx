@@ -33,6 +33,10 @@ import { InvitePermissionNote } from "@/components/bots/InvitePermissionNote";
 import { BotCard } from "@/components/cards/BotCard";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import {
+  ListingViewTracker,
+  TrackedInviteLink,
+} from "@/components/listing/ListingTracking";
 import { PageBackground } from "@/components/listing/PageBackground";
 import { isListed, UnlistedNotice } from "@/components/listing/UnlistedNotice";
 import { ReminderToggle } from "@/components/reminders/ReminderToggle";
@@ -164,15 +168,15 @@ export default async function BotPage({ params }: Props) {
           </div>
         )}
         {bot.invite && (
-          <a
+          <TrackedInviteLink
+            listingType="bot"
+            listingId={bot.bot_id}
             href={bot.invite}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-muted"
           >
             <ExternalLink size={14} />
             Add to Server
-          </a>
+          </TrackedInviteLink>
         )}
         {bot.invite && <InvitePermissionNote invite={bot.invite} />}
         <VoteButton
@@ -192,6 +196,9 @@ export default async function BotPage({ params }: Props) {
   return (
     <div className="relative isolate" style={accentVars(pageStyle)}>
       <PageBackground target="bot" id={bot.bot_id} style={pageStyle} />
+      {isListed(bot.type) && (
+        <ListingViewTracker target="bot" id={bot.bot_id} />
+      )}
       <Container className="py-10">
         <Link
           href="/bots"
@@ -361,11 +368,11 @@ export default async function BotPage({ params }: Props) {
                     value={formatCount(bot.shards)}
                   />
                 )}
-                {bot.clicks > 0 && (
+                {(bot.views_30d ?? 0) > 0 && (
                   <StatRow
                     icon={<Eye size={14} />}
-                    label="Page Views"
-                    value={formatCount(bot.clicks)}
+                    label="Views (30 days)"
+                    value={formatCount(bot.views_30d ?? 0)}
                   />
                 )}
                 {bot.invite_clicks > 0 && (
@@ -511,6 +518,7 @@ export default async function BotPage({ params }: Props) {
           avatar={avatarSrc}
           primaryHref={bot.invite || undefined}
           primaryLabel="Add"
+          inviteTarget={{ target: "bot", id: bot.bot_id }}
         />
       </Container>
     </div>

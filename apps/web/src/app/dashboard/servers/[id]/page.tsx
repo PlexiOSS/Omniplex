@@ -238,11 +238,11 @@ function ServerSettings() {
               label: "Automatic votes",
               value: formatCount(server.auto_votes ?? 0),
             },
-            { label: "Page views", value: formatCount(server.clicks) },
             {
-              label: "Unique page views",
-              value: formatCount(server.unique_clicks),
+              label: "Views (30 days)",
+              value: formatCount(server.views_30d ?? 0),
             },
+            { label: "All-time views", value: formatCount(server.clicks) },
             {
               label: "Invite clicks",
               value: formatCount(server.invite_clicks),

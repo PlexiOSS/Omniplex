@@ -111,6 +111,11 @@ export const serversResource = {
       { cache: "no-store" },
     ),
 
+  recordView: (id: string) => client.post<void>(`/servers/${id}/views`, {}),
+
+  recordInviteClick: (id: string) =>
+    client.post<void>(`/servers/${id}/invite-clicks`, {}),
+
   getServer: (id: string, token?: string) =>
     client.get<Server>(`/servers/${id}?include=long`, {
       token,

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `views_30d` on bots and servers.
 - `hidden_stats` on bots and servers, and on their settings updates.
 - `uptime_percent` and `uptime_checks` on `Bot`.
 

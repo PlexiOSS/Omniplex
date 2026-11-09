@@ -22,8 +22,8 @@ export function StatsSection({ bot, token }: { bot: Bot; token: string }) {
           },
           { label: "Servers", value: formatCount(bot.servers) },
           { label: "Shards", value: formatCount(bot.shards) },
-          { label: "Page views", value: formatCount(bot.clicks) },
-          { label: "Unique page views", value: formatCount(bot.unique_clicks) },
+          { label: "Views (30 days)", value: formatCount(bot.views_30d ?? 0) },
+          { label: "All-time views", value: formatCount(bot.clicks) },
           { label: "Invite clicks", value: formatCount(bot.invite_clicks) },
           { label: "Uptime (30 days)", value: uptime },
           {

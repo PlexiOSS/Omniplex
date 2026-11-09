@@ -116,7 +116,7 @@ export function BotCard({ bot }: BotCardProps) {
           {!statHidden(bot, "views") && (
             <span data-stat="views" className="flex items-center gap-1">
               <Eye size={12} />
-              {formatCountLabel(bot.clicks, "view")}
+              {formatCountLabel(bot.views_30d ?? 0, "view")}
             </span>
           )}
           {!statHidden(bot, "invites") && (

@@ -115,7 +115,10 @@ export default async function Image({
             <OgStat label="Members" value={formatCount(server.total_members)} />
           )}
           {!statHidden(server, "views") && (
-            <OgStat label="Page Views" value={formatCount(server.clicks)} />
+            <OgStat
+              label="Views (30 days)"
+              value={formatCount(server.views_30d ?? 0)}
+            />
           )}
         </div>
       )}

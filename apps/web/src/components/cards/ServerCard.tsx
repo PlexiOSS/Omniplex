@@ -118,7 +118,7 @@ export function ServerCard({ server }: ServerCardProps) {
           {!statHidden(server, "views") && (
             <span data-stat="views" className="flex items-center gap-1">
               <Eye size={12} />
-              {formatCountLabel(server.clicks, "view")}
+              {formatCountLabel(server.views_30d ?? 0, "view")}
             </span>
           )}
           {!statHidden(server, "invites") && (

@@ -693,6 +693,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -892,6 +896,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -1124,6 +1132,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "votes": {
                         "description": "The server's vote count",
@@ -1360,6 +1372,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -2224,6 +2240,10 @@
               "format": "uuid",
               "type": "string"
             },
+            "views_30d": {
+              "description": "Views in the last 30 days, counting each visitor once per listing per day",
+              "type": "integer"
+            },
             "vote_blitz_until": {
               "description": "If set and in the future, the bot's vote cooldown is halved until this time",
               "format": "date-time",
@@ -2352,6 +2372,10 @@
               "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
               "format": "uuid",
               "type": "string"
+            },
+            "views_30d": {
+              "description": "Views in the last 30 days, counting each visitor once per listing per day",
+              "type": "integer"
             },
             "votes": {
               "description": "The server's vote count",
@@ -4324,6 +4348,10 @@
                           "format": "uuid",
                           "type": "string"
                         },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
+                        },
                         "vote_blitz_until": {
                           "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                           "format": "date-time",
@@ -4545,6 +4573,10 @@
                           "format": "uuid",
                           "type": "string"
                         },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
+                        },
                         "votes": {
                           "description": "The server's vote count",
                           "type": "integer"
@@ -4732,6 +4764,10 @@
             "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
             "format": "uuid",
             "type": "string"
+          },
+          "views_30d": {
+            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+            "type": "integer"
           },
           "vote_banned": {
             "description": "Whether the bot is vote banned or not",
@@ -5014,6 +5050,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -5245,6 +5285,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -6243,6 +6287,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -6417,6 +6465,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -6590,6 +6642,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -6777,6 +6833,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -7009,6 +7069,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "votes": {
                         "description": "The server's vote count",
@@ -7276,6 +7340,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -7449,6 +7517,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -7624,6 +7696,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -7798,6 +7874,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -7934,6 +8014,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "votes": {
                   "description": "The server's vote count",
                   "type": "integer"
@@ -8059,6 +8143,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8186,6 +8274,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "votes": {
                   "description": "The server's vote count",
                   "type": "integer"
@@ -8311,6 +8403,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8438,6 +8534,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "votes": {
                   "description": "The server's vote count",
                   "type": "integer"
@@ -8563,6 +8663,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -8690,6 +8794,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "votes": {
                   "description": "The server's vote count",
                   "type": "integer"
@@ -8815,6 +8923,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -9873,6 +9985,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -10006,6 +10122,10 @@
                   "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                   "format": "uuid",
                   "type": "string"
+                },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
                 },
                 "votes": {
                   "description": "The server's vote count",
@@ -10337,6 +10457,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -10529,6 +10653,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -10762,6 +10890,10 @@
                         "format": "uuid",
                         "type": "string"
                       },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
+                      },
                       "votes": {
                         "description": "The server's vote count",
                         "type": "integer"
@@ -10987,6 +11119,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "votes": {
                   "description": "The server's vote count",
                   "type": "integer"
@@ -11185,6 +11321,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "vote_blitz_until": {
                             "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -11406,6 +11546,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "votes": {
                             "description": "The server's vote count",
@@ -12394,6 +12538,10 @@
                       "format": "uuid",
                       "type": "string"
                     },
+                    "views_30d": {
+                      "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                      "type": "integer"
+                    },
                     "vote_blitz_until": {
                       "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                       "format": "date-time",
@@ -12614,6 +12762,10 @@
                       "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                       "format": "uuid",
                       "type": "string"
+                    },
+                    "views_30d": {
+                      "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                      "type": "integer"
                     },
                     "votes": {
                       "description": "The server's vote count",
@@ -13969,6 +14121,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "vote_blitz_until": {
                   "description": "If set and in the future, the bot's vote cooldown is halved until this time",
                   "format": "date-time",
@@ -14155,6 +14311,10 @@
                         "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
                       },
                       "vote_blitz_until": {
                         "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -14388,6 +14548,10 @@
                         "format": "uuid",
                         "type": "string"
                       },
+                      "views_30d": {
+                        "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                        "type": "integer"
+                      },
                       "votes": {
                         "description": "The server's vote count",
                         "type": "integer"
@@ -14611,6 +14775,10 @@
                   "format": "uuid",
                   "type": "string"
                 },
+                "views_30d": {
+                  "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                  "type": "integer"
+                },
                 "votes": {
                   "description": "The server's vote count",
                   "type": "integer"
@@ -14803,6 +14971,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "vote_blitz_until": {
                             "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -15024,6 +15196,10 @@
                             "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                             "format": "uuid",
                             "type": "string"
+                          },
+                          "views_30d": {
+                            "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                            "type": "integer"
                           },
                           "votes": {
                             "description": "The server's vote count",
@@ -18187,6 +18363,10 @@
                           "format": "uuid",
                           "type": "string"
                         },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
+                        },
                         "votes": {
                           "description": "The server's vote count",
                           "type": "integer"
@@ -18378,6 +18558,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -18599,6 +18783,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -18977,6 +19165,10 @@
                           "format": "uuid",
                           "type": "string"
                         },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
+                        },
                         "votes": {
                           "description": "The server's vote count",
                           "type": "integer"
@@ -19168,6 +19360,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -19389,6 +19585,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -19750,6 +19950,10 @@
                           "format": "uuid",
                           "type": "string"
                         },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
+                        },
                         "votes": {
                           "description": "The server's vote count",
                           "type": "integer"
@@ -19941,6 +20145,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -20162,6 +20370,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -20522,6 +20734,10 @@
                           "format": "uuid",
                           "type": "string"
                         },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
+                        },
                         "votes": {
                           "description": "The server's vote count",
                           "type": "integer"
@@ -20713,6 +20929,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -20934,6 +21154,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -21370,6 +21594,10 @@
                           "format": "uuid",
                           "type": "string"
                         },
+                        "views_30d": {
+                          "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                          "type": "integer"
+                        },
                         "votes": {
                           "description": "The server's vote count",
                           "type": "integer"
@@ -21561,6 +21789,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all bots have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "vote_blitz_until": {
                                     "description": "If set and in the future, the bot's vote cooldown is halved until this time",
@@ -21782,6 +22014,10 @@
                                     "description": "The corresponding vanities itag, this also works to ensure that all servers have an associated vanity",
                                     "format": "uuid",
                                     "type": "string"
+                                  },
+                                  "views_30d": {
+                                    "description": "Views in the last 30 days, counting each visitor once per listing per day",
+                                    "type": "integer"
                                   },
                                   "votes": {
                                     "description": "The server's vote count",
@@ -23311,6 +23547,96 @@
         ]
       }
     },
+    "/bots/{id}/views": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record bot View",
+        "tags": [
+          "Bots"
+        ],
+        "description": "Records that a visitor opened this bot's page. Each visitor counts once per bot per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_bot_view",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The bot's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bots/{id}/invite-clicks": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record bot Invite Click",
+        "tags": [
+          "Bots"
+        ],
+        "description": "Records that a visitor opened this bot's invite. Each visitor counts once per bot per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_bot_invite_click",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The bot's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bots/@all": {
       "summary": "",
       "description": "",
@@ -23690,7 +24016,7 @@
           {
             "name": "target",
             "in": "query",
-            "description": "The target page of the request if any.\n\nIf target is 'page', then unique clicks will be counted based on a SHA-256 hashed IP\n\nIf target is 'invite', then the invite will be counted as a click\n\nOfficially recognized targets:\n\n- page -> bot page view\n- settings -> bot settings page view\n- stats -> bot stats page view\n- invite -> bot invite view",
+            "description": "No longer used. Views and invite clicks are recorded with POST /bots/{id}/views and POST /bots/{id}/invite-clicks.",
             "required": false,
             "schema": {
               "type": "string"
@@ -27977,6 +28303,96 @@
         ]
       }
     },
+    "/servers/{id}/views": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record server View",
+        "tags": [
+          "Servers"
+        ],
+        "description": "Records that a visitor opened this server's page. Each visitor counts once per server per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_server_view",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The server's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/servers/{id}/invite-clicks": {
+      "summary": "",
+      "description": "",
+      "post": {
+        "summary": "Record server Invite Click",
+        "tags": [
+          "Servers"
+        ],
+        "description": "Records that a visitor opened this server's invite. Each visitor counts once per server per day, and known crawlers aren't counted. Always returns 204.",
+        "operationId": "record_server_invite_click",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The server's ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/types.ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/servers/@all": {
       "summary": "",
       "description": "",
@@ -28419,7 +28835,7 @@
           {
             "name": "target",
             "in": "query",
-            "description": "The target page of the request if any.\n\nIf target is 'page', then unique clicks will be counted based on a SHA-256 hashed IP\n\nIf target is 'invite', then the invite will be counted as a click\n\nOfficially recognized targets:\n\n- page -> server page view\n- settings -> server settings page view\n- invite -> server invite view",
+            "description": "No longer used. Views and invite clicks are recorded with POST /servers/{id}/views and POST /servers/{id}/invite-clicks.",
             "required": false,
             "schema": {
               "type": "string"

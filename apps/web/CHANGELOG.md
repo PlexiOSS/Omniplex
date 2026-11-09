@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Page views and invite clicks weren't being counted. The site now records
+  them from the visitor's browser, once per visitor per listing per day.
+  Cards, pages, compare tables and link previews show views from the last
+  30 days, and a new **Views & Invite Clicks** article explains how it works.
 - Bots using HTTP interactions no longer show as offline when we can't
   actually tell. The status dot and label only appear when the status is
   known.

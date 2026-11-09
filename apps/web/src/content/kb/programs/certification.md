@@ -14,13 +14,13 @@ These are the actual, automatically-checked requirements the application form en
 
 1. Listed for at least 3 days.
 2. Must be **approved**, not still pending review.
-3. At least one of: **50+ servers**, **15+ unique clicks**, or **50+ votes**.
+3. At least one of: **50+ servers**, **15+ unique views**, or **50+ votes**.
 
 **Servers:**
 
 1. Listed for at least 3 days.
 2. Must be **approved**, not still pending review.
-3. At least one of: **100+ members**, **15+ unique clicks**, or **50+ votes**.
+3. At least one of: **100+ members**, **15+ unique views**, or **50+ votes**.
 
 If your application doesn't meet the bar yet, the form will tell you exactly which numbers you're short on.
 
@@ -47,3 +47,5 @@ The numeric requirements above get you through the door, but a staff member revi
 1. Abuse of the API or the voting system in an attempt to gain access to this program will result in a ban from the voting system, or a permanent banning of your bot/server and/or you from the service.
 2. Any attempts to harm the Omniplex service may lead to the permanent banning of your bot/server and/or you from the service.
 3. The staff team reserves the right to revoke certification at any time without warning.
+
+Unique views are the higher of your listing's older unique view count and its [views in the last 30 days](/kb/listings/views-and-clicks).

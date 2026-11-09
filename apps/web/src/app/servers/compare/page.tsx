@@ -73,10 +73,10 @@ function toCompareEntity(server: Server): CompareEntity {
       },
       {
         icon: <Eye size={14} />,
-        label: "Page Views",
+        label: "Views (30 days)",
         value: statHidden(server, "views")
           ? "Hidden"
-          : formatCount(server.clicks),
+          : formatCount(server.views_30d ?? 0),
       },
       {
         icon: <MousePointerClick size={14} />,

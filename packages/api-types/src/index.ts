@@ -59,6 +59,8 @@ export interface AssetVersions {
 }
 
 export interface IndexBot {
+  /** Views in the last 30 days, counting each visitor once per listing per day. */
+  views_30d?: number;
   asset_versions?: AssetVersions;
   highlighted?: boolean;
   card_color?: string;
@@ -91,6 +93,8 @@ export interface IndexBot {
 }
 
 export interface Bot {
+  /** Views in the last 30 days, counting each visitor once per listing per day. */
+  views_30d?: number;
   asset_versions?: AssetVersions;
   itag: string;
   bot_id: string;
@@ -295,6 +299,8 @@ export interface RecentChangelogBot {
 export type ServerState = "public" | "private" | "unlisted" | "defunct";
 
 export interface IndexServer {
+  /** Views in the last 30 days, counting each visitor once per listing per day. */
+  views_30d?: number;
   /** Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing. */
   hidden_stats?: string[];
   asset_versions?: AssetVersions;

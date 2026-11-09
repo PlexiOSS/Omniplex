@@ -60,6 +60,11 @@ export const botsResource = {
   getSimilar: (id: string) =>
     client.get<IndexBot[]>(`/bots/${id}/similar`, { cache: "no-store" }),
 
+  recordView: (id: string) => client.post<void>(`/bots/${id}/views`, {}),
+
+  recordInviteClick: (id: string) =>
+    client.post<void>(`/bots/${id}/invite-clicks`, {}),
+
   getBot: (id: string, token?: string) =>
     client.get<Bot>(`/bots/${id}?include=long`, {
       token,

@@ -544,7 +544,7 @@ export const CARD_STAT_OPTIONS: {
     label: "Online",
     description: "Members online, servers only",
   },
-  { value: "views", label: "Views", description: "Page views" },
+  { value: "views", label: "Views", description: "Last 30 days" },
   {
     value: "invites",
     label: "Invite clicks",
