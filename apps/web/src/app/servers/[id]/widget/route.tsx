@@ -3,6 +3,7 @@ import { ApiError } from "@omniplex/core/api/client";
 import { formatCount } from "@omniplex/core/utils/format";
 import { ImageResponse } from "next/og";
 import { toOgImageSrc } from "@/lib/og/image";
+import { statHidden } from "@/lib/utils/hiddenStats";
 import {
   resolveVisibleStats,
   resolveWidgetTheme,
@@ -148,7 +149,7 @@ export async function GET(
               value={formatCount(server.approximate_votes)}
             />
           )}
-          {visibleStats.has("members") && (
+          {visibleStats.has("members") && !statHidden(server, "members") && (
             <WidgetStat
               theme={theme}
               label="Members"

@@ -8,9 +8,9 @@ import { StatGrid } from "../../manage/ManageShell";
 
 export function StatsSection({ bot, token }: { bot: Bot; token: string }) {
   const uptime =
-    bot.total_uptime > 0
-      ? `${Math.round((bot.uptime / bot.total_uptime) * 1000) / 10}%`
-      : "Not checked yet";
+    bot.uptime_percent != null
+      ? `${Math.round(bot.uptime_percent * 10) / 10}%`
+      : "No data yet";
   return (
     <div className="space-y-6">
       <StatGrid
@@ -25,7 +25,7 @@ export function StatsSection({ bot, token }: { bot: Bot; token: string }) {
           { label: "Page views", value: formatCount(bot.clicks) },
           { label: "Unique page views", value: formatCount(bot.unique_clicks) },
           { label: "Invite clicks", value: formatCount(bot.invite_clicks) },
-          { label: "Uptime", value: uptime },
+          { label: "Uptime (30 days)", value: uptime },
           {
             label: "Last uptime check",
             value: bot.uptime_last_checked

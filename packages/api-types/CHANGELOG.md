@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-09
+
+### Added
+
+- `hidden_stats` on bots and servers, and on their settings updates.
+- `uptime_percent` and `uptime_checks` on `Bot`.
+
 ## [0.4.0] - 2026-11-08
 
 ### Added

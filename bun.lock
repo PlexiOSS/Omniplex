@@ -12,7 +12,7 @@
     },
     "apps/docs": {
       "name": "@omniplex/docs",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@omniplex/api-types": "workspace:*",
         "fumadocs-core": "16.17.9",
@@ -63,7 +63,7 @@
     },
     "apps/web": {
       "name": "@omniplex/web",
-      "version": "1.17.0",
+      "version": "1.18.0",
       "dependencies": {
         "@omniplex/api-types": "workspace:*",
         "@omniplex/core": "workspace:*",
@@ -97,7 +97,7 @@
     },
     "packages/api-types": {
       "name": "@omniplex/api-types",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "devDependencies": {
         "typescript": "^5",
       },

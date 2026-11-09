@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { Banner } from "@/components/ui/Banner";
 import { cardCosmetics } from "@/lib/utils/cardCosmetics";
+import { statHidden } from "@/lib/utils/hiddenStats";
 import { tagAttr } from "@/lib/utils/tagFilter";
 
 interface ServerCardProps {
@@ -102,24 +103,30 @@ export function ServerCard({ server }: ServerCardProps) {
             <Star size={12} />
             {formatCountLabel(server.approximate_votes, "vote")}
           </span>
-          <span data-stat="size" className="flex items-center gap-1">
-            <Users size={12} />
-            {formatCountLabel(server.total_members, "member")}
-          </span>
+          {!statHidden(server, "members") && (
+            <span data-stat="size" className="flex items-center gap-1">
+              <Users size={12} />
+              {formatCountLabel(server.total_members, "member")}
+            </span>
+          )}
           {server.online_members > 0 && (
             <span data-stat="online" className="flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               {formatCount(server.online_members)} online
             </span>
           )}
-          <span data-stat="views" className="flex items-center gap-1">
-            <Eye size={12} />
-            {formatCountLabel(server.clicks, "view")}
-          </span>
-          <span data-stat="invites" className="flex items-center gap-1">
-            <MousePointerClick size={12} />
-            {formatCountLabel(server.invite_clicks, "invite")}
-          </span>
+          {!statHidden(server, "views") && (
+            <span data-stat="views" className="flex items-center gap-1">
+              <Eye size={12} />
+              {formatCountLabel(server.clicks, "view")}
+            </span>
+          )}
+          {!statHidden(server, "invites") && (
+            <span data-stat="invites" className="flex items-center gap-1">
+              <MousePointerClick size={12} />
+              {formatCountLabel(server.invite_clicks, "invite")}
+            </span>
+          )}
         </div>
       </div>
     </Link>

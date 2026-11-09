@@ -59,6 +59,7 @@ import {
   isNotFoundError,
   nullIfNotFound,
 } from "@/lib/utils/errors";
+import { statHidden } from "@/lib/utils/hiddenStats";
 import { getServerToken } from "@/lib/utils/serverSession";
 import { SERVER_WIDGET_STATS } from "@/lib/widget/shared";
 import { ServerVoteButton } from "./ServerVoteButton";
@@ -328,30 +329,32 @@ export default async function ServerPage({ params }: Props) {
                   label="Votes"
                   value={formatCount(server.approximate_votes)}
                 />
-                <div>
-                  <StatRow
-                    icon={<Users size={14} />}
-                    label="Members"
-                    value={formatCount(server.total_members)}
-                  />
-                  {server.online_members != null &&
-                    server.total_members > 0 && (
-                      <>
-                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                          <div
-                            className="h-full rounded-full bg-emerald-500"
-                            style={{
-                              width: `${Math.min(100, (server.online_members / server.total_members) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          {formatCount(server.online_members)} online
-                        </p>
-                      </>
-                    )}
-                </div>
+                {!statHidden(server, "members") && (
+                  <div>
+                    <StatRow
+                      icon={<Users size={14} />}
+                      label="Members"
+                      value={formatCount(server.total_members)}
+                    />
+                    {server.online_members != null &&
+                      server.total_members > 0 && (
+                        <>
+                          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                            <div
+                              className="h-full rounded-full bg-emerald-500"
+                              style={{
+                                width: `${Math.min(100, (server.online_members / server.total_members) * 100)}%`,
+                              }}
+                            />
+                          </div>
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            {formatCount(server.online_members)} online
+                          </p>
+                        </>
+                      )}
+                  </div>
+                )}
                 {(server.boost_count ?? 0) > 0 && (
                   <StatRow
                     icon={<Gem size={14} />}

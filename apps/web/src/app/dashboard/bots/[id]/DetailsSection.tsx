@@ -11,8 +11,10 @@ import { TagPicker } from "@omniplex/ui/TagPicker";
 import Link from "next/link";
 import { useState } from "react";
 import { InviteCheck } from "@/components/bots/InviteCheck";
+import { PublicStatsFields } from "@/components/listing/PublicStatsFields";
 import { BOT_TAGS } from "@/lib/constants/tags";
 import { suspiciousMarkupError } from "@/lib/utils/detectSuspiciousContent";
+import { BOT_STAT_OPTIONS } from "@/lib/utils/hiddenStats";
 import {
   FormMessage,
   SettingsCard,
@@ -38,6 +40,7 @@ export function DetailsSection({ bot, token, onSaved }: SectionProps) {
     nsfw: bot.nsfw,
     captchaOptOut: bot.captcha_opt_out,
     acceptAutoVotes: !bot.auto_votes_opt_out,
+    hiddenStats: bot.hidden_stats ?? [],
     cardColor: bot.card_color ?? "",
   });
   const [links, setLinks] = useState<ApiLink[]>(bot.extra_links ?? []);
@@ -80,6 +83,7 @@ export function DetailsSection({ bot, token, onSaved }: SectionProps) {
           nsfw: form.nsfw,
           captcha_opt_out: form.captchaOptOut,
           auto_votes_opt_out: !form.acceptAutoVotes,
+          hidden_stats: form.hiddenStats,
           ...(bot.card_theme ? { card_color: form.cardColor } : {}),
         },
         token,
@@ -202,6 +206,11 @@ export function DetailsSection({ bot, token, onSaved }: SectionProps) {
           onChange={(v) => update("acceptAutoVotes", v)}
           label="Accept automatic votes"
           description="Auto-vote subscribers can vote for this bot automatically, without a captcha. Automatic votes never earn vote credits."
+        />
+        <PublicStatsFields
+          options={BOT_STAT_OPTIONS}
+          hidden={form.hiddenStats}
+          onChange={(v) => update("hiddenStats", v)}
         />
       </SettingsCard>
 

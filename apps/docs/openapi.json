@@ -4,7 +4,7 @@
     "title": "Omniplex API",
     "description": "RESTful API and Backend Services for Omniplex",
     "termsOfService": "https://omniplex.gg/legal/terms",
-    "version": "1.23.0",
+    "version": "1.24.0",
     "contact": {
       "name": "Omniplex Support",
       "url": "https://discord.gg/KBCRuBKrHe",
@@ -577,6 +577,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -768,6 +776,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -1031,6 +1047,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -1258,6 +1282,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -2076,6 +2108,14 @@
               "format": "date-time",
               "type": "string"
             },
+            "hidden_stats": {
+              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+              "items": {
+                "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                "type": "string"
+              },
+              "type": "array"
+            },
             "highlighted": {
               "description": "Whether the bot has an active Highlighted Card from the shop",
               "type": "boolean"
@@ -2234,6 +2274,14 @@
               "description": "If set and in the future, the server appears in the home page's Featured section until this time",
               "format": "date-time",
               "type": "string"
+            },
+            "hidden_stats": {
+              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+              "items": {
+                "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                "type": "string"
+              },
+              "type": "array"
             },
             "highlighted": {
               "description": "Whether the server has an active Highlighted Card from the shop",
@@ -3922,6 +3970,14 @@
             "format": "date-time",
             "type": "string"
           },
+          "hidden_stats": {
+            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+            "items": {
+              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+              "type": "string"
+            },
+            "type": "array"
+          },
           "highlighted": {
             "description": "Whether the bot has an active Highlighted Card from the shop",
             "type": "boolean"
@@ -4151,6 +4207,14 @@
                           "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                           "format": "date-time",
                           "type": "string"
+                        },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
                         },
                         "highlighted": {
                           "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -4403,6 +4467,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -4566,7 +4638,7 @@
             "type": "object"
           },
           "total_uptime": {
-            "description": "The bot's total number of uptime checks",
+            "description": "The bot's all-time number of uptime checks. Includes older checks that weren't reliable, so use uptime_percent to show uptime",
             "type": "integer"
           },
           "type": {
@@ -4584,13 +4656,23 @@
             "type": "string"
           },
           "uptime": {
-            "description": "The bot's total number of successful uptime checks",
+            "description": "The bot's all-time number of successful uptime checks. Includes older checks that weren't reliable, so use uptime_percent to show uptime",
+            "type": "integer"
+          },
+          "uptime_checks": {
+            "description": "How many uptime checks ran in the last 30 days",
             "type": "integer"
           },
           "uptime_last_checked": {
             "description": "The bot's last uptime check",
             "format": "date-time",
             "type": "string"
+          },
+          "uptime_percent": {
+            "description": "The share of uptime checks in the last 30 days where the bot was online, from 0 to 100. Null when it hasn't been seen online in that time",
+            "format": "double",
+            "nullable": true,
+            "type": "number"
           },
           "user": {
             "description": "The bot's user information",
@@ -4815,6 +4897,14 @@
                   "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -5077,6 +5167,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -6029,6 +6127,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -6195,6 +6301,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -6360,6 +6474,14 @@
                   "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -6539,6 +6661,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -6802,6 +6932,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -7022,6 +7160,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7187,6 +7333,14 @@
                   "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -7354,6 +7508,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7519,6 +7681,14 @@
                   "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -7686,6 +7856,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -7803,6 +7981,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -7922,6 +8108,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8039,6 +8233,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -8158,6 +8360,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8275,6 +8485,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -8394,6 +8612,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -8511,6 +8737,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -9523,6 +9757,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -9686,6 +9928,14 @@
                   "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                   "format": "date-time",
                   "type": "string"
+                },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
                 },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
@@ -9971,6 +10221,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -10155,6 +10413,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -10418,6 +10684,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -10635,6 +10909,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -10787,6 +11069,14 @@
                             "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                             "format": "date-time",
                             "type": "string"
+                          },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
                           },
                           "highlighted": {
                             "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -11038,6 +11328,14 @@
                             "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                             "format": "date-time",
                             "type": "string"
+                          },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
                           },
                           "highlighted": {
                             "description": "Whether the server has an active Highlighted Card from the shop",
@@ -11980,6 +12278,14 @@
                       "format": "date-time",
                       "type": "string"
                     },
+                    "hidden_stats": {
+                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                      "items": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
                     "highlighted": {
                       "description": "Whether the bot has an active Highlighted Card from the shop",
                       "type": "boolean"
@@ -12230,6 +12536,14 @@
                       "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                       "format": "date-time",
                       "type": "string"
+                    },
+                    "hidden_stats": {
+                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                      "items": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "type": "string"
+                      },
+                      "type": "array"
                     },
                     "highlighted": {
                       "description": "Whether the server has an active Highlighted Card from the shop",
@@ -13539,6 +13853,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the bot has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -13717,6 +14039,14 @@
                         "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                         "format": "date-time",
                         "type": "string"
+                      },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
                       },
                       "highlighted": {
                         "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -13980,6 +14310,14 @@
                         "format": "date-time",
                         "type": "string"
                       },
+                      "hidden_stats": {
+                        "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                        "items": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "highlighted": {
                         "description": "Whether the server has an active Highlighted Card from the shop",
                         "type": "boolean"
@@ -14195,6 +14533,14 @@
                   "format": "date-time",
                   "type": "string"
                 },
+                "hidden_stats": {
+                  "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                  "items": {
+                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "highlighted": {
                   "description": "Whether the server has an active Highlighted Card from the shop",
                   "type": "boolean"
@@ -14341,6 +14687,14 @@
                             "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                             "format": "date-time",
                             "type": "string"
+                          },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
                           },
                           "highlighted": {
                             "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -14592,6 +14946,14 @@
                             "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                             "format": "date-time",
                             "type": "string"
+                          },
+                          "hidden_stats": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "items": {
+                              "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                              "type": "string"
+                            },
+                            "type": "array"
                           },
                           "highlighted": {
                             "description": "Whether the server has an active Highlighted Card from the shop",
@@ -16026,6 +16388,15 @@
                   },
                   "type": "array"
                 },
+                "hidden_stats": {
+                  "description": "Stats to hide from public view: servers, shards, uptime (which also hides the online status), views and invites. Leave it out to keep the current choice",
+                  "items": {
+                    "description": "Stats to hide from public view: servers, shards, uptime (which also hides the online status), views and invites. Leave it out to keep the current choice",
+                    "type": "string"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                },
                 "invite": {
                   "type": "string"
                 },
@@ -16340,6 +16711,15 @@
                     },
                     "type": "object"
                   },
+                  "type": "array"
+                },
+                "hidden_stats": {
+                  "description": "Stats to hide from public view: members, boosts, views and invites. Leave it out to keep the current choice",
+                  "items": {
+                    "description": "Stats to hide from public view: members, boosts, views and invites. Leave it out to keep the current choice",
+                    "type": "string"
+                  },
+                  "nullable": true,
                   "type": "array"
                 },
                 "login_required_for_invite": {
@@ -17729,6 +18109,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -17874,6 +18262,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -18125,6 +18521,14 @@
                                     "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
@@ -18495,6 +18899,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -18640,6 +19052,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -18891,6 +19311,14 @@
                                     "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
@@ -19244,6 +19672,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -19389,6 +19825,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -19640,6 +20084,14 @@
                                     "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
@@ -19992,6 +20444,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -20137,6 +20597,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -20388,6 +20856,14 @@
                                     "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
@@ -20816,6 +21292,14 @@
                           "format": "date-time",
                           "type": "string"
                         },
+                        "hidden_stats": {
+                          "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                          "items": {
+                            "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
                         "highlighted": {
                           "description": "Whether the server has an active Highlighted Card from the shop",
                           "type": "boolean"
@@ -20961,6 +21445,14 @@
                                     "description": "If set and in the future, the bot appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the bot has an active Highlighted Card from the shop",
@@ -21212,6 +21704,14 @@
                                     "description": "If set and in the future, the server appears in the home page's Featured section until this time",
                                     "format": "date-time",
                                     "type": "string"
+                                  },
+                                  "hidden_stats": {
+                                    "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                    "items": {
+                                      "description": "Stats the owner chose to hide. Hidden stats are returned as zero unless you manage this listing",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
                                   },
                                   "highlighted": {
                                     "description": "Whether the server has an active Highlighted Card from the shop",
