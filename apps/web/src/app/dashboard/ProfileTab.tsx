@@ -72,7 +72,7 @@ export function EditProfileTab({
     setRefreshingDiscord(true);
     setDiscordRefreshed(false);
     try {
-      await platform.clearDiscordUser(discordId);
+      await platform.clearDiscordUser(discordId, token);
       mutate();
       setDiscordRefreshed(true);
       setTimeout(() => setDiscordRefreshed(false), 3000);

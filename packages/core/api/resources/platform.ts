@@ -8,10 +8,11 @@ export interface ClearUserInfo {
 }
 
 export const platformResource = {
-  /** Invalidates the cached Discord profile (username/avatar) for this id,
+  /** Invalidates the signed-in user's cached Discord profile (username/avatar),
    * so the next read re-fetches from Discord instead of serving a stale
-   * cached copy. Unauthenticated route — works for any id, not just the
-   * caller's own. */
-  clearDiscordUser: (id: string) =>
-    client.delete<ClearUserInfo>(`/platform/user/${id}?platform=discord`),
+   * cached copy. Only works for the caller's own id. */
+  clearDiscordUser: (id: string, token: string) =>
+    client.delete<ClearUserInfo>(`/platform/user/${id}?platform=discord`, {
+      token,
+    }),
 };

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The dashboard's "Refresh" button for your Discord profile now sends your
+  session, since Popplio's `DELETE /platform/user/{id}` requires it.
+
 ## [1.19.1] - 2026-11-11
 
 ### Security
