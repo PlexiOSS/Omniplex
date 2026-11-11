@@ -1,11 +1,20 @@
 import { apps } from "@omniplex/core/api";
+import { questionKind } from "@omniplex/core/appQuestions";
 import { Badge } from "@omniplex/ui/Badge";
-import { ArrowRight, Briefcase, ClipboardList, CloudOff } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  ClipboardList,
+  Clock,
+  CloudOff,
+  Users,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PositionStatus } from "./PositionStatus";
 
 export const metadata: Metadata = {
   title: "Apply",
@@ -38,11 +47,29 @@ const SECTIONS: {
   },
   {
     key: "owners",
-    title: "For bot owners",
-    description: "Fixed what got your bot denied? Ask for another review.",
-    ids: ["resubmit"],
+    title: "For listing owners",
+    description:
+      "Ask for another look at a bot or server that was denied or removed.",
+    ids: ["resubmit", "listing_appeal"],
+  },
+  {
+    key: "community",
+    title: "Community",
+    description: "Test new features early, or get your work featured.",
+    ids: ["beta", "spotlight"],
   },
 ];
+
+function minutesToApply(position: Position): number {
+  const minutes = position.questions.reduce((total, q) => {
+    const kind = questionKind(q);
+    if (kind === "long") return total + 3;
+    if (kind === "short" || kind === "url" || kind === "number")
+      return total + 0.5;
+    return total + 0.25;
+  }, 0);
+  return Math.max(2, Math.ceil(minutes));
+}
 
 const ALWAYS_HIDDEN = new Set(["banappeal"]);
 
@@ -60,33 +87,34 @@ function PositionCard({ position }: { position: Position }) {
     position.help_url && position.help_label
       ? { href: position.help_url, label: position.help_label }
       : null;
+  const minutes = minutesToApply(position);
   return (
-    <div className="flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-white p-5 transition-colors hover:border-accent/30 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-zinc-950 dark:text-zinc-50">
+        <h3 className="font-semibold text-zinc-950 dark:text-zinc-50">
           {position.name}
-        </p>
+        </h3>
         {position.closed ? (
           <Badge variant="danger">Closed</Badge>
         ) : (
-          <Badge variant="success">Open</Badge>
+          <PositionStatus positionId={position.id} />
         )}
       </div>
-      {position.requires_main_server && (
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          For members of the Omniplex Discord server
-        </p>
-      )}
-      {position.tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {position.tags.map((tag) => (
-            <Badge key={tag}>{tag}</Badge>
-          ))}
-        </div>
-      )}
-      <p className="mt-3 flex-1 text-sm text-zinc-500 dark:text-zinc-400">
-        {preview(position.info)}
+      <p className="mt-2 flex-1 text-sm text-zinc-600 dark:text-zinc-300">
+        {position.summary || preview(position.info)}
       </p>
+      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+        <li className="flex items-center gap-1.5">
+          <Clock size={13} />
+          About {minutes} min
+        </li>
+        {position.requires_main_server && (
+          <li className="flex items-center gap-1.5">
+            <Users size={13} />
+            Discord server members only
+          </li>
+        )}
+      </ul>
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
         <Link
           href={`/apps/${position.id}`}
@@ -114,7 +142,9 @@ function PositionCard({ position }: { position: Position }) {
 export default async function AppsPage() {
   const meta = await apps.getMeta().catch(() => null);
   const positions = (meta?.positions ?? []).filter(
-    (p) => !ALWAYS_HIDDEN.has(p.id) && (!p.hidden || p.id === "resubmit"),
+    (p) =>
+      !ALWAYS_HIDDEN.has(p.id) &&
+      (!p.hidden || p.id === "resubmit" || p.id === "listing_appeal"),
   );
   const placed = new Set(SECTIONS.flatMap((s) => s.ids));
   const sections = [

@@ -32,4 +32,4 @@ If you think the denial was a mistake, you can ask for it to be looked at again 
 
 ## After approval
 
-Your bot goes live straight away. From there you can [document your commands](/kb/listings/documenting-commands), [post changelog updates](/kb/listings/changelog-updates), [post stats](/kb/developers/posting-stats) and [set up vote webhooks](/kb/developers/vote-webhooks).
+Your bot goes live straight away. From there you can [document your commands](/kb/listings/documenting-commands), [post changelog updates](/kb/listings/changelog-updates), [post stats](https://docs.omniplex.gg/docs/developer/bot-stats) and [set up vote webhooks](https://docs.omniplex.gg/docs/developer/webhooks).

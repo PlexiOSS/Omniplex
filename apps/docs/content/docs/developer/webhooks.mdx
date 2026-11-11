@@ -20,6 +20,21 @@ every signing method and hand you a typed event:
 
 ## Creating a webhook
 
+From the dashboard:
+
+1. Open your [dashboard](https://omniplex.gg/dashboard), find the bot or server,
+   and click **Webhooks**. For a team, use the Webhooks section of the team's
+   settings.
+2. Click **New Webhook** and give it a name and the URL to send to.
+3. **For a Discord channel**, paste the channel's Discord webhook URL and leave
+   the secret blank. Omniplex posts a formatted message to the channel.
+4. **For your own server**, set a secret and choose **HMAC signature
+   (recommended)** as the signing method.
+5. Use **Test** to send a test event, then check **Delivery Logs** to see what
+   your server answered.
+
+With the API, these are the fields:
+
 | Field | Notes |
 |---|---|
 | `name` | A label for the webhook. |
@@ -96,8 +111,15 @@ For a new integration, switch the webhook to `hmac_auth` instead
 ## Responding
 
 Reply with any `2xx` once you've handled the event. Reply `401` or `403` when
-verification fails. A `404` or `410` turns the webhook off, and the owner is
-told to fix the URL and save the webhook again to turn it back on.
+verification fails. A `404` or `410` (or a deleted Discord channel webhook)
+turns the webhook off, and the owner is told to fix the URL and save the webhook
+again to turn it back on.
+
+Other errors are recorded in **Delivery Logs**, and the owner is notified. A
+webhook that fails 20 times in a row is paused until it's saved again. One
+successful delivery resets the count, and one webhook failing never affects the
+others. Requests time out after 30 seconds, and webhook URLs can't point at
+`localhost`.
 
 Omniplex sometimes sends a delivery signed with a throwaway secret, not your
 real one, to check your endpoint rejects it. A correct verifier already does.

@@ -146,7 +146,7 @@ export function SearchPalette() {
       .slice(0, 3)) {
       out.push({
         key: `tag-${tag}`,
-        href: `/tags/${encodeURIComponent(tag)}`,
+        href: `/tags/${encodeURIComponent(tag.toLowerCase())}`,
         label: tag,
         hint: "Tag",
         kind: "tag",

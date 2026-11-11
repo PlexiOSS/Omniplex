@@ -49,6 +49,32 @@ export function getKbCategories(): KbCategory[] {
     });
 }
 
+export interface KbSearchEntry {
+  slug: string;
+  category: string;
+  categoryTitle: string;
+  title: string;
+  description: string;
+  keywords: string;
+}
+
+export function getKbSearchIndex(): KbSearchEntry[] {
+  return getKbCategories().flatMap((category) =>
+    category.articles.map((article) => ({
+      slug: article.slug,
+      category: category.slug,
+      categoryTitle: category.title,
+      title: article.title,
+      description: article.description,
+      keywords: article.content
+        .split("\n")
+        .filter((line) => /^#{2,3} /.test(line))
+        .map((line) => line.replace(/^#+ /, ""))
+        .join(" "),
+    })),
+  );
+}
+
 export function getKbCategory(slug: string): KbCategory | undefined {
   return getKbCategories().find((c) => c.slug === slug);
 }

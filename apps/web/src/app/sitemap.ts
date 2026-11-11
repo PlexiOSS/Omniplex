@@ -7,7 +7,7 @@ import { getLegalDocuments } from "@/lib/legal/content";
 
 export const revalidate = 3600;
 
-const MAX_PAGES = 50;
+const MAX_PAGES = 500;
 
 type Freq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
@@ -20,7 +20,9 @@ async function collect<T>(
 ): Promise<T[]> {
   const items: T[] = [];
   for (let p = 1; p <= MAX_PAGES; p++) {
-    const res = await fetchPage(p).catch(() => null);
+    const res =
+      (await fetchPage(p).catch(() => null)) ??
+      (await fetchPage(p).catch(() => null));
     if (!res || res.results.length === 0) break;
     items.push(...res.results);
     if (items.length >= res.count || res.results.length < res.per_page) break;
@@ -96,8 +98,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(blogList?.posts ?? [])
       .filter((post) => !post.draft)
       .map((post) => page(`/blog/${post.slug}`, "monthly", 0.5)),
-    ...(tagList?.tags ?? []).map((t) =>
-      page(`/tags/${encodeURIComponent(t.tag)}`, "weekly", 0.5),
+    ...[...new Set((tagList?.tags ?? []).map((t) => t.tag.toLowerCase()))].map(
+      (tag) => page(`/tags/${encodeURIComponent(tag)}`, "weekly", 0.5),
     ),
   ];
 }

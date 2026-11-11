@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Servers",
+  title: "Discord Server List",
   description:
-    "Browse Discord servers listed on Omniplex. Find a community to join and vote for your favorites.",
+    "Browse the Omniplex Discord server list and find a community to join, from gaming and anime to coding and art. Filter by tag, read reviews and vote for your favourites.",
+  alternates: { canonical: "/servers" },
 };
 
 export default function ServersLayout({

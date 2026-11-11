@@ -37,7 +37,7 @@ export function StatsSection({ bot, token }: { bot: Bot; token: string }) {
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         Server and shard counts come from your bot posting its stats. See{" "}
         <Link
-          href="/kb/developers/posting-stats"
+          href="https://docs.omniplex.gg/docs/developer/bot-stats"
           className="text-accent hover:underline"
         >
           Posting Stats

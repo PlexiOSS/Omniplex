@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-11
+
+### Changed
+
+- Authentication explains creating a token in the dashboard, keeping it safe
+  and what to do if it leaks. Posting Bot Stats covers how often to post,
+  posting `offline` on shutdown, and how status affects uptime. Webhooks
+  covers setting one up in the dashboard and what happens when deliveries
+  fail. These came from knowledge base articles that now redirect here.
+
 ## [1.0.1] - 2026-11-09
 
 ### Changed

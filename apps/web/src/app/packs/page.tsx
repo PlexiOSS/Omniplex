@@ -11,7 +11,10 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { isApiUnavailable } from "@/lib/utils/errors";
 
-export const metadata: Metadata = { title: "Packs" };
+export const metadata: Metadata = {
+  title: "Packs",
+  alternates: { canonical: "/packs" },
+};
 
 const FILTERS: { value: PackType | undefined; label: string }[] = [
   { value: undefined, label: "All" },

@@ -13,6 +13,7 @@ import { formatCount, formatRelativeTime } from "@omniplex/core/utils/format";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Badge } from "@omniplex/ui/Badge";
 import { ArrowRight, BookOpen, Handshake, Sparkles } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PackCard } from "@/components/cards/PackCard";
 import { ActivityStrip } from "@/components/home/ActivityStrip";
@@ -37,6 +38,10 @@ const POPULAR_TAGS = [
 ];
 
 const MIN_TOP_VOTED = 6;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   let botIndex = null;
@@ -237,7 +242,7 @@ export default async function HomePage() {
               {POPULAR_TAGS.map((tag) => (
                 <Link
                   key={tag}
-                  href={`/tags/${encodeURIComponent(tag)}`}
+                  href={`/tags/${encodeURIComponent(tag.toLowerCase())}`}
                   className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
                 >
                   {tag}
@@ -326,7 +331,7 @@ export default async function HomePage() {
             {collectionPreviews.map(({ collection, bots: previewBots }) => (
               <Link
                 key={collection.slug}
-                href={`/tags/${encodeURIComponent(collection.tag)}`}
+                href={`/tags/${encodeURIComponent(collection.tag.toLowerCase())}`}
                 className="group flex flex-col rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:border-accent/40 hover:shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent/40"
               >
                 {previewBots.length > 0 ? (

@@ -38,4 +38,4 @@ These need the matching permission on the listing, the same as on the website. Y
 
 ## Reporting member counts yourself
 
-If you'd rather report member counts from your own bot, see [Posting Stats](/kb/developers/posting-stats#servers). Once you post counts yourself, the tracking bot stops overwriting them.
+If you'd rather report member counts from your own bot, see [Posting Server Stats](https://docs.omniplex.gg/docs/developer/server-stats). Once you post counts yourself, the tracking bot stops overwriting them.

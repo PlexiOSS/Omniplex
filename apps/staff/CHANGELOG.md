@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-11
+
+### Added
+
+- A **Summary** field in the application form editor: one line shown on the
+  position's card on the Apply page.
+
 ## [1.3.0] - 2026-11-08
 
 ### Changed

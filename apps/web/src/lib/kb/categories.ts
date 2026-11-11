@@ -7,6 +7,15 @@ export interface KbCategoryMeta {
   order: number;
 }
 
+export const KB_COMMON_QUESTIONS: { category: string; slug: string }[] = [
+  { category: "basics", slug: "getting-started" },
+  { category: "bots", slug: "adding-a-bot" },
+  { category: "bots", slug: "getting-approved" },
+  { category: "voting", slug: "voting-rules" },
+  { category: "premium", slug: "premium" },
+  { category: "developers", slug: "status-and-uptime" },
+];
+
 export const KB_CATEGORIES: KbCategoryMeta[] = [
   {
     slug: "basics",
@@ -39,7 +48,7 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
     slug: "developers",
     title: "Developers",
     description:
-      "Posting stats, bot status and uptime, vote webhooks, API tokens, and embeddable widgets.",
+      "Bot status and uptime, and embeddable widgets. API tokens, posting stats, webhooks and SDKs are in our developer docs.",
     order: 5,
   },
   {

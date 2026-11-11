@@ -18,7 +18,11 @@ Send an API token for your bot in `Authorization`, as `<token>` or
 `Bot <token>`. Create one under **API sessions** in the bot's dashboard (see
 [Authentication](/docs/developer/authentication)). There's no rate limit on this
 endpoint, so post as often as makes sense for your bot: on every `READY` or shard
-reconnect, and periodically after that.
+reconnect, and periodically after that. Every 15 to 30 minutes is plenty.
+
+Server listings normally don't need to post anything, because Omniplex keeps
+their member counts up to date itself. See [Posting Server Stats](/docs/developer/server-stats)
+if you'd rather report them.
 
 ## Body
 
@@ -48,12 +52,17 @@ keep whatever value was last posted rather than being reset to zero.
 Most bots don't share a guild with Omniplex's own Discord client, so there's
 usually no real gateway presence to read for your bot. `status` lets you
 report it yourself instead, post it periodically to keep it fresh, it
-otherwise keeps showing the last value you sent.
+otherwise keeps showing the last value you sent. Post `offline` when your bot
+shuts down cleanly.
 
 If you never send `status` at all, but you do post stats regularly with a
 nonzero `servers` count, your bot is still shown as online rather than
 falling back to an (almost always stale) gateway-derived status, a recent
 stats post is treated as evidence the bot is actually running.
+
+A status you post is the most reliable signal for your bot's
+[status and uptime](https://omniplex.gg/kb/developers/status-and-uptime),
+especially for bots that use HTTP interactions and have no presence on Discord.
 
 ## Using an SDK
 

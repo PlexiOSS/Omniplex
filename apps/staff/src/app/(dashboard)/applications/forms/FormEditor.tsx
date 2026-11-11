@@ -104,6 +104,7 @@ const EMPTY: AppPositionInput = {
   approval_note: "",
   help_url: "",
   help_label: "",
+  summary: "",
 };
 
 export function FormEditor({ position }: FormEditorProps) {
@@ -118,6 +119,7 @@ export function FormEditor({ position }: FormEditorProps) {
           id: position.id,
           name: position.name,
           info: position.info,
+          summary: position.summary ?? "",
           tags: position.tags,
           questions: position.questions,
           hidden: position.hidden,
@@ -296,6 +298,24 @@ export function FormEditor({ position }: FormEditorProps) {
                     : "Can't be changed."}
                 </p>
               </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="form-summary" className={label}>
+                Summary
+              </label>
+              <input
+                id="form-summary"
+                value={form.summary}
+                maxLength={200}
+                onChange={(e) => set("summary", e.target.value)}
+                className={field}
+                placeholder="One line about the position"
+              />
+              <p className={hint}>
+                Shown on the position's card on the Apply page. Keep it to one
+                sentence.
+              </p>
             </div>
 
             <div className="flex flex-col gap-1.5">

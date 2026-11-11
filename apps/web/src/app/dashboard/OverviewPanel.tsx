@@ -136,7 +136,9 @@ export function OverviewPanel({
   const denied = listings.filter((l) => DENIED.has(l.type));
   const monthVotes = live.reduce((sum, l) => sum + l.votes, 0);
   const top = [...live].sort((a, b) => b.votes - a.votes).slice(0, 5);
-  const reset = nextReset(rank?.period_start);
+  const reset = rank?.next_reset
+    ? new Date(rank.next_reset)
+    : nextReset(rank?.period_start);
   const unread = featured?.unacked_count ?? 0;
 
   const attention: { key: string; icon: ReactNode; body: ReactNode }[] = [];

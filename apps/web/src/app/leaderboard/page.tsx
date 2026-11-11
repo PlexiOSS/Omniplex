@@ -21,6 +21,7 @@ import { isApiUnavailable } from "@/lib/utils/errors";
 import { YourRank } from "./YourRank";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/leaderboard" },
   title: "Voter Leaderboard",
   description:
     "The most active voters on Omniplex, this month and of all time.",

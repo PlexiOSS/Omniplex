@@ -101,7 +101,7 @@ export function TagDirectory({ tags }: TagDirectoryProps) {
           {popular.map((t) => (
             <Link
               key={t.tag}
-              href={`/tags/${encodeURIComponent(t.tag)}`}
+              href={`/tags/${encodeURIComponent(t.tag.toLowerCase())}`}
               className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 transition-colors hover:border-accent/40 dark:border-zinc-800 dark:bg-zinc-900"
             >
               <p className="truncate font-semibold text-zinc-950 dark:text-zinc-50">
@@ -124,7 +124,7 @@ export function TagDirectory({ tags }: TagDirectoryProps) {
           {rest.map((t) => (
             <Link
               key={t.tag}
-              href={`/tags/${encodeURIComponent(t.tag)}`}
+              href={`/tags/${encodeURIComponent(t.tag.toLowerCase())}`}
               className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-sm text-zinc-700 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
             >
               <span className="truncate">{t.tag}</span>

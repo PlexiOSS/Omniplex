@@ -297,7 +297,7 @@ function NotificationPrefsPanel({ userId, token }: NotificationsTabProps) {
   );
 }
 
-type Filter = "all" | "unread" | AlertCategory;
+type Filter = "all" | "unread" | "reminders" | AlertCategory;
 
 type Entry =
   | { kind: "single"; alert: Alert }
@@ -309,23 +309,28 @@ function isVoteReminder(alert: Alert) {
 
 function groupEntries(alerts: Alert[]): Entry[] {
   const out: Entry[] = [];
+  let group: Extract<Entry, { kind: "reminders" }> | null = null;
   for (const alert of alerts) {
-    const last = out[out.length - 1];
-    if (isVoteReminder(alert)) {
-      if (last?.kind === "reminders") {
-        last.alerts.push(alert);
-        continue;
-      }
-      out.push({ kind: "reminders", key: alert.itag, alerts: [alert] });
+    if (!isVoteReminder(alert)) {
+      out.push({ kind: "single", alert });
       continue;
     }
-    out.push({ kind: "single", alert });
+    if (!group) {
+      group = { kind: "reminders", key: alert.itag, alerts: [] };
+      out.push(group);
+    }
+    group.alerts.push(alert);
   }
   return out.flatMap((e) =>
     e.kind === "reminders" && e.alerts.length === 1
       ? [{ kind: "single" as const, alert: e.alerts[0] }]
       : [e],
   );
+}
+
+function mergeAlerts(first: Alert[], second: Alert[]): Alert[] {
+  const seen = new Set(first.map((a) => a.itag));
+  return [...first, ...second.filter((a) => !seen.has(a.itag))];
 }
 
 function ReminderGroup({
@@ -416,13 +421,20 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
   const loadPage = useCallback(
     async (target: number, replace: boolean) => {
       try {
-        const result = await alertsApi.list(userId, token, target);
+        const [result, unread] = await Promise.all([
+          alertsApi.list(userId, token, target),
+          replace
+            ? alertsApi.getFeatured(userId, token, 0, 20).catch(() => null)
+            : Promise.resolve(null),
+        ]);
         setError(null);
         setTotal(result.count);
         setPerPage(result.per_page);
         setPage(target);
         setAlerts((prev) =>
-          replace ? result.results.alerts : [...prev, ...result.results.alerts],
+          replace
+            ? mergeAlerts(unread?.unacked ?? [], result.results.alerts)
+            : mergeAlerts(prev, result.results.alerts),
         );
       } catch {
         setError("Failed to load notifications.");
@@ -500,16 +512,22 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
 
   const unreadCount = alerts.filter((a) => !a.acked).length;
   const categories = CATEGORY_ORDER.filter((c) =>
-    alerts.some((a) => a.category === c),
+    alerts.some((a) => a.category === c && !isVoteReminder(a)),
   );
+  const reminderCount = alerts.filter(isVoteReminder).length;
   const visible = alerts.filter((a) =>
     filter === "all"
       ? true
       : filter === "unread"
         ? !a.acked
-        : a.category === filter,
+        : filter === "reminders"
+          ? isVoteReminder(a)
+          : a.category === filter && !isVoteReminder(a),
   );
-  const entries = groupEntries(visible);
+  const unreadEntries = groupEntries(visible.filter((a) => !a.acked));
+  const readEntries = groupEntries(visible.filter((a) => a.acked));
+  const entries = [...unreadEntries, ...readEntries];
+  const sectioned = unreadEntries.length > 0 && readEntries.length > 0;
   const hasMore = alerts.length < total && perPage > 0;
 
   const chip = (key: Filter, label: string, count: number) => (
@@ -541,10 +559,13 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
               {categories.map((c) =>
                 chip(
                   c,
-                  ALERT_CATEGORY_LABELS[c],
-                  alerts.filter((a) => a.category === c).length,
+                  c === "votes" ? "Votes" : ALERT_CATEGORY_LABELS[c],
+                  alerts.filter((a) => a.category === c && !isVoteReminder(a))
+                    .length,
                 ),
               )}
+              {reminderCount > 0 &&
+                chip("reminders", "Vote reminders", reminderCount)}
             </>
           )}
         </div>
@@ -600,25 +621,41 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
         </EmptyState>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {entries.map((entry) =>
-              entry.kind === "single" ? (
-                <NotificationRow
-                  key={entry.alert.itag}
-                  alert={entry.alert}
-                  onAck={ack}
-                  onDelete={remove}
-                />
-              ) : (
-                <ReminderGroup
-                  key={entry.key}
-                  alerts={entry.alerts}
-                  onAck={ack}
-                  onDelete={remove}
-                />
-              ),
-            )}
-          </div>
+          {(
+            [
+              ["Unread", unreadEntries],
+              ["Earlier", readEntries],
+            ] as const
+          ).map(([label, list]) =>
+            list.length === 0 ? null : (
+              <div key={label}>
+                {sectioned && (
+                  <p className="border-b border-zinc-100 bg-zinc-50/60 px-4 py-2 text-xs font-medium text-zinc-500 sm:px-5 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
+                    {label}
+                  </p>
+                )}
+                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  {list.map((entry) =>
+                    entry.kind === "single" ? (
+                      <NotificationRow
+                        key={entry.alert.itag}
+                        alert={entry.alert}
+                        onAck={ack}
+                        onDelete={remove}
+                      />
+                    ) : (
+                      <ReminderGroup
+                        key={entry.key}
+                        alerts={entry.alerts}
+                        onAck={ack}
+                        onDelete={remove}
+                      />
+                    ),
+                  )}
+                </div>
+              </div>
+            ),
+          )}
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 bg-zinc-50/60 px-4 py-3 text-xs text-zinc-500 sm:px-5 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
             <span className="tabular-nums">
               Showing {alerts.length} of {total}

@@ -24,6 +24,7 @@ interface Props {
 }
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/servers/compare" },
   title: "Compare Servers",
   description:
     "Compare two Discord servers side by side: votes, members, and tags.",

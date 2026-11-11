@@ -9,6 +9,7 @@ import { isApiUnavailable } from "@/lib/utils/errors";
 import { TagDirectory } from "./TagDirectory";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/tags" },
   title: "All Tags",
   description:
     "Browse every tag used by Discord bots and servers on Omniplex, from Moderation and Music to the niche ones.",

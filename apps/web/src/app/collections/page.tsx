@@ -75,7 +75,7 @@ export default async function CollectionsPage() {
                   </p>
                 </div>
                 <Link
-                  href={`/tags/${encodeURIComponent(collection.tag)}`}
+                  href={`/tags/${encodeURIComponent(collection.tag.toLowerCase())}`}
                   className="flex shrink-0 items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
                 >
                   View all <ArrowRight size={14} />

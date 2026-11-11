@@ -8,7 +8,7 @@ Most of your server page fills itself in from Discord through our tracking bot. 
 
 ## Members and online count
 
-The sidebar shows your total members, and how many are online as a share of that total. The tracking bot updates both regularly. If you'd rather report counts from your own bot, see [Posting Stats](/kb/developers/posting-stats#servers).
+The sidebar shows your total members, and how many are online as a share of that total. The tracking bot updates both regularly. If you'd rather report counts from your own bot, see [Posting Server Stats](https://docs.omniplex.gg/docs/developer/server-stats).
 
 ## Boosts
 

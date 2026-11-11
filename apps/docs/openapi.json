@@ -3268,6 +3268,10 @@
                   "description": "Whether applicants must be in the Omniplex Discord server",
                   "type": "boolean"
                 },
+                "summary": {
+                  "description": "One line describing the position, for lists of positions",
+                  "type": "string"
+                },
                 "tags": {
                   "items": {
                     "type": "string"
@@ -3490,6 +3494,14 @@
                       "timezone": {
                         "description": "IANA timezone the schedule uses",
                         "type": "string"
+                      },
+                      "votes_24h": {
+                        "description": "Automatic votes cast for this listing in the last 24 hours",
+                        "type": "integer"
+                      },
+                      "votes_7d": {
+                        "description": "Automatic votes cast for this listing in the last 7 days",
+                        "type": "integer"
                       }
                     },
                     "type": "object"
@@ -3625,11 +3637,27 @@
                 "timezone": {
                   "description": "IANA timezone the schedule uses",
                   "type": "string"
+                },
+                "votes_24h": {
+                  "description": "Automatic votes cast for this listing in the last 24 hours",
+                  "type": "integer"
+                },
+                "votes_7d": {
+                  "description": "Automatic votes cast for this listing in the last 7 days",
+                  "type": "integer"
                 }
               },
               "type": "object"
             },
             "type": "array"
+          },
+          "votes_24h": {
+            "description": "Automatic votes cast in the last 24 hours, including for listings no longer on the list",
+            "type": "integer"
+          },
+          "votes_7d": {
+            "description": "Automatic votes cast in the last 7 days, including for listings no longer on the list",
+            "type": "integer"
           },
           "yearly_price_cents": {
             "description": "The yearly plan's price in US cents",
@@ -15306,6 +15334,12 @@
           "all_time": {
             "description": "The user's all-time voter leaderboard position",
             "properties": {
+              "next_reset": {
+                "description": "When monthly votes next reset: 00:00 UTC on the 1st, or a month later if staff already reset every listing type at the end of this month",
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
               "period_start": {
                 "description": "When the period started, null for all-time",
                 "format": "date-time",
@@ -15330,6 +15364,12 @@
           "month": {
             "description": "The user's voter leaderboard position since the last monthly vote reset",
             "properties": {
+              "next_reset": {
+                "description": "When monthly votes next reset: 00:00 UTC on the 1st, or a month later if staff already reset every listing type at the end of this month",
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
               "period_start": {
                 "description": "When the period started, null for all-time",
                 "format": "date-time",
@@ -15785,6 +15825,12 @@
       },
       "types.VoterLeaderboardRank": {
         "properties": {
+          "next_reset": {
+            "description": "When monthly votes next reset: 00:00 UTC on the 1st, or a month later if staff already reset every listing type at the end of this month",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "period_start": {
             "description": "When the period started, null for all-time",
             "format": "date-time",
@@ -23555,7 +23601,7 @@
         "tags": [
           "Bots"
         ],
-        "description": "Records that a visitor opened this bot's page. Each visitor counts once per bot per day, and known crawlers aren't counted. Always returns 204.",
+        "description": "Records that a visitor opened this bot's page. Each visitor counts once per bot per day. Known crawlers, and people who manage the bot, aren't counted. Signing in is optional. Always returns 204.",
         "operationId": "record_bot_view",
         "parameters": [
           {
@@ -23589,7 +23635,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "User": []
+          }
+        ]
       }
     },
     "/bots/{id}/invite-clicks": {
@@ -23600,7 +23651,7 @@
         "tags": [
           "Bots"
         ],
-        "description": "Records that a visitor opened this bot's invite. Each visitor counts once per bot per day, and known crawlers aren't counted. Always returns 204.",
+        "description": "Records that a visitor opened this bot's invite. Each visitor counts once per bot per day. Known crawlers, and people who manage the bot, aren't counted. Signing in is optional. Always returns 204.",
         "operationId": "record_bot_invite_click",
         "parameters": [
           {
@@ -23634,7 +23685,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "User": []
+          }
+        ]
       }
     },
     "/bots/@all": {
@@ -28311,7 +28367,7 @@
         "tags": [
           "Servers"
         ],
-        "description": "Records that a visitor opened this server's page. Each visitor counts once per server per day, and known crawlers aren't counted. Always returns 204.",
+        "description": "Records that a visitor opened this server's page. Each visitor counts once per server per day. Known crawlers, and people who manage the server, aren't counted. Signing in is optional. Always returns 204.",
         "operationId": "record_server_view",
         "parameters": [
           {
@@ -28345,7 +28401,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "User": []
+          }
+        ]
       }
     },
     "/servers/{id}/invite-clicks": {
@@ -28356,7 +28417,7 @@
         "tags": [
           "Servers"
         ],
-        "description": "Records that a visitor opened this server's invite. Each visitor counts once per server per day, and known crawlers aren't counted. Always returns 204.",
+        "description": "Records that a visitor opened this server's invite. Each visitor counts once per server per day. Known crawlers, and people who manage the server, aren't counted. Signing in is optional. Always returns 204.",
         "operationId": "record_server_invite_click",
         "parameters": [
           {
@@ -28390,7 +28451,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "User": []
+          }
+        ]
       }
     },
     "/servers/@all": {

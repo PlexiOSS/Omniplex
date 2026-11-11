@@ -57,11 +57,18 @@ function withCsp(request: NextRequest) {
 }
 
 export async function proxy(request: NextRequest) {
-  const host = normalizeHost(request.headers.get("host") ?? "");
+  const rawHost = (request.headers.get("host") ?? "").toLowerCase();
+  const site = new URL(BASE_URL);
+  if (rawHost.startsWith("www.") && rawHost.slice(4) === site.host) {
+    const target = new URL(request.nextUrl.pathname, site);
+    target.search = request.nextUrl.search;
+    return NextResponse.redirect(target, 308);
+  }
+
+  const host = normalizeHost(rawHost);
   const domains = getShortLinkDomains();
   if (!host || !domains.includes(host)) return withCsp(request);
 
-  const site = new URL(BASE_URL);
   const { pathname, search } = request.nextUrl;
   const segments = pathname.split("/").filter(Boolean);
 

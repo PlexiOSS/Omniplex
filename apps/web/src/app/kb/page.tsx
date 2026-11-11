@@ -1,10 +1,12 @@
-import { ArrowRight, BookOpen, LifeBuoy } from "lucide-react";
+import { Activity, ArrowRight, BookOpen, FileCode } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { KbSearch } from "@/components/kb/KbSearch";
 import { kbCategoryIcon } from "@/components/kb/kbIcons";
+import { YourTickets } from "@/components/kb/YourTickets";
 import { Container } from "@/components/layout/Container";
-import { getKbCategories } from "@/lib/kb/content";
+import { KB_COMMON_QUESTIONS } from "@/lib/kb/categories";
+import { getKbCategories, getKbSearchIndex } from "@/lib/kb/content";
 
 export const metadata: Metadata = {
   title: "Knowledge Base",
@@ -14,15 +16,10 @@ export const metadata: Metadata = {
 
 export default function KbPage() {
   const categories = getKbCategories();
-  const searchableArticles = categories.flatMap((category) =>
-    category.articles.map((article) => ({
-      slug: article.slug,
-      category: category.slug,
-      categoryTitle: category.title,
-      title: article.title,
-      description: article.description,
-    })),
-  );
+  const searchableArticles = getKbSearchIndex();
+  const common = KB_COMMON_QUESTIONS.map(({ category, slug }) =>
+    searchableArticles.find((a) => a.category === category && a.slug === slug),
+  ).filter((a) => a !== undefined);
   const articleCount = searchableArticles.length;
 
   return (
@@ -45,6 +42,47 @@ export default function KbPage() {
           {articleCount} articles in {categories.length} categories
         </p>
       </section>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
+        <section className="rounded-2xl border border-zinc-200 bg-white p-5 lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900">
+          <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">
+            Common questions
+          </h2>
+          <ul className="mt-3 grid gap-x-6 gap-y-0.5 sm:grid-cols-2">
+            {common.map((article) => (
+              <li key={`${article.category}/${article.slug}`}>
+                <Link
+                  href={`/kb/${article.category}/${article.slug}`}
+                  className="group -mx-2 flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-50"
+                >
+                  <span className="min-w-0 truncate">{article.title}</span>
+                  <ArrowRight
+                    size={14}
+                    className="shrink-0 text-zinc-300 transition-transform group-hover:translate-x-0.5 dark:text-zinc-600"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-zinc-100 pt-3 text-sm dark:border-zinc-800">
+            <a
+              href="https://docs.omniplex.gg"
+              className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-accent dark:text-zinc-300"
+            >
+              <FileCode size={14} />
+              Developer docs
+            </a>
+            <a
+              href="https://status.omniplex.gg"
+              className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-accent dark:text-zinc-300"
+            >
+              <Activity size={14} />
+              System status
+            </a>
+          </div>
+        </section>
+        <YourTickets />
+      </div>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((category) => {
@@ -98,26 +136,6 @@ export default function KbPage() {
           );
         })}
       </div>
-
-      <section className="mt-10 flex flex-col items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-6 text-center sm:flex-row sm:text-left dark:border-zinc-800 dark:bg-zinc-900">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/15">
-          <LifeBuoy size={20} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="font-semibold text-zinc-950 dark:text-zinc-50">
-            Still stuck?
-          </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Open a support ticket and the team will get back to you.
-          </p>
-        </div>
-        <Link
-          href="/tickets/new"
-          className="inline-flex h-9 items-center rounded-lg bg-accent px-4 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90"
-        >
-          Open a ticket
-        </Link>
-      </section>
     </Container>
   );
 }

@@ -133,7 +133,7 @@ function TopTags({ tags }: { tags: ListTag[] }) {
           return (
             <li key={t.tag}>
               <Link
-                href={`/tags/${encodeURIComponent(t.tag)}`}
+                href={`/tags/${encodeURIComponent(t.tag.toLowerCase())}`}
                 title={`${t.tag}: ${t.bots} bots, ${t.servers} servers`}
                 className="group grid grid-cols-[7.5rem_minmax(0,1fr)_3rem] items-center gap-3 rounded-md px-1 py-1 transition-colors hover:bg-zinc-50 sm:grid-cols-[10rem_minmax(0,1fr)_3.5rem] dark:hover:bg-zinc-800/50"
               >
