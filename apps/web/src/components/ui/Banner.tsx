@@ -14,7 +14,16 @@ interface BannerProps {
   missingSizeClassName?: string;
 }
 
-export function Banner({
+export function Banner(props: BannerProps) {
+  return (
+    <BannerImage
+      key={`${props.src ?? ""}|${props.fallbackSrc ?? ""}`}
+      {...props}
+    />
+  );
+}
+
+function BannerImage({
   src,
   fallbackSrc,
   alt,

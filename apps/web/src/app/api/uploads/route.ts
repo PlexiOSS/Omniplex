@@ -11,13 +11,17 @@ import { matchesDeclaredType } from "@omniplex/core/cdn/safety";
 import { hasPermString } from "@omniplex/core/permissions";
 import { ASSET_VERSION_METADATA_KEY } from "@omniplex/core/s3/config";
 import {
+  discardObject,
+  getObject,
   headObject,
+  listKeys,
   putObject,
   S3UnavailableError,
 } from "@omniplex/core/s3/objects";
 import { COOKIE_TOKEN } from "@omniplex/core/utils/auth";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
+import { allowUpload } from "@/lib/uploadLimit";
 import { getServerToken } from "@/lib/utils/serverSession";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
@@ -64,6 +68,36 @@ const EMOJI_MAX_BYTES = 256 * 1024;
 const SOUND_MAX_BYTES = 2 * 1024 * 1024;
 
 const BACKGROUND_MAX_BYTES = 8 * 1024 * 1024;
+
+const PACK_FILE_LIMIT = 50;
+const STAGING_TTL_MS = 24 * 60 * 60 * 1000;
+const UPLOADER_METADATA_KEY = "uploader";
+
+async function stagingProblem(
+  prefix: string,
+  userId: string,
+): Promise<string | null> {
+  const cutoff = Date.now() - STAGING_TTL_MS;
+  const recent = (await listKeys(prefix, 1000)).filter(
+    (k) => (k.lastModified?.getTime() ?? 0) > cutoff,
+  );
+
+  if (recent.length >= PACK_FILE_LIMIT) {
+    return "This pack already has as many files as it can hold.";
+  }
+
+  for (const { key } of recent) {
+    const result = await getObject(key);
+    if (result.status !== "found") continue;
+    discardObject(result.object);
+    if (result.object.metadata[UPLOADER_METADATA_KEY] !== userId) {
+      return "Someone else is setting up a pack with that URL. Pick a different one.";
+    }
+    return null;
+  }
+
+  return null;
+}
 
 const KIND_CONFIG: Record<Kind, KindConfig> = {
   "bot-background": {
@@ -334,6 +368,15 @@ export async function POST(req: Request) {
   }
   const userToken = token;
 
+  if (!allowUpload(userId)) {
+    return NextResponse.json(
+      { error: "You've uploaded a lot of files recently. Try again in a bit." },
+      { status: 429 },
+    );
+  }
+
+  let packIsNew = false;
+
   if (isPackAssetKind(kind)) {
     const existingPack = await client
       .get<BotPack>(`/packs/${targetId}`, { cache: "no-store" })
@@ -348,6 +391,7 @@ export async function POST(req: Request) {
         { status: 403 },
       );
     }
+    packIsNew = !existingPack;
   } else {
     const entityPerms = await teams
       .getEntityPerms(userId, config.popplioTargetType, targetId)
@@ -378,6 +422,7 @@ export async function POST(req: Request) {
   }
 
   const key = config.key(targetId, assetId);
+  let stagingNewPack = false;
   const version = createHash("sha256")
     .update(buffer)
     .digest("hex")
@@ -391,6 +436,13 @@ export async function POST(req: Request) {
           { status: 409 },
         );
       }
+      if (packIsNew) {
+        const problem = await stagingProblem(config.key(targetId, ""), userId);
+        if (problem) {
+          return NextResponse.json({ error: problem }, { status: 403 });
+        }
+        stagingNewPack = true;
+      }
     } catch (err) {
       if (!(err instanceof S3UnavailableError)) throw err;
       console.error(err, err.cause);
@@ -403,6 +455,7 @@ export async function POST(req: Request) {
 
   const wrote = await putObject(key, buffer, file.type, {
     [ASSET_VERSION_METADATA_KEY]: version,
+    ...(stagingNewPack ? { [UPLOADER_METADATA_KEY]: userId } : {}),
   });
 
   if (!wrote) {

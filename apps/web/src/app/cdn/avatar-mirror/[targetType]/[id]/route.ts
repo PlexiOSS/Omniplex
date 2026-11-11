@@ -1,3 +1,4 @@
+import { client } from "@omniplex/core/api/client";
 import { DISCORD_CDN_URL } from "@omniplex/core/api/config";
 import { cdnHeaders, isSafeImageType } from "@omniplex/core/cdn/safety";
 import { MIRROR_SOURCE_METADATA_KEY } from "@omniplex/core/s3/config";
@@ -9,7 +10,11 @@ import {
   S3UnavailableError,
 } from "@omniplex/core/s3/objects";
 import { NextResponse } from "next/server";
-import { fetchCurrentAvatar, fetchDiscordImage } from "@/lib/japi/client";
+import {
+  fetchCurrentAvatar,
+  fetchDiscordImage,
+  isSnowflake,
+} from "@/lib/japi/client";
 
 const DISCORD_CDN_HOST = new URL(DISCORD_CDN_URL).hostname;
 
@@ -30,7 +35,7 @@ const OWN_IMAGE: Record<string, RegExp> = {
 
 export async function GET(req: Request, { params }: Params) {
   const { targetType, id } = await params;
-  if (!VALID_TARGET_TYPES.has(targetType) || !id) {
+  if (!VALID_TARGET_TYPES.has(targetType) || !isSnowflake(id)) {
     return new NextResponse("Not found", { status: 404 });
   }
 
@@ -64,10 +69,13 @@ export async function GET(req: Request, { params }: Params) {
   }
 
   if (src) {
+    const current = await isCurrentSource(targetType, id, src);
+    if (!current && cached) return streamResponse(cached, FALLBACK);
+
     const mirrored = await fetchDiscordImage(src.href, 2500);
     if (mirrored) {
       if (cached) discardObject(cached);
-      if (!s3Down) {
+      if (current && !s3Down) {
         await putObject(key, mirrored.body, mirrored.contentType, {
           [MIRROR_SOURCE_METADATA_KEY]: src.href,
         });
@@ -75,7 +83,7 @@ export async function GET(req: Request, { params }: Params) {
       return new NextResponse(Buffer.from(mirrored.body), {
         headers: {
           ...cdnHeaders(mirrored.contentType),
-          "Cache-Control": MATCHED,
+          "Cache-Control": current ? MATCHED : FALLBACK,
         },
       });
     }
@@ -87,7 +95,7 @@ export async function GET(req: Request, { params }: Params) {
       if (cached) discardObject(cached);
       if (!s3Down) {
         await putObject(key, current.body, current.contentType, {
-          [MIRROR_SOURCE_METADATA_KEY]: src?.href ?? current.sourceUrl,
+          [MIRROR_SOURCE_METADATA_KEY]: current.sourceUrl,
         });
       }
       return new NextResponse(Buffer.from(current.body), {
@@ -138,6 +146,23 @@ function streamResponse(object: FetchedObject, cacheControl: string) {
     headers["Content-Length"] = String(object.contentLength);
   }
   return new NextResponse(object.stream, { headers });
+}
+
+async function isCurrentSource(
+  targetType: string,
+  id: string,
+  src: URL,
+): Promise<boolean> {
+  try {
+    const seo = await client.get<{ avatar?: string }>(
+      `/${targetType}/${id}/seo`,
+      { next: { revalidate: 60 } },
+    );
+    const live = parseDiscordSrc(seo.avatar ?? null, targetType, id);
+    return live !== null && live.pathname === src.pathname;
+  } catch {
+    return false;
+  }
 }
 
 function isTrustedCache(object: FetchedObject, targetType: string, id: string) {

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Uploading pack files before the pack exists is now bounded. A pack URL
+  that's still being set up belongs to whoever uploaded to it first for 24
+  hours, it can hold at most 50 files, and each account can upload 300
+  files an hour across all uploads.
+- `/cdn/avatar-mirror` only replaces its cached avatar when the requested
+  `src` matches the avatar Popplio currently has for that bot, server or
+  user. Before, anyone could switch it to an older avatar of the same
+  account or to Discord's default one. It also only accepts Discord IDs.
+
+### Fixed
+
+- After uploading a new banner or team avatar, the preview now shows it
+  straight away. If the old image had failed to load (for example, there
+  was no banner yet), the preview stayed blank until you refreshed.
+
 ### Changed
 
 - The dashboard's "Refresh" button for your Discord profile now sends your
