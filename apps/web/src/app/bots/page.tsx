@@ -57,7 +57,7 @@ export default async function BotsPage({ searchParams }: Props) {
     <Container className="py-10">
       <PageHeader
         icon={Bot}
-        title="All Bots"
+        title="Discord Bot List"
         description={
           <>
             Browse every bot listed on Omniplex.{" "}

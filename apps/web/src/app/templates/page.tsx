@@ -10,7 +10,10 @@ import { SERVER_TAGS } from "@/lib/constants/tags";
 import { isApiUnavailable } from "@/lib/utils/errors";
 import { TemplateGrid } from "./TemplateGrid";
 
-export const metadata: Metadata = { title: "Server Templates" };
+export const metadata: Metadata = {
+  title: "Server Templates",
+  alternates: { canonical: "/templates" },
+};
 
 interface Props {
   searchParams: Promise<{ tag?: string }>;

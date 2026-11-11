@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-11
+
+### Added
+
+- `summary` on `AppPosition`.
+- `next_reset` on `VoterLeaderboardRank`.
+- `votes_24h` and `votes_7d` on `AutoVoteStatus` and `AutoVoteTarget`.
+
 ## [0.5.0] - 2026-11-09
 
 ### Added

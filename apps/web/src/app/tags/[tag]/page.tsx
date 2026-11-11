@@ -3,6 +3,8 @@ import {
   search,
   servers as serversApi,
 } from "@omniplex/core/api";
+import { BASE_URL } from "@omniplex/core/api/config";
+import { botPath, serverPath } from "@omniplex/core/utils/assets";
 import { formatCountLabel } from "@omniplex/core/utils/format";
 import { ArrowRight, Tag as TagIcon } from "lucide-react";
 import type { Metadata } from "next";
@@ -14,6 +16,7 @@ import { TeamCard } from "@/components/cards/TeamCard";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { isApiUnavailable } from "@/lib/utils/errors";
 
 const RELATED_LIMIT = 10;
@@ -51,12 +54,45 @@ interface Props {
   params: Promise<{ tag: string }>;
 }
 
+function displayTag(tag: string): string {
+  return tag.replace(
+    /(^|[\s-])([a-z])/g,
+    (_, sep, ch) => sep + ch.toUpperCase(),
+  );
+}
+
+function tagHeading(tag: string, bots: number, servers: number): string {
+  const name = displayTag(tag);
+  if (bots > 0 && servers === 0) return `Best ${name} Discord Bots`;
+  if (servers > 0 && bots === 0) return `Best ${name} Discord Servers`;
+  return `${name} Discord Bots and Servers`;
+}
+
+function tagIntro(tag: string, bots: number, servers: number): string {
+  const name = displayTag(tag).toLowerCase();
+  const parts = [
+    bots > 0 && `${bots === 1 ? "1 bot" : `${bots} bots`}`,
+    servers > 0 && `${servers === 1 ? "1 server" : `${servers} servers`}`,
+  ].filter(Boolean);
+  const what = parts.join(" and ") || "listings";
+  return `Looking for ${name} for your Discord? Omniplex has ${what} tagged ${name}, ranked by community votes. Open any of them to read reviews, see commands and stats, and add it in one click.`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { tag } = await params;
   const decoded = decodeURIComponent(tag);
+  const [botPage, serverPage] = await Promise.all([
+    botsApi.getAll(1, { tag: decoded, sort: "votes" }).catch(() => null),
+    serversApi.getAll(1, { tag: decoded, sort: "votes" }).catch(() => null),
+  ]);
+  const bots = botPage?.count ?? 0;
+  const servers = serverPage?.count ?? 0;
   return {
-    title: decoded,
-    description: `Bots, servers, teams, and packs tagged "${decoded}" on Omniplex.`,
+    title: tagHeading(decoded, bots, servers),
+    description: tagIntro(decoded, bots, servers),
+    alternates: {
+      canonical: `/tags/${encodeURIComponent(decoded.toLowerCase())}`,
+    },
   };
 }
 
@@ -94,10 +130,27 @@ export default async function TagPage({ params }: Props) {
 
   return (
     <Container className="py-10">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: tagHeading(decoded, botPage.count, serverPage.count),
+          itemListElement: [
+            ...bots.map((b) => botPath(b.bot_id, b.vanity)),
+            ...servers.map((s) => serverPath(s.server_id, s.vanity)),
+          ]
+            .slice(0, 20)
+            .map((path, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: `${BASE_URL}${path}`,
+            })),
+        }}
+      />
       <div className="mb-8">
         <PageHeader
           icon={TagIcon}
-          title={decoded}
+          title={tagHeading(decoded, botPage.count, serverPage.count)}
           description={
             <>
               {[
@@ -129,7 +182,7 @@ export default async function TagPage({ params }: Props) {
             {related.map((tag) => (
               <Link
                 key={tag}
-                href={`/tags/${encodeURIComponent(tag)}`}
+                href={`/tags/${encodeURIComponent(tag.toLowerCase())}`}
                 className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-accent/40 hover:text-accent dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
               >
                 {tag}

@@ -102,8 +102,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const seo = await fetchBotSeo(id).catch(() => null);
   if (!seo) return {};
   return {
-    title: seo.name,
-    description: seo.short,
+    title: `${seo.name}: Discord Bot`,
+    description:
+      seo.short || `${seo.name} is a Discord bot listed on Omniplex.`,
     alternates: { canonical: botPath(seo.id, seo.vanity) },
   };
 }

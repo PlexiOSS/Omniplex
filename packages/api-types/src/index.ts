@@ -927,6 +927,8 @@ export interface VoterLeaderboardRank {
   votes: number;
   total_voters: number;
   period_start: string | null;
+  /** When monthly votes next reset. */
+  next_reset?: string | null;
 }
 
 export interface EntityVote {
@@ -1334,6 +1336,8 @@ export interface AppPosition {
   cooldown: string;
   help_url?: string;
   help_label?: string;
+  /** One line describing the position, for lists of positions. */
+  summary?: string;
 }
 
 export interface AppMeta {
@@ -1396,6 +1400,10 @@ export interface AutoVoteTarget extends AutoVoteTargetInput {
   last_voted_at: string | null;
   last_skip_reason: string | null;
   cooldown_until: string | null;
+  /** Automatic votes cast for this listing in the last 24 hours. */
+  votes_24h?: number;
+  /** Automatic votes cast for this listing in the last 7 days. */
+  votes_7d?: number;
   in_schedule: boolean;
   paused: boolean;
 }
@@ -1414,6 +1422,10 @@ export interface AutoVoteStatus {
   billing_interval: "month" | "year";
   booster_slots: number;
   targets: AutoVoteTarget[];
+  /** Automatic votes cast in the last 24 hours, including for listings no longer on the list. */
+  votes_24h?: number;
+  /** Automatic votes cast in the last 7 days, including for listings no longer on the list. */
+  votes_7d?: number;
   notify: AutoVoteNotify;
 }
 

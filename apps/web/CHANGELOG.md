@@ -7,6 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-11-11
+
+### Added
+
+- An **Activity** card in the Auto-vote tab shows how many votes Auto-vote
+  cast in the last 24 hours and 7 days, broken down by listing, so you don't
+  need the daily summary notification to see it.
+- The knowledge base home has a **Common questions** list, links to the
+  developer docs and system status, and a **Still stuck?** panel that shows
+  your open tickets.
+- While you write a support ticket, matching knowledge base articles are
+  suggested under the subject, in case one already answers it.
+
+### Changed
+
+- The vote captcha only shows Cloudflare's box when it needs you to click.
+  Most people pass without seeing it, and a short "Checking you're human"
+  line, then "Verified", shows instead.
+- The Apply page cards show a one-line summary instead of a cut-off
+  description, how long the form takes, and whether you need to be in our
+  Discord server. The "Open" badge is gone; signed-in users see their own
+  status instead, like "Applied, in review". Listing Appeal sits with Bot
+  Resubmission under **For listing owners**, and Beta Testers and Spotlight
+  Request under **Community**.
+- The blog's topic filter shows the six most used topics, with post counts,
+  in one row that scrolls sideways on phones, and the rest under **More
+  topics**. Topics that only differ in capitalisation are merged.
+- Search engine improvements:
+  - www.omniplex.gg redirects to omniplex.gg instead of serving a copy of
+    the site.
+  - The home, Bots, Servers, Tags and tag pages now give search engines
+    their main address.
+  - The Bots and Servers pages are titled "Discord Bot List" and "Discord
+    Server List", and listing pages "Name: Discord Bot" or "Name: Discord
+    Server".
+  - Tag pages are titled like "Best Music Discord Bots", with a short
+    introduction and a structured list of the top listings.
+  - Tag links and the sitemap use lowercase tag addresses, so each tag has
+    one address.
+  - Filterable pages (templates, packs, the feed, commands, changelog,
+    leaderboard, compare and shop pages) name their main address, so filter
+    combinations like `/templates?tag=Support` aren't treated as separate
+    pages. Search results are no longer indexed, though their links are
+    still followed.
+- The Notifications page shows unread notifications first, even ones that
+  aren't among the latest, so they can't be buried under read vote reminders.
+  Vote reminders are grouped into one row and have their own **Vote
+  reminders** filter, separate from **Votes**.
+- Knowledge base search ranks results and also matches article headings, so
+  it finds more than exact title matches.
+- The API Tokens, Posting Stats, Official SDKs and Vote Webhooks articles moved
+  to the developer docs, which already covered them. Their old addresses
+  redirect there, and the dashboard walk-throughs from those articles were
+  added to the docs pages.
+
+### Fixed
+
+- Page views and invite clicks are sent with your sign-in when you have one,
+  so they show who it was in the staff activity log, and a listing's own
+  team isn't counted.
+- The sitemap stopped after 600 bots, so about a third of listed bots were
+  missing from it. It now includes every bot and server.
+- The dashboard showed the vote reset as one month after the last one (the
+  27th). It now shows the real date, the 1st of each month, and the
+  knowledge base says so.
+
 ## [1.18.0] - 2026-11-09
 
 ### Changed

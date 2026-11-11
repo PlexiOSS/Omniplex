@@ -19,7 +19,7 @@ Votes you cast by hand start the same cooldown, so if you vote for a listing you
 
 ## What automatic votes count for
 
-Automatic votes are real upvotes. They count toward the listing's vote count and its ranking, and they're sent to the owner's [vote webhooks](/kb/developers/vote-webhooks) with `auto` set to `true`.
+Automatic votes are real upvotes. They count toward the listing's vote count and its ranking, and they're sent to the owner's [vote webhooks](https://docs.omniplex.gg/docs/developer/webhooks) with `auto` set to `true`.
 
 They don't count toward:
 

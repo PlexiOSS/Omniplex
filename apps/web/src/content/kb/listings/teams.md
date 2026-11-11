@@ -29,7 +29,7 @@ Permissions apply to the team and everything it owns. The main ones:
 | **Webhooks** | See, create, test and delete webhooks, and read or clear their delivery logs. |
 | **Assets** | Upload and delete avatars, banners and other images. |
 | **Reviews** | Write, edit and delete the team's owner replies to reviews. |
-| **API tokens** | See, create and revoke [API tokens](/kb/developers/api-tokens). |
+| **API tokens** | See, create and revoke [API tokens](https://docs.omniplex.gg/docs/developer/authentication). |
 | **Shop** | Redeem vote credits and spend them in the [Shop](/kb/premium/shop). |
 
 **Owner** includes every permission, including deleting the team. Each permission is described in full where you assign it.

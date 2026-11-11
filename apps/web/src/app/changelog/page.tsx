@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Changelog",
   description: "Curated release notes for Popplio, Omniplex, and Keel.",
   alternates: {
+    canonical: "/changelog",
     types: {
       "application/rss+xml": "/changelog/rss.xml",
     },

@@ -907,6 +907,7 @@ export interface AppPositionInput {
   id: string;
   name: string;
   info: string;
+  summary: string;
   tags: string[];
   questions: AppPositionQuestion[];
   hidden: boolean;

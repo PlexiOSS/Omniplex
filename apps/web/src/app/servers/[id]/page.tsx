@@ -105,8 +105,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const seo = await fetchServerSeo(id).catch(() => null);
   if (!seo) return {};
   return {
-    title: seo.name,
-    description: seo.short,
+    title: `${seo.name}: Discord Server`,
+    description:
+      seo.short || `${seo.name} is a Discord server listed on Omniplex.`,
     alternates: { canonical: serverPath(seo.id, seo.vanity) },
   };
 }

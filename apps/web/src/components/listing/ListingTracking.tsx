@@ -1,6 +1,7 @@
 "use client";
 
 import { bots, servers } from "@omniplex/core/api";
+import { getSession } from "@omniplex/core/utils/auth";
 import type { ComponentProps } from "react";
 import { useEffect } from "react";
 
@@ -12,7 +13,7 @@ function api(target: Target) {
 
 export function trackInviteClick(target: Target, id: string) {
   api(target)
-    .recordInviteClick(id)
+    .recordInviteClick(id, getSession()?.token)
     .catch(() => {});
 }
 
@@ -25,7 +26,7 @@ export function ListingViewTracker({
 }) {
   useEffect(() => {
     api(target)
-      .recordView(id)
+      .recordView(id, getSession()?.token)
       .catch(() => {});
   }, [target, id]);
 

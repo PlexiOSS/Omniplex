@@ -10,7 +10,7 @@ The coloured dot on your bot's avatar and the status next to its name ("Online",
 
 Omniplex checks these in order and uses the first one that has an answer:
 
-1. **The status your bot posted.** If you send `status` when [posting stats](/kb/developers/posting-stats), that's what's shown, and it stays until you post a different one.
+1. **The status your bot posted.** If you send `status` when [posting stats](https://docs.omniplex.gg/docs/developer/bot-stats), that's what's shown, and it stays until you post a different one.
 2. **Our own Discord connection.** If your bot is in our main Discord server, we can see its live presence directly.
 3. **japi.rest.** For bots outside our server, we check their presence through [japi.rest](https://japi.rest) every few minutes.
 4. **Recent stats.** If your bot posted a server count in the last 24 hours, it's shown as online.
@@ -33,7 +33,7 @@ Uptime is the share of checks in the last 30 days where your bot was online. A b
 
 Every 5 minutes we check whether each listed bot is online, using these sources in order:
 
-1. The status your bot reports when it [posts stats](/kb/developers/posting-stats), as long as it posted in the last 24 hours.
+1. The status your bot reports when it [posts stats](https://docs.omniplex.gg/docs/developer/bot-stats), as long as it posted in the last 24 hours.
 2. Our own Discord connection, for bots in the Omniplex server.
 3. japi.rest, which looks up bots outside our server. We refresh these in small batches, so a bot can go a while between refreshes when the list is busy.
 4. A stats post with a server count in the last 24 hours, which counts as online.
@@ -54,7 +54,7 @@ We show this instead of 0% because we can't always tell a bot that's down from o
 
 ### Keeping it accurate
 
-Post stats regularly and include a `status`. It's the most reliable source, and it stops your uptime depending on anything outside your control. See [Posting Stats](/kb/developers/posting-stats).
+Post stats regularly and include a `status`. It's the most reliable source, and it stops your uptime depending on anything outside your control. See [Posting Stats](https://docs.omniplex.gg/docs/developer/bot-stats).
 
 ### Why the numbers changed
 

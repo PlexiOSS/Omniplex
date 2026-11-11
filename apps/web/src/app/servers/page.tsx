@@ -62,7 +62,7 @@ export default async function ServersPage({ searchParams }: Props) {
     <Container className="py-10">
       <PageHeader
         icon={Server}
-        title="All Servers"
+        title="Discord Server List"
         description={
           <>
             Browse Discord servers listed on Omniplex.{" "}

@@ -21,6 +21,8 @@ interface Props {
   searchParams: Promise<{ tag?: string }>;
 }
 
+const TOP_TAGS = 6;
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -65,21 +67,34 @@ export default async function BlogPage({ searchParams }: Props) {
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
-  const tags = [...new Set(allPosts.flatMap((p) => p.tags))].sort((a, b) =>
-    a.localeCompare(b),
-  );
-  const activeTag =
-    tag && tags.some((t) => t.toLowerCase() === tag.toLowerCase()) ? tag : null;
-  const posts = activeTag
-    ? allPosts.filter((p) =>
-        p.tags.some((t) => t.toLowerCase() === activeTag.toLowerCase()),
-      )
+  const tagCounts = new Map<string, { label: string; count: number }>();
+  for (const post of allPosts) {
+    for (const t of new Set(post.tags.map((x) => x.trim()).filter(Boolean))) {
+      const key = t.toLowerCase();
+      const entry = tagCounts.get(key);
+      if (entry) entry.count += 1;
+      else tagCounts.set(key, { label: t, count: 1 });
+    }
+  }
+  const tags = [...tagCounts.entries()]
+    .map(([key, v]) => ({ key, ...v }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  const activeTag = tag ? (tagCounts.get(tag.toLowerCase()) ?? null) : null;
+  const activeKey = activeTag ? tag?.toLowerCase() : null;
+  const topTags = tags.slice(0, TOP_TAGS);
+  if (activeKey && !topTags.some((t) => t.key === activeKey)) {
+    const current = tags.find((t) => t.key === activeKey);
+    if (current) topTags.push(current);
+  }
+  const moreTags = tags.filter((t) => !topTags.includes(t));
+  const posts = activeKey
+    ? allPosts.filter((p) => p.tags.some((t) => t.toLowerCase() === activeKey))
     : allPosts;
   const [featured, ...rest] = posts;
 
   const chip = (active: boolean) =>
     [
-      "inline-flex h-8 items-center rounded-lg border px-3 text-sm font-medium transition-colors",
+      "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 text-sm font-medium transition-colors",
       active
         ? "border-accent/40 bg-accent/10 text-accent"
         : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-50",
@@ -95,20 +110,54 @@ export default async function BlogPage({ searchParams }: Props) {
       />
 
       {tags.length > 1 && (
-        <div className="mx-auto mb-8 flex max-w-4xl flex-wrap justify-center gap-2">
-          <Link href="/blog" className={chip(!activeTag)}>
-            All posts
-          </Link>
-          {tags.map((t) => (
+        <nav aria-label="Blog topics" className="mx-auto mb-8 max-w-4xl">
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
             <Link
-              key={t}
-              href={`/blog?tag=${encodeURIComponent(t)}`}
-              className={chip(activeTag?.toLowerCase() === t.toLowerCase())}
+              href="/blog"
+              className={chip(!activeKey)}
+              aria-current={!activeKey ? "page" : undefined}
             >
-              {t}
+              All posts
             </Link>
-          ))}
-        </div>
+            {topTags.map((t) => (
+              <Link
+                key={t.key}
+                href={`/blog?tag=${encodeURIComponent(t.key)}`}
+                className={chip(activeKey === t.key)}
+                aria-current={activeKey === t.key ? "page" : undefined}
+              >
+                {t.label}
+                <span className="text-xs tabular-nums opacity-60">
+                  {t.count}
+                </span>
+              </Link>
+            ))}
+          </div>
+          {moreTags.length > 0 && (
+            <details className="group mt-3 text-center">
+              <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-sm font-medium text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 [&::-webkit-details-marker]:hidden">
+                <span className="group-open:hidden">
+                  More topics ({moreTags.length})
+                </span>
+                <span className="hidden group-open:inline">Fewer topics</span>
+              </summary>
+              <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2 rounded-2xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+                {moreTags.map((t) => (
+                  <Link
+                    key={t.key}
+                    href={`/blog?tag=${encodeURIComponent(t.key)}`}
+                    className="text-zinc-600 hover:text-accent dark:text-zinc-300"
+                  >
+                    {t.label}
+                    <span className="ml-1 text-xs tabular-nums text-zinc-400">
+                      {t.count}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </details>
+          )}
+        </nav>
       )}
 
       {!featured ? (

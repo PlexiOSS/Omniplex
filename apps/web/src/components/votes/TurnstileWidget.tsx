@@ -1,6 +1,7 @@
 "use client";
 
 import { TURNSTILE_SITE_KEY } from "@omniplex/core/api/config";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 
@@ -14,7 +15,10 @@ interface TurnstileRenderOptions {
   action: string;
   theme: "light" | "dark";
   size: "flexible";
+  appearance: "interaction-only";
   "refresh-expired": "auto";
+  "before-interactive-callback": () => void;
+  "after-interactive-callback": () => void;
   callback: (token: string) => void;
   "expired-callback": () => void;
   "error-callback": () => void;
@@ -59,6 +63,9 @@ export function TurnstileWidget({ action, onToken }: TurnstileWidgetProps) {
   const onTokenRef = useRef(onToken);
   const { resolvedTheme } = useTheme();
   const [failed, setFailed] = useState(!TURNSTILE_SITE_KEY);
+  const [status, setStatus] = useState<"checking" | "interactive" | "verified">(
+    "checking",
+  );
 
   useEffect(() => {
     onTokenRef.current = onToken;
@@ -69,6 +76,7 @@ export function TurnstileWidget({ action, onToken }: TurnstileWidgetProps) {
     let widgetId: string | undefined;
     let cancelled = false;
     setFailed(false);
+    setStatus("checking");
 
     loadTurnstile()
       .then(() => {
@@ -78,10 +86,22 @@ export function TurnstileWidget({ action, onToken }: TurnstileWidgetProps) {
           action,
           theme: resolvedTheme === "dark" ? "dark" : "light",
           size: "flexible",
+          appearance: "interaction-only",
           "refresh-expired": "auto",
-          callback: (token) => onTokenRef.current(token),
-          "expired-callback": () => onTokenRef.current(null),
-          "error-callback": () => onTokenRef.current(null),
+          "before-interactive-callback": () => setStatus("interactive"),
+          "after-interactive-callback": () => setStatus("checking"),
+          callback: (token) => {
+            setStatus("verified");
+            onTokenRef.current(token);
+          },
+          "expired-callback": () => {
+            setStatus("checking");
+            onTokenRef.current(null);
+          },
+          "error-callback": () => {
+            setStatus("checking");
+            onTokenRef.current(null);
+          },
         });
       })
       .catch(() => {
@@ -104,5 +124,30 @@ export function TurnstileWidget({ action, onToken }: TurnstileWidgetProps) {
     );
   }
 
-  return <div ref={ref} className="min-h-[65px] w-full" />;
+  return (
+    <div className="w-full">
+      <div
+        ref={ref}
+        className={status === "interactive" ? "min-h-[65px] w-full" : "w-full"}
+      />
+      {status !== "interactive" && (
+        <p
+          aria-live="polite"
+          className="flex items-center justify-center gap-1.5 py-1 text-xs text-zinc-500 dark:text-zinc-400"
+        >
+          {status === "verified" ? (
+            <>
+              <ShieldCheck size={13} className="text-emerald-500" />
+              Verified, you can vote
+            </>
+          ) : (
+            <>
+              <Loader2 size={13} className="animate-spin" />
+              Checking you&apos;re human…
+            </>
+          )}
+        </p>
+      )}
+    </div>
+  );
 }

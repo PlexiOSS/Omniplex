@@ -54,6 +54,26 @@ const nextConfig: NextConfig = {
         destination: "/kb",
         permanent: true,
       },
+      {
+        source: "/kb/developers/api-tokens",
+        destination: "https://docs.omniplex.gg/docs/developer/authentication",
+        permanent: true,
+      },
+      {
+        source: "/kb/developers/posting-stats",
+        destination: "https://docs.omniplex.gg/docs/developer/bot-stats",
+        permanent: true,
+      },
+      {
+        source: "/kb/developers/sdks",
+        destination: "https://docs.omniplex.gg/docs/sdks",
+        permanent: true,
+      },
+      {
+        source: "/kb/developers/vote-webhooks",
+        destination: "https://docs.omniplex.gg/docs/developer/webhooks",
+        permanent: true,
+      },
       { source: "/premium", destination: "/shop/premium", permanent: true },
       {
         source: "/help/:category/:slug",

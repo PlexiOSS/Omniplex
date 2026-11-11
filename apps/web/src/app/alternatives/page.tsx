@@ -76,13 +76,13 @@ const STEPS = [
   {
     title: "Point your vote webhook at Omniplex",
     body: "Add a webhook in your dashboard and verify the HMAC signature. Each vote event carries the voter, the new count and whether it was an automatic vote.",
-    href: "/kb/developers/vote-webhooks",
+    href: "https://docs.omniplex.gg/docs/developer/webhooks",
     link: "Vote webhooks",
   },
   {
     title: "Post your stats",
     body: "Send server and shard counts with your API token so your page shows live numbers and your bot shows as online.",
-    href: "/kb/developers/posting-stats",
+    href: "https://docs.omniplex.gg/docs/developer/bot-stats",
     link: "Posting stats",
   },
   {

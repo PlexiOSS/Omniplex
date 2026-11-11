@@ -3,14 +3,7 @@
 import { ArrowRight, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-
-interface SearchableArticle {
-  slug: string;
-  category: string;
-  categoryTitle: string;
-  title: string;
-  description: string;
-}
+import { type SearchableArticle, searchArticles } from "@/lib/kb/search";
 
 interface KbSearchProps {
   articles: SearchableArticle[];
@@ -20,13 +13,7 @@ export function KbSearch({ articles }: KbSearchProps) {
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return articles.filter(
-      (a) =>
-        a.title.toLowerCase().includes(q) ||
-        a.description.toLowerCase().includes(q),
-    );
+    return searchArticles(articles, query);
   }, [articles, query]);
 
   return (

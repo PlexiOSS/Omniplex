@@ -25,7 +25,7 @@ Bots, servers, packs, and teams all support both upvotes and downvotes. A downvo
 
 ## The monthly reset
 
-Vote counts reset once a month, so every listing starts the month on an even footing and rankings reflect who's being voted for now rather than years ago. After a reset:
+Vote counts reset at the start of every month (00:00 UTC on the 1st), so every listing starts the month on an even footing and rankings reflect who's being voted for now rather than years ago. After a reset:
 
 - A listing's displayed vote count starts again from 0.
 - Your own vote history and the all-time voter leaderboard are kept.

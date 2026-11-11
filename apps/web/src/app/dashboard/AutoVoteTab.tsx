@@ -327,6 +327,58 @@ export function AutoVoteTab({
         />
       )}
 
+      {((status.votes_7d ?? 0) > 0 || status.subscribed) && (
+        <SettingsCard
+          title="Activity"
+          description="Votes Auto-vote has cast for you."
+        >
+          <div className="grid grid-cols-2 gap-3">
+            {(
+              [
+                ["Last 24 hours", status.votes_24h ?? 0],
+                ["Last 7 days", status.votes_7d ?? 0],
+              ] as const
+            ).map(([label, count]) => (
+              <div
+                key={label}
+                className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+              >
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {label}
+                </p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-950 dark:text-zinc-50">
+                  {count}
+                  <span className="ml-1 text-sm font-normal text-zinc-500 dark:text-zinc-400">
+                    {count === 1 ? "vote" : "votes"}
+                  </span>
+                </p>
+              </div>
+            ))}
+          </div>
+          {status.targets.some((s) => (s.votes_7d ?? 0) > 0) && (
+            <ul className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+              {status.targets
+                .filter((s) => (s.votes_7d ?? 0) > 0)
+                .sort((a, b) => (b.votes_7d ?? 0) - (a.votes_7d ?? 0))
+                .map((s) => (
+                  <li
+                    key={`${s.target_type}-${s.target_id}`}
+                    className="flex items-center gap-3 px-4 py-2.5"
+                  >
+                    <Avatar src={s.avatar} alt={s.name} size={28} />
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                      {s.name}
+                    </span>
+                    <span className="shrink-0 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
+                      {s.votes_24h ?? 0} today · {s.votes_7d ?? 0} this week
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </SettingsCard>
+      )}
+
       <SettingsCard
         title="Listings"
         description={`Up to ${status.max_targets}. Schedules use your timezone (${timezone}).${status.subscribed ? "" : " You can set these up before subscribing."}`}
@@ -599,7 +651,7 @@ export function AutoVoteTab({
 
       <SettingsCard
         title="Notifications"
-        description="How you hear about the votes Auto-vote casts for you. Skipped votes always get a notification."
+        description="How you hear about the votes Auto-vote casts for you. Activity above always shows them, and skipped votes always get a notification."
       >
         <div className="grid gap-2 sm:grid-cols-3">
           {(
