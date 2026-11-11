@@ -9,6 +9,7 @@ import { StatusCard } from "@/components/ui/StatusCard";
 import { useMyApplications } from "@/hooks/useApplications";
 import { useAuth } from "@/hooks/useAuth";
 import { useOAuthMeta } from "@/hooks/useOAuthMeta";
+import { discordLoginUrl } from "@/lib/loginState";
 
 /** Matches the key /auth/sauron reads to decide which scope to request. */
 const SCOPE_STORAGE_KEY = "auth_scope";
@@ -32,10 +33,7 @@ export default function BannedPage() {
   function signInToAppeal() {
     if (!oauthMeta) return;
     localStorage.setItem(SCOPE_STORAGE_KEY, "ban_exempt");
-    window.location.href = oauthMeta.url.replace(
-      "%REDIRECT_URL%",
-      window.location.origin,
-    );
+    window.location.href = discordLoginUrl(oauthMeta.url);
   }
 
   return (
