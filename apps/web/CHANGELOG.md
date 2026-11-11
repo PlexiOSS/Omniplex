@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.19.1] - 2026-11-11
+
+### Security
+
+- Discord sign-in now uses an OAuth `state` check. Before, anyone could
+  send a link with their own sign-in code and sign the person who opened
+  it into the sender's account, so anything they did next, like opening a
+  ticket, went to the sender's account. Sign-ins that didn't start in the
+  same browser are now stopped with a message asking you to sign in again.
+
 ## [1.19.0] - 2026-11-11
 
 ### Added

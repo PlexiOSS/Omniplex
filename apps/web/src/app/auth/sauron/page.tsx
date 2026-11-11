@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useOAuthMeta } from "@/hooks/useOAuthMeta";
+import { consumeLoginState, discordLoginUrl } from "@/lib/loginState";
 import { AuthShell } from "../AuthShell";
 
 /** Persisted across the Discord redirect round trip so the callback knows
@@ -23,6 +24,7 @@ function SauronInner() {
   const called = useRef(false);
 
   const code = searchParams.get("code");
+  const state = searchParams.get("state");
   const discordError = searchParams.get("error");
   const discordErrorDescription = searchParams.get("error_description");
 
@@ -45,6 +47,13 @@ function SauronInner() {
     // Prevent duplicate calls
     if (called.current) return;
     called.current = true;
+
+    if (!consumeLoginState(state)) {
+      setError(
+        "This sign-in didn't start on this browser, so we stopped it to keep your account safe. Please sign in again.",
+      );
+      return;
+    }
 
     const redirectUri = `${window.location.origin}/auth/sauron`;
     const scope =
@@ -89,15 +98,20 @@ function SauronInner() {
           setError("Sign in failed. Please try again.");
         }
       });
-  }, [code, discordError, discordErrorDescription, oauthMeta, login, router]);
+  }, [
+    code,
+    state,
+    discordError,
+    discordErrorDescription,
+    oauthMeta,
+    login,
+    router,
+  ]);
 
   function retryBanExempt() {
     if (!oauthMeta) return;
     localStorage.setItem(SCOPE_STORAGE_KEY, "ban_exempt");
-    window.location.href = oauthMeta.url.replace(
-      "%REDIRECT_URL%",
-      window.location.origin,
-    );
+    window.location.href = discordLoginUrl(oauthMeta.url);
   }
 
   if (error) {
