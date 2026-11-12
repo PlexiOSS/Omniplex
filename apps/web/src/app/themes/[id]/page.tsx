@@ -98,7 +98,7 @@ export default async function ThemePage({ params }: Props) {
         <div className="min-w-0 space-y-6">
           <section className={card}>
             <h2 className={cardTitle}>Preview</h2>
-            <div className="flex justify-center rounded-xl bg-zinc-50 bg-[radial-gradient(var(--color-zinc-200)_1px,transparent_1px)] [background-size:16px_16px] p-6 sm:p-10 dark:bg-zinc-950 dark:bg-[radial-gradient(var(--color-zinc-800)_1px,transparent_1px)]">
+            <div className="flex justify-center rounded-xl bg-zinc-50 bg-[radial-gradient(var(--color-zinc-200)_1px,transparent_1px)] bg-size-[16px_16px] p-6 sm:p-10 dark:bg-zinc-950 dark:bg-[radial-gradient(var(--color-zinc-800)_1px,transparent_1px)]">
               <div className="w-full max-w-sm">
                 <ThemePreviewCard
                   themeName={theme.name}
