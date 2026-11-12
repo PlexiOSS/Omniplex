@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { assets, auth, teams } from "@omniplex/core/api";
+import { assets, auth, serverTemplates, teams } from "@omniplex/core/api";
 import { ApiError, client } from "@omniplex/core/api/client";
 import { BASE_URL } from "@omniplex/core/api/config";
 import type {
@@ -45,7 +45,8 @@ type Kind =
   | "server-background"
   | "pack-emoji"
   | "pack-sticker"
-  | "pack-sound";
+  | "pack-sound"
+  | "template-icon";
 
 function isPackAssetKind(
   kind: Kind,
@@ -58,10 +59,11 @@ function isPackAssetKind(
 interface KindConfig {
   key: (targetId: string, assetId?: string) => string;
   perm: string;
-  popplioTargetType: "team" | "bot" | "server" | "pack";
+  popplioTargetType: "team" | "bot" | "server" | "pack" | "template";
   maxBytes?: number;
   versioned?: { target: VersionedAssetTarget; kind: VersionedAssetKind };
   background?: boolean;
+  templateIcon?: boolean;
 }
 
 const EMOJI_MAX_BYTES = 256 * 1024;
@@ -100,6 +102,12 @@ async function stagingProblem(
 }
 
 const KIND_CONFIG: Record<Kind, KindConfig> = {
+  "template-icon": {
+    key: (id) => `icons/templates/${id}`,
+    perm: "",
+    popplioTargetType: "template",
+    templateIcon: true,
+  },
   "bot-background": {
     key: (id) => `backgrounds/bots/${id}`,
     perm: "edit_bots",
@@ -232,6 +240,60 @@ async function storeBackground(
           err instanceof ApiError
             ? err.message
             : "Couldn't submit the background for review.",
+      },
+      { status: 400 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, version });
+}
+
+async function storeTemplateIcon(
+  buffer: Buffer,
+  templateId: string,
+  userId: string,
+  token: string,
+) {
+  let image: Buffer;
+  try {
+    image = await sharp(buffer, {
+      limitInputPixels: 40_000_000,
+      failOn: "error",
+      animated: false,
+    })
+      .rotate()
+      .resize({ width: 256, height: 256, fit: "cover" })
+      .webp({ quality: 85 })
+      .toBuffer();
+  } catch {
+    return NextResponse.json(
+      { error: "That file couldn't be read as an image." },
+      { status: 400 },
+    );
+  }
+
+  const version = createHash("sha256").update(image).digest("hex").slice(0, 16);
+  const wrote = await putObject(
+    `icons/templates/${templateId}/${version}.webp`,
+    image,
+    "image/webp",
+    { [ASSET_VERSION_METADATA_KEY]: version },
+  );
+
+  if (!wrote) {
+    return NextResponse.json(
+      { error: "Failed to store the uploaded file. Please try again." },
+      { status: 502 },
+    );
+  }
+
+  try {
+    await serverTemplates.setIcon(userId, templateId, version, token);
+  } catch (err) {
+    return NextResponse.json(
+      {
+        error:
+          err instanceof ApiError ? err.message : "Couldn't save the icon.",
       },
       { status: 400 },
     );
@@ -392,9 +454,26 @@ export async function POST(req: Request) {
       );
     }
     packIsNew = !existingPack;
+  } else if (config.templateIcon) {
+    const template = await serverTemplates
+      .getTemplate(targetId)
+      .catch(() => null);
+    if (!template || template.owner.id !== userId) {
+      return NextResponse.json(
+        { error: "You don't have permission to do this." },
+        { status: 403 },
+      );
+    }
   } else {
     const entityPerms = await teams
-      .getEntityPerms(userId, config.popplioTargetType, targetId)
+      .getEntityPerms(
+        userId,
+        config.popplioTargetType as Exclude<
+          KindConfig["popplioTargetType"],
+          "template"
+        >,
+        targetId,
+      )
       .catch(() => ({ perms: [] }));
     if (!hasPermString(entityPerms.perms, config.perm)) {
       return NextResponse.json(
@@ -411,6 +490,9 @@ export async function POST(req: Request) {
       { error: "The file's contents don't match its type." },
       { status: 400 },
     );
+  }
+  if (config.templateIcon) {
+    return storeTemplateIcon(buffer, targetId, userId, userToken);
   }
   if (config.background) {
     return storeBackground(

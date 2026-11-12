@@ -840,6 +840,7 @@ export interface Report {
   target_id: string;
   target_name: string;
   target_url: string;
+  target_avatar: string;
   reporter_id: string;
   reason: ReportReason;
   description: string;
@@ -850,8 +851,14 @@ export interface Report {
   resolved_at: string | null;
 }
 
+export interface ReportPage {
+  reports: Report[];
+  total: number;
+  per_page: number;
+}
+
 export type ReportAction =
-  | { List: { status: ReportStatus | null } }
+  | { List: { status: ReportStatus | null; page?: number } }
   | { Resolve: { id: string; note: string } }
   | { Dismiss: { id: string; note: string } };
 

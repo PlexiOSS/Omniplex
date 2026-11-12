@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-11
+
+### Added
+
+- `ServerTemplate` has `icon_version`, `channel_count`, `role_count`,
+  `source_updated_at`, `out_of_date`, `unavailable` and `synced_at`.
+- `ApiSession.current`: true for the session making the request.
+- `PageGradient` accepts `custom:#rrggbb:#rrggbb` for custom gradients.
+
 ## [0.6.0] - 2026-11-11
 
 ### Added

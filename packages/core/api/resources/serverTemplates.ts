@@ -45,6 +45,30 @@ export const serverTemplatesResource = {
       token,
     }),
 
+  /** Refreshes the template from Discord. A 409 means it no longer exists there. */
+  sync: (userId: string, id: string, token: string) =>
+    client.post<void>(
+      `/users/${userId}/server-templates/${id}/sync`,
+      {},
+      {
+        token,
+      },
+    ),
+
+  /** Points the template at an icon already uploaded through /api/uploads,
+   * or removes it with null. */
+  setIcon: (
+    userId: string,
+    id: string,
+    version: string | null,
+    token: string,
+  ) =>
+    client.put<void>(
+      `/users/${userId}/server-templates/${id}/icon`,
+      { version },
+      { token },
+    ),
+
   getReaction: (userId: string, id: string) =>
     client.get<TemplateReactionSummary>(
       `/users/${userId}/server-templates/${id}/reaction`,

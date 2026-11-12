@@ -155,8 +155,7 @@ function DashboardPageInner() {
 
   const { me, loading: meLoading, mutate } = useMe(session);
   const { apps: myApplications } = useMyApplications(session);
-  const { templates: myTemplates, mutate: mutateTemplates } =
-    useMyTemplates(session);
+  const { templates: myTemplates } = useMyTemplates(session);
   const { themes: myThemes, mutate: mutateThemes } = useMyThemes(session);
 
   if (authLoading || meLoading || !session) {
@@ -318,14 +317,7 @@ function DashboardPageInner() {
               mutate={mutate}
             />
           )}
-          {tab === "templates" && (
-            <TemplatesTab
-              templates={myTemplates}
-              userId={session.user_id}
-              token={session.token}
-              mutate={mutateTemplates}
-            />
-          )}
+          {tab === "templates" && <TemplatesTab templates={myTemplates} />}
           {tab === "themes" && (
             <ThemesTab
               themes={myThemes}

@@ -33,8 +33,8 @@ import type {
   PromoCodeAction,
   PromoCodeCreate,
   PromoCodeRedemption,
-  Report,
   ReportAction,
+  ReportPage,
   ReportStatus,
   RPCLogEntry,
   RPCMethod,
@@ -1177,11 +1177,12 @@ export const arcadia = {
     list: async (
       loginToken: string,
       status: ReportStatus | null,
-    ): Promise<Report[]> => {
+      page = 1,
+    ): Promise<ReportPage> => {
       const res = await postQuery({
         UpdateReports: {
           login_token: loginToken,
-          action: { List: { status } } satisfies ReportAction,
+          action: { List: { status, page } } satisfies ReportAction,
         },
       });
       return (await assertOk(res)).json();

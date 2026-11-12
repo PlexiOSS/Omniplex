@@ -12,6 +12,7 @@ const REVALIDATE = "public, no-cache";
 const MISSING = "public, max-age=60";
 
 const IMMUTABLE_PREFIXES = [
+  "icons/templates/",
   "emojis/packs/",
   "stickers/packs/",
   "sounds/packs/",

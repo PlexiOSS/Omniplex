@@ -7,6 +7,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.20.0] - 2026-11-11
+
+### Added
+
+- Template owners have a settings page at `/dashboard/templates/{id}`, in
+  the same layout as bot and server settings, replacing the edit pop-up:
+  - **Details** for the description, tags and NSFW setting.
+  - **Icon** to upload, replace or remove a custom icon, cropped to a
+    square.
+  - **Sync** to refresh the template from Discord, with when it was last
+    checked and last changed, and a warning when the server has unsynced
+    changes or the template was deleted on Discord.
+  - **Danger zone** to delete it, by typing its name.
+- A knowledge base article on server templates: using one, sharing your
+  own, keeping it in sync, icons, and editing or deleting it.
+- A Custom gradient in Page style: pick two colours and the page uses a
+  gradient in the same style as the presets.
+
+### Changed
+
+- The Auto-vote article has a Fair use section explaining the 3 accounts
+  per card limit and that staff check for unusual automatic voting.
+- Server templates match the rest of the site:
+  - Cards link to the template's page and show its icon, uses, channels
+    and roles, like pack cards. The owner's delete button moved to the
+    dashboard.
+  - A template's page has a header card with its icon, tags that filter
+    the templates list, channels shown in a Discord-style list and roles
+    in their own card, and a sticky sidebar with Use template, likes, a
+    Stats card and who submitted it. Owners get a Manage button.
+  - Templates deleted on Discord say so and can't be used. They're hidden
+    from the list and not indexed by search engines.
+  - The templates list has pages instead of only showing the first page,
+    shows how many templates there are, and has a proper empty state.
+  - The Templates tab in the dashboard shows each template's icon, uses
+    and sync problems, with View and Manage buttons.
+  - The Like button no longer competes with Use template for attention.
+- After submitting a template, you land on its page.
+- The dashboard's "Refresh" button for your Discord profile now sends your
+  session, since Popplio's `DELETE /platform/user/{id}` requires it.
+- The Sessions page shows each signed-in device with a phone or computer
+  icon and a readable name ("Safari on iOS"), marks the one you're using
+  as "This device" and lists it first, shows when each signed in and how
+  long until it expires, and has a "Sign out other devices" button. Old
+  device names are tidied up too. A token limited to owner now says
+  "Full access".
+- Pack cards in the dashboard have View and Edit, with Vote credits and
+  Delete pack in a "More actions" menu instead of four buttons squeezed
+  into the footer. Deleting asks for confirmation in a dialog, and the
+  cards show the pack type and previews of emojis, stickers and sounds.
+- Theme pages use the same layout as templates and profiles: a header
+  card with the theme's own gradient, the profile preview and the steps
+  to use it in their own cards, a sidebar with the colours to copy
+  (Primary and Accent, as Discord calls them), details and who made it,
+  and more themes from the same person.
+- The account menu shows your display name and username, links to your
+  dashboard, profile, notifications, Auto-vote and settings, and groups
+  support tickets and applications under Help. Shop is no longer in it,
+  since it's in the main navigation.
+- The Profile tab in the dashboard is split into cards for your bio,
+  pinned listing, links, voting and Discord profile, instead of one long
+  form. The pinned listing is picked from cards with each listing's
+  avatar instead of a plain dropdown, the bio shows a character count, and
+  a save bar appears at the bottom when you have unsaved changes, with a
+  Discard button. The preview looks like your real profile: your Discord
+  banner, your bio rendered as Markdown, your pinned listing and link
+  icons.
+- Page style shows the preview full width with the controls in two
+  columns underneath, instead of a short preview beside a long column of
+  controls.
+- Card theme moved from Details to Appearance on bot and server settings,
+  next to the banner. It has preset colours alongside the colour picker, a
+  small preview, and saves on its own. Listings without the Card Theme get
+  a link to it in the shop.
+
+### Fixed
+
+- After uploading a new banner or team avatar, the preview now shows it
+  straight away. If the old image had failed to load (for example, there
+  was no banner yet), the preview stayed blank until you refreshed.
+
 ### Security
 
 - Uploading pack files before the pack exists is now bounded. A pack URL
@@ -17,17 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `src` matches the avatar Popplio currently has for that bot, server or
   user. Before, anyone could switch it to an older avatar of the same
   account or to Discord's default one. It also only accepts Discord IDs.
-
-### Fixed
-
-- After uploading a new banner or team avatar, the preview now shows it
-  straight away. If the old image had failed to load (for example, there
-  was no banner yet), the preview stayed blank until you refreshed.
-
-### Changed
-
-- The dashboard's "Refresh" button for your Discord profile now sends your
-  session, since Popplio's `DELETE /platform/user/{id}` requires it.
 
 ## [1.19.1] - 2026-11-11
 

@@ -34,7 +34,8 @@ export const KB_CATEGORIES: KbCategoryMeta[] = [
   {
     slug: "servers",
     title: "Servers",
-    description: "Rules and resources for Discord servers listed on Omniplex.",
+    description:
+      "Rules and resources for Discord servers listed on Omniplex, and sharing server templates.",
     order: 3,
   },
   {

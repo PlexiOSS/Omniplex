@@ -4,7 +4,7 @@ import { formatRelativeTime } from "@omniplex/core/utils/format";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Badge } from "@omniplex/ui/Badge";
 import { Button } from "@omniplex/ui/Button";
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useAdmin } from "@/app/AdminContext";
@@ -57,9 +57,10 @@ function ActivityLog() {
   });
   const [draft, setDraft] = useState(filters);
   const [events, setEvents] = useState<AuditEvent[] | null>(null);
-  const [next, setNext] = useState<string | null>(null);
+  const [cursors, setCursors] = useState<(string | null)[]>([null]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [hasOlder, setHasOlder] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
 
   const fetchPage = useCallback(
@@ -74,41 +75,53 @@ function ActivityLog() {
     [loginToken, filters],
   );
 
-  const load = useCallback(() => {
+  const [pagedFetch, setPagedFetch] = useState(() => fetchPage);
+  if (pagedFetch !== fetchPage) {
+    setPagedFetch(() => fetchPage);
+    setCursors([null]);
+    setPageIndex(0);
+  }
+
+  const cursor = cursors[pageIndex] ?? null;
+
+  const [attempt, setAttempt] = useState(0);
+  const load = useCallback(() => setAttempt((n) => n + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void attempt;
     setError(null);
     setEvents(null);
-    fetchPage(null)
+    fetchPage(cursor)
       .then((page) => {
+        if (cancelled) return;
         setEvents(page.events);
-        setNext(page.next_before);
+        setHasOlder(!!page.next_before);
+        if (page.next_before) {
+          const older = page.next_before;
+          setCursors((prev) =>
+            prev.length > pageIndex + 1
+              ? prev
+              : [...prev.slice(0, pageIndex + 1), older],
+          );
+        }
       })
-      .catch((err) =>
+      .catch((err) => {
+        if (cancelled) return;
         setError(
           err instanceof ArcadiaError
             ? err.message
             : "Failed to load the activity log.",
-        ),
-      );
-  }, [fetchPage]);
+        );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchPage, cursor, pageIndex, attempt]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  function loadMore() {
-    if (!next) return;
-    setLoadingMore(true);
-    fetchPage(next)
-      .then((page) => {
-        setEvents((prev) => [...(prev ?? []), ...page.events]);
-        setNext(page.next_before);
-      })
-      .catch((err) =>
-        setError(
-          err instanceof ArcadiaError ? err.message : "Failed to load more.",
-        ),
-      )
-      .finally(() => setLoadingMore(false));
+  function goTo(index: number) {
+    setPageIndex(index);
+    window.scrollTo({ top: 0 });
   }
 
   if (!hasPerm("view_audit_logs")) {
@@ -334,15 +347,28 @@ function ActivityLog() {
         </div>
       )}
 
-      {next && events && (
-        <div className="mt-6 flex justify-center">
+      {events && (pageIndex > 0 || hasOlder) && (
+        <div className="mt-6 flex items-center justify-center gap-3">
           <Button
             variant="secondary"
             size="sm"
-            loading={loadingMore}
-            onClick={loadMore}
+            disabled={pageIndex === 0}
+            onClick={() => goTo(pageIndex - 1)}
           >
-            Load older
+            <ChevronLeft size={14} />
+            Newer
+          </Button>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+            Page {pageIndex + 1}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!hasOlder}
+            onClick={() => goTo(pageIndex + 1)}
+          >
+            Older
+            <ChevronRight size={14} />
           </Button>
         </div>
       )}

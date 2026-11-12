@@ -30,7 +30,7 @@ export const REASON_LABELS: Record<Report["reason"], string> = {
   other: "Other",
 };
 
-const TARGET_TYPE_MAP: Record<string, TargetType> = {
+export const TARGET_TYPE_MAP: Record<string, TargetType> = {
   bot: "Bot",
   server: "Server",
   pack: "Pack",
@@ -38,7 +38,7 @@ const TARGET_TYPE_MAP: Record<string, TargetType> = {
   user: "User",
 };
 
-const TARGET_ICONS: Record<TargetType, typeof Bot> = {
+export const TARGET_ICONS: Record<TargetType, typeof Bot> = {
   Bot: Bot,
   Server: ServerIcon,
   Pack: Package,
@@ -57,7 +57,7 @@ function useUser(loginToken: string, id: string | null) {
   const [user, setUser] = useState<PlatformUser | null>(null);
   useEffect(() => {
     setUser(null);
-    if (!id) return;
+    if (!id || isSystemReporter(id)) return;
     let cancelled = false;
     arcadia
       .getUser(loginToken, id)
@@ -72,7 +72,51 @@ function useUser(loginToken: string, id: string | null) {
   return user;
 }
 
+const STATUS_BADGE: Record<
+  Report["status"],
+  { label: string; className: string }
+> = {
+  open: {
+    label: "Open",
+    className: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  },
+  under_review: {
+    label: "Under review",
+    className: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+  },
+  resolved: {
+    label: "Resolved",
+    className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  },
+  dismissed: {
+    label: "Dismissed",
+    className: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400",
+  },
+};
+
+const SYSTEM_REPORTERS: Record<string, string> = {
+  "system:moderation": "Automatic content check",
+  "system:autovote": "Automatic Auto-vote check",
+};
+
+export function isSystemReporter(id: string) {
+  return id.startsWith("system:");
+}
+
 function Person({ user, id }: { user: PlatformUser | null; id: string }) {
+  if (isSystemReporter(id)) {
+    return (
+      <span className="inline-flex min-w-0 items-center gap-2">
+        <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+          <Bot size={12} />
+        </span>
+        <span className="truncate text-zinc-950 dark:text-zinc-50">
+          {SYSTEM_REPORTERS[id] ?? "Automatic check"}
+        </span>
+      </span>
+    );
+  }
+
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
       <Avatar src={user?.avatar ?? ""} alt={user?.username ?? id} size={22} />
@@ -161,9 +205,17 @@ export function ReportDetail({
   return (
     <article className="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/60">
       <header className="flex flex-col gap-4 border-b border-zinc-100 p-5 sm:flex-row sm:items-start sm:p-6 dark:border-zinc-800/80">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-          <TargetIcon size={20} />
-        </div>
+        {report.target_avatar ? (
+          <Avatar
+            src={report.target_avatar}
+            alt={report.target_name}
+            size={48}
+          />
+        ) : (
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+            <TargetIcon size={20} />
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="truncate text-lg font-semibold text-zinc-950 dark:text-zinc-50">
@@ -171,6 +223,11 @@ export function ReportDetail({
             </h2>
             <span className="rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-300">
               {REASON_LABELS[report.reason]}
+            </span>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[report.status].className}`}
+            >
+              {STATUS_BADGE[report.status].label}
             </span>
           </div>
           <p className="mt-0.5 font-mono text-xs text-zinc-500 dark:text-zinc-400">
@@ -210,7 +267,9 @@ export function ReportDetail({
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-            What they said
+            {isSystemReporter(report.reporter_id)
+              ? "What the check found"
+              : "What they said"}
           </p>
           <p className="mt-1.5 whitespace-pre-wrap wrap-anywhere text-[15px] leading-relaxed text-zinc-700 dark:text-zinc-300">
             {report.description || (

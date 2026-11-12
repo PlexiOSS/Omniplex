@@ -17,4 +17,8 @@ export const pageStylesResource = {
 
   update: (target: Target, id: string, body: PageStyleUpdate, token: string) =>
     client.patch<void>(`/${target}s/${id}/page-style`, body, { token }),
+
+  /** Needs the Card Theme from the shop. An empty colour resets it. */
+  setCardColor: (target: Target, id: string, color: string, token: string) =>
+    client.put<void>(`/${target}s/${id}/card-color`, { color }, { token }),
 };
