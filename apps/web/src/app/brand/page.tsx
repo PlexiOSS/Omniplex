@@ -3,6 +3,12 @@ import { OmniplexLogo } from "@omniplex/ui/OmniplexLogo";
 import { Check, Palette, X } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  BOT_NAMES,
+  BotAvatar,
+  BotBanner,
+  type BotKind,
+} from "@/components/brand/BotAvatar";
 import { BrandAsset } from "@/components/brand/BrandAsset";
 import { OmiAvatar } from "@/components/brand/OmiAvatar";
 import { OmiBanner } from "@/components/brand/OmiBanner";
@@ -55,6 +61,16 @@ const DONTS = [
   "Redraw Omi, change Omi's colours or put words in Omi's mouth.",
   "Use the logo or Omi in a way that suggests we endorse you.",
   "Use Omi for anything adult, hateful or misleading.",
+  "Make Omi the face of another bot, including your own.",
+];
+
+const BOTS: { kind: BotKind; lines: string[]; tagline: string }[] = [
+  {
+    kind: "servers",
+    lines: ["Omniplex", "Servers"],
+    tagline: "List your server on Omniplex",
+  },
+  { kind: "staff", lines: ["Arcadia"], tagline: "The Omniplex staff bot" },
 ];
 
 const section = "scroll-mt-24";
@@ -130,6 +146,42 @@ export default function BrandPage() {
             >
               <OmiBanner className="h-full w-full" />
             </BrandAsset>
+          </div>
+        </section>
+
+        <section id="bots" className={section}>
+          <h2 className={sectionTitle}>Our other bots</h2>
+          <p className={sectionLead}>
+            Omi is only ever Omi. Omniplex Servers and Arcadia wear the logo in
+            their own colour, with a badge for what they do, so you can tell the
+            three apart at a glance.
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_2.833fr]">
+            {BOTS.map((b) => (
+              <div key={b.kind} className="contents">
+                <BrandAsset
+                  name={`${b.kind === "staff" ? "arcadia" : "omniplex-servers"}-avatar`}
+                  label={`${BOT_NAMES[b.kind]} avatar`}
+                  bleed
+                >
+                  <BotAvatar kind={b.kind} className="h-full w-full" />
+                </BrandAsset>
+                <BrandAsset
+                  name={`${b.kind === "staff" ? "arcadia" : "omniplex-servers"}-banner`}
+                  label={`${BOT_NAMES[b.kind]} banner`}
+                  width={1360}
+                  height={480}
+                  bleed
+                >
+                  <BotBanner
+                    kind={b.kind}
+                    lines={b.lines}
+                    tagline={b.tagline}
+                    className="h-full w-full"
+                  />
+                </BrandAsset>
+              </div>
+            ))}
           </div>
         </section>
 

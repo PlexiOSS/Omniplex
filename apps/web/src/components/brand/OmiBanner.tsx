@@ -1,6 +1,6 @@
 import { Omi } from "@omniplex/ui/Omi";
 import type { SVGProps } from "react";
-import { type OmiAvatarBadge, OmiBadge, omiTone } from "./OmiAvatar";
+import { BOT_TONES } from "./BotAvatar";
 
 const PAWS: [number, number, number, number][] = [
   [40, 34, -18, 1],
@@ -29,13 +29,11 @@ function Paw({ x, y, r, s }: { x: number; y: number; r: number; s: number }) {
 interface OmiBannerProps extends SVGProps<SVGSVGElement> {
   lines?: string[];
   tagline?: string;
-  badge?: OmiAvatarBadge;
 }
 
 export function OmiBanner({
   lines = ["Omi"],
   tagline = "The official Omniplex bot",
-  badge,
   ...props
 }: OmiBannerProps) {
   const big = lines.length === 1;
@@ -43,8 +41,8 @@ export function OmiBanner({
   const first = big ? 112 : 86;
   const step = size + 2;
   const after = first + step * (lines.length - 1);
-  const tone = omiTone(badge);
-  const id = badge ?? "omi";
+  const tone = BOT_TONES.omi;
+  const id = "omi";
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -120,11 +118,6 @@ export function OmiBanner({
         accent="#6366f1"
         aria-hidden="true"
       />
-      {badge && (
-        <g transform="translate(474 44) scale(0.98) translate(-98 8)">
-          <OmiBadge kind={badge} />
-        </g>
-      )}
     </svg>
   );
 }
