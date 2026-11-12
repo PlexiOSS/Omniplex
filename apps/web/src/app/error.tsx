@@ -1,9 +1,11 @@
 "use client";
 
 import { Button } from "@omniplex/ui/Button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Omi } from "@omniplex/ui/Omi";
+import { RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
+import { OmiLink } from "@/components/brand/OmiLink";
 import { Container } from "@/components/layout/Container";
 import { ServiceUnavailable } from "@/components/layout/ServiceUnavailable";
 import { isBoundaryApiError } from "@/lib/utils/errors";
@@ -26,9 +28,9 @@ export default function GlobalError({
 
   return (
     <Container className="flex flex-1 flex-col items-center justify-center py-24 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
-        <AlertTriangle size={22} className="text-red-600 dark:text-red-400" />
-      </div>
+      <OmiLink className="mb-4">
+        <Omi mood="confused" size={136} />
+      </OmiLink>
       <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
         Something went wrong
       </h1>

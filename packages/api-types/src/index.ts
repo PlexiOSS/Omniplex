@@ -357,6 +357,12 @@ export interface Server extends IndexServer {
   emojis_synced_at: string | null;
   vote_blitz_until: string | null;
   bumped_at?: string | null;
+  /** When Omniplex noticed the tracking bot left this server. Null while it's there. */
+  tracking_bot_missing_since?: string | null;
+  /** Hidden from browse and search because the tracking bot has been missing for 14 days. */
+  tracking_bot_hidden?: boolean;
+  /** Only sent to people who manage this listing, while the tracking bot is missing. */
+  tracking_bot_invite_url?: string;
 }
 
 export interface ServerEmoji {

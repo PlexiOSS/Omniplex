@@ -609,6 +609,7 @@ export function NotificationsTab({ userId, token }: NotificationsTabProps) {
       {entries.length === 0 ? (
         <EmptyState
           icon={BellOff}
+          mascot="sleepy"
           title={
             alerts.length === 0
               ? "You're all caught up"

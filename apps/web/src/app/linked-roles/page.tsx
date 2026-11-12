@@ -81,7 +81,7 @@ export default async function LinkedRolesPage() {
       </div>
 
       <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        Running a server? Add Infernoplex, then{" "}
+        Running a server? Add Omniplex Servers, then{" "}
         <Link
           href="/kb/account/linked-roles"
           className="text-accent hover:underline"

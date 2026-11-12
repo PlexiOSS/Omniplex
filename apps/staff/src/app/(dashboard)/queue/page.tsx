@@ -488,6 +488,7 @@ export default function AdminQueuePage() {
       {items.length === 0 ? (
         <AdminEmpty
           icon={ShieldOff}
+          mascot={claimFilter === "all" ? "sleepy" : "confused"}
           title={
             claimFilter === "all" ? "The queue is empty" : "Nothing matches"
           }

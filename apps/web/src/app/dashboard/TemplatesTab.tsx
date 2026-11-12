@@ -96,7 +96,11 @@ export function TemplatesTab({ templates }: { templates: ServerTemplate[] }) {
       </div>
 
       {templates.length === 0 ? (
-        <EmptyState icon={LayoutTemplate} title="No templates yet">
+        <EmptyState
+          icon={LayoutTemplate}
+          title="No templates yet"
+          mascot="sleepy"
+        >
           Share a Discord server template so others can copy your setup.{" "}
           <Link href="/templates/add" className="text-accent hover:underline">
             Submit one

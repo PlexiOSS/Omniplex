@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-11
+
+### Added
+
+- An empty queue shows a sleepy Omi, the Omniplex cat, and a filter with no
+  matches shows a confused one. Clicking Omi opens the website's Meet Omi
+  page in a new tab.
+
 ## [1.5.0] - 2026-11-11
 
 ### Changed

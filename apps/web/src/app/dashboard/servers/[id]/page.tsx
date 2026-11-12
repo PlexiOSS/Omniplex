@@ -42,6 +42,7 @@ import {
 import { AppearanceSection } from "./AppearanceSection";
 import { DangerSection } from "./DangerSection";
 import { DetailsSection, type SectionProps } from "./DetailsSection";
+import { TrackingBotNotice } from "./TrackingBotNotice";
 import { VoteMessagesSection } from "./VoteMessagesSection";
 
 const SECTIONS = [
@@ -201,6 +202,7 @@ function ServerSettings() {
       active={section}
       onSelect={setSection}
     >
+      <TrackingBotNotice server={server} />
       {section === "details" && <DetailsSection {...props} />}
       {section === "appearance" && <AppearanceSection {...props} />}
       {section === "style" && (
