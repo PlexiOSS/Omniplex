@@ -7,9 +7,11 @@ import {
 } from "@omniplex/core/utils/format";
 import { Button } from "@omniplex/ui/Button";
 import { Modal } from "@omniplex/ui/Modal";
+import { Omi } from "@omniplex/ui/Omi";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { OmiLink } from "@/components/brand/OmiLink";
 import { SignInLink } from "@/components/ui/SignInLink";
 import { AutoVotePrompt } from "@/components/votes/AutoVotePrompt";
 import { TurnstileWidget } from "@/components/votes/TurnstileWidget";
@@ -137,6 +139,16 @@ export function ServerVoteButton({
             />
           </Button>
         </div>
+      )}
+      {votedDirection === "up" && (
+        <p className="flex items-center gap-3 rounded-xl bg-accent/10 px-3 py-2.5 text-sm font-medium text-zinc-800 dark:text-zinc-200">
+          <OmiLink className="shrink-0 rounded-full">
+            <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--accent)_35%,white)] ring-2 ring-accent/40">
+              <Omi mood="joy" crop="avatar" size={44} />
+            </span>
+          </OmiLink>
+          Vote counted. Thanks for the support!
+        </p>
       )}
       {votedDirection === "up" && acceptsAutoVotes && <AutoVotePrompt />}
       {error && (

@@ -1,6 +1,8 @@
 "use client";
 
+import { SITE_URL } from "@omniplex/core/api/config";
 import { Button } from "@omniplex/ui/Button";
+import { Omi, type OmiMood } from "@omniplex/ui/Omi";
 import { AlertTriangle, Lock, type LucideIcon, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -73,6 +75,7 @@ interface AdminEmptyProps {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
+  mascot?: OmiMood;
 }
 
 export function AdminEmpty({
@@ -80,12 +83,26 @@ export function AdminEmpty({
   title,
   description,
   action,
+  mascot,
 }: AdminEmptyProps) {
   return (
     <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 px-4 py-20 text-center dark:border-zinc-800">
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">
-        <Icon size={19} className="text-zinc-400" />
-      </div>
+      {mascot ? (
+        <a
+          href={`${SITE_URL}/about/omi`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Meet Omi"
+          aria-label="Meet Omi"
+          className="inline-flex rounded-2xl transition-transform hover:-rotate-3 hover:scale-105"
+        >
+          <Omi mood={mascot} size={120} />
+        </a>
+      ) : (
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">
+          <Icon size={19} className="text-zinc-400" />
+        </div>
+      )}
       <p className="mt-4 text-sm font-medium text-zinc-950 dark:text-zinc-50">
         {title}
       </p>

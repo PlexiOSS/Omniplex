@@ -172,7 +172,11 @@ export function ReviewsSection({
         </section>
       ) : (
         editingId !== "new" && (
-          <EmptyState icon={MessageSquare} title="No reviews yet">
+          <EmptyState
+            icon={MessageSquare}
+            title="No reviews yet"
+            mascot="sleepy"
+          >
             <p>Be the first to share what you think.</p>
             <div className="mt-4 flex justify-center">{cta}</div>
           </EmptyState>

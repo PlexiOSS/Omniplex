@@ -13,6 +13,7 @@ const COLUMNS = [
       { href: "/shop/premium", label: "Premium" },
       { href: "/shop/auto-vote", label: "Auto-vote" },
       { href: "/bots/add", label: "Add your bot" },
+      { href: "/alternatives", label: "Compare bot lists" },
     ],
   },
   {
@@ -23,6 +24,7 @@ const COLUMNS = [
       { href: "/changelog", label: "Changelog" },
       { href: "/blog", label: "Blog" },
       { href: "https://status.omniplex.gg", label: "Status" },
+      { href: "/brand", label: "Brand kit" },
     ],
   },
   {
@@ -30,10 +32,10 @@ const COLUMNS = [
     links: [
       { href: "/about", label: "About" },
       { href: "/about/team", label: "Team" },
+      { href: "/about/omi", label: "Meet Omi" },
       { href: "/partners", label: "Partners" },
       { href: "/about/stats", label: "Platform stats" },
       { href: "/about/moderation", label: "Transparency" },
-      { href: "/alternatives", label: "Compare bot lists" },
     ],
   },
   {
@@ -41,9 +43,10 @@ const COLUMNS = [
     links: [
       { href: "/legal/terms", label: "Terms" },
       { href: "/legal/privacy", label: "Privacy" },
+      { href: "/legal/service-agreement", label: "Service agreement" },
       { href: "/legal/acceptable-use", label: "Acceptable use" },
+      { href: "/legal/developer-api", label: "Developer & API" },
       { href: "/legal/dmca", label: "DMCA" },
-      { href: "/legal", label: "All policies" },
     ],
   },
 ];

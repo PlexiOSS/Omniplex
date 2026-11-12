@@ -483,7 +483,7 @@ function SearchPageInner() {
               ))}
             </div>
           ) : !data || total === 0 ? (
-            <EmptyState icon={SearchX} title="No results">
+            <EmptyState icon={SearchX} title="No results" mascot="confused">
               Try different keywords or fewer tags.
               {tags.length > 0 && (
                 <button

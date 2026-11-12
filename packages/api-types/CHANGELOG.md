@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-11
+
+### Added
+
+- `Server` has `tracking_bot_missing_since`, `tracking_bot_hidden` and
+  `tracking_bot_invite_url`.
+
 ## [0.7.0] - 2026-11-11
 
 ### Added

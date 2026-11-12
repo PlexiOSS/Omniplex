@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.21.0] - 2026-11-11
+
+### Added
+
+- Omi, the Omniplex cat. Omi has six moods (happy, joy, waving, sleepy,
+  confused and party) and picks up each visitor's accent colour, like the
+  logo. Omi appears on the not-found and error pages, under the vote
+  buttons after an upvote ("Vote counted"), and in the empty states for
+  notifications, tickets, reviews, templates and search.
+- A Meet Omi page at `/about/omi`, introducing Omi and each mood.
+- A brand kit at `/brand` with the logo for dark and light backgrounds,
+  an app icon and avatar, Omi's Discord profile banner, every Omi mood,
+  our colours with copy buttons, our type and how to use them. Every image
+  downloads as SVG or PNG. Both pages are linked from the footer and in
+  the sitemap.
+- A server's dashboard warns its owners when the Omniplex Servers bot has
+  left, with the days left before the listing is hidden from browse and
+  search and an "Add the bot" button. Once it's hidden, the warning says
+  so and that the listing comes back by itself when the bot is added.
+- Clicking Omi anywhere on the site, including the staff panel's empty
+  queue, opens the Meet Omi page.
+
+### Changed
+
+- Infernoplex is now called Omniplex Servers everywhere the site mentions
+  it: the linked roles page and article, and server vote messages. The
+  About page's "Meet the bots" cards show Omi, Omniplex Servers and
+  Arcadia with their new Omi avatars.
+- The footer's columns are evened out at six links each: Compare bot
+  lists moved to Product, the brand kit to Resources, and Legal lists the
+  Service agreement and Developer & API policies directly instead of an
+  All policies link.
+
 ## [1.20.0] - 2026-11-11
 
 ### Added

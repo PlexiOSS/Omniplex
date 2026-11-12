@@ -89,7 +89,7 @@ export default function TicketsPage() {
           {ticketList === null ? (
             <LoadingState label="Loading tickets…" />
           ) : ticketList.length === 0 ? (
-            <EmptyState icon={LifeBuoy} title="No tickets yet">
+            <EmptyState icon={LifeBuoy} title="No tickets yet" mascot="happy">
               If something&apos;s wrong with your account, a payment or a
               listing, open a ticket and staff will follow up here.
             </EmptyState>

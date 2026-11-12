@@ -67,7 +67,7 @@ export function VoteMessagesSection({
     <form onSubmit={save}>
       <SettingsCard
         title="Vote messages"
-        description="The Infernoplex bot posts a message in your server each time someone votes for it on Omniplex."
+        description="The Omniplex Servers bot posts a message in your server each time someone votes for it on Omniplex."
         footer={
           <>
             <FormMessage error={saveError} success={message} />
@@ -109,8 +109,8 @@ export function VoteMessagesSection({
           </div>
         ) : (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            The Infernoplex bot isn&apos;t in this server, so it can&apos;t post
-            vote messages. Add it to your server, then come back here.
+            The Omniplex Servers bot isn&apos;t in this server, so it can&apos;t
+            post vote messages. Add it to your server, then come back here.
           </p>
         )}
       </SettingsCard>

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OmiAvatar, type OmiAvatarBadge } from "@/components/brand/OmiAvatar";
 import { Container } from "@/components/layout/Container";
 import { totalListedBots } from "@/lib/utils/stats";
 
@@ -64,20 +65,27 @@ const FEATURES = [
   },
 ];
 
-const BOTS = [
+const BOTS: {
+  key: string;
+  name: string;
+  badge?: OmiAvatarBadge;
+  role: string;
+}[] = [
   {
-    key: "popplio",
-    name: "Popplio",
+    key: "omi",
+    name: "Omi",
     role: "The official Omniplex bot. Keeps bot status and uptime up to date and posts listing updates.",
   },
   {
-    key: "infernoplex",
-    name: "Infernoplex",
+    key: "servers",
+    name: "Omniplex Servers",
+    badge: "servers",
     role: "Lists your server and keeps it in sync, and powers Discord linked roles.",
   },
   {
     key: "arcadia",
     name: "Arcadia",
+    badge: "staff",
     role: "Our staff bot: the review queue, moderation and staff tools.",
   },
 ];
@@ -312,10 +320,9 @@ export default async function AboutPage() {
               key={b.key}
               className="flex items-start gap-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
             >
-              {/* biome-ignore lint/performance/noImgElement: static brand asset from /public */}
-              <img
-                src={`/brand/bots/${b.key}/app-icon-1024.png`}
-                alt=""
+              <OmiAvatar
+                badge={b.badge}
+                aria-hidden="true"
                 className="h-12 w-12 shrink-0 rounded-xl"
               />
               <div className="min-w-0">
