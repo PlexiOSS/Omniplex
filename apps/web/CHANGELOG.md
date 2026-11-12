@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `GET /api/kb` lists every Knowledge Base category and article with its
+  description, opening paragraph and section headings, plus the common
+  questions. Omi's `/kb` command searches it.
+
+### Changed
+
+- Omniplex Servers and Arcadia no longer use Omi as their picture, so Omi
+  is only ever Omi. Each now wears the Omniplex logo on its own colour,
+  green for Omniplex Servers and orange for Arcadia, with its server or
+  shield badge. The About page's bot cards show the new pictures, and the
+  brand kit has an "Our other bots" section with both avatars and banners
+  to download. The brand kit also asks people not to make Omi the face of
+  another bot.
+
 ## [1.21.0] - 2026-11-11
 
 ### Added

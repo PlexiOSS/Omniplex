@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { OmiAvatar, type OmiAvatarBadge } from "@/components/brand/OmiAvatar";
+import { BotAvatar, type BotKind } from "@/components/brand/BotAvatar";
+import { OmiAvatar } from "@/components/brand/OmiAvatar";
 import { Container } from "@/components/layout/Container";
 import { totalListedBots } from "@/lib/utils/stats";
 
@@ -68,7 +69,7 @@ const FEATURES = [
 const BOTS: {
   key: string;
   name: string;
-  badge?: OmiAvatarBadge;
+  kind?: BotKind;
   role: string;
 }[] = [
   {
@@ -79,13 +80,13 @@ const BOTS: {
   {
     key: "servers",
     name: "Omniplex Servers",
-    badge: "servers",
+    kind: "servers",
     role: "Lists your server and keeps it in sync, and powers Discord linked roles.",
   },
   {
     key: "arcadia",
     name: "Arcadia",
-    badge: "staff",
+    kind: "staff",
     role: "Our staff bot: the review queue, moderation and staff tools.",
   },
 ];
@@ -320,11 +321,18 @@ export default async function AboutPage() {
               key={b.key}
               className="flex items-start gap-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
             >
-              <OmiAvatar
-                badge={b.badge}
-                aria-hidden="true"
-                className="h-12 w-12 shrink-0 rounded-xl"
-              />
+              {b.kind ? (
+                <BotAvatar
+                  kind={b.kind}
+                  aria-hidden="true"
+                  className="h-12 w-12 shrink-0 rounded-xl"
+                />
+              ) : (
+                <OmiAvatar
+                  aria-hidden="true"
+                  className="h-12 w-12 shrink-0 rounded-xl"
+                />
+              )}
               <div className="min-w-0">
                 <h3 className="font-semibold text-zinc-950 dark:text-zinc-50">
                   {b.name}

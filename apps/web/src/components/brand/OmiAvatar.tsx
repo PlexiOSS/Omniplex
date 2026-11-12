@@ -1,100 +1,12 @@
 import { Omi } from "@omniplex/ui/Omi";
 import type { SVGProps } from "react";
+import { BOT_TONES } from "./BotAvatar";
 
-export type OmiAvatarBadge = "servers" | "staff";
+type OmiAvatarProps = SVGProps<SVGSVGElement>;
 
-export const OMI_TONES = {
-  omi: {
-    from: "#3730a3",
-    mid: "#4f46e5",
-    to: "#818cf8",
-    ink: "#4f46e5",
-    glow: "#c7d2fe",
-    soft: "#e0e7ff",
-  },
-  servers: {
-    from: "#065f46",
-    mid: "#059669",
-    to: "#34d399",
-    ink: "#059669",
-    glow: "#a7f3d0",
-    soft: "#d1fae5",
-  },
-  staff: {
-    from: "#9a3412",
-    mid: "#ea580c",
-    to: "#fdba74",
-    ink: "#ea580c",
-    glow: "#fed7aa",
-    soft: "#ffedd5",
-  },
-} as const;
-
-export function omiTone(badge?: OmiAvatarBadge) {
-  return OMI_TONES[badge ?? "omi"];
-}
-
-interface OmiAvatarProps extends SVGProps<SVGSVGElement> {
-  badge?: OmiAvatarBadge;
-}
-
-export function OmiBadge({ kind }: { kind: OmiAvatarBadge }) {
-  return (
-    <g>
-      <circle cx="150" cy="152" r="27" fill="#ffffff" />
-      <circle
-        cx="150"
-        cy="152"
-        r="27"
-        fill="none"
-        stroke={omiTone(kind).ink}
-        strokeWidth="3"
-      />
-      {kind === "servers" &&
-        [138, 149, 160].map((y) => (
-          <g key={y}>
-            <rect
-              x="135"
-              y={y}
-              width="30"
-              height="9"
-              rx="2.5"
-              fill={omiTone(kind).ink}
-            />
-            <circle cx="140" cy={y + 4.5} r="1.8" fill="#4ade80" />
-            <rect
-              x="146"
-              y={y + 3.5}
-              width="14"
-              height="2"
-              rx="1"
-              fill="#c7d2fe"
-            />
-          </g>
-        ))}
-      {kind === "staff" && (
-        <g>
-          <path
-            d="M150 134 L166 140 V151 C166 162 159 169 150 172 C141 169 134 162 134 151 V140 Z"
-            fill={omiTone(kind).ink}
-          />
-          <path
-            d="M142.5 152 L148 157.5 L158 146.5"
-            fill="none"
-            stroke="#ffffff"
-            strokeWidth="3.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </g>
-      )}
-    </g>
-  );
-}
-
-export function OmiAvatar({ badge, ...props }: OmiAvatarProps) {
-  const tone = omiTone(badge);
-  const id = badge ?? "omi";
+export function OmiAvatar(props: OmiAvatarProps) {
+  const tone = BOT_TONES.omi;
+  const id = "omi";
 
   return (
     <svg
@@ -131,7 +43,6 @@ export function OmiAvatar({ badge, ...props }: OmiAvatarProps) {
         accent="#6366f1"
         aria-hidden="true"
       />
-      {badge && <OmiBadge kind={badge} />}
     </svg>
   );
 }
