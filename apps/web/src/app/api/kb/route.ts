@@ -11,6 +11,7 @@ function plain(text: string): string {
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
     .replace(/<[^>]+>/g, "")
+    .replace(/[<>]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
