@@ -236,7 +236,7 @@ export default function AdminOverviewPage() {
 
     arcadia.reports
       .list(loginToken, "open")
-      .then((r) => setOpenReports(r.length))
+      .then((r) => setOpenReports(r.total))
       .catch(() => setOpenReports(null));
 
     arcadia

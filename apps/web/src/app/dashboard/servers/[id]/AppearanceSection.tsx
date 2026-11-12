@@ -7,6 +7,7 @@ import { UploadError, uploadAsset } from "@omniplex/core/utils/upload";
 import { Button } from "@omniplex/ui/Button";
 import { Upload } from "lucide-react";
 import { useRef, useState } from "react";
+import { CardThemeCard } from "@/components/listing/CardThemeCard";
 import { Banner } from "@/components/ui/Banner";
 import { FormMessage, SettingsCard } from "../../manage/ManageShell";
 
@@ -106,6 +107,15 @@ export function AppearanceSection({
           className="h-36 rounded-xl sm:h-48"
         />
       </SettingsCard>
+
+      <CardThemeCard
+        target="server"
+        id={server.server_id}
+        owned={!!server.card_theme}
+        color={server.card_color}
+        token={token}
+        onSaved={onSaved}
+      />
 
       <form onSubmit={saveVanity}>
         <SettingsCard

@@ -459,6 +459,8 @@ export interface ApiSession {
   /** Empty means unrestricted — the token inherits whatever perms its owner has at request time. */
   perm_limits: string[];
   expiry: string;
+  /** True for the session making the request, so a UI can mark "this device". */
+  current: boolean;
 }
 
 export interface CreateSessionPayload {
@@ -1215,7 +1217,8 @@ export type PageGradient =
   | "candy"
   | "midnight"
   | "ember"
-  | "mono";
+  | "mono"
+  | `custom:#${string}:#${string}`;
 
 export interface PageStyle {
   gradient: PageGradient | null;
@@ -1789,10 +1792,24 @@ export interface ServerTemplate {
   tags: string[];
   nsfw: boolean;
   owner: PlatformUser;
-  /** Discord's own reported usage count, as of submission time. */
+  /** Discord's own reported usage count, as of the last sync. */
   usage_count: number;
   created_at: string;
   updated_at: string;
+  /** Version of the custom icon, for `templateIconUrl()`. Null when there's none. */
+  icon_version: string | null;
+  /** How many channels (not counting categories) the template has. */
+  channel_count: number;
+  /** How many roles (not counting @everyone) the template has. */
+  role_count: number;
+  /** When the template was last updated on Discord. */
+  source_updated_at: string | null;
+  /** The source server has changes not yet synced into the template on Discord. */
+  out_of_date: boolean;
+  /** The template no longer exists on Discord. Hidden from browse. */
+  unavailable: boolean;
+  /** When Omniplex last refreshed the template from Discord. */
+  synced_at: string | null;
   /** Only populated on a single-template fetch, not the browse list. */
   channels: TemplateChannel[];
   /** Only populated on a single-template fetch, not the browse list. */

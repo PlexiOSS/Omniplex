@@ -71,7 +71,7 @@ export function TemplateReactionButtons({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant={userLiked === true ? "secondary" : "primary"}
+        variant="secondary"
         size="md"
         loading={loading && pendingDir === "up"}
         disabled={loading}

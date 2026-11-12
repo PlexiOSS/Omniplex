@@ -4,12 +4,15 @@ import { SITE_URL } from "@omniplex/core/api/config";
 import { formatRelativeTime } from "@omniplex/core/utils/format";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Button } from "@omniplex/ui/Button";
-import { Check, ExternalLink, X } from "lucide-react";
+import { Check, ExternalLink, ImageOff, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAdmin } from "@/app/AdminContext";
 import { AdminPageHeader } from "@/app/AdminPageHeader";
-import { AdminEmptyState } from "@/components/admin/AdminListRow";
-import { AdminError, AdminLoading } from "@/components/admin/AdminState";
+import {
+  AdminEmpty,
+  AdminError,
+  AdminLoading,
+} from "@/components/admin/AdminState";
 import { ArcadiaError, arcadia } from "@/lib/arcadia/client";
 import type { PendingPageImage } from "@/lib/arcadia/types";
 
@@ -109,7 +112,7 @@ export default function BackgroundsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10">
       <AdminPageHeader
         title="Backgrounds"
         description="Custom page backgrounds waiting for review. They only show on the listing once approved, and owners are told either way."
@@ -120,9 +123,13 @@ export default function BackgroundsPage() {
       ) : !items ? (
         <AdminLoading />
       ) : items.length === 0 ? (
-        <AdminEmptyState message="No backgrounds waiting for review." />
+        <AdminEmpty
+          icon={ImageOff}
+          title="Nothing to review"
+          description="No backgrounds are waiting for review."
+        />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {items.map((item) => {
             const key = `${item.target_type}:${item.target_id}`;
             return (
@@ -233,7 +240,9 @@ export default function BackgroundsPage() {
         </div>
       )}
       {actionError && (
-        <p className="text-sm text-red-600 dark:text-red-400">{actionError}</p>
+        <p className="mt-4 text-sm text-red-600 dark:text-red-400">
+          {actionError}
+        </p>
       )}
     </div>
   );

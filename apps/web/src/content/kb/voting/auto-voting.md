@@ -35,7 +35,15 @@ Auto-vote skips a listing, and shows the reason in your dashboard, when:
 
 - its owner has turned off **Accept automatic votes**,
 - it's no longer listed,
-- you've been vote banned.
+- you've been vote banned,
+- the card paying for your subscription already pays for Auto-vote on 3 other accounts (see below).
+
+## Fair use
+
+Auto-vote is for voting for listings you like, not for buying votes. To keep it fair:
+
+- **One card, up to 3 accounts.** A payment card can pay for Auto-vote on up to 3 accounts, so a household can share one. On a 4th account using the same card, the subscription still works but its automatic votes are paused, and the dashboard tells you why. If that's a mistake, [open a ticket](/tickets/new).
+- **Staff watch for unusual patterns.** When most of a listing's votes suddenly come from Auto-vote, staff get a report to look into. Buying subscriptions to boost your own listing counts as vote manipulation under the [voting rules](/kb/voting/voting-rules).
 
 ## Managing your subscription
 

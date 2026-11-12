@@ -32,6 +32,10 @@ export function teamAvatarUrl(teamId: string, version?: string | null): string {
   );
 }
 
+export function templateIconUrl(templateId: string, version: string): string {
+  return `/cdn/icons/templates/${encodeURIComponent(templateId)}/${encodeURIComponent(version)}.webp`;
+}
+
 export function bannerUrl(
   targetType: "bots" | "servers" | "teams",
   id: string,

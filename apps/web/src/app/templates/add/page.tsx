@@ -79,7 +79,7 @@ export default function AddServerTemplatePage() {
         },
         session.token,
       );
-      router.push(`/templates?created=${res.id}`);
+      router.push(`/templates/${res.id}`);
     } catch (err) {
       setError(
         err instanceof ApiError

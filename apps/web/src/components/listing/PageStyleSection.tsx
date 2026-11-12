@@ -8,8 +8,11 @@ import type {
   PageStyle,
 } from "@omniplex/core/api/types";
 import {
+  customGradient,
+  gradientCss,
   PAGE_GRADIENTS,
   pageImageUrl,
+  parseCustomGradient,
   readableAccent,
 } from "@omniplex/core/utils/pageStyle";
 import { UploadError, uploadAsset } from "@omniplex/core/utils/upload";
@@ -19,6 +22,7 @@ import {
   Check,
   Clock,
   ImagePlus,
+  Palette,
   RotateCcw,
   Sparkles,
   Trash2,
@@ -140,6 +144,8 @@ export function PageStyleSection({
   );
   const [draft, setDraft] = useState<Draft | null>(null);
   const [customAccent, setCustomAccent] = useState("");
+  const [customFrom, setCustomFrom] = useState("#4f46e5");
+  const [customTo, setCustomTo] = useState("#0f172a");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -152,6 +158,11 @@ export function PageStyleSection({
     if (data) {
       setDraft(draftFrom(data));
       setCustomAccent(data.accent ?? "");
+      const custom = parseCustomGradient(data.gradient);
+      if (custom) {
+        setCustomFrom(custom.from);
+        setCustomTo(custom.to);
+      }
     }
   }, [data]);
 
@@ -214,6 +225,7 @@ export function PageStyleSection({
   const set = (patch: Partial<Draft>) =>
     setDraft((d) => (d ? { ...d, ...patch } : d));
   const accentOk = !draft.accent || readableAccent(draft.accent);
+  const customColours = parseCustomGradient(draft.gradient);
   const pendingUrl = data.pending_version
     ? pageImageUrl(target, id, data.pending_version)
     : null;
@@ -332,8 +344,8 @@ export function PageStyleSection({
         </p>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="min-w-0 self-start xl:sticky xl:top-24">
+      <div className="space-y-6">
+        <div className="min-w-0">
           <PageStylePreview
             target={target}
             id={id}
@@ -348,7 +360,7 @@ export function PageStyleSection({
           />
         </div>
 
-        <div className="min-w-0 space-y-6 xl:border-l xl:border-zinc-100 xl:pl-6 xl:dark:border-zinc-800">
+        <div className="grid gap-x-8 gap-y-6 border-t border-zinc-100 pt-6 md:grid-cols-2 dark:border-zinc-800">
           <section>
             <GroupTitle>Background image</GroupTitle>
             <input
@@ -483,7 +495,67 @@ export function PageStyleSection({
                   {g.label}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() =>
+                  set({ gradient: customGradient(customFrom, customTo) })
+                }
+                aria-pressed={!!customColours}
+                className={[
+                  "relative col-span-3 flex h-12 items-end overflow-hidden rounded-lg border p-1.5 text-[11px] font-medium text-white",
+                  customColours
+                    ? "border-accent ring-1 ring-accent"
+                    : "border-dashed border-zinc-300 dark:border-zinc-700",
+                ].join(" ")}
+                style={{
+                  backgroundImage:
+                    gradientCss(customGradient(customFrom, customTo)) ??
+                    undefined,
+                }}
+              >
+                <span className="inline-flex items-center gap-1">
+                  <Palette size={11} />
+                  Custom
+                </span>
+              </button>
             </div>
+            {customColours && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {(
+                  [
+                    ["From", customFrom, setCustomFrom, "to"],
+                    ["To", customTo, setCustomTo, "from"],
+                  ] as const
+                ).map(([label, value, setValue, other]) => (
+                  <label key={label} className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={value}
+                      onChange={(e) => {
+                        const v = e.target.value.toLowerCase();
+                        setValue(v);
+                        set({
+                          gradient:
+                            other === "to"
+                              ? customGradient(v, customTo)
+                              : customGradient(customFrom, v),
+                        });
+                      }}
+                      aria-label={`Custom gradient ${label.toLowerCase()} colour`}
+                      className="size-8 shrink-0 cursor-pointer rounded-lg border border-zinc-200 bg-transparent p-0.5 dark:border-zinc-800"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-[11px] text-zinc-500 dark:text-zinc-400">
+                        {label}
+                      </span>
+                      <span className="block font-mono text-xs text-zinc-950 dark:text-zinc-50">
+                        {value}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </section>
 
           <section>

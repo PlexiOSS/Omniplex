@@ -13,7 +13,8 @@ interface ManageShellProps<K extends string> {
   backHref: string;
   backLabel: string;
   name: string;
-  avatar: string;
+  avatar?: string;
+  icon?: ReactNode;
   badges?: ReactNode;
   viewHref: string;
   groups: DashboardNavGroup<K>[];
@@ -43,6 +44,7 @@ export function ManageShell<K extends string>({
   backLabel,
   name,
   avatar,
+  icon,
   badges,
   viewHref,
   groups,
@@ -67,7 +69,7 @@ export function ManageShell<K extends string>({
       <div className="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <Avatar src={avatar} alt={name} size={40} />
+            {icon ?? <Avatar src={avatar ?? ""} alt={name} size={40} />}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                 {name}

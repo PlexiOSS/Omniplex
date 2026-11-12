@@ -10,7 +10,6 @@ import type {
 import { Button } from "@omniplex/ui/Button";
 import { LinksEditor } from "@omniplex/ui/LinksEditor";
 import { TagPicker } from "@omniplex/ui/TagPicker";
-import Link from "next/link";
 import { useState } from "react";
 import { PublicStatsFields } from "@/components/listing/PublicStatsFields";
 import { SERVER_TAGS } from "@/lib/constants/tags";
@@ -66,7 +65,6 @@ export function DetailsSection({ server, token, onSaved }: SectionProps) {
     captchaOptOut: server.captcha_opt_out,
     acceptAutoVotes: !server.auto_votes_opt_out,
     hiddenStats: server.hidden_stats ?? [],
-    cardColor: server.card_color ?? "",
     loginRequiredForInvite: server.login_required_for_invite,
     showEmojis: server.show_emojis,
   });
@@ -100,7 +98,6 @@ export function DetailsSection({ server, token, onSaved }: SectionProps) {
           captcha_opt_out: form.captchaOptOut,
           auto_votes_opt_out: !form.acceptAutoVotes,
           hidden_stats: form.hiddenStats,
-          ...(server.card_theme ? { card_color: form.cardColor } : {}),
           login_required_for_invite: form.loginRequiredForInvite,
           show_emojis: form.showEmojis,
         },
@@ -245,60 +242,6 @@ export function DetailsSection({ server, token, onSaved }: SectionProps) {
           hidden={form.hiddenStats}
           onChange={(v) => update("hiddenStats", v)}
         />
-      </SettingsCard>
-
-      <SettingsCard
-        title="Card theme"
-        description={
-          server.card_theme
-            ? "Tints this server's card everywhere it appears. Leave it empty for the default look."
-            : "Buy Card Theme in the shop to tint this server's card with a colour of your choice."
-        }
-        footer={
-          server.card_theme ? (
-            <>
-              <FormMessage
-                error={error}
-                success={saved ? "Changes saved." : null}
-              />
-              <Button type="submit" variant="primary" loading={saving}>
-                Save changes
-              </Button>
-            </>
-          ) : undefined
-        }
-      >
-        {server.card_theme ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <input
-              type="color"
-              value={form.cardColor || "#5865f2"}
-              onChange={(e) => update("cardColor", e.target.value)}
-              aria-label="Card colour"
-              className="h-10 w-14 cursor-pointer rounded-lg border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-zinc-950"
-            />
-            <span className="font-mono text-sm text-zinc-600 dark:text-zinc-300">
-              {form.cardColor || "Default"}
-            </span>
-            {form.cardColor && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => update("cardColor", "")}
-              >
-                Reset
-              </Button>
-            )}
-          </div>
-        ) : (
-          <Link
-            href="/shop/items"
-            className="text-sm font-medium text-accent hover:underline"
-          >
-            Open the shop
-          </Link>
-        )}
       </SettingsCard>
     </form>
   );

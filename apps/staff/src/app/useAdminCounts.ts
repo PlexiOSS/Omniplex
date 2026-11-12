@@ -63,7 +63,7 @@ export function useAdminCounts(): AdminCounts {
           : 0;
       return {
         queue: bots || servers ? unclaimed(bots) + unclaimed(servers) : null,
-        reports: reports ? reports.length : null,
+        reports: reports ? reports.total : null,
         tickets: openTickets ? openTickets.tickets.length : null,
         applications: apps
           ? (apps.json?.apps ?? []).filter((a) => a.state === "pending").length

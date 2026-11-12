@@ -52,6 +52,31 @@ export async function headObject(key: string): Promise<ObjectMeta | null> {
   }
 }
 
+export interface ListedKey {
+  key: string;
+  lastModified?: Date;
+}
+
+export async function listKeys(
+  prefix: string,
+  max: number,
+): Promise<ListedKey[]> {
+  try {
+    const res = await getS3Client().send(
+      new ListObjectsV2Command({
+        Bucket: S3_BUCKET,
+        Prefix: prefix,
+        MaxKeys: max,
+      }),
+    );
+    return (res.Contents ?? []).flatMap((o) =>
+      o.Key ? [{ key: o.Key, lastModified: o.LastModified }] : [],
+    );
+  } catch (err) {
+    throw new S3UnavailableError("listKeys", prefix, err);
+  }
+}
+
 export async function getObject(
   key: string,
   opts: { ifNoneMatch?: string | null } = {},

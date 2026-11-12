@@ -7,7 +7,8 @@ export type UploadKind =
   | "bot-banner"
   | "server-banner"
   | "bot-background"
-  | "server-background";
+  | "server-background"
+  | "template-icon";
 
 export type UploadAuth =
   | { loginToken: string }

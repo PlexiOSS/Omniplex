@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-11
+
+### Changed
+
+- Reports filed by automatic checks show who filed them as "Automatic
+  content check" or "Automatic Auto-vote check" with a bot icon, instead
+  of a raw `system:` ID and a broken avatar.
+- Reports are paged, 20 at a time, instead of one long list in a
+  scrolling box. Each report shows the bot's, server's or pack's avatar
+  and name instead of its ID, a status dot on the avatar, and an "Auto"
+  tag when an automatic check filed it. The report itself shows its status
+  next to the reason, and "What the check found" for automatic reports.
+- The Activity log has Newer and Older buttons with a page number instead
+  of "Load older" growing one long page.
+
+### Fixed
+
+- The Backgrounds page sits in the same centred, padded layout as the rest
+  of the panel, instead of running edge to edge against the sidebar, and
+  shows the standard empty card when nothing is waiting.
+
 ## [1.4.0] - 2026-11-11
 
 ### Added

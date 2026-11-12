@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { assets, auth, teams } from "@omniplex/core/api";
+import { assets, auth, serverTemplates, teams } from "@omniplex/core/api";
 import { ApiError, client } from "@omniplex/core/api/client";
 import { BASE_URL } from "@omniplex/core/api/config";
 import type {
@@ -11,13 +11,17 @@ import { matchesDeclaredType } from "@omniplex/core/cdn/safety";
 import { hasPermString } from "@omniplex/core/permissions";
 import { ASSET_VERSION_METADATA_KEY } from "@omniplex/core/s3/config";
 import {
+  discardObject,
+  getObject,
   headObject,
+  listKeys,
   putObject,
   S3UnavailableError,
 } from "@omniplex/core/s3/objects";
 import { COOKIE_TOKEN } from "@omniplex/core/utils/auth";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
+import { allowUpload } from "@/lib/uploadLimit";
 import { getServerToken } from "@/lib/utils/serverSession";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
@@ -41,7 +45,8 @@ type Kind =
   | "server-background"
   | "pack-emoji"
   | "pack-sticker"
-  | "pack-sound";
+  | "pack-sound"
+  | "template-icon";
 
 function isPackAssetKind(
   kind: Kind,
@@ -54,10 +59,11 @@ function isPackAssetKind(
 interface KindConfig {
   key: (targetId: string, assetId?: string) => string;
   perm: string;
-  popplioTargetType: "team" | "bot" | "server" | "pack";
+  popplioTargetType: "team" | "bot" | "server" | "pack" | "template";
   maxBytes?: number;
   versioned?: { target: VersionedAssetTarget; kind: VersionedAssetKind };
   background?: boolean;
+  templateIcon?: boolean;
 }
 
 const EMOJI_MAX_BYTES = 256 * 1024;
@@ -65,7 +71,43 @@ const SOUND_MAX_BYTES = 2 * 1024 * 1024;
 
 const BACKGROUND_MAX_BYTES = 8 * 1024 * 1024;
 
+const PACK_FILE_LIMIT = 50;
+const STAGING_TTL_MS = 24 * 60 * 60 * 1000;
+const UPLOADER_METADATA_KEY = "uploader";
+
+async function stagingProblem(
+  prefix: string,
+  userId: string,
+): Promise<string | null> {
+  const cutoff = Date.now() - STAGING_TTL_MS;
+  const recent = (await listKeys(prefix, 1000)).filter(
+    (k) => (k.lastModified?.getTime() ?? 0) > cutoff,
+  );
+
+  if (recent.length >= PACK_FILE_LIMIT) {
+    return "This pack already has as many files as it can hold.";
+  }
+
+  for (const { key } of recent) {
+    const result = await getObject(key);
+    if (result.status !== "found") continue;
+    discardObject(result.object);
+    if (result.object.metadata[UPLOADER_METADATA_KEY] !== userId) {
+      return "Someone else is setting up a pack with that URL. Pick a different one.";
+    }
+    return null;
+  }
+
+  return null;
+}
+
 const KIND_CONFIG: Record<Kind, KindConfig> = {
+  "template-icon": {
+    key: (id) => `icons/templates/${id}`,
+    perm: "",
+    popplioTargetType: "template",
+    templateIcon: true,
+  },
   "bot-background": {
     key: (id) => `backgrounds/bots/${id}`,
     perm: "edit_bots",
@@ -206,6 +248,60 @@ async function storeBackground(
   return NextResponse.json({ ok: true, version });
 }
 
+async function storeTemplateIcon(
+  buffer: Buffer,
+  templateId: string,
+  userId: string,
+  token: string,
+) {
+  let image: Buffer;
+  try {
+    image = await sharp(buffer, {
+      limitInputPixels: 40_000_000,
+      failOn: "error",
+      animated: false,
+    })
+      .rotate()
+      .resize({ width: 256, height: 256, fit: "cover" })
+      .webp({ quality: 85 })
+      .toBuffer();
+  } catch {
+    return NextResponse.json(
+      { error: "That file couldn't be read as an image." },
+      { status: 400 },
+    );
+  }
+
+  const version = createHash("sha256").update(image).digest("hex").slice(0, 16);
+  const wrote = await putObject(
+    `icons/templates/${templateId}/${version}.webp`,
+    image,
+    "image/webp",
+    { [ASSET_VERSION_METADATA_KEY]: version },
+  );
+
+  if (!wrote) {
+    return NextResponse.json(
+      { error: "Failed to store the uploaded file. Please try again." },
+      { status: 502 },
+    );
+  }
+
+  try {
+    await serverTemplates.setIcon(userId, templateId, version, token);
+  } catch (err) {
+    return NextResponse.json(
+      {
+        error:
+          err instanceof ApiError ? err.message : "Couldn't save the icon.",
+      },
+      { status: 400 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, version });
+}
+
 function isKind(value: unknown): value is Kind {
   return typeof value === "string" && value in KIND_CONFIG;
 }
@@ -334,6 +430,15 @@ export async function POST(req: Request) {
   }
   const userToken = token;
 
+  if (!allowUpload(userId)) {
+    return NextResponse.json(
+      { error: "You've uploaded a lot of files recently. Try again in a bit." },
+      { status: 429 },
+    );
+  }
+
+  let packIsNew = false;
+
   if (isPackAssetKind(kind)) {
     const existingPack = await client
       .get<BotPack>(`/packs/${targetId}`, { cache: "no-store" })
@@ -348,9 +453,27 @@ export async function POST(req: Request) {
         { status: 403 },
       );
     }
+    packIsNew = !existingPack;
+  } else if (config.templateIcon) {
+    const template = await serverTemplates
+      .getTemplate(targetId)
+      .catch(() => null);
+    if (!template || template.owner.id !== userId) {
+      return NextResponse.json(
+        { error: "You don't have permission to do this." },
+        { status: 403 },
+      );
+    }
   } else {
     const entityPerms = await teams
-      .getEntityPerms(userId, config.popplioTargetType, targetId)
+      .getEntityPerms(
+        userId,
+        config.popplioTargetType as Exclude<
+          KindConfig["popplioTargetType"],
+          "template"
+        >,
+        targetId,
+      )
       .catch(() => ({ perms: [] }));
     if (!hasPermString(entityPerms.perms, config.perm)) {
       return NextResponse.json(
@@ -368,6 +491,9 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
+  if (config.templateIcon) {
+    return storeTemplateIcon(buffer, targetId, userId, userToken);
+  }
   if (config.background) {
     return storeBackground(
       buffer,
@@ -378,6 +504,7 @@ export async function POST(req: Request) {
   }
 
   const key = config.key(targetId, assetId);
+  let stagingNewPack = false;
   const version = createHash("sha256")
     .update(buffer)
     .digest("hex")
@@ -391,6 +518,13 @@ export async function POST(req: Request) {
           { status: 409 },
         );
       }
+      if (packIsNew) {
+        const problem = await stagingProblem(config.key(targetId, ""), userId);
+        if (problem) {
+          return NextResponse.json({ error: problem }, { status: 403 });
+        }
+        stagingNewPack = true;
+      }
     } catch (err) {
       if (!(err instanceof S3UnavailableError)) throw err;
       console.error(err, err.cause);
@@ -403,6 +537,7 @@ export async function POST(req: Request) {
 
   const wrote = await putObject(key, buffer, file.type, {
     [ASSET_VERSION_METADATA_KEY]: version,
+    ...(stagingNewPack ? { [UPLOADER_METADATA_KEY]: userId } : {}),
   });
 
   if (!wrote) {

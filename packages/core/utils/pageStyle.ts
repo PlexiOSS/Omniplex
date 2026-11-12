@@ -48,7 +48,24 @@ export const PAGE_GRADIENTS: {
   },
 ];
 
+const CUSTOM_GRADIENT = /^custom:(#[0-9a-f]{6}):(#[0-9a-f]{6})$/i;
+
+export function customGradient(from: string, to: string): PageGradient {
+  return `custom:${from.toLowerCase()}:${to.toLowerCase()}` as PageGradient;
+}
+
+export function parseCustomGradient(
+  id: PageGradient | null | undefined,
+): { from: string; to: string } | null {
+  const match = id ? CUSTOM_GRADIENT.exec(id) : null;
+  return match ? { from: match[1], to: match[2] } : null;
+}
+
 export function gradientCss(id: PageGradient | null | undefined) {
+  const custom = parseCustomGradient(id);
+  if (custom) {
+    return `radial-gradient(60% 80% at 20% 0%, ${custom.from}66, transparent 60%), radial-gradient(55% 75% at 85% 15%, ${custom.to}55, transparent 60%), linear-gradient(165deg, ${custom.from}, ${custom.to})`;
+  }
   return PAGE_GRADIENTS.find((g) => g.id === id)?.css ?? null;
 }
 

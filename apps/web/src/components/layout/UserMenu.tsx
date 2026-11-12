@@ -6,16 +6,19 @@ import { mirroredAvatarUrl } from "@omniplex/core/utils/assets";
 import { Avatar } from "@omniplex/ui/Avatar";
 import { Dropdown, DropdownItem } from "@omniplex/ui/Dropdown";
 import {
+  Bell,
+  ClipboardList,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
+  Repeat,
+  Settings,
   Shield,
-  ShoppingBag,
-  Ticket,
   User,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { GiPaper } from "react-icons/gi";
 
 interface UserMenuProps {
   session: AuthSession;
@@ -23,29 +26,31 @@ interface UserMenuProps {
   onLogout: () => void;
 }
 
-/** Avatar-triggered dropdown replacing the old bare avatar + inline "Sign out"
- * button — houses every account-level link (dashboard, profile, premium,
- * shop, tickets, staff panel) in one place instead of the avatar being a
- * dead-end that only linked to the dashboard. */
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <p className="px-3 pt-2 pb-1 text-[11px] font-medium tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+      {children}
+    </p>
+  );
+}
+
 export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const avatar = mirroredAvatarUrl("users", session.user_id, session.avatar);
+  const displayName =
+    session.display_name || session.username || "Your account";
 
   function go(href: string) {
     setOpen(false);
     router.push(href);
   }
 
-  function handleLogout() {
-    setOpen(false);
-    onLogout();
-  }
-
   return (
     <Dropdown
       open={open}
       onClose={() => setOpen(false)}
-      panelClassName="w-56"
+      panelClassName="w-64"
       trigger={
         <button
           type="button"
@@ -55,7 +60,7 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
           aria-expanded={open}
         >
           <Avatar
-            src={mirroredAvatarUrl("users", session.user_id, session.avatar)}
+            src={avatar}
             alt={session.username ?? "Your profile"}
             size={32}
             className="cursor-pointer"
@@ -63,11 +68,24 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
         </button>
       }
     >
-      <div className="border-b border-zinc-100 px-3 py-2 dark:border-zinc-800">
-        <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
-          {session.username ?? "Your account"}
-        </p>
-      </div>
+      <Link
+        href={`/user/${session.user_id}`}
+        onClick={() => setOpen(false)}
+        className="flex items-center gap-3 border-b border-zinc-100 px-3 py-3 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/60"
+      >
+        <Avatar src={avatar} alt={displayName} size={36} />
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+            {displayName}
+          </span>
+          {session.username && (
+            <span className="block truncate text-xs text-zinc-500 dark:text-zinc-400">
+              @{session.username}
+            </span>
+          )}
+        </span>
+      </Link>
+
       <div className="py-1">
         <DropdownItem
           icon={<LayoutDashboard size={14} />}
@@ -79,18 +97,46 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
           icon={<User size={14} />}
           onClick={() => go(`/user/${session.user_id}`)}
         >
-          View Profile
-        </DropdownItem>
-        <DropdownItem icon={<GiPaper size={14} />} onClick={() => go("/apps")}>
-          Applications
+          Your profile
         </DropdownItem>
         <DropdownItem
-          icon={<Ticket size={14} />}
+          icon={<Bell size={14} />}
+          onClick={() => go("/dashboard?tab=notifications")}
+        >
+          Notifications
+        </DropdownItem>
+        <DropdownItem
+          icon={<Repeat size={14} />}
+          onClick={() => go("/dashboard?tab=auto-vote")}
+        >
+          Auto-vote
+        </DropdownItem>
+        <DropdownItem
+          icon={<Settings size={14} />}
+          onClick={() => go("/dashboard?tab=profile")}
+        >
+          Settings
+        </DropdownItem>
+      </div>
+
+      <div className="border-t border-zinc-100 py-1 dark:border-zinc-800">
+        <SectionLabel>Help</SectionLabel>
+        <DropdownItem
+          icon={<LifeBuoy size={14} />}
           onClick={() => go("/tickets")}
         >
-          Support Tickets
+          Support tickets
         </DropdownItem>
-        {isStaff && (
+        <DropdownItem
+          icon={<ClipboardList size={14} />}
+          onClick={() => go("/dashboard?tab=applications")}
+        >
+          Your applications
+        </DropdownItem>
+      </div>
+
+      {isStaff && (
+        <div className="border-t border-zinc-100 py-1 dark:border-zinc-800">
           <DropdownItem
             icon={<Shield size={14} />}
             onClick={() => {
@@ -98,18 +144,20 @@ export function UserMenu({ session, isStaff, onLogout }: UserMenuProps) {
               window.location.href = STAFF_URL;
             }}
           >
-            Staff Panel
+            Staff panel
           </DropdownItem>
-        )}
-        <DropdownItem
-          icon={<ShoppingBag size={14} />}
-          onClick={() => go("/shop")}
-        >
-          Shop
-        </DropdownItem>
-      </div>
+        </div>
+      )}
+
       <div className="border-t border-zinc-100 py-1 dark:border-zinc-800">
-        <DropdownItem icon={<LogOut size={14} />} onClick={handleLogout} danger>
+        <DropdownItem
+          icon={<LogOut size={14} />}
+          onClick={() => {
+            setOpen(false);
+            onLogout();
+          }}
+          danger
+        >
           Sign out
         </DropdownItem>
       </div>

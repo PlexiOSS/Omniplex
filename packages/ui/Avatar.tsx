@@ -60,6 +60,7 @@ export function Avatar({
     >
       <div className="relative h-full w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
         <Image
+          key={resolvedSrc}
           src={resolvedSrc}
           alt={alt}
           fill

@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { DeviceList } from "@/components/sessions/DeviceList";
 import { PermSelector } from "@/components/teams/PermSelector";
 
 type TargetType = "user" | "bot" | "server" | "team";
@@ -86,6 +87,7 @@ export function TokenManager({
   >(null);
 
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [signingOutOthers, setSigningOutOthers] = useState(false);
 
   const load = useCallback(() => {
     setError(null);
@@ -164,6 +166,25 @@ export function TokenManager({
     } finally {
       setRevokingId(null);
     }
+  }
+
+  async function handleSignOutOthers() {
+    const others = (list ?? []).filter((s) => s.type !== "api" && !s.current);
+    setSigningOutOthers(true);
+    setError(null);
+    const results = await Promise.allSettled(
+      others.map((s) => sessions.revoke(targetType, targetId, s.id, authToken)),
+    );
+    const done = new Set(
+      others
+        .filter((_, i) => results[i].status === "fulfilled")
+        .map((s) => s.id),
+    );
+    setList((prev) => prev?.filter((s) => !done.has(s.id)) ?? null);
+    if (done.size < others.length) {
+      setError("Some devices couldn't be signed out. Try again.");
+    }
+    setSigningOutOthers(false);
   }
 
   function copyToken() {
@@ -417,82 +438,79 @@ export function TokenManager({
                 action: "Revoke",
                 items: (list ?? []).filter((s) => s.type === "api"),
               },
-              {
-                key: "login",
-                title: "Signed-in devices",
-                empty: "",
-                action: "Sign out",
-                items: (list ?? []).filter((s) => s.type !== "api"),
-              },
             ] as const
-          )
-            .filter(
-              (section) => section.key === "api" || section.items.length > 0,
-            )
-            .map((section) => (
-              <section key={section.key} className="mt-6 first:mt-0">
-                <h3 className="mb-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
-                  {section.title}
-                  <span className="ml-1.5 font-normal text-zinc-400 dark:text-zinc-500">
-                    {section.items.length}
-                  </span>
-                </h3>
-                {section.items.length === 0 ? (
-                  !creating && (
-                    <p className="rounded-xl border border-dashed border-zinc-200 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-                      {section.empty}
-                    </p>
-                  )
-                ) : (
-                  <ul className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
-                    {section.items.map((s) => {
-                      const expired = isExpired(s.expiry);
-                      return (
-                        <li
-                          key={s.id}
-                          className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="flex min-w-0 items-center gap-2">
-                              <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
-                                {s.name || "Unnamed token"}
-                              </p>
-                              {expired && (
-                                <Badge variant="danger">Expired</Badge>
-                              )}
-                            </div>
-                            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                              Created {formatDate(s.created_at)} ·{" "}
-                              {expired ? "expired" : "expires"}{" "}
-                              {formatDate(s.expiry)}
-                              {section.key === "api" &&
-                                ` · ${
-                                  s.perm_limits.length === 0
-                                    ? "Full access"
-                                    : `Limited to ${s.perm_limits.join(", ")}`
-                                }`}
+          ).map((section) => (
+            <section key={section.key} className="mt-6 first:mt-0">
+              <h3 className="mb-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+                {section.title}
+                <span className="ml-1.5 font-normal text-zinc-400 dark:text-zinc-500">
+                  {section.items.length}
+                </span>
+              </h3>
+              {section.items.length === 0 ? (
+                !creating && (
+                  <p className="rounded-xl border border-dashed border-zinc-200 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                    {section.empty}
+                  </p>
+                )
+              ) : (
+                <ul className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+                  {section.items.map((s) => {
+                    const expired = isExpired(s.expiry);
+                    return (
+                      <li
+                        key={s.id}
+                        className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <p className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                              {s.name || "Unnamed token"}
                             </p>
+                            {expired && <Badge variant="danger">Expired</Badge>}
                           </div>
-                          {canManage && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              loading={revokingId === s.id}
-                              onClick={() => handleRevoke(s.id)}
-                              className="shrink-0 px-3 text-xs"
-                            >
-                              <Trash2 size={12} />
-                              {section.action}
-                            </Button>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </section>
-            ))}
+                          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                            Created {formatDate(s.created_at)} ·{" "}
+                            {expired ? "expired" : "expires"}{" "}
+                            {formatDate(s.expiry)}
+                            {` · ${
+                              s.perm_limits.length === 0 ||
+                              s.perm_limits.some(isSuperPerm)
+                                ? "Full access"
+                                : `Limited to ${s.perm_limits.join(", ")}`
+                            }`}
+                          </p>
+                        </div>
+                        {canManage && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            loading={revokingId === s.id}
+                            onClick={() => handleRevoke(s.id)}
+                            className="shrink-0 px-3 text-xs"
+                          >
+                            <Trash2 size={12} />
+                            {section.action}
+                          </Button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+          ))}
+      {list?.some((s) => s.type !== "api") && (
+        <DeviceList
+          devices={list.filter((s) => s.type !== "api")}
+          canManage={canManage}
+          revokingId={revokingId}
+          signingOutOthers={signingOutOthers}
+          onSignOut={handleRevoke}
+          onSignOutOthers={handleSignOutOthers}
+        />
+      )}
     </div>
   );
 }
